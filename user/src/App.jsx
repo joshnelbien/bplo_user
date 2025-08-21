@@ -1,7 +1,14 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { Box, Button } from "@mui/material"; // ✅ Missing imports
+import {
+  Box,
+  Button,
+  Paper,
+  Step,
+  StepLabel,
+  Stepper,
+  Typography,
+} from "@mui/material";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import Section1BusinessInfo from "./components/BusinessForm/Step1";
 import Section2OwnerInfo from "./components/BusinessForm/Step2";
@@ -14,8 +21,19 @@ import Section8FileUploads from "./components/BusinessForm/Step8";
 
 function App() {
   const API = import.meta.env.VITE_API_BASE;
+  const [step, setStep] = useState(1);
 
-  // --- Text & Select Inputs ---
+  const steps = [
+    "Business Info",
+    "Owner Info",
+    "Address Info",
+    "Tax Info",
+    "Rental / Ownership",
+    "Business Details",
+    "Employees & Vehicles",
+    "File Uploads",
+  ];
+
   const [formDataState, setFormDataState] = useState({
     BusinessType: "",
     dscRegNo: "",
@@ -66,7 +84,6 @@ function App() {
     capital: "",
   });
 
-  // --- Files ---
   const [filesState, setFilesState] = useState({
     proofOfReg: null,
     proofOfRightToUseLoc: null,
@@ -80,45 +97,24 @@ function App() {
     tIGEfiles: null,
   });
 
-  const [uploadedFiles, setUploadedFiles] = useState([]);
-
-  // --- Fetch Uploaded Files ---
-  const fetchFiles = async () => {
-    try {
-      const res = await axios.get(`${API}/api/files`);
-      setUploadedFiles(res.data);
-    } catch (err) {
-      console.error("Error fetching files", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchFiles();
-  }, []);
-
-  // --- Handle Text Inputs ---
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormDataState((prev) => ({ ...prev, [name]: value }));
   };
 
-  // --- Handle File Inputs ---
   const handleFileChange = (e) => {
     const { name, files } = e.target;
     setFilesState((prev) => ({ ...prev, [name]: files[0] }));
   };
 
-  // --- Handle Submit ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
 
-    // Append text/select values
     Object.keys(formDataState).forEach((key) => {
       formData.append(key, formDataState[key]);
     });
 
-    // Append files
     Object.keys(filesState).forEach((key) => {
       if (filesState[key]) formData.append(key, filesState[key]);
     });
@@ -128,96 +124,96 @@ function App() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       alert("Application submitted!");
-      fetchFiles(); // ✅ refresh after submit
+      setStep(1);
     } catch (err) {
       console.error(err);
       alert("Submit failed");
     }
   };
 
+  const renderStepContent = (step) => {
+    switch (step) {
+      case 1:
+        return <Section1BusinessInfo formData={formDataState} handleChange={handleChange} />;
+      case 2:
+        return <Section2OwnerInfo formData={formDataState} handleChange={handleChange} />;
+      case 3:
+        return <Section3AddressInfo formData={formDataState} handleChange={handleChange} />;
+      case 4:
+        return <Section4TaxInfo formData={formDataState} handleChange={handleChange} />;
+      case 5:
+        return <Section5RentalOwnership formData={formDataState} handleChange={handleChange} />;
+      case 6:
+        return <Section6BusinessDetails formData={formDataState} handleChange={handleChange} />;
+      case 7:
+        return <Section7EmployeesVehicles formData={formDataState} handleChange={handleChange} />;
+      case 8:
+        return <Section8FileUploads handleFileChange={handleFileChange} />;
+      default:
+        return "Unknown step";
+    }
+  };
+
   return (
-    <div>
-      <Box component="form" onSubmit={handleSubmit} sx={{ p: 3 }}>
-        {/* ✅ Pass correct state + handler */}
-        <Section1BusinessInfo
-          formData={formDataState}
-          handleChange={handleChange}
-        />
-        <Section2OwnerInfo
-          formData={formDataState}
-          handleChange={handleChange}
-        />
-        <Section3AddressInfo
-          formData={formDataState}
-          handleChange={handleChange}
-        />
-        <Section4TaxInfo formData={formDataState} handleChange={handleChange} />
-        <Section5RentalOwnership
-          formData={formDataState}
-          handleChange={handleChange}
-        />
-        <Section6BusinessDetails
-          formData={formDataState}
-          handleChange={handleChange}
-        />
-        <Section7EmployeesVehicles
-          formData={formDataState}
-          handleChange={handleChange}
-        />
-        <Section8FileUploads handleFileChange={handleFileChange} />
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        mt: 4,
+        mb: 4,
+        px: 2,
+      }}
+    >
+      <Paper
+        sx={{
+          p: { xs: 2, sm: 4 },
+          width: "100%",
+          maxWidth: 700,
+          mx: "auto",
+        }}
+      >
+        <Typography variant="h4" align="center" gutterBottom>
+          Business Application Form
+        </Typography>
 
-        <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
-          Submit
-        </Button>
-      </Box>
-
-      <hr />
-
-      <h2>Uploaded Applications</h2>
-      <table border="1" cellPadding="6">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Status</th>
-            <th>Uploaded At</th>
-            <th>Files</th>
-          </tr>
-        </thead>
-        <tbody>
-          {uploadedFiles.map((file) => (
-            <tr key={file.id}>
-              <td>{file.id}</td>
-              <td>{file.status}</td>
-              <td>{new Date(file.createdAt).toLocaleString()}</td>
-              <td>
-                {Object.keys(filesState).map((key) =>
-                  file[`${key}_filename`] ? (
-                    <div key={key}>
-                      <a
-                        href={`${API}/api/files/${file.id}/${key}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {file[`${key}_filename`]}
-                      </a>{" "}
-                      (
-                      <a
-                        href={`${API}/api/files/${file.id}/${key}/download`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        download
-                      </a>
-                      )
-                    </div>
-                  ) : null
-                )}
-              </td>
-            </tr>
+        {/* MUI Stepper */}
+        <Stepper activeStep={step - 1} alternativeLabel sx={{ mb: 4, flexWrap: "wrap" }}>
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel
+                StepIconProps={{ sx: { fontSize: 20 } }}
+                sx={{ "& .MuiStepLabel-label": { fontSize: { xs: "0.6rem", sm: "0.75rem" } } }}
+              >
+                {label}
+              </StepLabel>
+            </Step>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </Stepper>
+
+        <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+          {renderStepContent(step)}
+
+          {/* Buttons like your snippet */}
+          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
+            {step > 1 && (
+              <Button type="button" variant="outlined" onClick={() => setStep(step - 1)}>
+                Back
+              </Button>
+            )}
+            {step < 8 && (
+              <Button type="button" variant="contained" onClick={() => setStep(step + 1)}>
+                Next
+              </Button>
+            )}
+            {step === 8 && (
+              <Button type="submit" variant="contained">
+                Submit Form
+              </Button>
+            )}
+          </Box>
+        </form>
+      </Paper>
+    </Box>
   );
 }
 

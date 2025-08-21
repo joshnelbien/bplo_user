@@ -1,8 +1,9 @@
-// Section8FileUploads.jsx
-import { Button, Grid, Typography } from "@mui/material";
+// src/components/BusinessForm/Section8FileUploads.jsx
+import { Button, Stack, TextField, Typography } from "@mui/material";
+import { useState } from "react";
 
 export default function Section8FileUploads({ handleFileChange }) {
-  const fileInputs = [
+  const files = [
     { label: "Proof of Registration", name: "proofOfReg" },
     { label: "Proof of Right to Use Location", name: "proofOfRightToUseLoc" },
     { label: "Location Plan", name: "locationPlan" },
@@ -15,21 +16,53 @@ export default function Section8FileUploads({ handleFileChange }) {
     { label: "TIGE Files", name: "tIGEfiles" },
   ];
 
+  // State to track selected files
+  const [selectedFiles, setSelectedFiles] = useState({});
+
+  const handleFileSelect = (e) => {
+    const { name, files } = e.target;
+    setSelectedFiles((prev) => ({ ...prev, [name]: files[0] ? files[0].name : "" }));
+    handleFileChange(e); // call parent handler
+  };
+
   return (
-    <div>
+    <div style={{ marginBottom: 20 }}>
       <Typography variant="h6" gutterBottom>
         File Uploads
       </Typography>
-      <Grid container spacing={2}>
-        {fileInputs.map((file, idx) => (
-          <Grid item xs={12} sm={6} key={idx}>
-            <Button variant="outlined" component="label" fullWidth>
-              {file.label}
-              <input type="file" name={file.name} hidden onChange={handleFileChange}/>
-            </Button>
-          </Grid>
+
+      <Stack spacing={3}>
+        {files.map((file) => (
+          <Stack key={file.name} direction="column" spacing={1}>
+            <Typography>{file.label}:</Typography>
+            <Stack direction="row" spacing={2} alignItems="center">
+                 <Button
+                variant="contained"
+                component="label"
+                size="small" // smaller button
+                sx={{ minWidth: 100 }}
+              >
+                Choose File
+                <input
+                  type="file"
+                  name={file.name}
+                  hidden
+                  onChange={handleFileSelect}
+                />
+              </Button>
+              <TextField
+                value={selectedFiles[file.name] || ""}
+                placeholder="No file selected"
+                size="small"
+                fullWidth
+                InputProps={{
+                  readOnly: true,
+                }}
+              />
+            </Stack>
+          </Stack>
         ))}
-      </Grid>
+      </Stack>
     </div>
   );
 }
