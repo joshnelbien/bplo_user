@@ -10,13 +10,12 @@ import {
 import axios from "axios";
 import { useState } from "react";
 
-import Section1BusinessInfo from "./components/BusinessForm/Step1";
-import Section2OwnerInfo from "./components/BusinessForm/Step2";
-import Section3AddressInfo from "./components/BusinessForm/Step3";
-import Section4TaxInfo from "./components/BusinessForm/Step4";
-import Section5RentalOwnership from "./components/BusinessForm/Step5";
-import Section6BusinessDetails from "./components/BusinessForm/Step6";
-import Section7EmployeesVehicles from "./components/BusinessForm/Step7";
+import Step1BusinessInfo from "./components/BusinessForm/Step1";
+import Step2PersonalInfo from "./components/BusinessForm/Step2";
+import Step3AddressInfo from "./components/BusinessForm/Step3";
+import Step4TaxInfo from "./components/BusinessForm/Step4";
+import Step6BusinessDetails from "./components/BusinessForm/Step6";
+import Step7BusinessActivity from "./components/BusinessForm/Step7";
 import Section8FileUploads from "./components/BusinessForm/Step8";
 
 function App() {
@@ -28,7 +27,6 @@ function App() {
     "Owner Info",
     "Address Info",
     "Tax Info",
-    "Rental / Ownership",
     "Business Details",
     "Employees & Vehicles",
     "File Uploads",
@@ -134,20 +132,18 @@ function App() {
   const renderStepContent = (step) => {
     switch (step) {
       case 1:
-        return <Section1BusinessInfo formData={formDataState} handleChange={handleChange} />;
+        return <Step1BusinessInfo formData={formDataState} handleChange={handleChange} />;
       case 2:
-        return <Section2OwnerInfo formData={formDataState} handleChange={handleChange} />;
+        return <Step2PersonalInfo formData={formDataState} handleChange={handleChange} />;
       case 3:
-        return <Section3AddressInfo formData={formDataState} handleChange={handleChange} />;
+        return <Step3AddressInfo formData={formDataState} handleChange={handleChange} />;
       case 4:
-        return <Section4TaxInfo formData={formDataState} handleChange={handleChange} />;
+        return <Step4TaxInfo formData={formDataState} handleChange={handleChange} />;
       case 5:
-        return <Section5RentalOwnership formData={formDataState} handleChange={handleChange} />;
+        return <Step6BusinessDetails formData={formDataState} handleChange={handleChange} />;
       case 6:
-        return <Section6BusinessDetails formData={formDataState} handleChange={handleChange} />;
+        return <Step7BusinessActivity formData={formDataState} handleChange={handleChange} />;
       case 7:
-        return <Section7EmployeesVehicles formData={formDataState} handleChange={handleChange} />;
-      case 8:
         return <Section8FileUploads handleFileChange={handleFileChange} />;
       default:
         return "Unknown step";
@@ -200,12 +196,12 @@ function App() {
                 Back
               </Button>
             )}
-            {step < 8 && (
+            {step < 7 && (
               <Button type="button" variant="contained" onClick={() => setStep(step + 1)}>
                 Next
               </Button>
             )}
-            {step === 8 && (
+            {step === 7 && (
               <Button type="submit" variant="contained">
                 Submit Form
               </Button>

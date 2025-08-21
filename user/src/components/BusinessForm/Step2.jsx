@@ -1,14 +1,14 @@
-// src/components/BusinessForm/Section2OwnerInfo.jsx
 import { FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 
-export default function Section2OwnerInfo({ formData, handleChange }) {
+export default function Step2PersonalInfo({ formData, handleChange }) {
   return (
     <div style={{ marginBottom: 20 }}>
       <Typography variant="h6" gutterBottom>
-        Owner Information
+        Owner's Personal Information
       </Typography>
 
       <Stack spacing={3}>
+        {/* First Name */}
         <TextField
           label="First Name"
           name="firstName"
@@ -19,6 +19,7 @@ export default function Section2OwnerInfo({ formData, handleChange }) {
           sx={{ minWidth: 300 }}
         />
 
+        {/* Middle Name */}
         <TextField
           label="Middle Name"
           name="middleName"
@@ -29,6 +30,7 @@ export default function Section2OwnerInfo({ formData, handleChange }) {
           sx={{ minWidth: 300 }}
         />
 
+        {/* Last Name */}
         <TextField
           label="Last Name"
           name="lastName"
@@ -39,6 +41,7 @@ export default function Section2OwnerInfo({ formData, handleChange }) {
           sx={{ minWidth: 300 }}
         />
 
+        {/* Ext. Name */}
         <TextField
           label="Ext. Name"
           name="extName"
@@ -49,8 +52,9 @@ export default function Section2OwnerInfo({ formData, handleChange }) {
           sx={{ minWidth: 300 }}
         />
 
+        {/* Gender */}
         <FormControl fullWidth sx={{ minWidth: 300 }}>
-          <InputLabel id="sex-label">Sex</InputLabel>
+          <InputLabel id="sex-label">Gender</InputLabel>
           <Select
             labelId="sex-label"
             name="sex"
@@ -64,6 +68,7 @@ export default function Section2OwnerInfo({ formData, handleChange }) {
           </Select>
         </FormControl>
 
+        {/* Email */}
         <TextField
           label="Email"
           type="email"
@@ -75,6 +80,7 @@ export default function Section2OwnerInfo({ formData, handleChange }) {
           sx={{ minWidth: 300 }}
         />
 
+        {/* Telephone No. */}
         <TextField
           label="Telephone No."
           name="telNo"
@@ -85,6 +91,7 @@ export default function Section2OwnerInfo({ formData, handleChange }) {
           sx={{ minWidth: 300 }}
         />
 
+        {/* Mobile No. */}
         <TextField
           label="Mobile No."
           name="mobileNo"
