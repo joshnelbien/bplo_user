@@ -29,15 +29,12 @@ function HomePage
           textAlign: "center"
         }}
       >
-
         <Box
           component="form"
           sx={{ display: "flex", flexDirection: "column", gap: 2 }}
           noValidate
           autoComplete="off"
         >
-
-
           <Button onClick={() => navigate("/newApplicationPage")} variant="contained" color="primary" fullWidth>
             New Application
           </Button>

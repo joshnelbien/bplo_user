@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import Step1BusinessInfo from "../components/BusinessForm/Step1";
 import Step2PersonalInfo from "../components/BusinessForm/Step2";
@@ -31,7 +32,7 @@ function NewApplicationPage() {
     "Business Activities",
     "Business Requirements",
   ];
-
+  const navigate = useNavigate();
   const [formDataState, setFormDataState] = useState({
     BusinessType: "",
     dscRegNo: "",
@@ -168,6 +169,11 @@ function NewApplicationPage() {
           mx: "auto",
         }}
       >
+
+          <Button onClick={() => navigate("/homePage")} variant="contained" color="primary" sx={{ maxWidth: 150}}>
+            back to Home
+          </Button>
+
         <Typography variant="h4" align="center" gutterBottom>
           Business Application Form
         </Typography>
