@@ -28,7 +28,7 @@ export default function Section8FileUploads({ handleFileChange }) {
   return (
     <div style={{ marginBottom: 20 }}>
       <Typography variant="h6" gutterBottom>
-        File Uploads
+        Business Requirements
       </Typography>
 
       <Stack spacing={3}>

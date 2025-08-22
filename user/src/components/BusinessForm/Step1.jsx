@@ -11,6 +11,11 @@ export default function Step1BusinessInfo({ formData, handleChange }) {
 
   const regLabel = regLabelMap[formData.BusinessType] || "Registration No.";
 
+    const handleNumberInput = (e) => {
+    const value = e.target.value.replace(/\D/g, "").slice(0, 15);
+    handleChange({ target: { name: e.target.name, value } });
+  };
+
   return (
     <div style={{ marginBottom: 20 }}>
       <Typography variant="h6" gutterBottom>
@@ -64,7 +69,7 @@ export default function Step1BusinessInfo({ formData, handleChange }) {
           label="TIN No."
           name="tinNo"
           value={formData.tinNo || ""}
-          onChange={handleChange}
+          onChange={handleNumberInput}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}

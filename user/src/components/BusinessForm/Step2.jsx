@@ -1,6 +1,17 @@
 import { FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 
 export default function Step2PersonalInfo({ formData, handleChange }) {
+
+      const handleTelNumberInput = (e) => {
+    const value = e.target.value.replace(/\D/g, "").slice(0, 9);
+    handleChange({ target: { name: e.target.name, value } });
+  };
+
+       const handlePhoneNumberInput = (e) => {
+    const value = e.target.value.replace(/\D/g, "").slice(0, 11);
+    handleChange({ target: { name: e.target.name, value } });
+  };
+
   return (
     <div style={{ marginBottom: 20 }}>
       <Typography variant="h6" gutterBottom>
@@ -85,7 +96,7 @@ export default function Step2PersonalInfo({ formData, handleChange }) {
           label="Telephone No."
           name="telNo"
           value={formData.telNo || ""}
-          onChange={handleChange}
+          onChange={handleTelNumberInput}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
@@ -96,7 +107,7 @@ export default function Step2PersonalInfo({ formData, handleChange }) {
           label="Mobile No."
           name="mobileNo"
           value={formData.mobileNo || ""}
-          onChange={handleChange}
+          onChange={handlePhoneNumberInput}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}

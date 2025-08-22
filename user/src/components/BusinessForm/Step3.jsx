@@ -88,12 +88,13 @@ export default function Step3AddressInfo({ formData, handleChange }) {
 
   // Auto-set fixed values if not set
   useEffect(() => {
-    if (!formData.region || !formData.province || !formData.cityOrMunicipality) {
+    if (!formData.region || !formData.province || !formData.cityOrMunicipality || !formData.zipCode) {
       handleChange({ target: { name: "region", value: "REGION IV-A" } });
       handleChange({ target: { name: "province", value: "LAGUNA" } });
       handleChange({ target: { name: "cityOrMunicipality", value: "SAN PABLO CITY" } });
+      handleChange({ target: { name: "zipCode", value: "4000" } });
     }
-  }, [formData.region, formData.province, formData.cityOrMunicipality, handleChange]);
+  }, [formData.region, formData.province, formData.cityOrMunicipality, formData.zipCode,handleChange]);
 
   return (
     <div style={{ marginBottom: 20 }}>
@@ -166,8 +167,8 @@ export default function Step3AddressInfo({ formData, handleChange }) {
         <TextField
           label="Zip Code"
           name="zipCode"
-          value={formData.zipCode || ""}
-          onChange={handleChange}
+          value={"4000"}
+          disabled
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}

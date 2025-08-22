@@ -109,11 +109,14 @@ const File = sequelize.define(
 
     status: { type: DataTypes.STRING, defaultValue: "pending" },
   },
+
+
   {
     tableName: "files",
     timestamps: true,
   }
 );
+
 
 
 module.exports = File;
