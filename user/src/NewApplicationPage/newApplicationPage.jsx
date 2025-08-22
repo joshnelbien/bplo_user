@@ -15,9 +15,9 @@ import Step1BusinessInfo from "../components/BusinessForm/Step1";
 import Step2PersonalInfo from "../components/BusinessForm/Step2";
 import Step3AddressInfo from "../components/BusinessForm/Step3";
 import Step4TaxInfo from "../components/BusinessForm/Step4";
-import Step6BusinessDetails from "../components/BusinessForm/Step6";
-import Step7BusinessActivity from "../components/BusinessForm/Step7";
-import Section8FileUploads from "../components/BusinessForm/Step8";
+import Step5BusinessDetails from "../components/BusinessForm/Step5";
+import Step6BusinessActivity from "../components/BusinessForm/Step6";
+import Section7FileUploads from "../components/BusinessForm/Step7";
 
 function NewApplicationPage() {
   const API = import.meta.env.VITE_API_BASE;
@@ -141,11 +141,11 @@ function NewApplicationPage() {
       case 4:
         return <Step4TaxInfo formData={formDataState} handleChange={handleChange} />;
       case 5:
-        return <Step6BusinessDetails formData={formDataState} handleChange={handleChange} />;
+        return <Step5BusinessDetails formData={formDataState} handleChange={handleChange} />;
       case 6:
-        return <Step7BusinessActivity formData={formDataState} handleChange={handleChange} />;
+        return <Step6BusinessActivity formData={formDataState} handleChange={handleChange} />;
       case 7:
-        return <Section8FileUploads handleFileChange={handleFileChange} />;
+        return <Section7FileUploads handleFileChange={handleFileChange} />;
       default:
         return "Unknown step";
     }

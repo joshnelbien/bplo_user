@@ -1,123 +1,160 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { Stack, TextField, Typography } from "@mui/material";
-import { useEffect } from "react";
+// src/components/BusinessForm/Step6BusinessActivity.jsx
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useState } from "react";
 
-export default function Step6BusinessDetails({ formData, handleChange }) {
-  // Only allow digits & limit to 6 characters
-  const handleNumberInput = (e) => {
-    const value = e.target.value.replace(/\D/g, "").slice(0, 6);
-    handleChange({ target: { name: e.target.name, value } });
+export default function Step6BusinessActivity({
+  formData,
+  handleChange,
+  handleFileChange,
+}) {
+  const files = [{ label: "TIGE Files", name: "tIGEfiles" }];
+
+  // State to track selected files
+  const [selectedFiles, setSelectedFiles] = useState({});
+
+  const handleFileSelect = (e) => {
+    const { name, files } = e.target;
+    setSelectedFiles((prev) => ({
+      ...prev,
+      [name]: files[0] ? files[0].name : "",
+    }));
+    handleFileChange(e); // call parent handler
   };
-
-  // Auto-calculate total employees using useEffect
-  useEffect(() => {
-    const male = parseInt(formData.maleEmployee || "0", 10);
-    const female = parseInt(formData.femaleEmployee || "0", 10);
-    const totalEmployees = male + female;
-
-    if (formData.numberOfEmployee !== String(totalEmployees)) {
-      handleChange({
-        target: { name: "numberOfEmployee", value: String(totalEmployees) },
-      });
-    }
-  }, [formData.maleEmployee, formData.femaleEmployee]);
-
-  const totalEmployees =
-    parseInt(formData.maleEmployee || "0", 10) +
-    parseInt(formData.femaleEmployee || "0", 10);
 
   return (
     <div style={{ marginBottom: 20 }}>
       <Typography variant="h6" gutterBottom>
-        Business Operation
+        Business Activity
       </Typography>
 
       <Stack spacing={3}>
+        {/* Tax Incentives */}
+        <FormControl fullWidth sx={{ minWidth: 300 }}>
+          <InputLabel id="tIGE-label">Tax Incentives from Gov't</InputLabel>
+          <Select
+            labelId="tIGE-label"
+            name="tIGE"
+            value={formData.tIGE || ""}
+            onChange={handleChange}
+          >
+            <MenuItem value="">Select</MenuItem>
+            <MenuItem value="No">No</MenuItem>
+            <MenuItem value="Yes">Yes</MenuItem>
+          </Select>
+        </FormControl>
+
+        {/* File Upload for TIGE */}
+        {formData.tIGE === "Yes" && (
+          <Stack spacing={3}>
+            {files.map((file) => (
+              <Stack key={file.name} direction="column" spacing={1}>
+                <Typography>{file.label}:</Typography>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Button
+                    variant="contained"
+                    component="label"
+                    size="small"
+                    sx={{ minWidth: 120 }}
+                  >
+                    Choose File
+                    <input
+                      type="file"
+                      name={file.name}
+                      hidden
+                      onChange={handleFileSelect}
+                    />
+                  </Button>
+                  <TextField
+                    value={selectedFiles[file.name] || ""}
+                    placeholder="No file selected"
+                    size="small"
+                    fullWidth
+                    InputProps={{
+                      readOnly: true,
+                    }}
+                  />
+                </Stack>
+              </Stack>
+            ))}
+          </Stack>
+        )}
+
+        {/* Office Type */}
+        <FormControl fullWidth sx={{ minWidth: 300 }}>
+          <InputLabel id="officeType-label">Office Type</InputLabel>
+          <Select
+            labelId="officeType-label"
+            name="officeType"
+            value={formData.officeType || ""}
+            onChange={handleChange}
+          >
+            <MenuItem value="">-- Select Office Type --</MenuItem>
+            <MenuItem value="Main">Main</MenuItem>
+            <MenuItem value="Branch Office">Branch Office</MenuItem>
+            <MenuItem value="Admin Office Only">Admin Office Only</MenuItem>
+            <MenuItem value="Warehouse">Warehouse</MenuItem>
+            <MenuItem value="Others">Others (Specify)</MenuItem>
+          </Select>
+        </FormControl>
+
+        {formData.officeType === "Others" && (
+          <TextField
+            label="Specify Business Activity"
+            name="officeTypeOther"
+            value={formData.officeTypeOther || ""}
+            onChange={handleChange}
+            fullWidth
+            variant="outlined"
+            sx={{ minWidth: 300 }}
+          />
+        )}
+
         <TextField
-          label="Total Floor Area"
-          name="totalFloorArea"
-          value={formData.totalFloorArea || ""}
-          onInput={handleNumberInput}
+          label="Line of Business"
+          name="lineOfBusiness"
+          value={formData.lineOfBusiness || ""}
+          onChange={handleChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
         />
 
         <TextField
-          label="Male Employees"
-          name="maleEmployee"
-          value={formData.maleEmployee || ""}
-          onInput={handleNumberInput}
+          label="Product/Service"
+          name="productService"
+          value={formData.productService || ""}
+          onChange={handleChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
         />
 
         <TextField
-          label="Female Employees"
-          name="femaleEmployee"
-          value={formData.femaleEmployee || ""}
-          onInput={handleNumberInput}
+          label="Units"
+          name="Units"
+          type="number"
+          value={formData.Units || ""}
+          onChange={handleChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
         />
 
         <TextField
-          label="Total Employees"
-          name="numberOfEmployee"
-          value={totalEmployees}
-          InputProps={{ readOnly: true }}
-          fullWidth
-          variant="outlined"
-          sx={{ minWidth: 300 }}
-        />
-
-        <TextField
-          label="Vehicle (Van)"
-          name="numVehicleVan"
-          value={formData.numVehicleVan || ""}
-          onInput={handleNumberInput}
-          fullWidth
-          variant="outlined"
-          sx={{ minWidth: 300 }}
-        />
-
-        <TextField
-          label="Vehicle (Truck)"
-          name="numVehicleTruck"
-          value={formData.numVehicleTruck || ""}
-          onInput={handleNumberInput}
-          fullWidth
-          variant="outlined"
-          sx={{ minWidth: 300 }}
-        />
-
-        <TextField
-          label="Vehicle (Motorcycle)"
-          name="numVehicleMotor"
-          value={formData.numVehicleMotor || ""}
-          onInput={handleNumberInput}
-          fullWidth
-          variant="outlined"
-          sx={{ minWidth: 300 }}
-        />
-
-        <TextField
-          label="Number of Nozzles"
-          name="numNozzle"
-          value={formData.numNozzle || ""}
-          onInput={handleNumberInput}
-          fullWidth
-          variant="outlined"
-          sx={{ minWidth: 300 }}
-        />
-
-        <TextField
-          label="Weighing Scale"
-          name="weighScale"
-          value={formData.weighScale || ""}
-          onInput={handleNumberInput}
+          label="Capital"
+          name="capital"
+          type="number"
+          value={formData.capital || ""}
+          onChange={handleChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}

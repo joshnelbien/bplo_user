@@ -51,7 +51,14 @@ const File = sequelize.define(
     lessorName: DataTypes.STRING,
     monthlyRent: DataTypes.STRING,
     tIGE: DataTypes.STRING,
-    tIGEfiles: DataTypes.STRING,
+
+
+    tIGEfiles: { type: DataTypes.BLOB("long"), allowNull: true },
+    tIGEfiles_filename: { type: DataTypes.STRING, allowNull: true },
+    tIGEfiles_mimetype: { type: DataTypes.STRING, allowNull: true },
+    tIGEfiles_size: { type: DataTypes.INTEGER, allowNull: true },
+
+
     officeType: DataTypes.STRING,
     officeTypeOther: DataTypes.STRING,
     lineOfBusiness: DataTypes.STRING,
