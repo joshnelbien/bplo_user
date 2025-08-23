@@ -1,8 +1,7 @@
 const express = require("express");
 const multer = require("multer");
-const File = require("../db/model/files");
-const Backroom = require ("../db/model/backroomLocal")
-
+const Backroom = require("../db/model/backroomLocal");
+const Files = require("../db/model/files");
 const router = express.Router();
 
 // Multer in-memory storage
@@ -11,7 +10,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // Upload files + text fields
 router.post(
-  "/files",
+  "/backroom",
   upload.fields([
     { name: "proofOfReg" },
     { name: "proofOfRightToUseLoc" },
@@ -27,27 +26,27 @@ router.post(
   async (req, res) => {
     try {
       const files = req.files;
-      const body = req.body; // <- text inputs are here
-      const fileData = {};
+      const body = req.body;
+      const backroomData = {};
 
       // Save each uploaded file’s info
-      if (files) {
-        Object.keys(files).forEach((key) => {
-          const f = files[key][0];
-          fileData[key] = f.buffer;
-          fileData[`${key}_filename`] = f.originalname;
-          fileData[`${key}_mimetype`] = f.mimetype;
-          fileData[`${key}_size`] = f.size;
+      if (backroom) {
+        Object.keys(backroom).forEach((key) => {
+          const f = backroom[key][0];
+          backroomData[key] = f.buffer;
+          backroomData[`${key}_filename`] = f.originalname;
+          backroomData[`${key}_mimetype`] = f.mimetype;
+          backroomData[`${key}_size`] = f.size;
         });
       }
 
       // Merge text fields + file data
       const payload = {
         ...body,
-        ...fileData,
+        ...backroomData,
       };
 
-      const created = await File.create(payload);
+      const created = await Backroom.create(payload);
       res.status(201).json(created);
     } catch (err) {
       console.error(err);
@@ -56,18 +55,20 @@ router.post(
   }
 );
 
+// approve applicant -> move from Files to Backroom
 router.post("/backroom/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
     // 1. Get applicant from Files table
-    const applicant = await File.findByPk(id);
+    const applicant = await Files.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
     // 2. Insert into Backroom
     const backroomData = applicant.toJSON();
+    delete backroomData.id; // let Backroom have its own UUID
 
     const created = await Backroom.create(backroomData);
 
@@ -80,13 +81,13 @@ router.post("/backroom/approve/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to approve applicant" });
   }
 });
+
+
 // List files
-
-
-router.get("/files", async (req, res) => {
+router.get("/backrooms", async (req, res) => {
   try {
-    const files = await File.findAll({ order: [["createdAt", "DESC"]] });
-    res.json(files);
+    const backrooms = await Backroom.findAll({ order: [["createdAt", "DESC"]] });
+    res.json(backrooms);
   } catch (err) {
     console.error(err);
     res.status(500).json([]);
@@ -94,33 +95,33 @@ router.get("/files", async (req, res) => {
 });
 
 // Preview file
-router.get("/files/:id/:key", async (req, res) => {
+router.get("/backroom/:id/:key", async (req, res) => {
   const { id, key } = req.params;
-  const file = await File.findByPk(id);
-  if (!file) return res.status(404).send("Not found");
+  const backroom = await Backroom.findByPk(id);
+  if (!backroom) return res.status(404).send("Not found");
 
-  if (!file[key]) return res.status(404).send("File not found");
-  res.setHeader("Content-Type", file[`${key}_mimetype`]);
+  if (!backroom[key]) return res.status(404).send("File not found");
+  res.setHeader("Content-Type", backroom[`${key}_mimetype`]);
   res.setHeader(
     "Content-Disposition",
-    `inline; filename="${file[`${key}_filename`]}"`
+    `inline; filename="${backroom[`${key}_filename`]}"`
   );
-  res.send(file[key]);
+  res.send(backroom[key]);
 });
 
 // Download file
-router.get("/files/:id/:key/download", async (req, res) => {
+router.get("/backroom/:id/:key/download", async (req, res) => {
   const { id, key } = req.params;
-  const file = await File.findByPk(id);
-  if (!file) return res.status(404).send("Not found");
+  const backroom = await Backroom.findByPk(id);
+  if (!backroom) return res.status(404).send("Not found");
 
-  if (!file[key]) return res.status(404).send("File not found");
+  if (!backroom[key]) return res.status(404).send("File not found");
   res.setHeader("Content-Type", "application/octet-stream");
   res.setHeader(
     "Content-Disposition",
-    `attachment; filename="${file[`${key}_filename`]}"`
+    `attachment; filename="${backroom[`${key}_filename`]}"`
   );
-  res.send(file[key]);
+  res.send(backroom[key]);
 });
 
 module.exports = router;

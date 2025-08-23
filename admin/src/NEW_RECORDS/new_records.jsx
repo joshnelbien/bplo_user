@@ -44,16 +44,27 @@ function New_records() {
     indexOfLastRecord
   );
 
-  const handleApprove = async (id) => {
-    try {
-      await axios.post("http://localhost:5000/backroom", { id });
-      setApplicants((prev) => prev.filter((applicant) => applicant.id !== id));
-      alert("Applicant approved and moved to backroom");
-      closeModal();
-    } catch (error) {
-      console.error("Error approving applicant:", error);
-    }
-  };
+const handleApprove = async (applicant) => {
+  console.log("Approving applicant:", applicant);
+  if (!applicant || !applicant.id) {
+    alert("No applicant selected!");
+    return;
+  }
+
+  try {
+    await axios.post(`http://localhost:5000/api/backroom/approve/${applicant.id}`);
+
+    setApplicants((prev) => prev.filter((a) => a.id !== applicant.id));
+    alert("Applicant approved and moved to backroom");
+    closeModal();
+  } catch (error) {
+    console.error("Error approving applicant:", error);
+    alert("Failed to approve applicant");
+  }
+};
+
+
+
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);

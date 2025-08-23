@@ -231,13 +231,10 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove }) {
         <Button variant="outlined" onClick={onClose} color="secondary">
           Close
         </Button>
-        <Button
-          onClick={() => onApprove(applicant.id)}
-          variant="contained"
-          color="success"
-        >
+        <Button onClick={() => onApprove(applicant)} variant="contained" color="success">
           Approve
         </Button>
+
         <Button onClick={onClose} variant="outlined" color="error">
           Decline
         </Button>

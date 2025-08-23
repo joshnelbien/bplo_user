@@ -13,7 +13,100 @@ import {
   Typography,
 } from "@mui/material";
 
-function CenroApplicantModal({ applicant, isOpen, onClose, onApprove }) {
+// Component to display a normal text field
+const Field = ({ label, value }) => (
+  <Grid item xs={12} sm={6}>
+    <TextField
+      label={label}
+      value={value || "—"}
+      fullWidth
+      variant="outlined"
+      size="small"
+      disabled
+      InputProps={{
+        sx: {
+          color: "black",
+          "& .MuiInputBase-input.Mui-disabled": {
+            WebkitTextFillColor: "black",
+          },
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "black",
+          },
+          "&.Mui-disabled .MuiOutlinedInput-notchedOutline": {
+            borderColor: "black",
+          },
+        },
+      }}
+      InputLabelProps={{
+        sx: {
+          color: "black",
+          "&.Mui-disabled": {
+            color: "black",
+          },
+        },
+      }}
+    />
+  </Grid>
+);
+
+// Component to display files as links
+const FileField = ({ label, fileKey, fileData }) => (
+  <Grid item xs={12} sm={6}>
+    <TextField
+      label={label}
+      value={
+        fileData[fileKey]
+          ? fileData[`${fileKey}_filename`]
+          : "No file uploaded"
+      }
+      fullWidth
+      variant="outlined"
+      size="small"
+      disabled
+      InputProps={{
+        sx: {
+          color: "black",
+          "& .MuiInputBase-input.Mui-disabled": {
+            WebkitTextFillColor: "black",
+          },
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "black",
+          },
+          "&.Mui-disabled .MuiOutlinedInput-notchedOutline": {
+            borderColor: "black",
+          },
+        },
+      }}
+      InputLabelProps={{
+        sx: {
+          color: "black",
+          "&.Mui-disabled": { color: "black" },
+        },
+      }}
+    />
+    {fileData[fileKey] && (
+      <Typography variant="body2" sx={{ mt: 0.5 }}>
+        <a
+          href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          View
+        </a>{" "}
+        |{" "}
+        <a
+          href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}/download`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Download
+        </a>
+      </Typography>
+    )}
+  </Grid>
+);
+
+function ApplicantModal({ applicant, isOpen, onClose, onApprove }) {
   if (!isOpen || !applicant) return null;
 
   const Section = ({ title, children }) => (
@@ -30,41 +123,6 @@ function CenroApplicantModal({ applicant, isOpen, onClose, onApprove }) {
       </AccordionDetails>
     </Accordion>
   );
-
-const Field = ({ label, value }) => (
-  <Grid item xs={12} sm={6}>
-    <TextField
-      label={label}
-      value={value || "—"}
-      fullWidth
-      variant="outlined"
-      size="small"
-      disabled
-      InputProps={{
-        sx: {
-          color: "black", // text color
-          "& .MuiInputBase-input.Mui-disabled": {
-            WebkitTextFillColor: "black", // override disabled gray
-          },
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "black", // border black
-          },
-          "&.Mui-disabled .MuiOutlinedInput-notchedOutline": {
-            borderColor: "black", // keep border black when disabled
-          },
-        },
-      }}
-      InputLabelProps={{
-        sx: {
-          color: "black", // label black
-          "&.Mui-disabled": {
-            color: "black", // label black when disabled
-          },
-        },
-      }}
-    />
-  </Grid>
-);
 
   return (
     <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
@@ -132,19 +190,22 @@ const Field = ({ label, value }) => (
           <Field label="Tax Pin Address" value={applicant.TaxpinAddress} />
           <Field label="Own Place" value={applicant.ownPlace} />
           {applicant.ownPlace === "Yes" ? (
-          <Field label="Tax Dec. No." value={applicant.taxdec} />
-  ) : (
-    <>
-      <Field label="Lessor's Name" value={applicant.lessorName} />
-      <Field label="Monthly Rent" value={applicant.monthlyRent} />
-      <Field label="Tax Dec. No." value={applicant.taxdec} />
-    </>
-  )}
-</Section>
+            <Field label="Tax Dec. No." value={applicant.taxdec} />
+          ) : (
+            <>
+              <Field label="Lessor's Name" value={applicant.lessorName} />
+              <Field label="Monthly Rent" value={applicant.monthlyRent} />
+              <Field label="Tax Dec. No." value={applicant.taxdec} />
+            </>
+          )}
+        </Section>
 
         {/* Business Activity */}
         <Section title="Business Activity & Incentives">
           <Field label="Tax Incentives" value={applicant.tIGE} />
+          {applicant.tIGE === "Yes" && (
+            <FileField fileKey="tIGEfiles" label="Tax Incentives From Government" fileData={applicant} />
+          )}
           <Field label="Office Type" value={applicant.officeType} />
           <Field label="Line of Business" value={applicant.lineOfBusiness} />
           <Field label="Product/Service" value={applicant.productService} />
@@ -152,17 +213,17 @@ const Field = ({ label, value }) => (
           <Field label="Capital" value={applicant.capital} />
         </Section>
 
-        {/* Requirements */}
+        {/* Business Requirements */}
         <Section title="Business Requirements">
-          <Field label="Proof of Registration" value={applicant.proofOfReg} />
-          <Field label="Proof of Right to Use Location" value={applicant.proofOfRightToUseLoc} />
-          <Field label="Location Plan" value={applicant.locationPlan} />
-          <Field label="Barangay Clearance" value={applicant.brgyClearance} />
-          <Field label="Market Clearance" value={applicant.marketClearance} />
-          <Field label="Occupancy Permit" value={applicant.occupancyPermit} />
-          <Field label="Cedula" value={applicant.cedula} />
-          <Field label="Photo (Interior)" value={applicant.photoOfBusinessEstInt} />
-          <Field label="Photo (Exterior)" value={applicant.photoOfBusinessEstExt} />
+          <FileField fileKey="proofOfReg" label="Proof of Registration" fileData={applicant} />
+          <FileField fileKey="proofOfRightToUseLoc" label="Proof of Right to Use Location" fileData={applicant} />
+          <FileField fileKey="locationPlan" label="Location Plan" fileData={applicant} />
+          <FileField fileKey="brgyClearance" label="Barangay Clearance" fileData={applicant} />
+          <FileField fileKey="marketClearance" label="Market Clearance" fileData={applicant} />
+          <FileField fileKey="occupancyPermit" label="Occupancy Permit" fileData={applicant} />
+          <FileField fileKey="cedula" label="Cedula" fileData={applicant} />
+          <FileField fileKey="photoOfBusinessEstInt" label="Photo (Interior)" fileData={applicant} />
+          <FileField fileKey="photoOfBusinessEstExt" label="Photo (Exterior)" fileData={applicant} />
         </Section>
       </DialogContent>
 
@@ -170,13 +231,10 @@ const Field = ({ label, value }) => (
         <Button variant="outlined" onClick={onClose} color="secondary">
           Close
         </Button>
-        <Button
-          onClick={() => onApprove(applicant.id)}
-          variant="contained"
-          color="success"
-        >
+        <Button onClick={() => onApprove(applicant)} variant="contained" color="success">
           Approve
         </Button>
+
         <Button onClick={onClose} variant="outlined" color="error">
           Decline
         </Button>
@@ -185,4 +243,4 @@ const Field = ({ label, value }) => (
   );
 }
 
-export default CenroApplicantModal;
+export default ApplicantModal;

@@ -26,7 +26,7 @@ function Obo() {
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/backroom");
+        const res = await axios.get("http://localhost:5000/backroom/backrooms");
         setApplicants(res.data);
       } catch (error) {
         console.error("Error fetching applicants:", error);

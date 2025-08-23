@@ -119,7 +119,7 @@ function NewApplicationPage() {
     });
 
     try {
-      await axios.post(`${API}/api/files`, formData, {
+      await axios.post(`${API}/api/newApplication`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       alert("Application submitted!");
