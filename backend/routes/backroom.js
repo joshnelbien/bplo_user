@@ -1,7 +1,7 @@
 const express = require("express");
 const multer = require("multer");
 const Backroom = require("../db/model/backroomLocal");
-const Files = require("../db/model/files");
+const File = require("../db/model/files");
 const router = express.Router();
 
 // Multer in-memory storage
@@ -9,8 +9,35 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 
 // Upload files + text fields
+router.post("/backroom/approve/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1. Get applicant from Files table
+    const applicant = await File.findByPk(id);
+    if (!applicant) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
+    // 2. Insert into Backroom
+    const backroomData = applicant.toJSON();
+
+    const created = await Backroom.create(backroomData);
+
+    // 3. Remove from Files (move instead of copy)
+    await applicant.destroy();
+
+    res.status(201).json({ message: "Applicant approved and moved to Backroom", created });
+  } catch (err) {
+    console.error("Approve error:", err);
+    res.status(500).json({ error: "Failed to approve applicant" });
+  }
+});
+// List file
+
+
 router.post(
-  "/backroom",
+  "/backroom/insert",
   upload.fields([
     { name: "proofOfReg" },
     { name: "proofOfRightToUseLoc" },
@@ -55,32 +82,6 @@ router.post(
   }
 );
 
-// approve applicant -> move from Files to Backroom
-router.post("/backroom/approve/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // 1. Get applicant from Files table
-    const applicant = await Files.findByPk(id);
-    if (!applicant) {
-      return res.status(404).json({ error: "Applicant not found" });
-    }
-
-    // 2. Insert into Backroom
-    const backroomData = applicant.toJSON();
-    delete backroomData.id; // let Backroom have its own UUID
-
-    const created = await Backroom.create(backroomData);
-
-    // 3. Remove from Files (move instead of copy)
-    await applicant.destroy();
-
-    res.status(201).json({ message: "Applicant approved and moved to Backroom", created });
-  } catch (err) {
-    console.error("Approve error:", err);
-    res.status(500).json({ error: "Failed to approve applicant" });
-  }
-});
 
 
 // List files

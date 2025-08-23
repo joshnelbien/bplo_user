@@ -106,7 +106,7 @@ const FileField = ({ label, fileKey, fileData }) => (
   </Grid>
 );
 
-function ApplicantModal({ applicant, isOpen, onClose, onApprove }) {
+function CenroApplicantModal({ applicant, isOpen, onClose, onApprove }) {
   if (!isOpen || !applicant) return null;
 
   const Section = ({ title, children }) => (
@@ -243,4 +243,4 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove }) {
   );
 }
 
-export default ApplicantModal;
+export default CenroApplicantModal;

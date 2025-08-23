@@ -101,7 +101,7 @@ function Zoning() {
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.status}</TableCell>
+                  <TableCell>{applicant.ZONING}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -1,7 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Side_bar from "../../SIDE_BAR/side_bar";
-import ApplicantModal from "./cmswo_modal";
 
 import {
   Box,
@@ -101,7 +100,7 @@ function Cmswo() {
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.status}</TableCell>
+                  <TableCell>{applicant.cmswo}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -121,7 +120,7 @@ function Cmswo() {
       </Box>
 
       {/* ✅ Modal Component */}
-      <ApplicantModal
+      <CmswoApplicantModal
         applicant={selectedApplicant}
         isOpen={isModalOpen}
         onClose={closeModal}

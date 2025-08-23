@@ -101,7 +101,7 @@ function Cenro() {
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.status}</TableCell>
+                  <TableCell>{applicant.CENRO}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

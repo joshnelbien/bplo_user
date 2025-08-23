@@ -52,7 +52,7 @@ const handleApprove = async (applicant) => {
   }
 
   try {
-    await axios.post(`http://localhost:5000/api/backroom/approve/${applicant.id}`);
+    await axios.post(`http://localhost:5000/backroom/backroom/approve/${applicant.id}`);
 
     setApplicants((prev) => prev.filter((a) => a.id !== applicant.id));
     alert("Applicant approved and moved to backroom");

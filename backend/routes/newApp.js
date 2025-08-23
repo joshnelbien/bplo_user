@@ -1,7 +1,7 @@
 const express = require("express");
 const multer = require("multer");
 const File = require("../db/model/files");
-const Backroom = require ("../db/model/backroomLocal")
+
 
 const router = express.Router();
 
@@ -56,30 +56,7 @@ router.post(
   }
 );
 
-router.post("/backroom/approve/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
 
-    // 1. Get applicant from Files table
-    const applicant = await File.findByPk(id);
-    if (!applicant) {
-      return res.status(404).json({ error: "Applicant not found" });
-    }
-
-    // 2. Insert into Backroom
-    const backroomData = applicant.toJSON();
-
-    const created = await Backroom.create(backroomData);
-
-    // 3. Remove from Files (move instead of copy)
-    await applicant.destroy();
-
-    res.status(201).json({ message: "Applicant approved and moved to Backroom", created });
-  } catch (err) {
-    console.error("Approve error:", err);
-    res.status(500).json({ error: "Failed to approve applicant" });
-  }
-});
 // List files
 
 

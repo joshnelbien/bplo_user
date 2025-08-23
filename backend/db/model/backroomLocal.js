@@ -113,12 +113,12 @@ const Backroom = sequelize.define(
     photoOfBusinessEstExt_mimetype: { type: DataTypes.STRING, allowNull: true },
     photoOfBusinessEstExt_size: { type: DataTypes.INTEGER, allowNull: true },
 
-    BPLO: { type: DataTypes.STRING},
-    CSMWO: { type: DataTypes.STRING},
-    OBO: { type: DataTypes.STRING},
-    CHO: { type: DataTypes.STRING},
-    CENRO: { type: DataTypes.STRING},
-    ZONING: { type: DataTypes.STRING},
+    BPLO: { type: DataTypes.STRING, defaultValue: 'Approved' },
+    CSMWO: { type: DataTypes.STRING, defaultValue: 'Pending' },
+    OBO: { type: DataTypes.STRING, defaultValue: 'Pending' },
+    CHO: { type: DataTypes.STRING, defaultValue: 'Pending' },
+    CENRO: { type: DataTypes.STRING, defaultValue: 'Pending' },
+    ZONING: { type: DataTypes.STRING, defaultValue: 'Pending' },
   },
 
 
