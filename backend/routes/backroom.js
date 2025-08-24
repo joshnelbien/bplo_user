@@ -36,53 +36,122 @@ router.post("/backroom/approve/:id", async (req, res) => {
 // List file
 
 
-router.post(
-  "/backroom/insert",
-  upload.fields([
-    { name: "proofOfReg" },
-    { name: "proofOfRightToUseLoc" },
-    { name: "locationPlan" },
-    { name: "brgyClearance" },
-    { name: "marketClearance" },
-    { name: "occupancyPermit" },
-    { name: "cedula" },
-    { name: "photoOfBusinessEstInt" },
-    { name: "photoOfBusinessEstExt" },
-    { name: "tIGEfiles" }, 
-  ]),
-  async (req, res) => {
-    try {
-      const files = req.files;
-      const body = req.body;
-      const backroomData = {};
+router.post("/obo/approve/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
 
-      // Save each uploaded file’s info
-      if (backroom) {
-        Object.keys(backroom).forEach((key) => {
-          const f = backroom[key][0];
-          backroomData[key] = f.buffer;
-          backroomData[`${key}_filename`] = f.originalname;
-          backroomData[`${key}_mimetype`] = f.mimetype;
-          backroomData[`${key}_size`] = f.size;
-        });
-      }
-
-      // Merge text fields + file data
-      const payload = {
-        ...body,
-        ...backroomData,
-      };
-
-      const created = await Backroom.create(payload);
-      res.status(201).json(created);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Upload failed" });
+    const applicant = await Backroom.findByPk(id);
+    if (!applicant) {
+      return res.status(404).json({ error: "Applicant not found" });
     }
+
+    // ✅ Update OBO to Approved
+    applicant.OBO = "Approved";
+    await applicant.save();
+
+    // ✅ (Optional) If you really want to destroy it after approval
+    // await applicant.destroy();
+
+    res.json({ message: "Applicant approved", applicant });
+  } catch (err) {
+    console.error("Approve error:", err);
+    res.status(500).json({ error: "Failed to approve applicant" });
   }
-);
+});
 
 
+router.post("/zoning/approve/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const applicant = await Backroom.findByPk(id);
+    if (!applicant) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
+    // ✅ Update zoning to Approved
+    applicant.ZONING = "Approved";
+    await applicant.save();
+
+    // ✅ (Optional) If you really want to destroy it after approval
+    // await applicant.destroy();
+
+    res.json({ message: "Applicant approved", applicant });
+  } catch (err) {
+    console.error("Approve error:", err);
+    res.status(500).json({ error: "Failed to approve applicant" });
+  }
+});
+
+router.post("/cho/approve/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const applicant = await Backroom.findByPk(id);
+    if (!applicant) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
+    // ✅ Update cho to Approved
+    applicant.CHO = "Approved";
+    await applicant.save();
+
+    // ✅ (Optional) If you really want to destroy it after approval
+    // await applicant.destroy();
+
+    res.json({ message: "Applicant approved", applicant });
+  } catch (err) {
+    console.error("Approve error:", err);
+    res.status(500).json({ error: "Failed to approve applicant" });
+  }
+});
+
+
+router.post("/cenro/approve/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const applicant = await Backroom.findByPk(id);
+    if (!applicant) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
+    // ✅ Update CENRO to Approved
+    applicant.CENRO = "Approved";
+    await applicant.save();
+
+    // ✅ (Optional) If you really want to destroy it after approval
+    // await applicant.destroy();
+
+    res.json({ message: "Applicant approved", applicant });
+  } catch (err) {
+    console.error("Approve error:", err);
+    res.status(500).json({ error: "Failed to approve applicant" });
+  }
+});
+
+router.post("/cmswo/approve/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const applicant = await Backroom.findByPk(id);
+    if (!applicant) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
+    // ✅ Update  to Approved
+    applicant.CMSWO = "Approved";
+    await applicant.save();
+
+    // ✅ (Optional) If you really want to destroy it after approval
+    // await applicant.destroy();
+
+    res.json({ message: "Applicant approved", applicant });
+  } catch (err) {
+    console.error("Approve error:", err);
+    res.status(500).json({ error: "Failed to approve applicant" });
+  }
+});
 
 // List files
 router.get("/backrooms", async (req, res) => {

@@ -277,7 +277,7 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
         </Button>
 
         {!showCert && (
-          <Button onClick={() => onApprove(applicant)} variant="contained" color="success">
+          <Button onClick={() => onApprove(applicant.id)} variant="contained" color="success">
             Approve
           </Button>
         )}

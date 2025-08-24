@@ -45,15 +45,19 @@ function Cenro() {
   );
 
   const handleApprove = async (id) => {
-    try {
-      await axios.post("http://localhost:5000/backroom", { id });
-      setApplicants((prev) => prev.filter((applicant) => applicant.id !== id));
-      alert("Applicant approved and moved to backroom");
-      closeModal();
-    } catch (error) {
-      console.error("Error approving applicant:", error);
-    }
-  };
+  try {
+    await axios.post(`http://localhost:5000/backroom/cenro/approve/${id}`);
+    setApplicants((prev) =>
+      prev.map((applicant) =>
+        applicant.id === id ? { ...applicant, CENRO: "Approved" } : applicant
+      )
+    );
+    alert("Applicant approved");
+    closeModal();
+  } catch (error) {
+    console.error("Error approving applicant:", error);
+  }
+};
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);

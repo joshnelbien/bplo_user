@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Side_bar from "../../SIDE_BAR/side_bar";
+import CmswoApplicantModal from "./cmswo_modal";
 
 import {
   Box,
@@ -44,15 +45,19 @@ function Cmswo() {
   );
 
   const handleApprove = async (id) => {
-    try {
-      await axios.post("http://localhost:5000/backroom", { id });
-      setApplicants((prev) => prev.filter((applicant) => applicant.id !== id));
-      alert("Applicant approved and moved to backroom");
-      closeModal();
-    } catch (error) {
-      console.error("Error approving applicant:", error);
-    }
-  };
+  try {
+    await axios.post(`http://localhost:5000/backroom/cmswo/approve/${id}`);
+    setApplicants((prev) =>
+      prev.map((applicant) =>
+        applicant.id === id ? { ...applicant, CMSWO: "Approved" } : applicant
+      )
+    );
+    alert("Applicant approved");
+    closeModal();
+  } catch (error) {
+    console.error("Error approving applicant:", error);
+  }
+};
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
@@ -100,7 +105,7 @@ function Cmswo() {
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.cmswo}</TableCell>
+                  <TableCell>{applicant.CMSWO}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
