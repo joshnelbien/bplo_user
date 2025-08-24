@@ -14,7 +14,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function Step6BusinessActivity({
   formData,
@@ -25,19 +25,13 @@ export default function Step6BusinessActivity({
 }) {
   const files = [{ label: "TIGE Files", name: "tIGEfiles" }];
 
-  // State to track selected files
   const [selectedFiles, setSelectedFiles] = useState({});
-
-  // State for multiple lines of business
-
   const [newBusiness, setNewBusiness] = useState({
     lineOfBusiness: "",
     productService: "",
     Units: "",
     capital: "",
   });
-
-  // For editing
   const [editingIndex, setEditingIndex] = useState(null);
 
   const handleFileSelect = (e) => {
@@ -46,7 +40,7 @@ export default function Step6BusinessActivity({
       ...prev,
       [name]: files[0] ? files[0].name : "",
     }));
-    handleFileChange(e); // call parent handler
+    handleFileChange(e);
   };
 
   const handleBusinessChange = (e) => {
@@ -69,17 +63,14 @@ export default function Step6BusinessActivity({
     }
 
     if (editingIndex !== null) {
-      // Update existing
       const updated = [...businessLines];
       updated[editingIndex] = newBusiness;
       setBusinessLines(updated);
       setEditingIndex(null);
     } else {
-      // Add new
       setBusinessLines([...businessLines, newBusiness]);
     }
 
-    // Reset input
     setNewBusiness({ lineOfBusiness: "", productService: "", Units: "", capital: "" });
   };
 
@@ -93,6 +84,18 @@ export default function Step6BusinessActivity({
     updated.splice(index, 1);
     setBusinessLines(updated);
   };
+
+  // ✅ Calculate total capital using useMemo (efficient re-rendering)
+  const totalCapital = useMemo(() => {
+    return businessLines.reduce(
+      (sum, biz) => sum + (parseFloat(biz.capital) || 0),
+      0
+    );
+  }, [businessLines]);
+
+  useEffect(() => {
+  handleChange({ target: { name: "totalCapital", value: totalCapital } });
+}, [totalCapital, handleChange]);
 
   return (
     <div style={{ marginBottom: 20 }}>
@@ -226,29 +229,32 @@ export default function Step6BusinessActivity({
             <Card key={index} variant="outlined">
               <CardContent>
                 <Typography variant="subtitle2">
-                  Line Of Business : {biz.productService}
+                  Line Of Business : {biz.lineOfBusiness}
                 </Typography>
                 <Typography variant="subtitle2">
                   Product and Services : {biz.productService}
                 </Typography>
-                <Typography variant="body2">
-                  Units: {biz.Units}
-                </Typography>
-                <Typography variant="body2">
-                  Capital: {biz.capital}
-                </Typography>
+                <Typography variant="body2">Units: {biz.Units}</Typography>
+                <Typography variant="body2">Capital: {biz.capital}</Typography>
                 <Stack direction="row" spacing={1} mt={1}>
                   <IconButton onClick={() => editBusinessLine(index)}>
-                    <EditIcon variant="outlined" />
+                    <EditIcon />
                   </IconButton>
                   <IconButton onClick={() => deleteBusinessLine(index)}>
-                    <DeleteIcon variant="outlined" />
+                    <DeleteIcon />
                   </IconButton>
                 </Stack>
               </CardContent>
             </Card>
           ))}
         </Stack>
+
+        {/* ✅ Total Capital */}
+        {businessLines.length > 0 && (
+          <Typography variant="h6" sx={{ mt: 2 }}>
+            Total Capital: {totalCapital.toLocaleString()}
+          </Typography>
+        )}
       </Stack>
     </div>
   );

@@ -64,6 +64,7 @@ const Backroom = sequelize.define(
     productService: DataTypes.STRING,
     Units: DataTypes.STRING,
     capital: DataTypes.STRING,
+    totalCapital:DataTypes.STRING,
 
     // Files
     proofOfReg: { type: DataTypes.BLOB("long"), allowNull: true },

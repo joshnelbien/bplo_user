@@ -20,17 +20,17 @@ function getFilipinoMonth(monthIndex) {
 }
 
 // ✅ Compute zoning fee based on capital
-function calculateZoningFee(capital) {
-  if (capital <= 5000) {
+function calculateZoningFee(totalCapital) {
+  if (totalCapital <= 5000) {
     return "Exempted";
-  } else if (capital >= 5001 && capital <= 10000) {
+  } else if (totalCapital >= 5001 && totalCapital <= 10000) {
     return 100;
-  } else if (capital >= 10001 && capital <= 50000) {
+  } else if (totalCapital >= 10001 && totalCapital <= 50000) {
     return 200;
-  } else if (capital >= 50001 && capital <= 100000) {
+  } else if (totalCapital >= 50001 && totalCapital <= 100000) {
     return 300;
   } else {
-    return ((capital - 100000) * 0.001 + 500).toFixed(2);
+    return ((totalCapital - 100000) * 0.001 + 500).toFixed(2);
   }
 }
 
@@ -40,7 +40,7 @@ function ZoningCert({ applicant }) {
   const month = getFilipinoMonth(today.getMonth());
   const year = today.getFullYear();
 
-  const zoningFee = calculateZoningFee(applicant.capital);
+  const zoningFee = calculateZoningFee(applicant.totalCapital);
 
   return (
     <Box
@@ -118,7 +118,7 @@ function ZoningCert({ applicant }) {
         <Typography variant="subtitle1" sx={{ mt: 2 }}>
           CAPITAL: P
           <b>
-            <u>{applicant.capital}</u>
+            <u>{applicant.totalCapital}</u>
           </b>
         </Typography>
         <Typography variant="subtitle1" sx={{ mb: 3 }}>

@@ -83,6 +83,7 @@ function NewApplicationPage() {
     productService: "",
     Units: "",
     capital: "",
+    totalCapital: "",
   });
 
   const [filesState, setFilesState] = useState({
@@ -135,7 +136,7 @@ const handleSubmit = async (e) => {
       headers: { "Content-Type": "multipart/form-data" },
     });
     alert("Application submitted!");
-    setStep(1);
+    navigate("/homePage");
   } catch (err) {
     console.error(err);
     alert("Submit failed");
