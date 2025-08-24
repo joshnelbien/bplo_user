@@ -22,6 +22,8 @@ import Section7FileUploads from "../components/BusinessForm/Step7";
 function NewApplicationPage() {
   const API = import.meta.env.VITE_API_BASE;
   const [step, setStep] = useState(1);
+  const [businessLines, setBusinessLines] = useState([]);
+
 
   const steps = [
     "Business Info",
@@ -106,29 +108,40 @@ function NewApplicationPage() {
     setFilesState((prev) => ({ ...prev, [name]: files[0] }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData();
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const formData = new FormData();
 
-    Object.keys(formDataState).forEach((key) => {
-      formData.append(key, formDataState[key]);
+  // Flatten businessLines into comma-separated strings
+  if (businessLines.length > 0) {
+    formData.append("lineOfBusiness", businessLines.map((b) => b.lineOfBusiness).join(","));
+    formData.append("productService", businessLines.map((b) => b.productService).join(","));
+    formData.append("Units", businessLines.map((b) => b.Units).join(","));
+    formData.append("capital", businessLines.map((b) => b.capital).join(","));
+  }
+
+  // Add all other form fields
+  Object.keys(formDataState).forEach((key) => {
+    if (formDataState[key]) formData.append(key, formDataState[key]);
+  });
+
+  // Add files
+  Object.keys(filesState).forEach((key) => {
+    if (filesState[key]) formData.append(key, filesState[key]);
+  });
+
+  try {
+    await axios.post(`${API}/api/files`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
+    alert("Application submitted!");
+    setStep(1);
+  } catch (err) {
+    console.error(err);
+    alert("Submit failed");
+  }
+};
 
-    Object.keys(filesState).forEach((key) => {
-      if (filesState[key]) formData.append(key, filesState[key]);
-    });
-
-    try {
-      await axios.post(`${API}/api/files`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      alert("Application submitted!");
-      setStep(1);
-    } catch (err) {
-      console.error(err);
-      alert("Submit failed");
-    }
-  };
 
   const renderStepContent = (step) => {
     switch (step) {
@@ -143,7 +156,7 @@ function NewApplicationPage() {
       case 5:
         return <Step5BusinessDetails formData={formDataState} handleChange={handleChange} />;
       case 6:
-        return <Step6BusinessActivity formData={formDataState} handleChange={handleChange} />;
+        return <Step6BusinessActivity formData={formDataState} handleChange={handleChange} businessLines={businessLines} setBusinessLines={setBusinessLines}/>;
       case 7:
         return <Section7FileUploads handleFileChange={handleFileChange} />;
       default:

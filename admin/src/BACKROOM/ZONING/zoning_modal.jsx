@@ -15,6 +15,97 @@ import {
 import { useState } from "react";
 import ZoningCert from "./zoningCert";
 
+// ✅ Normal text field
+const Field = ({ label, value }) => (
+  <Grid item xs={12} sm={6}>
+    <TextField
+      label={label}
+      value={value || "—"}
+      fullWidth
+      variant="outlined"
+      size="small"
+      disabled
+      InputProps={{
+        sx: {
+          color: "black",
+          "& .MuiInputBase-input.Mui-disabled": {
+            WebkitTextFillColor: "black",
+          },
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "black",
+          },
+          "&.Mui-disabled .MuiOutlinedInput-notchedOutline": {
+            borderColor: "black",
+          },
+        },
+      }}
+      InputLabelProps={{
+        sx: {
+          color: "black",
+          "&.Mui-disabled": { color: "black" },
+        },
+      }}
+    />
+  </Grid>
+);
+
+// ✅ File display (with View/Download links)
+const FileField = ({ label, fileKey, fileData }) => (
+  <Grid item xs={12} sm={6}>
+    <TextField
+      label={label}
+      value={
+        fileData[fileKey]
+          ? fileData[`${fileKey}_filename`] || "File available"
+          : "No file uploaded"
+      }
+      fullWidth
+      variant="outlined"
+      size="small"
+      disabled
+      InputProps={{
+        sx: {
+          color: "black",
+          "& .MuiInputBase-input.Mui-disabled": {
+            WebkitTextFillColor: "black",
+          },
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "black",
+          },
+          "&.Mui-disabled .MuiOutlinedInput-notchedOutline": {
+            borderColor: "black",
+          },
+        },
+      }}
+      InputLabelProps={{
+        sx: {
+          color: "black",
+          "&.Mui-disabled": { color: "black" },
+        },
+      }}
+    />
+    {fileData[fileKey] && (
+      <Typography variant="body2" sx={{ mt: 0.5 }}>
+        <a
+          href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          View
+        </a>{" "}
+        |{" "}
+        <a
+          href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}/download`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Download
+        </a>
+      </Typography>
+    )}
+  </Grid>
+);
+
 function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
   const [showCert, setShowCert] = useState(false);
 
@@ -28,46 +119,9 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
         </Typography>
       </AccordionSummary>
       <AccordionDetails>
-        <Grid container spacing={2}>
-          {children}
-        </Grid>
+        <Grid container spacing={2}>{children}</Grid>
       </AccordionDetails>
     </Accordion>
-  );
-
-  const Field = ({ label, value }) => (
-    <Grid item xs={12} sm={6}>
-      <TextField
-        label={label}
-        value={value || "—"}
-        fullWidth
-        variant="outlined"
-        size="small"
-        disabled
-        InputProps={{
-          sx: {
-            color: "black",
-            "& .MuiInputBase-input.Mui-disabled": {
-              WebkitTextFillColor: "black",
-            },
-            "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: "black",
-            },
-            "&.Mui-disabled .MuiOutlinedInput-notchedOutline": {
-              borderColor: "black",
-            },
-          },
-        }}
-        InputLabelProps={{
-          sx: {
-            color: "black",
-            "&.Mui-disabled": {
-              color: "black",
-            },
-          },
-        }}
-      />
-    </Grid>
   );
 
   return (
@@ -154,6 +208,13 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
             {/* Business Activity */}
             <Section title="Business Activity & Incentives">
               <Field label="Tax Incentives" value={applicant.tIGE} />
+              {applicant.tIGE === "Yes" && (
+                <FileField
+                  fileKey="tIGEfiles"
+                  label="Tax Incentives From Government"
+                  fileData={applicant}
+                />
+              )}
               <Field label="Office Type" value={applicant.officeType} />
               <Field label="Line of Business" value={applicant.lineOfBusiness} />
               <Field label="Product/Service" value={applicant.productService} />
@@ -161,17 +222,17 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
               <Field label="Capital" value={applicant.capital} />
             </Section>
 
-            {/* Requirements */}
+            {/* Business Requirements */}
             <Section title="Business Requirements">
-              <Field label="Proof of Registration" value={applicant.proofOfReg} />
-              <Field label="Proof of Right to Use Location" value={applicant.proofOfRightToUseLoc} />
-              <Field label="Location Plan" value={applicant.locationPlan} />
-              <Field label="Barangay Clearance" value={applicant.brgyClearance} />
-              <Field label="Market Clearance" value={applicant.marketClearance} />
-              <Field label="Occupancy Permit" value={applicant.occupancyPermit} />
-              <Field label="Cedula" value={applicant.cedula} />
-              <Field label="Photo (Interior)" value={applicant.photoOfBusinessEstInt} />
-              <Field label="Photo (Exterior)" value={applicant.photoOfBusinessEstExt} />
+              <FileField fileKey="proofOfReg" label="Proof of Registration" fileData={applicant} />
+              <FileField fileKey="proofOfRightToUseLoc" label="Proof of Right to Use Location" fileData={applicant} />
+              <FileField fileKey="locationPlan" label="Location Plan" fileData={applicant} />
+              <FileField fileKey="brgyClearance" label="Barangay Clearance" fileData={applicant} />
+              <FileField fileKey="marketClearance" label="Market Clearance" fileData={applicant} />
+              <FileField fileKey="occupancyPermit" label="Occupancy Permit" fileData={applicant} />
+              <FileField fileKey="cedula" label="Cedula" fileData={applicant} />
+              <FileField fileKey="photoOfBusinessEstInt" label="Photo (Interior)" fileData={applicant} />
+              <FileField fileKey="photoOfBusinessEstExt" label="Photo (Exterior)" fileData={applicant} />
             </Section>
           </>
         ) : (
@@ -185,11 +246,7 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
         </Button>
 
         {!showCert && (
-          <Button
-            onClick={() => onApprove(applicant.id)}
-            variant="contained"
-            color="success"
-          >
+          <Button onClick={() => onApprove(applicant)} variant="contained" color="success">
             Approve
           </Button>
         )}
@@ -200,7 +257,6 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
           </Button>
         )}
 
-        
         {/* ✅ Toggle Certificate */}
         <Button
           variant="contained"

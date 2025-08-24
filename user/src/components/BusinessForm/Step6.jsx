@@ -1,7 +1,12 @@
 // src/components/BusinessForm/Step6BusinessActivity.jsx
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import {
   Button,
+  Card,
+  CardContent,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Select,
@@ -15,11 +20,25 @@ export default function Step6BusinessActivity({
   formData,
   handleChange,
   handleFileChange,
+  businessLines,
+  setBusinessLines
 }) {
   const files = [{ label: "TIGE Files", name: "tIGEfiles" }];
 
   // State to track selected files
   const [selectedFiles, setSelectedFiles] = useState({});
+
+  // State for multiple lines of business
+
+  const [newBusiness, setNewBusiness] = useState({
+    lineOfBusiness: "",
+    productService: "",
+    Units: "",
+    capital: "",
+  });
+
+  // For editing
+  const [editingIndex, setEditingIndex] = useState(null);
 
   const handleFileSelect = (e) => {
     const { name, files } = e.target;
@@ -28,6 +47,51 @@ export default function Step6BusinessActivity({
       [name]: files[0] ? files[0].name : "",
     }));
     handleFileChange(e); // call parent handler
+  };
+
+  const handleBusinessChange = (e) => {
+    const { name, value } = e.target;
+    setNewBusiness((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const addBusinessLine = () => {
+    if (
+      !newBusiness.lineOfBusiness ||
+      !newBusiness.productService ||
+      !newBusiness.Units ||
+      !newBusiness.capital
+    ) {
+      alert("Please fill all fields before adding.");
+      return;
+    }
+
+    if (editingIndex !== null) {
+      // Update existing
+      const updated = [...businessLines];
+      updated[editingIndex] = newBusiness;
+      setBusinessLines(updated);
+      setEditingIndex(null);
+    } else {
+      // Add new
+      setBusinessLines([...businessLines, newBusiness]);
+    }
+
+    // Reset input
+    setNewBusiness({ lineOfBusiness: "", productService: "", Units: "", capital: "" });
+  };
+
+  const editBusinessLine = (index) => {
+    setNewBusiness(businessLines[index]);
+    setEditingIndex(index);
+  };
+
+  const deleteBusinessLine = (index) => {
+    const updated = [...businessLines];
+    updated.splice(index, 1);
+    setBusinessLines(updated);
   };
 
   return (
@@ -118,47 +182,73 @@ export default function Step6BusinessActivity({
           />
         )}
 
+        {/* Add Line of Business Section */}
+        <Typography variant="subtitle1">Add Line of Business</Typography>
+
         <TextField
           label="Line of Business"
           name="lineOfBusiness"
-          value={formData.lineOfBusiness || ""}
-          onChange={handleChange}
+          value={newBusiness.lineOfBusiness}
+          onChange={handleBusinessChange}
           fullWidth
-          variant="outlined"
-          sx={{ minWidth: 300 }}
         />
-
         <TextField
           label="Product/Service"
           name="productService"
-          value={formData.productService || ""}
-          onChange={handleChange}
+          value={newBusiness.productService}
+          onChange={handleBusinessChange}
           fullWidth
-          variant="outlined"
-          sx={{ minWidth: 300 }}
         />
-
         <TextField
           label="Units"
           name="Units"
           type="number"
-          value={formData.Units || ""}
-          onChange={handleChange}
+          value={newBusiness.Units}
+          onChange={handleBusinessChange}
           fullWidth
-          variant="outlined"
-          sx={{ minWidth: 300 }}
         />
-
         <TextField
           label="Capital"
           name="capital"
           type="number"
-          value={formData.capital || ""}
-          onChange={handleChange}
+          value={newBusiness.capital}
+          onChange={handleBusinessChange}
           fullWidth
-          variant="outlined"
-          sx={{ minWidth: 300 }}
         />
+
+        <Button variant="contained" onClick={addBusinessLine}>
+          {editingIndex !== null ? "Save Changes" : "Add Line of Business"}
+        </Button>
+
+        {/* Business List */}
+        <Stack spacing={2}>
+          {businessLines.map((biz, index) => (
+            <Card key={index} variant="outlined">
+              <CardContent>
+                <Typography variant="subtitle2">
+                  Line Of Business : {biz.productService}
+                </Typography>
+                <Typography variant="subtitle2">
+                  Product and Services : {biz.productService}
+                </Typography>
+                <Typography variant="body2">
+                  Units: {biz.Units}
+                </Typography>
+                <Typography variant="body2">
+                  Capital: {biz.capital}
+                </Typography>
+                <Stack direction="row" spacing={1} mt={1}>
+                  <IconButton onClick={() => editBusinessLine(index)}>
+                    <EditIcon variant="outlined" />
+                  </IconButton>
+                  <IconButton onClick={() => deleteBusinessLine(index)}>
+                    <DeleteIcon variant="outlined" />
+                  </IconButton>
+                </Stack>
+              </CardContent>
+            </Card>
+          ))}
+        </Stack>
       </Stack>
     </div>
   );
