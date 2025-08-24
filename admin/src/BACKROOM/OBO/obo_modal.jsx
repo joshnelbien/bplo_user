@@ -9,8 +9,9 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
+  Paper,
   TextField,
-  Typography
+  Typography,
 } from "@mui/material";
 
 // Component to display a normal text field
