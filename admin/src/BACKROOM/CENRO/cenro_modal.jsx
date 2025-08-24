@@ -9,6 +9,7 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
+  Paper,
   TextField,
   Typography,
 } from "@mui/material";
@@ -201,17 +202,51 @@ function CenroApplicantModal({ applicant, isOpen, onClose, onApprove }) {
         </Section>
 
         {/* Business Activity */}
-        <Section title="Business Activity & Incentives">
-          <Field label="Tax Incentives" value={applicant.tIGE} />
-          {applicant.tIGE === "Yes" && (
-            <FileField fileKey="tIGEfiles" label="Tax Incentives From Government" fileData={applicant} />
-          )}
-          <Field label="Office Type" value={applicant.officeType} />
-          <Field label="Line of Business" value={applicant.lineOfBusiness} />
-          <Field label="Product/Service" value={applicant.productService} />
-          <Field label="Units" value={applicant.Units} />
-          <Field label="Capital" value={applicant.capital} />
-        </Section>
+      <Section title="Business Activity & Incentives">
+        <Field label="Tax Incentives" value={applicant.tIGE} />
+        {applicant.tIGE === "Yes" && (
+          <FileField
+            fileKey="tIGEfiles"
+            label="Tax Incentives From Government"
+            fileData={applicant}
+          />
+        )}
+      
+        <Field label="Office Type" value={applicant.officeType} />
+      
+        {applicant.lineOfBusiness?.split(",").map((lob, index) => {
+          const product = applicant.productService?.split(",")[index] || "";
+          const unit = applicant.Units?.split(",")[index] || "";
+          const capital = applicant.capital?.split(",")[index] || "";
+      
+          return (
+            <Paper
+              key={index}
+              elevation={2}
+              sx={{ p: 2, mb: 2, borderRadius: 2, backgroundColor: "#f9f9f9" }}
+            >
+              <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                Business Line {index + 1}
+              </Typography>
+      
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Field label="Line of Business" value={lob.trim()} />
+                </Grid>
+                <Grid item xs={12}>
+                  <Field label="Product/Service" value={product.trim()} />
+                </Grid>
+                <Grid item xs={12}>
+                  <Field label="Units" value={unit.trim()} />
+                </Grid>
+                <Grid item xs={12}>
+                  <Field label="Capital" value={capital.trim()} />
+                </Grid>
+              </Grid>
+            </Paper>
+          );
+        })}
+      </Section>
 
         {/* Business Requirements */}
         <Section title="Business Requirements">
