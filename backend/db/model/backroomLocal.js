@@ -1,6 +1,7 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../sequelize");
 
+
 const Backroom = sequelize.define(
   "Backroom",
   {
@@ -115,11 +116,17 @@ const Backroom = sequelize.define(
     photoOfBusinessEstExt_size: { type: DataTypes.INTEGER, allowNull: true },
 
     BPLO: { type: DataTypes.STRING, defaultValue: 'Approved' },
+    BPLOtimeStamp: { type: DataTypes.STRING },
     CSMWO: { type: DataTypes.STRING, defaultValue: 'Pending' },
+    CSMWOtimeStamp: { type: DataTypes.STRING },
     OBO: { type: DataTypes.STRING, defaultValue: 'Pending' },
+    OBOtimeStamp: { type: DataTypes.STRING },
     CHO: { type: DataTypes.STRING, defaultValue: 'Pending' },
+    CHOtimeStamp: { type: DataTypes.STRING },
     CENRO: { type: DataTypes.STRING, defaultValue: 'Pending' },
+    CENROtimeStamp: { type: DataTypes.STRING },
     ZONING: { type: DataTypes.STRING, defaultValue: 'Pending' },
+    ZONINGtimeStamp: { type: DataTypes.STRING },
   },
 
 

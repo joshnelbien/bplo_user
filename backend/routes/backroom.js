@@ -3,6 +3,7 @@ const multer = require("multer");
 const Backroom = require("../db/model/backroomLocal");
 const File = require("../db/model/files");
 const router = express.Router();
+const moment = require("moment");
 
 // Multer in-memory storage
 const upload = multer({ storage: multer.memoryStorage() });
@@ -19,15 +20,20 @@ router.post("/backroom/approve/:id", async (req, res) => {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
-    // 2. Insert into Backroom
+    // 2. Insert into Backroom with timestamp
     const backroomData = applicant.toJSON();
+
+    backroomData.BPLO = "Approved";
+    backroomData.BPLOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
     const created = await Backroom.create(backroomData);
 
     // 3. Remove from Files (move instead of copy)
     await applicant.destroy();
 
-    res.status(201).json({ message: "Applicant approved and moved to Backroom", created });
+    res
+      .status(201)
+      .json({ message: "Applicant approved and moved to Backroom", created });
   } catch (err) {
     console.error("Approve error:", err);
     res.status(500).json({ error: "Failed to approve applicant" });
@@ -47,6 +53,7 @@ router.post("/obo/approve/:id", async (req, res) => {
 
     // ✅ Update OBO to Approved
     applicant.OBO = "Approved";
+    applicant.OBOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
     await applicant.save();
 
     // ✅ (Optional) If you really want to destroy it after approval
@@ -71,6 +78,7 @@ router.post("/zoning/approve/:id", async (req, res) => {
 
     // ✅ Update zoning to Approved
     applicant.ZONING = "Approved";
+    applicant.ZONINGtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
     await applicant.save();
 
     // ✅ (Optional) If you really want to destroy it after approval
@@ -94,6 +102,7 @@ router.post("/cho/approve/:id", async (req, res) => {
 
     // ✅ Update cho to Approved
     applicant.CHO = "Approved";
+    applicant.CHOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
     await applicant.save();
 
     // ✅ (Optional) If you really want to destroy it after approval
@@ -118,6 +127,7 @@ router.post("/cenro/approve/:id", async (req, res) => {
 
     // ✅ Update CENRO to Approved
     applicant.CENRO = "Approved";
+    applicant.CENROtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
     await applicant.save();
 
     // ✅ (Optional) If you really want to destroy it after approval
@@ -141,6 +151,7 @@ router.post("/csmwo/approve/:id", async (req, res) => {
 
     // ✅ Update  to Approved
     applicant.CSMWO = "Approved";
+    applicant.CSMWOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
     await applicant.save();
 
     // ✅ (Optional) If you really want to destroy it after approval

@@ -163,12 +163,54 @@ function New_records() {
 
                   {filter === "approved" && (
                     <>
-                      <TableCell>{applicant.BPLO}</TableCell>
-                      <TableCell>{applicant.CENRO}</TableCell>
-                      <TableCell>{applicant.CHO}</TableCell>
-                      <TableCell>{applicant.ZONING}</TableCell>
-                      <TableCell>{applicant.CSMWO}</TableCell>
-                      <TableCell>{applicant.OBO}</TableCell>
+                      <TableCell>
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                          <span>{applicant.BPLO}</span>
+                          <span style={{ fontSize: "0.8em", color: "gray" }}>
+                            {applicant.BPLOtimeStamp}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                          <span>{applicant.CENRO}</span>
+                          <span style={{ fontSize: "0.8em", color: "gray" }}>
+                            {applicant.CENROtimeStamp}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                          <span>{applicant.CHO}</span>
+                          <span style={{ fontSize: "0.8em", color: "gray" }}>
+                            {applicant.CHOtimeStamp}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                          <span>{applicant.ZONING}</span>
+                          <span style={{ fontSize: "0.8em", color: "gray" }}>
+                            {applicant.ZONINGtimeStamp}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                          <span>{applicant.CSMWO}</span>
+                          <span style={{ fontSize: "0.8em", color: "gray" }}>
+                            {applicant.CSMWOtimeStamp}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                          <span>{applicant.OBO}</span>
+                          <span style={{ fontSize: "0.8em", color: "gray" }}>
+                            {applicant.OBOtimeStamp}
+                          </span>
+                        </div>
+                      </TableCell>
                     </>
                   )}
                 </TableRow>
