@@ -17,8 +17,9 @@ import { useState } from "react";
 import ZoningCert from "./zoningCert";
 
 // ✅ Normal text field
+// ✅ Normal text field
 const Field = ({ label, value }) => (
-  <Grid item xs={12} sm={6}>
+  <Grid size={{ xs: 12, sm: 6 }}>
     <TextField
       label={label}
       value={value || "—"}
@@ -52,7 +53,7 @@ const Field = ({ label, value }) => (
 
 // ✅ File display (with View/Download links)
 const FileField = ({ label, fileKey, fileData }) => (
-  <Grid item xs={12} sm={6}>
+  <Grid size={{ xs: 12, sm: 6 }}>
     <TextField
       label={label}
       value={
@@ -106,6 +107,7 @@ const FileField = ({ label, fileKey, fileData }) => (
     )}
   </Grid>
 );
+
 
 function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
   const [showCert, setShowCert] = useState(false);

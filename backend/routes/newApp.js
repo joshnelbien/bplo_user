@@ -22,7 +22,7 @@ router.post(
     { name: "cedula" },
     { name: "photoOfBusinessEstInt" },
     { name: "photoOfBusinessEstExt" },
-    { name: "tIGEfiles" }, 
+    { name: "tIGEfiles" },
   ]),
   async (req, res) => {
     try {

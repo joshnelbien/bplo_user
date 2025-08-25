@@ -5,6 +5,8 @@ import CmswoApplicantModal from "./cmswo_modal";
 
 import {
   Box,
+  Button,
+  ButtonGroup,
   Pagination,
   Paper,
   Table,
@@ -13,7 +15,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  Typography,
 } from "@mui/material";
 
 function Cmswo() {
@@ -21,6 +23,7 @@ function Cmswo() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filter, setFilter] = useState("pending"); // ✅ pending by default
   const recordsPerPage = 20;
 
   useEffect(() => {
@@ -36,28 +39,34 @@ function Cmswo() {
     fetchApplicants();
   }, []);
 
-  const totalPages = Math.ceil(applicants.length / recordsPerPage);
+  // ✅ Filter applicants based on button selection
+  const filteredApplicants =
+    filter === "pending"
+      ? applicants.filter((a) => a.CSMWO !== "Approved")
+      : applicants.filter((a) => a.CSMWO === "Approved");
+
+  const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = applicants.slice(
+  const currentRecords = filteredApplicants.slice(
     indexOfFirstRecord,
     indexOfLastRecord
   );
 
   const handleApprove = async (id) => {
-  try {
-    await axios.post(`http://localhost:5000/backroom/cmswo/approve/${id}`);
-    setApplicants((prev) =>
-      prev.map((applicant) =>
-        applicant.id === id ? { ...applicant, CMSWO: "Approved" } : applicant
-      )
-    );
-    alert("Applicant approved");
-    closeModal();
-  } catch (error) {
-    console.error("Error approving applicant:", error);
-  }
-};
+    try {
+      await axios.post(`http://localhost:5000/backroom/csmwo/approve/${id}`);
+      setApplicants((prev) =>
+        prev.map((applicant) =>
+          applicant.id === id ? { ...applicant, CSMWO: "Approved" } : applicant
+        )
+      );
+      alert("Applicant approved");
+      closeModal();
+    } catch (error) {
+      console.error("Error approving applicant:", error);
+    }
+  };
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
@@ -78,8 +87,32 @@ function Cmswo() {
       <Side_bar />
       <Box id="main_content" sx={{ p: 3 }}>
         <Typography variant="h4" gutterBottom>
-          CMSWO
+          CSMWO
         </Typography>
+
+        {/* ✅ Button Group Filter */}
+        <Box mb={2}>
+          <ButtonGroup variant="contained">
+            <Button
+              color={filter === "pending" ? "primary" : "inherit"}
+              onClick={() => {
+                setFilter("pending");
+                setCurrentPage(1); // reset pagination when switching
+              }}
+            >
+              Pending
+            </Button>
+            <Button
+              color={filter === "approved" ? "primary" : "inherit"}
+              onClick={() => {
+                setFilter("approved");
+                setCurrentPage(1);
+              }}
+            >
+              Approved
+            </Button>
+          </ButtonGroup>
+        </Box>
 
         {/* ✅ Table */}
         <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
@@ -105,7 +138,7 @@ function Cmswo() {
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.CMSWO}</TableCell>
+                  <TableCell>{applicant.CSMWO}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

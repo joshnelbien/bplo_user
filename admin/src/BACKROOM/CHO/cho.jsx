@@ -5,6 +5,8 @@ import ChoApplicantModal from "./cho_modal";
 
 import {
   Box,
+  Button,
+  ButtonGroup,
   Pagination,
   Paper,
   Table,
@@ -13,14 +15,15 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  Typography,
 } from "@mui/material";
 
-function Cmswo() {
+function Cho() {
   const [applicants, setApplicants] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filter, setFilter] = useState("pending"); // ✅ pending by default
   const recordsPerPage = 20;
 
   useEffect(() => {
@@ -36,28 +39,34 @@ function Cmswo() {
     fetchApplicants();
   }, []);
 
-  const totalPages = Math.ceil(applicants.length / recordsPerPage);
+  // ✅ Filter applicants based on button selection
+  const filteredApplicants =
+    filter === "pending"
+      ? applicants.filter((a) => a.CHO !== "Approved")
+      : applicants.filter((a) => a.CHO === "Approved");
+
+  const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = applicants.slice(
+  const currentRecords = filteredApplicants.slice(
     indexOfFirstRecord,
     indexOfLastRecord
   );
 
-   const handleApprove = async (id) => {
-   try {
-     await axios.post(`http://localhost:5000/backroom/cho/approve/${id}`);
-     setApplicants((prev) =>
-       prev.map((applicant) =>
-         applicant.id === id ? { ...applicant, CHO: "Approved" } : applicant
-       )
-     );
-     alert("Applicant approved");
-     closeModal();
-   } catch (error) {
-     console.error("Error approving applicant:", error);
-   }
- };
+  const handleApprove = async (id) => {
+    try {
+      await axios.post(`http://localhost:5000/backroom/cho/approve/${id}`);
+      setApplicants((prev) =>
+        prev.map((applicant) =>
+          applicant.id === id ? { ...applicant, CHO: "Approved" } : applicant
+        )
+      );
+      alert("Applicant approved");
+      closeModal();
+    } catch (error) {
+      console.error("Error approving applicant:", error);
+    }
+  };
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
@@ -80,6 +89,30 @@ function Cmswo() {
         <Typography variant="h4" gutterBottom>
           CHO
         </Typography>
+
+        {/* ✅ Button Group Filter */}
+        <Box mb={2}>
+          <ButtonGroup variant="contained">
+            <Button
+              color={filter === "pending" ? "primary" : "inherit"}
+              onClick={() => {
+                setFilter("pending");
+                setCurrentPage(1); // reset pagination when switching
+              }}
+            >
+              Pending
+            </Button>
+            <Button
+              color={filter === "approved" ? "primary" : "inherit"}
+              onClick={() => {
+                setFilter("approved");
+                setCurrentPage(1);
+              }}
+            >
+              Approved
+            </Button>
+          </ButtonGroup>
+        </Box>
 
         {/* ✅ Table */}
         <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
@@ -105,7 +138,7 @@ function Cmswo() {
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.CHO}</TableCell>
+                  <TableCell>{applicant.CSMWO}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -135,4 +168,4 @@ function Cmswo() {
   );
 }
 
-export default Cmswo;
+export default Cho;

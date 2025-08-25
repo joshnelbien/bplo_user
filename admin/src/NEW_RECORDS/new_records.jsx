@@ -5,6 +5,8 @@ import ApplicantModal from "./newApp_modal";
 
 import {
   Box,
+  Button,
+  ButtonGroup,
   Pagination,
   Paper,
   Table,
@@ -13,21 +15,30 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  Typography,
 } from "@mui/material";
 
 function New_records() {
-  const [applicants, setApplicants] = useState([]);
+  const [pendingApplicants, setPendingApplicants] = useState([]);
+  const [approvedApplicants, setApprovedApplicants] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filter, setFilter] = useState("pending"); // ✅ pending by default
   const recordsPerPage = 20;
 
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/files");
-        setApplicants(res.data);
+        // ✅ Pending applicants
+        const pendingRes = await axios.get("http://localhost:5000/api/files");
+        setPendingApplicants(pendingRes.data);
+
+        // ✅ Approved applicants
+        const approvedRes = await axios.get(
+          "http://localhost:5000/backroom/backrooms"
+        );
+        setApprovedApplicants(approvedRes.data);
       } catch (error) {
         console.error("Error fetching applicants:", error);
       }
@@ -35,6 +46,9 @@ function New_records() {
 
     fetchApplicants();
   }, []);
+
+  // ✅ Decide which dataset to show
+  const applicants = filter === "pending" ? pendingApplicants : approvedApplicants;
 
   const totalPages = Math.ceil(applicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
@@ -44,27 +58,27 @@ function New_records() {
     indexOfLastRecord
   );
 
-const handleApprove = async (applicant) => {
-  console.log("Approving applicant:", applicant);
-  if (!applicant || !applicant.id) {
-    alert("No applicant selected!");
-    return;
-  }
+  const handleApprove = async (applicant) => {
+    if (!applicant || !applicant.id) {
+      alert("No applicant selected!");
+      return;
+    }
 
-  try {
-    await axios.post(`http://localhost:5000/backroom/backroom/approve/${applicant.id}`);
+    try {
+      await axios.post(
+        `http://localhost:5000/backroom/backroom/approve/${applicant.id}`
+      );
 
-    setApplicants((prev) => prev.filter((a) => a.id !== applicant.id));
-    alert("Applicant approved and moved to backroom");
-    closeModal();
-  } catch (error) {
-    console.error("Error approving applicant:", error);
-    alert("Failed to approve applicant");
-  }
-};
+      // ✅ remove from pending after approval
+      setPendingApplicants((prev) => prev.filter((a) => a.id !== applicant.id));
 
-
-
+      alert("Applicant approved and moved to backroom");
+      closeModal();
+    } catch (error) {
+      console.error("Error approving applicant:", error);
+      alert("Failed to approve applicant");
+    }
+  };
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
@@ -88,6 +102,30 @@ const handleApprove = async (applicant) => {
           New Records
         </Typography>
 
+        {/* ✅ Button Group Filter */}
+        <Box mb={2}>
+          <ButtonGroup variant="contained">
+            <Button
+              color={filter === "pending" ? "primary" : "inherit"}
+              onClick={() => {
+                setFilter("pending");
+                setCurrentPage(1);
+              }}
+            >
+              Pending
+            </Button>
+            <Button
+              color={filter === "approved" ? "primary" : "inherit"}
+              onClick={() => {
+                setFilter("approved");
+                setCurrentPage(1);
+              }}
+            >
+              Approved
+            </Button>
+          </ButtonGroup>
+        </Box>
+
         {/* ✅ Table */}
         <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
           <Table>
@@ -96,7 +134,19 @@ const handleApprove = async (applicant) => {
                 <TableCell><strong>Business Name</strong></TableCell>
                 <TableCell><strong>First Name</strong></TableCell>
                 <TableCell><strong>Last Name</strong></TableCell>
-                <TableCell><strong>Status</strong></TableCell>
+
+                {filter === "approved" && (
+                  <>
+                    <TableCell><strong>BPLO</strong></TableCell>
+                    <TableCell><strong>CENRO</strong></TableCell>
+                    <TableCell><strong>CHO</strong></TableCell>
+                    <TableCell><strong>ZONING</strong></TableCell>
+                    <TableCell><strong>CSWMO</strong></TableCell>
+                    <TableCell><strong>OBO</strong></TableCell>
+                  </>
+                )}
+
+            
               </TableRow>
             </TableHead>
             <TableBody>
@@ -107,11 +157,20 @@ const handleApprove = async (applicant) => {
                   sx={{ cursor: "pointer" }}
                   onClick={() => openModal(applicant)}
                 >
-              
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.status}</TableCell>
+
+                  {filter === "approved" && (
+                    <>
+                      <TableCell>{applicant.BPLO}</TableCell>
+                      <TableCell>{applicant.CENRO}</TableCell>
+                      <TableCell>{applicant.CHO}</TableCell>
+                      <TableCell>{applicant.ZONING}</TableCell>
+                      <TableCell>{applicant.CSMWO}</TableCell>
+                      <TableCell>{applicant.OBO}</TableCell>
+                    </>
+                  )}
                 </TableRow>
               ))}
             </TableBody>

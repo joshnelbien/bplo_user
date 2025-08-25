@@ -130,7 +130,7 @@ router.post("/cenro/approve/:id", async (req, res) => {
   }
 });
 
-router.post("/cmswo/approve/:id", async (req, res) => {
+router.post("/csmwo/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -140,7 +140,7 @@ router.post("/cmswo/approve/:id", async (req, res) => {
     }
 
     // ✅ Update  to Approved
-    applicant.CMSWO = "Approved";
+    applicant.CSMWO = "Approved";
     await applicant.save();
 
     // ✅ (Optional) If you really want to destroy it after approval
