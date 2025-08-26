@@ -138,7 +138,7 @@ function Cho() {
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.CSMWO}</TableCell>
+                  <TableCell>{applicant.CHO}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

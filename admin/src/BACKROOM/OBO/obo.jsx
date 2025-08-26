@@ -138,7 +138,7 @@ function Obo() {
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.CSMWO}</TableCell>
+                  <TableCell>{applicant.OBO}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
