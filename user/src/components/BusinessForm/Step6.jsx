@@ -34,14 +34,16 @@ export default function Step6BusinessActivity({
   });
   const [editingIndex, setEditingIndex] = useState(null);
 
-  const handleFileSelect = (e) => {
-    const { name, files } = e.target;
-    setSelectedFiles((prev) => ({
-      ...prev,
-      [name]: files[0] ? files[0].name : "",
-    }));
-    handleFileChange(e);
-  };
+const handleFileSelect = (e) => {
+  const { name, files } = e.target;
+  console.log("Step6 selected:", name, files[0]); // 👈 check this fires
+  setSelectedFiles((prev) => ({
+    ...prev,
+    [name]: files[0] ? files[0].name : "",
+  }));
+  handleFileChange(e); // pass file to parent
+};
+
 
   const handleBusinessChange = (e) => {
     const { name, value } = e.target;
@@ -93,9 +95,10 @@ export default function Step6BusinessActivity({
     );
   }, [businessLines]);
 
-  useEffect(() => {
+useEffect(() => {
   handleChange({ target: { name: "totalCapital", value: totalCapital } });
-}, [totalCapital, handleChange]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [totalCapital]);
 
   return (
     <div style={{ marginBottom: 20 }}>

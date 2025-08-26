@@ -157,7 +157,7 @@ const handleSubmit = async (e) => {
       case 5:
         return <Step5BusinessDetails formData={formDataState} handleChange={handleChange} />;
       case 6:
-        return <Step6BusinessActivity formData={formDataState} handleChange={handleChange} businessLines={businessLines} setBusinessLines={setBusinessLines}/>;
+        return <Step6BusinessActivity formData={formDataState} handleChange={handleChange}  handleFileChange={handleFileChange}  businessLines={businessLines} setBusinessLines={setBusinessLines}/>;
       case 7:
         return <Section7FileUploads handleFileChange={handleFileChange} />;
       default:
