@@ -1,4 +1,3 @@
-
 import { Button, Stack, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 
@@ -12,10 +11,14 @@ export default function Section7FileUploads({ handleFileChange }) {
     { label: "Market Clearance", name: "marketClearance" },
     { label: "Occupancy Permit", name: "occupancyPermit" },
     { label: "Cedula", name: "cedula" },
-    { label: "Photo of Business Establishment (Interior)", name: "photoOfBusinessEstInt" },
-    { label: "Photo of Business Establishment (Exterior)", name: "photoOfBusinessEstExt" },
-    
-
+    {
+      label: "Photo of Business Establishment (Interior)",
+      name: "photoOfBusinessEstInt",
+    },
+    {
+      label: "Photo of Business Establishment (Exterior)",
+      name: "photoOfBusinessEstExt",
+    },
   ];
 
   // State to track selected files
@@ -23,7 +26,10 @@ export default function Section7FileUploads({ handleFileChange }) {
 
   const handleFileSelect = (e) => {
     const { name, files } = e.target;
-    setSelectedFiles((prev) => ({ ...prev, [name]: files[0] ? files[0].name : "" }));
+    setSelectedFiles((prev) => ({
+      ...prev,
+      [name]: files[0] ? files[0].name : "",
+    }));
     handleFileChange(e); // call parent handler
   };
 
@@ -38,7 +44,7 @@ export default function Section7FileUploads({ handleFileChange }) {
           <Stack key={file.name} direction="column" spacing={1}>
             <Typography>{file.label}:</Typography>
             <Stack direction="row" spacing={2} alignItems="center">
-                 <Button
+              <Button
                 variant="contained"
                 component="label"
                 size="small" // smaller button
