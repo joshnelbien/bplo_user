@@ -66,6 +66,7 @@ router.post("/obo/approve/:id", async (req, res) => {
 
 router.post(
   "/zoning/approve/:id",
+
   upload.single("zoningCert"),
   async (req, res) => {
     try {
@@ -82,10 +83,10 @@ router.post(
 
       // ✅ If file uploaded, save it in DB
       if (req.file) {
-        applicant.zobingCert = req.file.buffer; // store raw binary
-        applicant.zobingCert_filename = req.file.originalname;
-        applicant.zobingCert_mimetype = req.file.mimetype;
-        applicant.zobingCert_size = req.file.size;
+        applicant.zoningCert = req.file.buffer; // store raw binary
+        applicant.zoningCert_filename = req.file.originalname;
+        applicant.zoningCert_mimetype = req.file.mimetype;
+        applicant.zoningCert_size = req.file.size;
       }
 
       await applicant.save();

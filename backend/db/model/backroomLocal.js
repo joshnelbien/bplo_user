@@ -124,10 +124,10 @@ const Backroom = sequelize.define(
     ZONING: { type: DataTypes.STRING, defaultValue: "Pending" },
     ZONINGtimeStamp: { type: DataTypes.STRING },
 
-    zobingCert: { type: DataTypes.BLOB("long"), allowNull: true },
-    zobingCert_filename: { type: DataTypes.STRING, allowNull: true },
-    zobingCert_mimetype: { type: DataTypes.STRING, allowNull: true },
-    zobingCert_size: { type: DataTypes.INTEGER, allowNull: true },
+    zoningCert: { type: DataTypes.BLOB("long"), allowNull: true },
+    zoningCert_filename: { type: DataTypes.STRING, allowNull: true },
+    zoningCert_mimetype: { type: DataTypes.STRING, allowNull: true },
+    zoningCert_size: { type: DataTypes.INTEGER, allowNull: true },
   },
 
   {
