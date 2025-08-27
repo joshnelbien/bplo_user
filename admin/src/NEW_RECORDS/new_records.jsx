@@ -48,7 +48,8 @@ function New_records() {
   }, []);
 
   // ✅ Decide which dataset to show
-  const applicants = filter === "pending" ? pendingApplicants : approvedApplicants;
+  const applicants =
+    filter === "pending" ? pendingApplicants : approvedApplicants;
 
   const totalPages = Math.ceil(applicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
@@ -127,26 +128,45 @@ function New_records() {
         </Box>
 
         {/* ✅ Table */}
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
+        <TableContainer
+          component={Paper}
+          sx={{ borderRadius: 2, boxShadow: 3 }}
+        >
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell><strong>Business Name</strong></TableCell>
-                <TableCell><strong>First Name</strong></TableCell>
-                <TableCell><strong>Last Name</strong></TableCell>
+                <TableCell>
+                  <strong>Business Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>First Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Last Name</strong>
+                </TableCell>
 
                 {filter === "approved" && (
                   <>
-                    <TableCell><strong>BPLO</strong></TableCell>
-                    <TableCell><strong>CENRO</strong></TableCell>
-                    <TableCell><strong>CHO</strong></TableCell>
-                    <TableCell><strong>ZONING</strong></TableCell>
-                    <TableCell><strong>CSWMO</strong></TableCell>
-                    <TableCell><strong>OBO</strong></TableCell>
+                    <TableCell>
+                      <strong>BPLO</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>CENRO</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>CHO</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>ZONING</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>CSWMO</strong>
+                    </TableCell>
+                    <TableCell>
+                      <strong>OBO</strong>
+                    </TableCell>
                   </>
                 )}
-
-            
               </TableRow>
             </TableHead>
             <TableBody>
@@ -164,7 +184,9 @@ function New_records() {
                   {filter === "approved" && (
                     <>
                       <TableCell>
-                        <div style={{ display: "flex", flexDirection: "column" }}>
+                        <div
+                          style={{ display: "flex", flexDirection: "column" }}
+                        >
                           <span>{applicant.BPLO}</span>
                           <span style={{ fontSize: "0.8em", color: "gray" }}>
                             {applicant.BPLOtimeStamp}
@@ -172,7 +194,9 @@ function New_records() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div style={{ display: "flex", flexDirection: "column" }}>
+                        <div
+                          style={{ display: "flex", flexDirection: "column" }}
+                        >
                           <span>{applicant.CENRO}</span>
                           <span style={{ fontSize: "0.8em", color: "gray" }}>
                             {applicant.CENROtimeStamp}
@@ -180,7 +204,9 @@ function New_records() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div style={{ display: "flex", flexDirection: "column" }}>
+                        <div
+                          style={{ display: "flex", flexDirection: "column" }}
+                        >
                           <span>{applicant.CHO}</span>
                           <span style={{ fontSize: "0.8em", color: "gray" }}>
                             {applicant.CHOtimeStamp}
@@ -188,7 +214,9 @@ function New_records() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div style={{ display: "flex", flexDirection: "column" }}>
+                        <div
+                          style={{ display: "flex", flexDirection: "column" }}
+                        >
                           <span>{applicant.ZONING}</span>
                           <span style={{ fontSize: "0.8em", color: "gray" }}>
                             {applicant.ZONINGtimeStamp}
@@ -196,7 +224,9 @@ function New_records() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div style={{ display: "flex", flexDirection: "column" }}>
+                        <div
+                          style={{ display: "flex", flexDirection: "column" }}
+                        >
                           <span>{applicant.CSMWO}</span>
                           <span style={{ fontSize: "0.8em", color: "gray" }}>
                             {applicant.CSMWOtimeStamp}
@@ -204,7 +234,9 @@ function New_records() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div style={{ display: "flex", flexDirection: "column" }}>
+                        <div
+                          style={{ display: "flex", flexDirection: "column" }}
+                        >
                           <span>{applicant.OBO}</span>
                           <span style={{ fontSize: "0.8em", color: "gray" }}>
                             {applicant.OBOtimeStamp}
@@ -237,6 +269,11 @@ function New_records() {
         isOpen={isModalOpen}
         onClose={closeModal}
         onApprove={handleApprove}
+        baseUrl={
+          filter === "pending"
+            ? "http://localhost:5000/api/files"
+            : "http://localhost:5000/backroom/backroom"
+        }
       />
     </>
   );

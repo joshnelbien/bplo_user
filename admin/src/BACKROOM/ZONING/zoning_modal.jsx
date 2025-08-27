@@ -12,6 +12,7 @@ import {
   Paper,
   TextField,
   Typography,
+  Stack,
 } from "@mui/material";
 import { useState } from "react";
 import ZoningCert from "./zoningCert";
@@ -115,7 +116,20 @@ function ZoningApplicantModal({
   handleFileChange,
 }) {
   const [showCert, setShowCert] = useState(false);
-  const [zoningAttachment, setZoningAttachment] = useState(null);
+
+  const files = [{ label: "Zoning Certificate", name: "zoningCert" }];
+
+  const [selectedFiles, setSelectedFiles] = useState({});
+
+  const handleFileSelect = (e) => {
+    const { name, files } = e.target;
+    setSelectedFiles((prev) => ({
+      ...prev,
+      [name]: files[0] ? files[0].name : "",
+    }));
+    handleFileChange(e); // call parent handler
+  };
+
   if (!isOpen || !applicant) return null;
 
   const Section = ({ title, children }) => (
@@ -348,19 +362,53 @@ function ZoningApplicantModal({
             </Section>
 
             {/* Zoning Attachments */}
-            <Section title="Zoning Attachments">
-              <Typography variant="subtitle1" sx={{ mb: 3 }}>
-                ZONING FEE:{" "}
-                <b>{zoningFee === "Exempted" ? zoningFee : `₱${zoningFee}`}</b>
-              </Typography>
 
-              <TextField
-                type="file"
-                size="small"
-                fullWidth
-                onChange={(e) => setZoningAttachment(e.target.files[0])}
+            <Typography variant="subtitle1" sx={{ mb: 3 }}>
+              ZONING FEE:{" "}
+              <b>{zoningFee === "Exempted" ? zoningFee : `₱${zoningFee}`}</b>
+            </Typography>
+
+            {applicant.ZONING === "Pending" ? (
+              // ✅ Show upload fields
+              <Stack spacing={3}>
+                {files.map((file) => (
+                  <Stack key={file.name} direction="column" spacing={1}>
+                    <Typography>{file.label}:</Typography>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Button
+                        variant="contained"
+                        component="label"
+                        size="small"
+                        sx={{ minWidth: 120 }}
+                      >
+                        Choose File
+                        <input
+                          type="file"
+                          name={file.name}
+                          hidden
+                          onChange={handleFileSelect}
+                        />
+                      </Button>
+                      <TextField
+                        value={selectedFiles[file.name] || ""}
+                        placeholder="No file selected"
+                        size="small"
+                        fullWidth
+                        InputProps={{
+                          readOnly: true,
+                        }}
+                      />
+                    </Stack>
+                  </Stack>
+                ))}
+              </Stack>
+            ) : applicant.ZONING === "Approved" ? (
+              <FileField
+                fileKey="zoningCert"
+                label="Zoning Certificate"
+                fileData={applicant}
               />
-            </Section>
+            ) : null}
           </>
         ) : (
           <ZoningCert applicant={applicant} />
@@ -378,7 +426,7 @@ function ZoningApplicantModal({
         {!showCert && applicant.ZONING !== "Approved" && (
           <>
             <Button
-              onClick={() => onApprove(applicant.id, zoningAttachment)}
+              onClick={() => onApprove(applicant.id)}
               color="success"
               variant="contained"
             >

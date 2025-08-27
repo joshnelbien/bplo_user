@@ -25,6 +25,7 @@ function Zoning() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filter, setFilter] = useState("pending"); // ✅ pending by default
   const recordsPerPage = 20;
+  const [selectedFiles, setSelectedFiles] = useState({});
 
   useEffect(() => {
     const fetchApplicants = async () => {
@@ -55,13 +56,18 @@ function Zoning() {
 
   const handleFileChange = (e) => {
     const { name, files } = e.target;
-    setFilesState((prev) => ({ ...prev, [name]: files[0] }));
+    setSelectedFiles((prev) => ({
+      ...prev,
+      [name]: files[0] || null, // store the actual File object
+    }));
   };
 
-  const handleApprove = async (id, file) => {
+  const handleApprove = async (id) => {
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      if (selectedFiles["zoningCert"]) {
+        formData.append("zoningCert", selectedFiles["zoningCert"]); // file object
+      }
 
       await axios.post(
         `http://localhost:5000/backroom/zoning/approve/${id}`,
@@ -74,7 +80,7 @@ function Zoning() {
           applicant.id === id ? { ...applicant, ZONING: "Approved" } : applicant
         )
       );
-      alert("Applicant approved with file uploaded");
+      alert("Applicant approved");
       closeModal();
     } catch (error) {
       console.error("Error approving applicant:", error);
@@ -190,6 +196,7 @@ function Zoning() {
         onClose={closeModal}
         onApprove={handleApprove}
         handleFileChange={handleFileChange}
+        selectedFiles={selectedFiles}
       />
     </>
   );

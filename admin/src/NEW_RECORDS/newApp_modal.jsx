@@ -51,14 +51,12 @@ const Field = ({ label, value }) => (
 );
 
 // Component to display files as links
-const FileField = ({ label, fileKey, fileData }) => (
+const FileField = ({ label, fileKey, fileData, baseUrl }) => (
   <Grid item xs={12} sm={6}>
     <TextField
       label={label}
       value={
-        fileData[fileKey]
-          ? fileData[`${fileKey}_filename`]
-          : "No file uploaded"
+        fileData[fileKey] ? fileData[`${fileKey}_filename`] : "No file uploaded"
       }
       fullWidth
       variant="outlined"
@@ -88,7 +86,7 @@ const FileField = ({ label, fileKey, fileData }) => (
     {fileData[fileKey] && (
       <Typography variant="body2" sx={{ mt: 0.5 }}>
         <a
-          href={`http://localhost:5000/api/files/${fileData.id}/${fileKey}`}
+          href={`${baseUrl}/${fileData.id}/${fileKey}`}
           target="_blank"
           rel="noreferrer"
         >
@@ -96,7 +94,7 @@ const FileField = ({ label, fileKey, fileData }) => (
         </a>{" "}
         |{" "}
         <a
-          href={`http://localhost:5000/api/files/${fileData.id}/${fileKey}/download`}
+          href={`${baseUrl}/${fileData.id}/${fileKey}/download`}
           target="_blank"
           rel="noreferrer"
         >
@@ -107,7 +105,7 @@ const FileField = ({ label, fileKey, fileData }) => (
   </Grid>
 );
 
-function ApplicantModal({ applicant, isOpen, onClose, onApprove }) {
+function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
   if (!isOpen || !applicant) return null;
 
   const Section = ({ title, children }) => (
@@ -160,7 +158,10 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove }) {
         <Section title="Business Address">
           <Field label="Region" value={applicant.region} />
           <Field label="Province" value={applicant.province} />
-          <Field label="City/Municipality" value={applicant.cityOrMunicipality} />
+          <Field
+            label="City/Municipality"
+            value={applicant.cityOrMunicipality}
+          />
           <Field label="Barangay" value={applicant.barangay} />
           <Field label="Address Line 1" value={applicant.addressLine1} />
           <Field label="Zip Code" value={applicant.zipCode} />
@@ -184,7 +185,10 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove }) {
         <Section title="Taxpayer Address">
           <Field label="Tax Region" value={applicant.Taxregion} />
           <Field label="Tax Province" value={applicant.Taxprovince} />
-          <Field label="Tax City/Municipality" value={applicant.TaxcityOrMunicipality} />
+          <Field
+            label="Tax City/Municipality"
+            value={applicant.TaxcityOrMunicipality}
+          />
           <Field label="Tax Barangay" value={applicant.Taxbarangay} />
           <Field label="Tax Address Line 1" value={applicant.TaxaddressLine1} />
           <Field label="Tax Zip Code" value={applicant.TaxzipCode} />
@@ -202,72 +206,136 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove }) {
         </Section>
 
         {/* Business Activity */}
-      <Section title="Business Activity & Incentives">
-  <Field label="Tax Incentives" value={applicant.tIGE} />
-  {applicant.tIGE === "Yes" && (
-    <FileField
-      fileKey="tIGEfiles"
-      label="Tax Incentives From Government"
-      fileData={applicant}
-    />
-  )}
+        <Section title="Business Activity & Incentives">
+          <Field label="Tax Incentives" value={applicant.tIGE} />
+          {applicant.tIGE === "Yes" && (
+            <FileField
+              fileKey="tIGEfiles"
+              label="Tax Incentives From Government"
+              fileData={applicant}
+            />
+          )}
 
-  <Field label="Office Type" value={applicant.officeType} />
+          <Field label="Office Type" value={applicant.officeType} />
 
-  {applicant.lineOfBusiness?.split(",").map((lob, index) => {
-    const product = applicant.productService?.split(",")[index] || "";
-    const unit = applicant.Units?.split(",")[index] || "";
-    const capital = applicant.capital?.split(",")[index] || "";
+          {applicant.lineOfBusiness?.split(",").map((lob, index) => {
+            const product = applicant.productService?.split(",")[index] || "";
+            const unit = applicant.Units?.split(",")[index] || "";
+            const capital = applicant.capital?.split(",")[index] || "";
 
-    return (
-      <Paper
-        key={index}
-        elevation={2}
-        sx={{ p: 2, mb: 2, borderRadius: 2, backgroundColor: "#f9f9f9" }}
-      >
-        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-          Business Line {index + 1}
-        </Typography>
+            return (
+              <Paper
+                key={index}
+                elevation={2}
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  borderRadius: 2,
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                  Business Line {index + 1}
+                </Typography>
 
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Field label="Line of Business" value={lob.trim()} />
-          </Grid>
-          <Grid item xs={12}>
-            <Field label="Product/Service" value={product.trim()} />
-          </Grid>
-          <Grid item xs={12}>
-            <Field label="Units" value={unit.trim()} />
-          </Grid>
-          <Grid item xs={12}>
-            <Field label="Capital" value={capital.trim()} />
-          </Grid>
-        </Grid>
-      </Paper>
-    );
-  })}
-</Section>
-
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Field label="Line of Business" value={lob.trim()} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Field label="Product/Service" value={product.trim()} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Field label="Units" value={unit.trim()} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Field label="Capital" value={capital.trim()} />
+                  </Grid>
+                </Grid>
+              </Paper>
+            );
+          })}
+        </Section>
 
         {/* Business Requirements */}
         <Section title="Business Requirements">
-          <FileField fileKey="proofOfReg" label="Proof of Registration" fileData={applicant} />
-          <FileField fileKey="proofOfRightToUseLoc" label="Proof of Right to Use Location" fileData={applicant} />
-          <FileField fileKey="locationPlan" label="Location Plan" fileData={applicant} />
-          <FileField fileKey="brgyClearance" label="Barangay Clearance" fileData={applicant} />
-          <FileField fileKey="marketClearance" label="Market Clearance" fileData={applicant} />
-          <FileField fileKey="occupancyPermit" label="Occupancy Permit" fileData={applicant} />
-          <FileField fileKey="cedula" label="Cedula" fileData={applicant} />
-          <FileField fileKey="photoOfBusinessEstInt" label="Photo (Interior)" fileData={applicant} />
-          <FileField fileKey="photoOfBusinessEstExt" label="Photo (Exterior)" fileData={applicant} />
+          <FileField
+            fileKey="proofOfReg"
+            label="Proof of Registration"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
+          <FileField
+            fileKey="proofOfRightToUseLoc"
+            label="Proof of Right to Use Location"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
+          <FileField
+            fileKey="locationPlan"
+            label="Location Plan"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
+          <FileField
+            fileKey="brgyClearance"
+            label="Barangay Clearance"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
+          <FileField
+            fileKey="marketClearance"
+            label="Market Clearance"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
+          <FileField
+            fileKey="occupancyPermit"
+            label="Occupancy Permit"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
+          <FileField
+            fileKey="cedula"
+            label="Cedula"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
+          <FileField
+            fileKey="photoOfBusinessEstInt"
+            label="Photo (Interior)"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
+          <FileField
+            fileKey="photoOfBusinessEstExt"
+            label="Photo (Exterior)"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
         </Section>
+
+        {applicant.status !== "pending" && (
+          <Section title="Backroom">
+            <FileField
+              fileKey="zoningCert"
+              label="Zoning Certificate"
+              fileData={applicant}
+              baseUrl={baseUrl}
+            />
+          </Section>
+        )}
       </DialogContent>
 
       <DialogActions>
         <Button variant="outlined" onClick={onClose} color="secondary">
           Close
         </Button>
-        <Button onClick={() => onApprove(applicant)} variant="contained" color="success">
+        <Button
+          onClick={() => onApprove(applicant)}
+          variant="contained"
+          color="success"
+        >
           Approve
         </Button>
 

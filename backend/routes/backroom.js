@@ -64,35 +64,40 @@ router.post("/obo/approve/:id", async (req, res) => {
   }
 });
 
-router.post("/zoning/approve/:id", upload.single("file"), async (req, res) => {
-  try {
-    const { id } = req.params;
+router.post(
+  "/zoning/approve/:id",
 
-    const applicant = await Backroom.findByPk(id);
-    if (!applicant) {
-      return res.status(404).json({ error: "Applicant not found" });
+  upload.single("zoningCert"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const applicant = await Backroom.findByPk(id);
+      if (!applicant) {
+        return res.status(404).json({ error: "Applicant not found" });
+      }
+
+      // ✅ Save zoning approval
+      applicant.ZONING = "Approved";
+      applicant.ZONINGtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+
+      // ✅ If file uploaded, save it in DB
+      if (req.file) {
+        applicant.zoningCert = req.file.buffer; // store raw binary
+        applicant.zoningCert_filename = req.file.originalname;
+        applicant.zoningCert_mimetype = req.file.mimetype;
+        applicant.zoningCert_size = req.file.size;
+      }
+
+      await applicant.save();
+
+      res.json({ message: "Applicant approved", applicant });
+    } catch (err) {
+      console.error("Approve error:", err);
+      res.status(500).json({ error: "Failed to approve applicant" });
     }
-
-    // ✅ Update zoning fields
-    applicant.ZONING = "Approved";
-    applicant.ZONINGtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
-
-    // ✅ If file exists, save it into zobingCert fields
-    if (req.file) {
-      applicant.zobingCert = req.file.buffer;
-      applicant.zobingCert_filename = req.file.originalname;
-      applicant.zobingCert_mimetype = req.file.mimetype;
-      applicant.zobingCert_size = req.file.size;
-    }
-
-    await applicant.save();
-
-    res.json({ message: "Applicant approved with file uploaded", applicant });
-  } catch (err) {
-    console.error("Approve error:", err);
-    res.status(500).json({ error: "Failed to approve applicant" });
   }
-});
+);
 
 router.post("/cho/approve/:id", async (req, res) => {
   try {
