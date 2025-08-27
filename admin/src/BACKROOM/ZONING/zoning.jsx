@@ -53,15 +53,28 @@ function Zoning() {
     indexOfLastRecord
   );
 
-  const handleApprove = async (id) => {
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    setFilesState((prev) => ({ ...prev, [name]: files[0] }));
+  };
+
+  const handleApprove = async (id, file) => {
     try {
-      await axios.post(`http://localhost:5000/backroom/zoning/approve/${id}`);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      await axios.post(
+        `http://localhost:5000/backroom/zoning/approve/${id}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
       setApplicants((prev) =>
         prev.map((applicant) =>
           applicant.id === id ? { ...applicant, ZONING: "Approved" } : applicant
         )
       );
-      alert("Applicant approved");
+      alert("Applicant approved with file uploaded");
       closeModal();
     } catch (error) {
       console.error("Error approving applicant:", error);
@@ -115,15 +128,28 @@ function Zoning() {
         </Box>
 
         {/* ✅ Table */}
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
+        <TableContainer
+          component={Paper}
+          sx={{ borderRadius: 2, boxShadow: 3 }}
+        >
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell><strong>Applicant ID</strong></TableCell>
-                <TableCell><strong>Business Name</strong></TableCell>
-                <TableCell><strong>First Name</strong></TableCell>
-                <TableCell><strong>Last Name</strong></TableCell>
-                <TableCell><strong>Status</strong></TableCell>
+                <TableCell>
+                  <strong>Applicant ID</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Business Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>First Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Last Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Status</strong>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -163,6 +189,7 @@ function Zoning() {
         isOpen={isModalOpen}
         onClose={closeModal}
         onApprove={handleApprove}
+        handleFileChange={handleFileChange}
       />
     </>
   );

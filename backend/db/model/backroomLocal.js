@@ -1,7 +1,6 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../sequelize");
 
-
 const Backroom = sequelize.define(
   "Backroom",
   {
@@ -10,7 +9,7 @@ const Backroom = sequelize.define(
       primaryKey: true,
     },
 
-     BusinessType: DataTypes.STRING,
+    BusinessType: DataTypes.STRING,
     dscRegNo: DataTypes.STRING,
     businessName: DataTypes.STRING,
     tinNo: DataTypes.STRING,
@@ -52,12 +51,10 @@ const Backroom = sequelize.define(
     monthlyRent: DataTypes.STRING,
     tIGE: DataTypes.STRING,
 
-
     tIGEfiles: { type: DataTypes.BLOB("long"), allowNull: true },
     tIGEfiles_filename: { type: DataTypes.STRING, allowNull: true },
     tIGEfiles_mimetype: { type: DataTypes.STRING, allowNull: true },
     tIGEfiles_size: { type: DataTypes.INTEGER, allowNull: true },
-
 
     officeType: DataTypes.STRING,
     officeTypeOther: DataTypes.STRING,
@@ -65,7 +62,7 @@ const Backroom = sequelize.define(
     productService: DataTypes.STRING,
     Units: DataTypes.STRING,
     capital: DataTypes.STRING,
-    totalCapital:DataTypes.STRING,
+    totalCapital: DataTypes.STRING,
 
     // Files
     proofOfReg: { type: DataTypes.BLOB("long"), allowNull: true },
@@ -73,12 +70,10 @@ const Backroom = sequelize.define(
     proofOfReg_mimetype: { type: DataTypes.STRING, allowNull: true },
     proofOfReg_size: { type: DataTypes.INTEGER, allowNull: true },
 
-
     proofOfRightToUseLoc: { type: DataTypes.BLOB("long"), allowNull: true },
     proofOfRightToUseLoc_filename: { type: DataTypes.STRING, allowNull: true },
     proofOfRightToUseLoc_mimetype: { type: DataTypes.STRING, allowNull: true },
     proofOfRightToUseLoc_size: { type: DataTypes.INTEGER, allowNull: true },
-
 
     locationPlan: { type: DataTypes.BLOB("long"), allowNull: true },
     locationPlan_filename: { type: DataTypes.STRING, allowNull: true },
@@ -115,20 +110,25 @@ const Backroom = sequelize.define(
     photoOfBusinessEstExt_mimetype: { type: DataTypes.STRING, allowNull: true },
     photoOfBusinessEstExt_size: { type: DataTypes.INTEGER, allowNull: true },
 
-    BPLO: { type: DataTypes.STRING, defaultValue: 'Approved' },
+    BPLO: { type: DataTypes.STRING, defaultValue: "Approved" },
     BPLOtimeStamp: { type: DataTypes.STRING },
-    CSMWO: { type: DataTypes.STRING, defaultValue: 'Pending' },
+    CSMWO: { type: DataTypes.STRING, defaultValue: "Pending" },
     CSMWOtimeStamp: { type: DataTypes.STRING },
-    OBO: { type: DataTypes.STRING, defaultValue: 'Pending' },
+    OBO: { type: DataTypes.STRING, defaultValue: "Pending" },
     OBOtimeStamp: { type: DataTypes.STRING },
-    CHO: { type: DataTypes.STRING, defaultValue: 'Pending' },
+    CHO: { type: DataTypes.STRING, defaultValue: "Pending" },
     CHOtimeStamp: { type: DataTypes.STRING },
-    CENRO: { type: DataTypes.STRING, defaultValue: 'Pending' },
+    CENRO: { type: DataTypes.STRING, defaultValue: "Pending" },
     CENROtimeStamp: { type: DataTypes.STRING },
-    ZONING: { type: DataTypes.STRING, defaultValue: 'Pending' },
-    ZONINGtimeStamp: { type: DataTypes.STRING },
-  },
 
+    ZONING: { type: DataTypes.STRING, defaultValue: "Pending" },
+    ZONINGtimeStamp: { type: DataTypes.STRING },
+
+    zobingCert: { type: DataTypes.BLOB("long"), allowNull: true },
+    zobingCert_filename: { type: DataTypes.STRING, allowNull: true },
+    zobingCert_mimetype: { type: DataTypes.STRING, allowNull: true },
+    zobingCert_size: { type: DataTypes.INTEGER, allowNull: true },
+  },
 
   {
     tableName: "Backroom",
@@ -136,7 +136,4 @@ const Backroom = sequelize.define(
   }
 );
 
-
-
 module.exports = Backroom;
-

@@ -107,9 +107,15 @@ const FileField = ({ label, fileKey, fileData }) => (
   </Grid>
 );
 
-function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
+function ZoningApplicantModal({
+  applicant,
+  isOpen,
+  onClose,
+  onApprove,
+  handleFileChange,
+}) {
   const [showCert, setShowCert] = useState(false);
-
+  const [zoningAttachment, setZoningAttachment] = useState(null);
   if (!isOpen || !applicant) return null;
 
   const Section = ({ title, children }) => (
@@ -120,10 +126,28 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
         </Typography>
       </AccordionSummary>
       <AccordionDetails>
-        <Grid container spacing={2}>{children}</Grid>
+        <Grid container spacing={2}>
+          {children}
+        </Grid>
       </AccordionDetails>
     </Accordion>
   );
+
+  function calculateZoningFee(totalCapital) {
+    if (totalCapital <= 5000) {
+      return "Exempted";
+    } else if (totalCapital >= 5001 && totalCapital <= 10000) {
+      return 100;
+    } else if (totalCapital >= 10001 && totalCapital <= 50000) {
+      return 200;
+    } else if (totalCapital >= 50001 && totalCapital <= 100000) {
+      return 300;
+    } else {
+      return ((totalCapital - 100000) * 0.001 + 500).toFixed(2);
+    }
+  }
+
+  const zoningFee = calculateZoningFee(Number(applicant.totalCapital));
 
   return (
     <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
@@ -165,7 +189,10 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
             <Section title="Business Address">
               <Field label="Region" value={applicant.region} />
               <Field label="Province" value={applicant.province} />
-              <Field label="City/Municipality" value={applicant.cityOrMunicipality} />
+              <Field
+                label="City/Municipality"
+                value={applicant.cityOrMunicipality}
+              />
               <Field label="Barangay" value={applicant.barangay} />
               <Field label="Address Line 1" value={applicant.addressLine1} />
               <Field label="Zip Code" value={applicant.zipCode} />
@@ -174,10 +201,16 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
 
             {/* Operations */}
             <Section title="Business Operation">
-              <Field label="Total Floor Area" value={applicant.totalFloorArea} />
+              <Field
+                label="Total Floor Area"
+                value={applicant.totalFloorArea}
+              />
               <Field label="Employees" value={applicant.numberOfEmployee} />
               <Field label="Male Employees" value={applicant.maleEmployee} />
-              <Field label="Female Employees" value={applicant.femaleEmployee} />
+              <Field
+                label="Female Employees"
+                value={applicant.femaleEmployee}
+              />
               <Field label="Vans" value={applicant.numVehicleVan} />
               <Field label="Trucks" value={applicant.numVehicleTruck} />
               <Field label="Motorcycles" value={applicant.numVehicleMotor} />
@@ -189,9 +222,15 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
             <Section title="Taxpayer Address">
               <Field label="Tax Region" value={applicant.Taxregion} />
               <Field label="Tax Province" value={applicant.Taxprovince} />
-              <Field label="Tax City/Municipality" value={applicant.TaxcityOrMunicipality} />
+              <Field
+                label="Tax City/Municipality"
+                value={applicant.TaxcityOrMunicipality}
+              />
               <Field label="Tax Barangay" value={applicant.Taxbarangay} />
-              <Field label="Tax Address Line 1" value={applicant.TaxaddressLine1} />
+              <Field
+                label="Tax Address Line 1"
+                value={applicant.TaxaddressLine1}
+              />
               <Field label="Tax Zip Code" value={applicant.TaxzipCode} />
               <Field label="Tax Pin Address" value={applicant.TaxpinAddress} />
               <Field label="Own Place" value={applicant.ownPlace} />
@@ -220,7 +259,8 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
               <Field label="Office Type" value={applicant.officeType} />
 
               {applicant.lineOfBusiness?.split(",").map((lob, index) => {
-                const product = applicant.productService?.split(",")[index] || "";
+                const product =
+                  applicant.productService?.split(",")[index] || "";
                 const unit = applicant.Units?.split(",")[index] || "";
                 const capital = applicant.capital?.split(",")[index] || "";
 
@@ -228,9 +268,18 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
                   <Paper
                     key={index}
                     elevation={2}
-                    sx={{ p: 2, mb: 2, borderRadius: 2, backgroundColor: "#f9f9f9" }}
+                    sx={{
+                      p: 2,
+                      mb: 2,
+                      borderRadius: 2,
+                      backgroundColor: "#f9f9f9",
+                    }}
                   >
-                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                    <Typography
+                      variant="subtitle2"
+                      fontWeight="bold"
+                      gutterBottom
+                    >
                       Business Line {index + 1}
                     </Typography>
 
@@ -255,15 +304,62 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
 
             {/* Business Requirements */}
             <Section title="Business Requirements">
-              <FileField fileKey="proofOfReg" label="Proof of Registration" fileData={applicant} />
-              <FileField fileKey="proofOfRightToUseLoc" label="Proof of Right to Use Location" fileData={applicant} />
-              <FileField fileKey="locationPlan" label="Location Plan" fileData={applicant} />
-              <FileField fileKey="brgyClearance" label="Barangay Clearance" fileData={applicant} />
-              <FileField fileKey="marketClearance" label="Market Clearance" fileData={applicant} />
-              <FileField fileKey="occupancyPermit" label="Occupancy Permit" fileData={applicant} />
+              <FileField
+                fileKey="proofOfReg"
+                label="Proof of Registration"
+                fileData={applicant}
+              />
+              <FileField
+                fileKey="proofOfRightToUseLoc"
+                label="Proof of Right to Use Location"
+                fileData={applicant}
+              />
+              <FileField
+                fileKey="locationPlan"
+                label="Location Plan"
+                fileData={applicant}
+              />
+              <FileField
+                fileKey="brgyClearance"
+                label="Barangay Clearance"
+                fileData={applicant}
+              />
+              <FileField
+                fileKey="marketClearance"
+                label="Market Clearance"
+                fileData={applicant}
+              />
+              <FileField
+                fileKey="occupancyPermit"
+                label="Occupancy Permit"
+                fileData={applicant}
+              />
               <FileField fileKey="cedula" label="Cedula" fileData={applicant} />
-              <FileField fileKey="photoOfBusinessEstInt" label="Photo (Interior)" fileData={applicant} />
-              <FileField fileKey="photoOfBusinessEstExt" label="Photo (Exterior)" fileData={applicant} />
+              <FileField
+                fileKey="photoOfBusinessEstInt"
+                label="Photo (Interior)"
+                fileData={applicant}
+              />
+              <FileField
+                fileKey="photoOfBusinessEstExt"
+                label="Photo (Exterior)"
+                fileData={applicant}
+              />
+            </Section>
+
+            {/* Zoning Attachments */}
+            <Section title="Zoning Attachments">
+              <Typography variant="subtitle1" sx={{ mb: 3 }}>
+                ZONING FEE:{" "}
+                <b>{zoningFee === "Exempted" ? zoningFee : `₱${zoningFee}`}</b>
+              </Typography>
+
+              <TextField
+                type="file"
+                size="small"
+                fullWidth
+                onChange={(e) => setZoningAttachment(e.target.files[0])}
+              />
             </Section>
           </>
         ) : (
@@ -272,7 +368,7 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
       </DialogContent>
 
       {/* ✅ Cleaned Up Actions */}
-            {/* ✅ Cleaned Up Actions */}
+      {/* ✅ Cleaned Up Actions */}
       <DialogActions>
         <Button variant="outlined" onClick={onClose} color="secondary">
           Close
@@ -282,17 +378,13 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
         {!showCert && applicant.ZONING !== "Approved" && (
           <>
             <Button
-              onClick={() => onApprove(applicant.id)}
+              onClick={() => onApprove(applicant.id, zoningAttachment)}
               color="success"
               variant="contained"
             >
               Approve
             </Button>
-            <Button
-              onClick={onClose}
-              color="error"
-              variant="outlined"
-            >
+            <Button onClick={onClose} color="error" variant="outlined">
               Decline
             </Button>
           </>
@@ -317,7 +409,6 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
           </Button>
         ) : null}
       </DialogActions>
-
     </Dialog>
   );
 }

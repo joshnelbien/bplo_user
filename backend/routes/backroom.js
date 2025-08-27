@@ -8,7 +8,6 @@ const moment = require("moment");
 // Multer in-memory storage
 const upload = multer({ storage: multer.memoryStorage() });
 
-
 // Upload files + text fields
 router.post("/backroom/approve/:id", async (req, res) => {
   try {
@@ -41,7 +40,6 @@ router.post("/backroom/approve/:id", async (req, res) => {
 });
 // List file
 
-
 router.post("/obo/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -66,8 +64,7 @@ router.post("/obo/approve/:id", async (req, res) => {
   }
 });
 
-
-router.post("/zoning/approve/:id", async (req, res) => {
+router.post("/zoning/approve/:id", upload.single("file"), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -76,15 +73,21 @@ router.post("/zoning/approve/:id", async (req, res) => {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
-    // ✅ Update zoning to Approved
+    // ✅ Update zoning fields
     applicant.ZONING = "Approved";
     applicant.ZONINGtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+
+    // ✅ If file exists, save it into zobingCert fields
+    if (req.file) {
+      applicant.zobingCert = req.file.buffer;
+      applicant.zobingCert_filename = req.file.originalname;
+      applicant.zobingCert_mimetype = req.file.mimetype;
+      applicant.zobingCert_size = req.file.size;
+    }
+
     await applicant.save();
 
-    // ✅ (Optional) If you really want to destroy it after approval
-    // await applicant.destroy();
-
-    res.json({ message: "Applicant approved", applicant });
+    res.json({ message: "Applicant approved with file uploaded", applicant });
   } catch (err) {
     console.error("Approve error:", err);
     res.status(500).json({ error: "Failed to approve applicant" });
@@ -114,7 +117,6 @@ router.post("/cho/approve/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to approve applicant" });
   }
 });
-
 
 router.post("/cenro/approve/:id", async (req, res) => {
   try {
@@ -167,7 +169,9 @@ router.post("/csmwo/approve/:id", async (req, res) => {
 // List files
 router.get("/backrooms", async (req, res) => {
   try {
-    const backrooms = await Backroom.findAll({ order: [["createdAt", "DESC"]] });
+    const backrooms = await Backroom.findAll({
+      order: [["createdAt", "DESC"]],
+    });
     res.json(backrooms);
   } catch (err) {
     console.error(err);
