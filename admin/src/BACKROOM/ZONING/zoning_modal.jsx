@@ -368,38 +368,47 @@ function ZoningApplicantModal({
               <b>{zoningFee === "Exempted" ? zoningFee : `₱${zoningFee}`}</b>
             </Typography>
 
-            <Stack spacing={3}>
-              {files.map((file) => (
-                <Stack key={file.name} direction="column" spacing={1}>
-                  <Typography>{file.label}:</Typography>
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <Button
-                      variant="contained"
-                      component="label"
-                      size="small" // smaller button
-                      sx={{ minWidth: 120 }}
-                    >
-                      Choose File
-                      <input
-                        type="file"
-                        name={file.name}
-                        hidden
-                        onChange={handleFileSelect}
+            {applicant.ZONING === "Pending" ? (
+              // ✅ Show upload fields
+              <Stack spacing={3}>
+                {files.map((file) => (
+                  <Stack key={file.name} direction="column" spacing={1}>
+                    <Typography>{file.label}:</Typography>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Button
+                        variant="contained"
+                        component="label"
+                        size="small"
+                        sx={{ minWidth: 120 }}
+                      >
+                        Choose File
+                        <input
+                          type="file"
+                          name={file.name}
+                          hidden
+                          onChange={handleFileSelect}
+                        />
+                      </Button>
+                      <TextField
+                        value={selectedFiles[file.name] || ""}
+                        placeholder="No file selected"
+                        size="small"
+                        fullWidth
+                        InputProps={{
+                          readOnly: true,
+                        }}
                       />
-                    </Button>
-                    <TextField
-                      value={selectedFiles[file.name] || ""}
-                      placeholder="No file selected"
-                      size="small"
-                      fullWidth
-                      InputProps={{
-                        readOnly: true,
-                      }}
-                    />
+                    </Stack>
                   </Stack>
-                </Stack>
-              ))}
-            </Stack>
+                ))}
+              </Stack>
+            ) : applicant.ZONING === "Approved" ? (
+              <FileField
+                fileKey="zoningCert"
+                label="Zoning Certificate"
+                fileData={applicant}
+              />
+            ) : null}
           </>
         ) : (
           <ZoningCert applicant={applicant} />

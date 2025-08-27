@@ -315,14 +315,16 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
           />
         </Section>
 
-        <Section title="Backroom">
-          <FileField
-            fileKey="zoningCert"
-            label="Zoning Certificate"
-            fileData={applicant}
-            baseUrl={baseUrl}
-          />
-        </Section>
+        {applicant.status !== "pending" && (
+          <Section title="Backroom">
+            <FileField
+              fileKey="zoningCert"
+              label="Zoning Certificate"
+              fileData={applicant}
+              baseUrl={baseUrl}
+            />
+          </Section>
+        )}
       </DialogContent>
 
       <DialogActions>
