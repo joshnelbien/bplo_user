@@ -17,9 +17,8 @@ import { useState } from "react";
 import ZoningCert from "./zoningCert";
 
 // ✅ Normal text field
-// ✅ Normal text field
 const Field = ({ label, value }) => (
-  <Grid size={{ xs: 12, sm: 6 }}>
+  <Grid item xs={12} sm={6}>
     <TextField
       label={label}
       value={value || "—"}
@@ -53,7 +52,7 @@ const Field = ({ label, value }) => (
 
 // ✅ File display (with View/Download links)
 const FileField = ({ label, fileKey, fileData }) => (
-  <Grid size={{ xs: 12, sm: 6 }}>
+  <Grid item xs={12} sm={6}>
     <TextField
       label={label}
       value={
@@ -107,7 +106,6 @@ const FileField = ({ label, fileKey, fileData }) => (
     )}
   </Grid>
 );
-
 
 function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
   const [showCert, setShowCert] = useState(false);
@@ -210,50 +208,50 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
 
             {/* Business Activity */}
             <Section title="Business Activity & Incentives">
-  <Field label="Tax Incentives" value={applicant.tIGE} />
-  {applicant.tIGE === "Yes" && (
-    <FileField
-      fileKey="tIGEfiles"
-      label="Tax Incentives From Government"
-      fileData={applicant}
-    />
-  )}
+              <Field label="Tax Incentives" value={applicant.tIGE} />
+              {applicant.tIGE === "Yes" && (
+                <FileField
+                  fileKey="tIGEfiles"
+                  label="Tax Incentives From Government"
+                  fileData={applicant}
+                />
+              )}
 
-  <Field label="Office Type" value={applicant.officeType} />
+              <Field label="Office Type" value={applicant.officeType} />
 
-  {applicant.lineOfBusiness?.split(",").map((lob, index) => {
-    const product = applicant.productService?.split(",")[index] || "";
-    const unit = applicant.Units?.split(",")[index] || "";
-    const capital = applicant.capital?.split(",")[index] || "";
+              {applicant.lineOfBusiness?.split(",").map((lob, index) => {
+                const product = applicant.productService?.split(",")[index] || "";
+                const unit = applicant.Units?.split(",")[index] || "";
+                const capital = applicant.capital?.split(",")[index] || "";
 
-    return (
-      <Paper
-        key={index}
-        elevation={2}
-        sx={{ p: 2, mb: 2, borderRadius: 2, backgroundColor: "#f9f9f9" }}
-      >
-        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-          Business Line {index + 1}
-        </Typography>
+                return (
+                  <Paper
+                    key={index}
+                    elevation={2}
+                    sx={{ p: 2, mb: 2, borderRadius: 2, backgroundColor: "#f9f9f9" }}
+                  >
+                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                      Business Line {index + 1}
+                    </Typography>
 
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Field label="Line of Business" value={lob.trim()} />
-          </Grid>
-          <Grid item xs={12}>
-            <Field label="Product/Service" value={product.trim()} />
-          </Grid>
-          <Grid item xs={12}>
-            <Field label="Units" value={unit.trim()} />
-          </Grid>
-          <Grid item xs={12}>
-            <Field label="Capital" value={capital.trim()} />
-          </Grid>
-        </Grid>
-      </Paper>
-    );
-  })}
-</Section>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <Field label="Line of Business" value={lob.trim()} />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Field label="Product/Service" value={product.trim()} />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Field label="Units" value={unit.trim()} />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Field label="Capital" value={capital.trim()} />
+                      </Grid>
+                    </Grid>
+                  </Paper>
+                );
+              })}
+            </Section>
 
             {/* Business Requirements */}
             <Section title="Business Requirements">
@@ -273,32 +271,53 @@ function ZoningApplicantModal({ applicant, isOpen, onClose, onApprove }) {
         )}
       </DialogContent>
 
+      {/* ✅ Cleaned Up Actions */}
+            {/* ✅ Cleaned Up Actions */}
       <DialogActions>
         <Button variant="outlined" onClick={onClose} color="secondary">
           Close
         </Button>
 
-        {!showCert && (
-          <Button onClick={() => onApprove(applicant.id)} variant="contained" color="success">
-            Approve
-          </Button>
+        {/* Only show Approve/Decline if not yet approved and not viewing cert */}
+        {!showCert && applicant.ZONING !== "Approved" && (
+          <>
+            <Button
+              onClick={() => onApprove(applicant.id)}
+              color="success"
+              variant="contained"
+            >
+              Approve
+            </Button>
+            <Button
+              onClick={onClose}
+              color="error"
+              variant="outlined"
+            >
+              Decline
+            </Button>
+          </>
         )}
 
-        {!showCert && (
-          <Button onClick={onClose} variant="outlined" color="error">
-            Decline
+        {/* ✅ Only allow Generate Certificate if pending */}
+        {!showCert && applicant.ZONING !== "Approved" ? (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setShowCert(true)}
+          >
+            Generate Certificate
           </Button>
-        )}
-
-        {/* ✅ Toggle Certificate */}
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setShowCert(!showCert)}
-        >
-          {showCert ? "Back to Details" : "Generate Certificate"}
-        </Button>
+        ) : showCert ? (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setShowCert(false)}
+          >
+            Back to Details
+          </Button>
+        ) : null}
       </DialogActions>
+
     </Dialog>
   );
 }

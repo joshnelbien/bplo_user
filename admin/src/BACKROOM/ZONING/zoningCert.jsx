@@ -1,4 +1,12 @@
-import { Box, Button, Checkbox, Paper, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Paper,
+  TextField,
+  Typography
+} from "@mui/material";
+import jsPDF from "jspdf";
+import { useState } from "react";
 
 // ✅ Convert month number to Filipino month name
 function getFilipinoMonth(monthIndex) {
@@ -40,17 +48,86 @@ function ZoningCert({ applicant }) {
   const month = getFilipinoMonth(today.getMonth());
   const year = today.getFullYear();
 
-  const zoningFee = calculateZoningFee(applicant.totalCapital);
+  // ✅ Make form fields editable
+  const [form, setForm] = useState({
+    firstName: applicant.firstName,
+    lastName: applicant.lastName,
+    barangay: applicant.barangay,
+    businessType: applicant.BusinessType,
+    totalCapital: applicant.totalCapital,
+  });
+
+  const zoningFee = calculateZoningFee(Number(form.totalCapital));
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  // ✅ Export to PDF
+const exportPDF = () => {
+  const doc = new jsPDF("p", "mm", "a4"); // A4 page
+  const marginX = 20;
+  let y = 20;
+
+  // --- HEADER ---
+  doc.setFont("Times", "bold");
+  doc.setFontSize(16);
+  doc.text("CITY MAYOR'S OFFICE", 105, y, { align: "center" });
+  y += 8;
+  doc.setFontSize(12);
+  doc.text("San Pablo City", 105, y, { align: "center" });
+  y += 8;
+  doc.setFontSize(16);
+  doc.text("ZONING AND LAND USE DIVISION", 105, y, { align: "center" });
+  y += 10;
+  doc.setFontSize(14);
+  doc.text("PAGPAPATUNAY", 105, y, { align: "center" });
+
+  // --- BODY ---
+  y += 20;
+  doc.setFontSize(12);
+  doc.setFont("Times", "normal");
+
+  // Full paragraph like modal
+  const paragraph1 = 
+    `ITO AY PAGPAPATUNAY na ang isang lugar na lupang matatagpuan sa barangay ${form.barangay}, San Pablo City, nakatala sa pangalan ni ${form.firstName} ${form.lastName} ay nakakasakop sa SONANG nakatalaga sa/o para gamiting ${form.businessType}, dahil dito ang pagtatayo ay maaaring pahintulutan at pasubaling babawiin o patitigilin sa sandaling mapatunayan naglalagay ng panganib sa PANGMADLANG KALUSUGAN AT KALIGTASAN.`;
+
+  doc.text(paragraph1, marginX, y, { maxWidth: 170, textAlign: "justify" });
+
+  // Date line
+  y += 50;
+  const dateText = `Ipinagkaloob ngayon ika-${day} ng ${month}, ${year} kaugnay ng kanyang kahilingan para sa MAYOR'S PERMIT.`;
+  doc.text(dateText, marginX, y, { maxWidth: 170, textAlign: "justify" });
+
+  // Capital & Fee
+  y += 20;
+  doc.setFont("Times", "bold");
+  doc.text(`CAPITAL: P ${form.totalCapital}`, marginX, y);
+  y += 8;
+  const feeText = zoningFee === "Exempted" ? "Exempted" : `P ${zoningFee}`;
+  doc.text(`ZONING FEE: ${feeText}`, marginX, y);
+
+  // --- SIGNATURE SECTION (Right aligned like preview) ---
+y += 40;
+doc.setFont("Times", "normal");
+doc.text("For", 150, y, { align: "center" });   // Centered "For"
+
+y += 12;
+doc.setFont("Times", "bold");
+doc.text("HON. ARCADIO B. GAPANGADA, MNSA", 150, y, { align: "center" });
+y += 7;
+doc.setFont("Times", "normal");
+doc.text("City Mayor", 150, y, { align: "center" });
+
+  // Save file
+  doc.save(`ZoningCert_${form.lastName}.pdf`);
+};
+
+
+
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        mt: 3,
-        mb: 3,
-      }}
-    >
+    <Box sx={{ display: "flex", justifyContent: "center", mt: 3, mb: 3 }}>
       <Paper
         elevation={6}
         sx={{
@@ -75,69 +152,64 @@ function ZoningCert({ applicant }) {
           </Typography>
         </Box>
 
-        {/* Certificate Body */}
+        {/* Editable Certificate Body */}
         <Typography paragraph sx={{ textAlign: "justify", mb: 2 }}>
-          ITO AY PAGPAPATUNAY na ang isang lugar na lupang matatagpuan sa
-          barangay{" "}
-          <b>
-            <u>{applicant.barangay}</u>
-          </b>
+          ITO AY PAGPAPATUNAY na ang isang lugar na lupang matatagpuan sa barangay{" "}
+          <TextField
+            name="barangay"
+            value={form.barangay}
+            onChange={handleChange}
+            variant="standard"
+            sx={{ width: 150 }}
+          />{" "}
           , San Pablo City, nakatala sa pangalan ni{" "}
-          <b>
-            <u>
-              {applicant.firstName} {applicant.lastName}
-            </u>
-          </b>{" "}
+          <TextField
+            name="firstName"
+            value={form.firstName}
+            onChange={handleChange}
+            variant="standard"
+            sx={{ width: 120 }}
+          />{" "}
+          <TextField
+            name="lastName"
+            value={form.lastName}
+            onChange={handleChange}
+            variant="standard"
+            sx={{ width: 120 }}
+          />{" "}
           ay nakakasakop sa SONANG nakatalaga sa/o para gamiting{" "}
           <b>
             <u>RES/COMM/IND/AGRI/INS</u>
           </b>
           , dahil dito ang pagtatayo ng{" "}
-          <b>
-            <u>{applicant.BusinessType}</u>
-          </b>{" "}
-          ay maaaring pahintulutan at pasubaling babawiin o patitigilin sa sandaling 
-          mapatunayan naglalagay ng panganib sa PANGMADLANG KALUSUGAN AT KALIGTASAN 
-          </Typography>
-          <Typography>
-           Ipinagkaloob ngayon ika-
-          <b>
-            <u>{day}</u>
-          </b>{" "}
-          ng{" "}
-          <b>
-            <u>{month}</u>
-          </b>
-          ,{" "}
-          <b>
-            <u>{year}</u>
-          </b>{" "}
-          kaugnay ng kanyang kahilingan para sa MAYOR'S PERMIT.
+          <TextField
+            name="businessType"
+            value={form.businessType}
+            onChange={handleChange}
+            variant="standard"
+            sx={{ width: 160 }}
+          />{" "}
+          ay maaaring pahintulutan...
+        </Typography>
+
+        <Typography>
+          Ipinagkaloob ngayon ika-{day} ng {month}, {year} kaugnay ng kanyang
+          kahilingan para sa MAYOR'S PERMIT.
         </Typography>
 
         <Typography variant="subtitle1" sx={{ mt: 2 }}>
-          CAPITAL: P
-          <b>
-            <u>{applicant.totalCapital}</u>
-          </b>
+          CAPITAL: ₱{" "}
+          <TextField
+            name="totalCapital"
+            value={form.totalCapital}
+            onChange={handleChange}
+            variant="standard"
+            sx={{ width: 120 }}
+          />
         </Typography>
         <Typography variant="subtitle1" sx={{ mb: 3 }}>
-          ZONING FEE:{" "}
-          <b>
-            <u>{zoningFee === "Exempted" ? zoningFee : `P${zoningFee}`}</u>
-          </b>
+          ZONING FEE: <b>{zoningFee === "Exempted" ? zoningFee : `₱${zoningFee}`}</b>
         </Typography>
-
-        <Box display="flex" gap={5} mb={3} alignItems="center">
-          <Box display="flex" alignItems="center" gap={1}>
-            <Checkbox defaultChecked />
-            <Typography>New</Typography>
-          </Box>
-          <Box display="flex" alignItems="center" gap={1}>
-            <Checkbox />
-            <Typography>Renew</Typography>
-          </Box>
-        </Box>
 
         {/* Signature Section */}
         <Box mt={5} textAlign="right">
@@ -148,14 +220,10 @@ function ZoningCert({ applicant }) {
           <Typography variant="body2">City Mayor</Typography>
         </Box>
 
-        {/* Print Button */}
+        {/* Export PDF Button */}
         <Box mt={5} display="flex" justifyContent="center">
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => window.print()}
-          >
-            Print Certificate
+          <Button variant="contained" color="primary" onClick={exportPDF}>
+            Export to PDF
           </Button>
         </Box>
       </Paper>
