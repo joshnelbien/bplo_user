@@ -38,7 +38,6 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 
 function RegisterPage() {
   const navigate = useNavigate();
-  // We'll use a standard variable for the API URL.
   const API = "http://localhost:5000";
 
   const [form, setForm] = useState({
@@ -61,7 +60,6 @@ function RegisterPage() {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    // mobile validation: numbers only, max 10
     if (id === "mobile") {
       if (/^\d*$/.test(value) && value.length <= 10) {
         setForm({ ...form, [id]: value });
@@ -74,7 +72,6 @@ function RegisterPage() {
   const validate = () => {
     let newErrors = {};
 
-    // Check if any field is empty
     if (!form.lastname) newErrors.lastname = "Last Name is required";
     if (!form.firstname) newErrors.firstname = "First Name is required";
     if (!form.email) newErrors.email = "Email is required";
@@ -82,12 +79,14 @@ function RegisterPage() {
     if (!form.password) newErrors.password = "Password is required";
     if (!form.confirmPassword) newErrors.confirmPassword = "Confirm Password is required";
 
-    // Validate specific fields
     if (form.email && !form.email.includes("@")) {
       newErrors.email = "Email must contain @";
     }
     if (form.mobile && form.mobile.length !== 10) {
       newErrors.mobile = "Mobile number must be 10 digits";
+    }
+    if (form.password && form.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
     }
     if (form.password && form.confirmPassword && form.password !== form.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
@@ -112,7 +111,6 @@ function RegisterPage() {
 
     try {
       const { lastname, firstname, email, password } = form;
-      // Actual API call to the backend
       await axios.post(`${API}/userAccounts/register`, {
         lastname,
         firstname,
@@ -273,7 +271,6 @@ function RegisterPage() {
           </Box>
         </Paper>
 
-        {/* Success Dialog - clean style */}
         <Dialog open={openSuccessDialog} onClose={handleCloseSuccessDialog}>
           <DialogContent
             sx={{
@@ -308,7 +305,6 @@ function RegisterPage() {
           </DialogActions>
         </Dialog>
 
-        {/* Snackbar for errors */}
         <Snackbar
           open={snackbar.open}
           autoHideDuration={6000}
@@ -324,7 +320,6 @@ function RegisterPage() {
         </Snackbar>
       </Box>
 
-      {/* Simple animation */}
       <style>
         {`
           @keyframes pop-in {

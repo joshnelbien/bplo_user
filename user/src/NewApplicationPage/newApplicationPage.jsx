@@ -160,7 +160,7 @@ function NewApplicationPage() {
       3: ['region', 'province', 'cityOrMunicipality', 'barangay', 'addressLine1', 'zipCode'],
       4: ['Taxregion', 'Taxprovince', 'TaxcityOrMunicipality', 'Taxbarangay', 'TaxaddressLine1', 'TaxzipCode'],
       5: ['totalFloorArea', 'numberOfEmployee', 'maleEmployee', 'femaleEmployee'],
-      6: ['lineOfBusiness', 'productService', 'Units', 'capital'],
+      // 6: ['lineOfBusiness', 'productService', 'Units', 'capital'],
       7: ['proofOfReg', 'brgyClearance', 'cedula'],
     };
 
