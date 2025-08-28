@@ -2,12 +2,10 @@ const express = require("express");
 const multer = require("multer");
 const File = require("../db/model/files");
 
-
 const router = express.Router();
 
 // Multer in-memory storage
 const upload = multer({ storage: multer.memoryStorage() });
-
 
 // Upload files + text fields
 router.post(
@@ -56,13 +54,26 @@ router.post(
   }
 );
 
-
 // List files
-
 
 router.get("/files", async (req, res) => {
   try {
     const files = await File.findAll({ order: [["createdAt", "DESC"]] });
+    res.json(files);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json([]);
+  }
+});
+
+router.get("/files/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const files = await File.findAll({
+      attributes: ["status"], // ✅ only fetch status + trackerId
+      where: { userId: id },
+      order: [["createdAt", "DESC"]],
+    });
     res.json(files);
   } catch (err) {
     console.error(err);

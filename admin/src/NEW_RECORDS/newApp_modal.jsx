@@ -213,6 +213,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
               fileKey="tIGEfiles"
               label="Tax Incentives From Government"
               fileData={applicant}
+              baseUrl={baseUrl}
             />
           )}
 
