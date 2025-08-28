@@ -25,7 +25,7 @@ const logo = "/spclogo.png";
 const reqImage = "/req.png";
 const renewImage = "/renew.png";
 
-// Style for the modal
+// Style for the main modal
 const modalStyle = {
   position: "absolute",
   top: "50%",
@@ -35,10 +35,23 @@ const modalStyle = {
   maxHeight: "90vh",
   overflowY: "auto",
   bgcolor: "background.paper",
-  // I have removed the border to remove the black outline
   boxShadow: 24,
   p: 4,
   borderRadius: "12px",
+};
+
+// Style for the confirmation modal
+const confirmationModalStyle = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: { xs: "90%", sm: 400 },
+  bgcolor: "background.paper",
+  boxShadow: 24,
+  p: 4,
+  borderRadius: "12px",
+  textAlign: "center",
 };
 
 // Define the shaking keyframes outside the component for better performance
@@ -97,6 +110,7 @@ const modalContents = {
 function HomePage() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [openLogoutModal, setOpenLogoutModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalItems, setModalItems] = useState([]);
   const { id } = useParams();
@@ -111,8 +125,10 @@ function HomePage() {
   };
 
   const handleClose = () => setOpen(false);
+  const handleOpenLogoutModal = () => setOpenLogoutModal(true);
+  const handleCloseLogoutModal = () => setOpenLogoutModal(false);
 
-  const handleLogout = () => {
+  const handleConfirmLogout = () => {
     navigate("/");
   };
 
@@ -218,7 +234,7 @@ function HomePage() {
               />
             </ListItemButton>
             <ListItemButton
-              onClick={() => navigate(`/appTracker/${id}`)} // ✅ navigate to AppTacker
+              onClick={() => navigate(`/appTracker/${id}`)}
               sx={{
                 borderRadius: "8px",
                 mb: 1,
@@ -240,7 +256,7 @@ function HomePage() {
         </Box>
         <Box sx={{ p: 2, borderTop: "1px solid #E0E0E0" }}>
           <ListItemButton
-            onClick={handleLogout}
+            onClick={handleOpenLogoutModal}
             sx={{
               borderRadius: "8px",
               bgcolor: "#FF6B6B",
@@ -380,7 +396,7 @@ function HomePage() {
           </Box>
         </Stack>
 
-        {/* Modal component */}
+        {/* Requirements Modal */}
         <Modal
           aria-labelledby="transition-modal-title"
           aria-describedby="transition-modal-description"
@@ -423,7 +439,6 @@ function HomePage() {
               <Typography id="transition-modal-description" sx={{ mt: 2 }}>
                 <List dense>
                   {modalItems.map((item, index) => (
-                    // I have removed the ListItemIcon component to remove the empty space for the icon.
                     <ListItem key={index} sx={{ py: 0.5, px: 0 }}>
                       <ListItemText
                         primary={item.text}
@@ -433,6 +448,39 @@ function HomePage() {
                   ))}
                 </List>
               </Typography>
+            </Box>
+          </Fade>
+        </Modal>
+
+        {/* Logout Confirmation Modal */}
+        <Modal
+          open={openLogoutModal}
+          onClose={handleCloseLogoutModal}
+          closeAfterTransition
+          slots={{ backdrop: Backdrop }}
+          slotProps={{
+            backdrop: {
+              timeout: 500,
+            },
+          }}
+        >
+          <Fade in={openLogoutModal}>
+            <Box sx={confirmationModalStyle}>
+              <Typography variant="h6" component="h2" mb={2}>
+                Are you sure you want to log out?
+              </Typography>
+              <Stack
+                direction="row"
+                spacing={2}
+                justifyContent="center"
+              >
+                <Button variant="contained" color="error" onClick={handleConfirmLogout}>
+                  Yes
+                </Button>
+                <Button variant="outlined" color="primary" onClick={handleCloseLogoutModal}>
+                  No
+                </Button>
+              </Stack>
             </Box>
           </Fade>
         </Modal>
