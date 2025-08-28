@@ -184,6 +184,20 @@ router.get("/backrooms", async (req, res) => {
   }
 });
 
+router.get("/backrooms/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const backrooms = await Backroom.findAll({
+      where: { userId: id }, // ✅ filter by userId
+      order: [["createdAt", "DESC"]],
+    });
+    res.json(backrooms);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json([]);
+  }
+});
+
 // Preview file
 router.get("/backroom/:id/:key", async (req, res) => {
   const { id, key } = req.params;

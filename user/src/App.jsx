@@ -4,6 +4,7 @@ import HomePage from "./homePage/homePage";
 import LoginPage from "./loginPage/loginPage";
 import NewApplicationPage from "./NewApplicationPage/newApplicationPage";
 import RegisterPage from "./registerPage/registerPage";
+import AppTracker from "./appTracker/appTracker";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           element={<NewApplicationPage />}
         />
         <Route path="/registerPage" element={<RegisterPage />} />
+        <Route path="/appTracker/:id" element={<AppTracker />} />
       </Routes>
     </BrowserRouter>
   );

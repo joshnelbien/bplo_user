@@ -192,7 +192,10 @@ function RegisterPage() {
             Already have an account?{" "}
             <Link
               component="button"
-              onClick={() => navigate("/")}
+              onClick={(e) => {
+                e.preventDefault(); // stop form submit
+                navigate("/");
+              }}
               sx={{ color: "#2E8B57", fontWeight: "bold" }}
             >
               Login

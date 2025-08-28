@@ -218,6 +218,7 @@ function HomePage() {
               />
             </ListItemButton>
             <ListItemButton
+              onClick={() => navigate(`/appTracker/${id}`)} // ✅ navigate to AppTacker
               sx={{
                 borderRadius: "8px",
                 mb: 1,
@@ -231,7 +232,7 @@ function HomePage() {
                 <AssignmentTurnedInIcon sx={{ color: "#2E8B57" }} />
               </ListItemIcon>
               <ListItemText
-                primary="Status Permit"
+                primary="Application Status"
                 sx={{ fontWeight: "bold" }}
               />
             </ListItemButton>
