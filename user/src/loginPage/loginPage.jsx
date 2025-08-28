@@ -28,8 +28,9 @@ const LoginPage = () => {
         "http://localhost:5000/userAccounts/login",
         form
       );
+      const userId = res.data.user.id;
 
-      navigate("/homePage");
+      navigate(`/homePage/${userId}`);
     } catch (err) {
       alert(err.response?.data?.error || "Invalid credentials");
     }

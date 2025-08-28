@@ -10,8 +10,11 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LoginPage />} />
-        <Route path="/homePage" element={<HomePage />} />
-        <Route path="/newApplicationPage" element={<NewApplicationPage />} />
+        <Route path="/homePage/:id" element={<HomePage />} />
+        <Route
+          path="/newApplicationPage/:id"
+          element={<NewApplicationPage />}
+        />
         <Route path="/registerPage" element={<RegisterPage />} />
       </Routes>
     </BrowserRouter>

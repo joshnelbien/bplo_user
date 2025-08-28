@@ -9,8 +9,8 @@ const File = sequelize.define(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-
-     BusinessType: DataTypes.STRING,
+    userId: DataTypes.UUID,
+    BusinessType: DataTypes.STRING,
     dscRegNo: DataTypes.STRING,
     businessName: DataTypes.STRING,
     tinNo: DataTypes.STRING,
@@ -52,12 +52,10 @@ const File = sequelize.define(
     monthlyRent: DataTypes.STRING,
     tIGE: DataTypes.STRING,
 
-
     tIGEfiles: { type: DataTypes.BLOB("long"), allowNull: true },
     tIGEfiles_filename: { type: DataTypes.STRING, allowNull: true },
     tIGEfiles_mimetype: { type: DataTypes.STRING, allowNull: true },
     tIGEfiles_size: { type: DataTypes.INTEGER, allowNull: true },
-
 
     officeType: DataTypes.STRING,
     officeTypeOther: DataTypes.STRING,
@@ -73,12 +71,10 @@ const File = sequelize.define(
     proofOfReg_mimetype: { type: DataTypes.STRING, allowNull: true },
     proofOfReg_size: { type: DataTypes.INTEGER, allowNull: true },
 
-
     proofOfRightToUseLoc: { type: DataTypes.BLOB("long"), allowNull: true },
     proofOfRightToUseLoc_filename: { type: DataTypes.STRING, allowNull: true },
     proofOfRightToUseLoc_mimetype: { type: DataTypes.STRING, allowNull: true },
     proofOfRightToUseLoc_size: { type: DataTypes.INTEGER, allowNull: true },
-
 
     locationPlan: { type: DataTypes.BLOB("long"), allowNull: true },
     locationPlan_filename: { type: DataTypes.STRING, allowNull: true },
@@ -118,14 +114,10 @@ const File = sequelize.define(
     status: { type: DataTypes.STRING, defaultValue: "pending" },
   },
 
-
   {
     tableName: "files",
     timestamps: true,
   }
 );
 
-
-
 module.exports = File;
-
