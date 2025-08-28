@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -114,6 +114,33 @@ function HomePage() {
   const [modalTitle, setModalTitle] = useState("");
   const [modalItems, setModalItems] = useState([]);
   const { id } = useParams();
+  const API = import.meta.env.VITE_API_BASE;
+
+  const [user, setUser] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+  });
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await fetch(`${API}/userAccounts/${id}`); // <-- adjust API endpoint
+        if (!response.ok) throw new Error("Failed to fetch user");
+        const data = await response.json();
+
+        setUser({
+          firstName: data.firstname,
+          lastName: data.lastname,
+          email: data.email,
+        });
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+
+    if (id) fetchUser();
+  }, [id]);
 
   const handleOpen = (type) => {
     const content = modalContents[type];
@@ -184,14 +211,23 @@ function HomePage() {
             }}
           >
             <Avatar sx={{ width: 56, height: 56, bgcolor: "#2E8B57" }}>
-              JS
+              {user.firstName && user.lastName
+                ? `${user.firstName[0].toLocaleUpperCase()}${user.lastName[0].toLocaleUpperCase()}`
+                : "?"}
             </Avatar>
             <Box>
-              <Typography variant="subtitle1" fontWeight="bold" noWrap>
-                Jeremie Sotero
+              <Typography
+                variant="body1"
+                sx={{
+                  wordWrap: "break-word",
+                  whiteSpace: "normal",
+                  maxWidth: "100%",
+                }}
+              >
+                {user.firstName} {user.lastName}
               </Typography>
               <Typography variant="body2" color="text.secondary" noWrap>
-                jeremiesotero@gmail.com
+                {user.email}
               </Typography>
             </Box>
           </Stack>
@@ -469,15 +505,19 @@ function HomePage() {
               <Typography variant="h6" component="h2" mb={2}>
                 Are you sure you want to log out?
               </Typography>
-              <Stack
-                direction="row"
-                spacing={2}
-                justifyContent="center"
-              >
-                <Button variant="contained" color="error" onClick={handleConfirmLogout}>
+              <Stack direction="row" spacing={2} justifyContent="center">
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={handleConfirmLogout}
+                >
                   Yes
                 </Button>
-                <Button variant="outlined" color="primary" onClick={handleCloseLogoutModal}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={handleCloseLogoutModal}
+                >
                   No
                 </Button>
               </Stack>
