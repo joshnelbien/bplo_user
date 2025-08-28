@@ -1,5 +1,6 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios"; // make sure you installed axios
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
@@ -13,16 +14,44 @@ const logo = "spclogo.png";
 function RegisterPage() {
   const navigate = useNavigate();
 
-  const handleRegister = (e) => {
-    e.preventDefault();
-    // In a real application, you would handle user registration here.
-    // For now, it will simply navigate to the home page.
-    navigate("/");
+  const [form, setForm] = useState({
+    lastname: "",
+    firstname: "",
+    email: "",
+    mobile: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.id]: e.target.value });
   };
 
-  const handleLoginRedirect = () => {
-    // This function will navigate the user to the login page.
-    navigate("/loginPage");
+  const handleRegister = async (e) => {
+    e.preventDefault();
+
+    if (form.password !== form.confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/userAccounts/register",
+        {
+          lastname: form.lastname,
+          firstname: form.firstname,
+          email: form.email,
+          password: form.password, // backend hashes this
+        }
+      );
+
+      alert(res.data.message);
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.error || "Registration failed");
+    }
   };
 
   return (
@@ -85,143 +114,87 @@ function RegisterPage() {
           noValidate
           autoComplete="off"
         >
-          {/* Email input field */}
+          {/* Last Name input */}
+          <TextField
+            id="lastname"
+            label="Last Name"
+            value={form.lastname}
+            onChange={handleChange}
+            variant="outlined"
+            fullWidth
+          />
+
+          {/* First Name input */}
+          <TextField
+            id="firstname"
+            label="First Name"
+            value={form.firstname}
+            onChange={handleChange}
+            variant="outlined"
+            fullWidth
+          />
+
+          {/* Email input */}
           <TextField
             id="email"
             label="Email"
             type="email"
+            value={form.email}
+            onChange={handleChange}
             variant="outlined"
             fullWidth
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "#CCCCCC",
-                },
-                "&:hover fieldset": {
-                  borderColor: "#2E8B57",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#2E8B57",
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "#666666",
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#2E8B57",
-              },
-            }}
           />
 
-          {/* Mobile number input field with +63 adornment */}
+          {/* Mobile number input with +63 */}
           <TextField
-            id="mobile-number"
+            id="mobile"
             label="Mobile Number"
+            value={form.mobile}
+            onChange={handleChange}
             variant="outlined"
             fullWidth
             InputProps={{
-              startAdornment: <InputAdornment position="start">+63</InputAdornment>,
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "#CCCCCC",
-                },
-                "&:hover fieldset": {
-                  borderColor: "#2E8B57",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#2E8B57",
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "#666666",
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#2E8B57",
-              },
+              startAdornment: (
+                <InputAdornment position="start">+63</InputAdornment>
+              ),
             }}
           />
 
-          {/* Password input field */}
+          {/* Password input */}
           <TextField
             id="password"
             label="Password"
             type="password"
+            value={form.password}
+            onChange={handleChange}
             variant="outlined"
             fullWidth
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "#CCCCCC",
-                },
-                "&:hover fieldset": {
-                  borderColor: "#2E8B57",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#2E8B57",
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "#666666",
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#2E8B57",
-              },
-            }}
           />
 
-          {/* Confirm Password input field */}
+          {/* Confirm Password input */}
           <TextField
-            id="confirm-password"
+            id="confirmPassword"
             label="Confirm Password"
             type="password"
+            value={form.confirmPassword}
+            onChange={handleChange}
             variant="outlined"
             fullWidth
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "#CCCCCC",
-                },
-                "&:hover fieldset": {
-                  borderColor: "#2E8B57",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#2E8B57",
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "#666666",
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#2E8B57",
-              },
-            }}
           />
 
           {/* Submit button */}
-          <Button
-            type="submit"
-            variant="contained"
-            fullWidth
-            sx={{
-              backgroundColor: "#076e0cff",
-              "&:hover": {
-                backgroundColor: "#085f0cff",
-              },
-              borderRadius: "8px",
-              fontWeight: "bold",
-              py: 1.5,
-              mt: 1,
-            }}
-          >
+          <Button type="submit" variant="contained" fullWidth>
             Register
           </Button>
 
           {/* Link to login page */}
           <Typography variant="body2" sx={{ mt: 2, color: "#666666" }}>
             Already have an account?{" "}
-            <Link component="button" onClick={handleLoginRedirect} sx={{ color: "#2E8B57", fontWeight: "bold" }}>
+            <Link
+              component="button"
+              onClick={() => navigate("/")}
+              sx={{ color: "#2E8B57", fontWeight: "bold" }}
+            >
               Login
             </Link>
           </Typography>
