@@ -13,7 +13,7 @@ const logo = "spclogo.png";
 
 function RegisterPage() {
   const navigate = useNavigate();
-
+  const API = import.meta.env.VITE_API_BASE;
   const [form, setForm] = useState({
     lastname: "",
     firstname: "",
@@ -36,15 +36,12 @@ function RegisterPage() {
     }
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/userAccounts/register",
-        {
-          lastname: form.lastname,
-          firstname: form.firstname,
-          email: form.email,
-          password: form.password, // backend hashes this
-        }
-      );
+      const res = await axios.post(`${API}/userAccounts/register`, {
+        lastname: form.lastname,
+        firstname: form.firstname,
+        email: form.email,
+        password: form.password, // backend hashes this
+      });
 
       alert(res.data.message);
       navigate("/");

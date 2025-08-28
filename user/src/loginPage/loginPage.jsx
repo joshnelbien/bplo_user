@@ -11,7 +11,7 @@ const logo = "spclogo.png";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-
+  const API = import.meta.env.VITE_API_BASE;
   // local state for form values
   const [form, setForm] = useState({ email: "", password: "" });
 
@@ -24,10 +24,7 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(
-        "http://localhost:5000/userAccounts/login",
-        form
-      );
+      const res = await axios.post(`${API}/userAccounts/login`, form);
       const userId = res.data.user.id;
 
       navigate(`/homePage/${userId}`);

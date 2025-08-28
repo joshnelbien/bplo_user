@@ -17,17 +17,16 @@ function AppTracker() {
   const [tracker, setTracker] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const API = import.meta.env.VITE_API_BASE;
 
   const departments = ["BPLO", "CSMWO", "OBO", "CHO", "CENRO", "ZONING"];
 
   useEffect(() => {
     const fetchTracker = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:5000/backroom/backrooms/${id}`
-        );
+        const res = await axios.get(`${API}/backroom/backrooms/${id}`);
         if (res.data.length > 0) {
-          setTracker(res.data[0]); // ✅ latest entry
+          setTracker(res.data[0]);
         }
       } catch (err) {
         console.error("Error fetching tracker:", err);
