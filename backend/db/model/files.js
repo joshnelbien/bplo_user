@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const { sequelize } = require("../sequelize");
 
 const File = sequelize.define(
-  "File",
+  "NewApplication",
   {
     id: {
       type: DataTypes.UUID,
@@ -115,7 +115,7 @@ const File = sequelize.define(
   },
 
   {
-    tableName: "files",
+    tableName: "NewApplications",
     timestamps: true,
   }
 );
