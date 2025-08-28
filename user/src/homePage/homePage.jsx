@@ -21,9 +21,9 @@ import Backdrop from "@mui/material/Backdrop";
 import Fade from "@mui/material/Fade";
 import CloseIcon from "@mui/icons-material/Close";
 
-const logo = "spclogo.png";
-const reqImage = "req.png";
-const renewImage = "renew.png";
+const logo = "/spclogo.png";
+const reqImage = "/req.png";
+const renewImage = "/renew.png";
 
 // Style for the modal
 const modalStyle = {

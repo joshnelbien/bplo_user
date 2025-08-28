@@ -1,9 +1,12 @@
 import WifiIcon from "@mui/icons-material/Wifi";
 import WifiOffIcon from "@mui/icons-material/WifiOff";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import {
   AppBar,
   Box,
   Chip,
+  Collapse,
   Divider,
   Drawer,
   IconButton,
@@ -24,6 +27,7 @@ function Side_bar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [openDept, setOpenDept] = useState(false); // ✅ for dropdown
 
   // Detect if screen is small (mobile)
   const isMobile = useMediaQuery("(max-width:768px)");
@@ -48,6 +52,9 @@ function Side_bar() {
     { text: "New Application", path: "/new_records" },
     { text: "Renew Application", path: "/renew_records" },
     { text: "Profile", path: "/profile" },
+  ];
+
+  const departmentItems = [
     { text: "OBO", path: "/obo" },
     { text: "CHO", path: "/cho" },
     { text: "CMSWO", path: "/cmswo" },
@@ -59,6 +66,7 @@ function Side_bar() {
     <Box sx={{ display: "flex" }}>
       {/* ✅ Top NavBar with Online/Offline */}
       <AppBar
+        color="success"
         position="fixed"
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
@@ -86,7 +94,7 @@ function Side_bar() {
           <Chip
             icon={isOnline ? <WifiIcon /> : <WifiOffIcon />}
             label={isOnline ? "Online" : "Offline"}
-            color={isOnline ? "success" : "default"}
+            color={isOnline ? "primary" : "default"}
             variant="contained"
           />
         </Toolbar>
@@ -121,6 +129,29 @@ function Side_bar() {
               </ListItemButton>
             </ListItem>
           ))}
+
+          {/* ✅ Dropdown Section */}
+          <ListItemButton onClick={() => setOpenDept(!openDept)}>
+            <ListItemText primary="Backroom" />
+            {openDept ? <ExpandLess /> : <ExpandMore />}
+          </ListItemButton>
+          <Collapse in={openDept} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              {departmentItems.map((dept) => (
+                <ListItem key={dept.text} disablePadding>
+                  <ListItemButton
+                    sx={{ pl: 4 }} // indent inside dropdown
+                    onClick={() => {
+                      navigate(dept.path);
+                      if (isMobile) setOpen(false);
+                    }}
+                  >
+                    <ListItemText primary={dept.text} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Collapse>
 
           <Divider sx={{ my: 1 }} />
 

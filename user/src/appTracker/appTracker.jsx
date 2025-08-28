@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   Stepper,
@@ -9,12 +9,14 @@ import {
   Box,
   Paper,
   CircularProgress,
+  Button,
 } from "@mui/material";
 
 function AppTracker() {
   const { id } = useParams();
   const [tracker, setTracker] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const departments = ["BPLO", "CSMWO", "OBO", "CHO", "CENRO", "ZONING"];
 
@@ -65,6 +67,15 @@ function AppTracker() {
   return (
     <Box sx={{ p: 4, maxWidth: 800, mx: "auto" }}>
       <Paper elevation={3} sx={{ p: 4 }}>
+        <Button
+          onClick={() => navigate(`/homePage/${id}`)}
+          variant="contained"
+          color="primary"
+          sx={{ maxWidth: 150 }}
+        >
+          back to Home
+        </Button>
+
         <Typography variant="h5" fontWeight="bold" gutterBottom color="primary">
           Application Tracker
         </Typography>
