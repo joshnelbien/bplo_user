@@ -1,59 +1,161 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Paper from "@mui/material/Paper";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
+import {
+  Box,
+  Button,
+  Paper,
+  TextField,
+  Typography,
+  Dialog,
+  DialogContent,
+  DialogContentText,
+  Snackbar,
+} from "@mui/material";
+import { styled } from "@mui/system";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import MuiAlert from "@mui/material/Alert";
 
 const logo = "spclogo.png";
 
+// Styled GreenButton to match NewApplicationPage
+const GreenButton = styled(Button)(({ theme, variant }) => ({
+  borderRadius: "8px",
+  ...(variant === "contained" && {
+    backgroundColor: "#4caf50",
+    color: "#fff",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    "&:hover": {
+      backgroundColor: "#388e3c",
+    },
+  }),
+  ...(variant === "outlined" && {
+    borderColor: "#4caf50",
+    color: "#4caf50",
+    "&:hover": {
+      backgroundColor: "rgba(76, 175, 80, 0.08)",
+      borderColor: "#4caf50",
+    },
+  }),
+}));
+
+// Snackbar Alert component
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 const LoginPage = () => {
   const navigate = useNavigate();
-  const API = import.meta.env.VITE_API_BASE;
-
+  const API = import.meta.env.VITE_API_BASE || "http://localhost:5000"; // Fallback for debugging
   const [form, setForm] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({ email: "", password: "" });
   const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
   const [openErrorDialog, setOpenErrorDialog] = useState(false);
+  const [snackbarState, setSnackbarState] = useState({
+    open: false,
+    message: "",
+    severity: "error",
+  });
 
-  // handle input changes
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.id]: e.target.value });
+  // Validate email and password
+  const validateForm = () => {
+    const newErrors = { email: "", password: "" };
+    let isValid = true;
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!form.email) {
+      newErrors.email = "Email is required";
+      isValid = false;
+    } else if (!emailRegex.test(form.email)) {
+      newErrors.email = "Invalid email format";
+      isValid = false;
+    }
+
+    // Password validation
+    if (!form.password) {
+      newErrors.password = "Password is required";
+      isValid = false;
+    } else if (form.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
   };
 
-  // handle login submit
+  // Handle input changes
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setForm((prev) => ({ ...prev, [id]: value }));
+    // Clear error for the field being edited
+    setErrors((prev) => ({ ...prev, [id]: "" }));
+  };
+
+  // Handle login submit
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    // Validate form before sending request
+    if (!validateForm()) {
+      setSnackbarState({
+        open: true,
+        message: "Please correct the errors in the form",
+        severity: "error",
+      });
+      return;
+    }
+
     try {
-      const res = await axios.post(`${API}/userAccounts/login`, form);
-      const userId = res.data.user.id;
+      // Log request details for debugging
+      console.log("Sending request to:", `${API}/userAccounts/login`, {
+        data: form,
+        headers: { "Content-Type": "application/json" },
+      });
 
-      // show success dialog first
+      const res = await axios.post(`${API}/userAccounts/login`, form, {
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const userId = res.data.user?.id;
+      if (!userId) {
+        throw new Error("User ID not found in response");
+      }
+
+      // Show success dialog
       setOpenSuccessDialog(true);
-
       setTimeout(() => {
         setOpenSuccessDialog(false);
         navigate(`/homePage/${userId}`);
       }, 1500);
     } catch (err) {
-      // only show error dialog
+      console.error("Login error:", err.response?.data || err.message);
+      const errorMessage =
+        err.response?.data?.message ||
+        "Invalid email or password. Please try again.";
       setOpenErrorDialog(true);
-
+      setSnackbarState({
+        open: true,
+        message: errorMessage,
+        severity: "error",
+      });
       setTimeout(() => {
         setOpenErrorDialog(false);
       }, 1500);
     }
   };
 
+  // Handle register navigation
   const handleRegister = (e) => {
     e.preventDefault();
     navigate("/registerPage");
+  };
+
+  // Handle Snackbar close
+  const handleSnackbarClose = () => {
+    setSnackbarState({ ...snackbarState, open: false });
   };
 
   return (
@@ -64,7 +166,7 @@ const LoginPage = () => {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "100vh",
-          backgroundColor: "#F0F2F5",
+          backgroundColor: "#f0f2f5",
           padding: { xs: 2, sm: 4 },
         }}
       >
@@ -76,7 +178,7 @@ const LoginPage = () => {
             width: "100%",
             maxWidth: 400,
             textAlign: "center",
-            backgroundColor: "#FFFFFF",
+            backgroundColor: "#ffffff",
             boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.1)",
           }}
         >
@@ -104,7 +206,6 @@ const LoginPage = () => {
               Login
             </Typography>
           </Box>
-
           <Box
             onSubmit={handleLogin}
             component="form"
@@ -124,17 +225,20 @@ const LoginPage = () => {
               onChange={handleChange}
               variant="outlined"
               fullWidth
+              error={!!errors.email}
+              helperText={errors.email}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  "& fieldset": { borderColor: "#CCCCCC" },
-                  "&:hover fieldset": { borderColor: "#2E8B57" },
-                  "&.Mui-focused fieldset": { borderColor: "#2E8B57" },
+                  "& fieldset": { borderColor: "#cccccc" },
+                  "&:hover fieldset": { borderColor: "#4caf50" },
+                  "&.Mui-focused fieldset": { borderColor: "#4caf50" },
+                  "&.Mui-error fieldset": { borderColor: "#f44336" },
                 },
                 "& .MuiInputLabel-root": { color: "#666666" },
-                "& .MuiInputLabel-root.Mui-focused": { color: "#2E8B57" },
+                "& .MuiInputLabel-root.Mui-focused": { color: "#4caf50" },
+                "& .MuiFormHelperText-root": { color: "#f44336" },
               }}
             />
-
             <TextField
               id="password"
               label="Password"
@@ -143,47 +247,41 @@ const LoginPage = () => {
               onChange={handleChange}
               variant="outlined"
               fullWidth
+              error={!!errors.password}
+              helperText={errors.password}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  "& fieldset": { borderColor: "#CCCCCC" },
-                  "&:hover fieldset": { borderColor: "#2E8B57" },
-                  "&.Mui-focused fieldset": { borderColor: "#2E8B57" },
+                  "& fieldset": { borderColor: "#cccccc" },
+                  "&:hover fieldset": { borderColor: "#4caf50" },
+                  "&.Mui-focused fieldset": { borderColor: "#4caf50" },
+                  "&.Mui-error fieldset": { borderColor: "#f44336" },
                 },
                 "& .MuiInputLabel-root": { color: "#666666" },
-                "& .MuiInputLabel-root.Mui-focused": { color: "#2E8B57" },
+                "& .MuiInputLabel-root.Mui-focused": { color: "#4caf50" },
+                "& .MuiFormHelperText-root": { color: "#f44336" },
               }}
             />
-
-            <Button
+            <GreenButton
               type="submit"
               variant="contained"
               fullWidth
               sx={{
-                backgroundColor: "#2E8B57",
-                "&:hover": { backgroundColor: "#3CB371" },
-                borderRadius: "8px",
-                fontWeight: "bold",
                 py: 1.5,
                 mt: 1,
               }}
             >
               Login
-            </Button>
-
-            <Button
+            </GreenButton>
+            <GreenButton
               onClick={handleRegister}
               variant="contained"
               fullWidth
               sx={{
-                backgroundColor: "#2E8B57",
-                "&:hover": { backgroundColor: "#3CB371" },
-                borderRadius: "8px",
-                fontWeight: "bold",
                 py: 1.5,
               }}
             >
               Register
-            </Button>
+            </GreenButton>
           </Box>
         </Paper>
       </Box>
@@ -215,7 +313,7 @@ const LoginPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Error Dialog with ❌ */}
+      {/* Error Dialog */}
       <Dialog open={openErrorDialog}>
         <DialogContent
           sx={{
@@ -237,10 +335,28 @@ const LoginPage = () => {
             Login Failed!
           </Typography>
           <DialogContentText sx={{ color: "#555", mt: 1 }}>
-            Invalid email or password.
+            {snackbarState.message || "Invalid email or password."}
           </DialogContentText>
         </DialogContent>
       </Dialog>
+
+      {/* Snackbar for additional feedback */}
+      <Snackbar
+        open={snackbarState.open}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarState.severity}
+          sx={{
+            backgroundColor: snackbarState.severity === "success" ? "#4caf50" : "#f44336",
+          }}
+        >
+          {snackbarState.message}
+        </Alert>
+      </Snackbar>
 
       {/* Animations */}
       <style>

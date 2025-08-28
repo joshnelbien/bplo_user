@@ -1,24 +1,45 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Paper from "@mui/material/Paper";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
-import InputAdornment from "@mui/material/InputAdornment";
-import Link from "@mui/material/Link";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
-import Snackbar from "@mui/material/Snackbar";
+import axios from "axios";
+import {
+  Box,
+  Button,
+  Paper,
+  TextField,
+  Typography,
+  InputAdornment,
+  Link,
+  Dialog,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Snackbar,
+  CircularProgress,
+} from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { styled } from "@mui/system";
 
-const logo = "/spclogo.png";
+// Styled GreenButton
+const GreenButton = styled(Button)(({ theme, variant }) => ({
+  borderRadius: "8px",
+  backgroundColor: "#4caf50",
+  color: "#fff",
+  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+  "&:hover": {
+    backgroundColor: "#388e3c",
+  },
+}));
+
+// Snackbar Alert component
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 function RegisterPage() {
   const navigate = useNavigate();
+  // We'll use a standard variable for the API URL.
+  const API = "http://localhost:5000";
 
   const [form, setForm] = useState({
     lastname: "",
@@ -31,6 +52,7 @@ function RegisterPage() {
 
   const [errors, setErrors] = useState({});
   const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -39,7 +61,6 @@ function RegisterPage() {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-
     // mobile validation: numbers only, max 10
     if (id === "mobile") {
       if (/^\d*$/.test(value) && value.length <= 10) {
@@ -53,13 +74,22 @@ function RegisterPage() {
   const validate = () => {
     let newErrors = {};
 
-    if (!form.email.includes("@")) {
+    // Check if any field is empty
+    if (!form.lastname) newErrors.lastname = "Last Name is required";
+    if (!form.firstname) newErrors.firstname = "First Name is required";
+    if (!form.email) newErrors.email = "Email is required";
+    if (!form.mobile) newErrors.mobile = "Mobile Number is required";
+    if (!form.password) newErrors.password = "Password is required";
+    if (!form.confirmPassword) newErrors.confirmPassword = "Confirm Password is required";
+
+    // Validate specific fields
+    if (form.email && !form.email.includes("@")) {
       newErrors.email = "Email must contain @";
     }
-    if (form.mobile.length !== 10) {
+    if (form.mobile && form.mobile.length !== 10) {
       newErrors.mobile = "Mobile number must be 10 digits";
     }
-    if (form.password !== form.confirmPassword) {
+    if (form.password && form.confirmPassword && form.password !== form.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
@@ -69,16 +99,35 @@ function RegisterPage() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
-
-    try {
-      // simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setOpenSuccessDialog(true);
-    } catch (err) {
+    if (!validate()) {
       setSnackbar({
         open: true,
-        message: err.response?.data?.error || "Registration failed",
+        message: "Please correct the errors in the form.",
+        severity: "error",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { lastname, firstname, email, password } = form;
+      // Actual API call to the backend
+      await axios.post(`${API}/userAccounts/register`, {
+        lastname,
+        firstname,
+        email,
+        password,
+      });
+
+      setLoading(false);
+      setOpenSuccessDialog(true);
+    } catch (err) {
+      setLoading(false);
+      const errorMessage = err.response?.data?.error || "Registration failed. Please try again.";
+      setSnackbar({
+        open: true,
+        message: errorMessage,
         severity: "error",
       });
     }
@@ -119,7 +168,7 @@ function RegisterPage() {
           <Box sx={{ mb: 3 }}>
             <Box
               component="img"
-              src={logo}
+              src="/spclogo.png"
               alt="SPC Logo"
               sx={{
                 height: 100,
@@ -147,6 +196,8 @@ function RegisterPage() {
               value={form.lastname}
               onChange={handleChange}
               fullWidth
+              error={!!errors.lastname}
+              helperText={errors.lastname}
             />
             <TextField
               id="firstname"
@@ -154,6 +205,8 @@ function RegisterPage() {
               value={form.firstname}
               onChange={handleChange}
               fullWidth
+              error={!!errors.firstname}
+              helperText={errors.firstname}
             />
             <TextField
               id="email"
@@ -184,6 +237,8 @@ function RegisterPage() {
               value={form.password}
               onChange={handleChange}
               fullWidth
+              error={!!errors.password}
+              helperText={errors.password}
             />
             <TextField
               id="confirmPassword"
@@ -195,19 +250,15 @@ function RegisterPage() {
               error={!!errors.confirmPassword}
               helperText={errors.confirmPassword}
             />
-            <Button
+            <GreenButton
               type="submit"
               variant="contained"
               fullWidth
-              sx={{
-                backgroundColor: "#2e7d32",
-                "&:hover": { backgroundColor: "#388e3c" },
-                fontWeight: "bold",
-                textTransform: "none",
-              }}
+              disabled={loading}
+              startIcon={loading && <CircularProgress size={20} color="inherit" />}
             >
-              Register
-            </Button>
+              {loading ? "Registering..." : "Register"}
+            </GreenButton>
 
             <Typography variant="body2" sx={{ mt: 2, color: "#666" }}>
               Already have an account?{" "}
@@ -248,13 +299,12 @@ function RegisterPage() {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button
+            <GreenButton
               onClick={handleCloseSuccessDialog}
               variant="contained"
-              sx={{ textTransform: "none" }}
             >
               Proceed to Login
-            </Button>
+            </GreenButton>
           </DialogActions>
         </Dialog>
 
@@ -265,14 +315,12 @@ function RegisterPage() {
           onClose={handleCloseSnackbar}
           anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
-          <MuiAlert
-            elevation={6}
-            variant="filled"
+          <Alert
             onClose={handleCloseSnackbar}
             severity={snackbar.severity}
           >
             {snackbar.message}
-          </MuiAlert>
+          </Alert>
         </Snackbar>
       </Box>
 
