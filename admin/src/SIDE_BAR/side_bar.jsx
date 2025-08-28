@@ -51,7 +51,7 @@ function Side_bar() {
     { text: "Dashboard", path: "/dashboard" },
     { text: "New Application", path: "/new_records" },
     { text: "Renew Application", path: "/renew_records" },
-    { text: "Profile", path: "/profile" },
+    { text: "Business Profile", path: "/profile" },
   ];
 
   const departmentItems = [
