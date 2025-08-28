@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
@@ -14,13 +15,15 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { alpha } from '@mui/material/styles';
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button'; // New import
-import Modal from '@mui/material/Modal'; // New import
-import Backdrop from '@mui/material/Backdrop'; // New import
-import Fade from '@mui/material/Fade'; // New import
-import CloseIcon from '@mui/icons-material/Close'; // New import
+import Button from '@mui/material/Button';
+import Modal from '@mui/material/Modal';
+import Backdrop from '@mui/material/Backdrop';
+import Fade from '@mui/material/Fade';
+import CloseIcon from '@mui/icons-material/Close';
 
 const logo = "spclogo.png";
+const reqImage = "req.png";
+const renewImage = "renew.png";
 
 // Style for the modal
 const modalStyle = {
@@ -28,24 +31,79 @@ const modalStyle = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 400,
+  width: { xs: '90%', sm: 500 },
+  maxHeight: '90vh',
+  overflowY: 'auto',
   bgcolor: 'background.paper',
-  border: '2px solid #000',
+  // I have removed the border to remove the black outline
   boxShadow: 24,
   p: 4,
-  borderRadius: '8px',
+  borderRadius: '12px',
+};
+
+// Define the shaking keyframes outside the component for better performance
+const shakeAnimation = {
+  '@keyframes shake': {
+    '0%, 100%': {
+      transform: 'rotate(0deg)',
+    },
+    '25%': {
+      transform: 'rotate(-5deg)',
+    },
+    '75%': {
+      transform: 'rotate(5deg)',
+    },
+  },
+};
+
+// Define the content for each modal type
+const modalContents = {
+  newApplication: {
+    title: "REQUIREMENTS FOR NEW BUSINESS REGISTRATION",
+    items: [
+      { text: "- Filled-up Unified Business Permit Application Form" },
+      { text: "- 1 (one) photocopy of: DTI Business Name Registration (if sole proprietor), SEC Registration and Articles of Incorporation (if corporation or partnership), CDA Registration and Articles of Cooperation (if cooperative)" },
+      { text: "- Barangay Clearance (Window 1-BPLD)" },
+      { text: "- Barangay Capitalization" },
+      { text: "- 1 (one) photocopy of Contract of Lease and Lessor Mayor's Permit (if place of business is rented)" },
+      { text: "- Photocopy of Occupancy Permit (if newly constructed building)" },
+      { text: "- Location of Business (Sketch/Map)" },
+      { text: "- Land Tax Clearance/Certificate of Payment" },
+      { text: "- Market Clearance (if stallholder)" },
+    ],
+  },
+  renewal: {
+    title: "REQUIREMENTS FOR BUSINESS PERMIT RENEWAL",
+    items: [
+      { text: "- Filled-up Unified Business Permit Application Form" },
+      { text: "- Previous year's Mayor's Permit" },
+      { text: "- Financial Statement/Income Tax Return of the previous year/Statement of Gross Sales/Receipt" },
+      { text: "- Barangay Clearance (Window 1-BPLD)" },
+      { text: "- Land Tax Clearance/ Certificate of Payment" },
+      { text: "- Market Clearance (if market stall holder)" },
+      { text: "- Public Liability Insurance (for certain businesses)" },
+    ],
+  },
 };
 
 function HomePage() {
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false); // State for modal visibility
+  const [open, setOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalItems, setModalItems] = useState([]);
 
-  const handleOpen = () => setOpen(true);
+  const handleOpen = (type) => {
+    const content = modalContents[type];
+    if (content) {
+      setModalTitle(content.title);
+      setModalItems(content.items);
+      setOpen(true);
+    }
+  };
+
   const handleClose = () => setOpen(false);
   
-  // Function to navigate and handle logout
   const handleLogout = () => {
-    // Implement your logout logic here
     navigate("/");
   };
 
@@ -58,7 +116,6 @@ function HomePage() {
         background: 'linear-gradient(to right, #ffffff, #eaffe9)'
       }}
     >
-      {/* Sidebar container */}
       <Paper
         elevation={8}
         sx={{
@@ -75,7 +132,6 @@ function HomePage() {
         }}
       >
         <Box>
-          {/* Logo */}
           <Box
             component="img"
             src={logo}
@@ -87,11 +143,9 @@ function HomePage() {
               borderRadius: "50%",
               boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
               mx: 'auto',
-              display: 'block'
+              display: 'block',
             }}
           />
-
-          {/* Account Profile Section */}
           <Stack 
             direction="row" 
             spacing={2} 
@@ -108,8 +162,6 @@ function HomePage() {
               </Typography>
             </Box>
           </Stack>
-
-          {/* Navigation list */}
           <List component="nav">
             <ListItemButton
               onClick={() => navigate("/newApplicationPage")}
@@ -127,13 +179,12 @@ function HomePage() {
               </ListItemIcon>
               <ListItemText primary="New Application" sx={{ fontWeight: 'bold' }} />
             </ListItemButton>
-
             <ListItemButton
               sx={{
                 borderRadius: '8px',
                 mb: 1,
                 bgcolor: alpha('#076e0cff', 0.1),
-                '&:hover': {
+                '&:hover': { 
                   bgcolor: alpha('#085f0cff', 0.2),
                 },
               }}
@@ -143,7 +194,6 @@ function HomePage() {
               </ListItemIcon>
               <ListItemText primary="Renew Application" sx={{ fontWeight: 'bold' }} />
             </ListItemButton>
-
             <ListItemButton
               sx={{
                 borderRadius: '8px',
@@ -161,28 +211,24 @@ function HomePage() {
             </ListItemButton>
           </List>
         </Box>
-
-        {/* Logout button */}
         <Box sx={{ p: 2, borderTop: '1px solid #E0E0E0' }}>
           <ListItemButton
             onClick={handleLogout}
             sx={{
               borderRadius: '8px',
-              bgcolor: alpha('#d32f2f', 0.1),
+              bgcolor: '#FF6B6B',
               '&:hover': {
-                bgcolor: alpha('#d32f2f', 0.2),
+                bgcolor: '#E55B5B',
               },
             }}
           >
             <ListItemIcon>
-              <LogoutIcon sx={{ color: '#d32f2f' }} />
+              <LogoutIcon sx={{ color: 'white' }} />
             </ListItemIcon>
-            <ListItemText primary="Logout" sx={{ color: '#d32f2f', fontWeight: 'bold' }} />
+            <ListItemText primary="Logout" sx={{ color: 'white', fontWeight: 'bold' }} />
           </ListItemButton>
         </Box>
       </Paper>
-
-      {/* Main content area */}
       <Box
         component="main"
         sx={{
@@ -194,15 +240,109 @@ function HomePage() {
           flexDirection: 'column'
         }}
       >
-
-        {/* New button to open the modal */}
-        <Button 
-          variant="contained" 
-          onClick={handleOpen} 
-          sx={{ mt: 4, bgcolor: '#2E8B57', '&:hover': { bgcolor: '#006400' } }}
-        >
-          Renewal Requirements
-        </Button>
+        {/* Container for buttons */}
+        <Stack direction="row" spacing={4} sx={{ mt: 4 }}>
+          {/* New Application Requirements Button */}
+          <Box
+            onClick={() => handleOpen('newApplication')}
+            sx={{
+              width: 170,
+              height: 170,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-start',
+              alignItems: 'center',
+              p: 1,
+              borderRadius: '12px',
+              bgcolor: '#d2ead0',
+              cursor: 'pointer',
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+              transition: 'transform 0.2s',
+              '&:hover': {
+                transform: 'scale(1.05)',
+                boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
+              },
+            }}
+          >
+            <Box
+              className="icon"
+              component="img"
+              src={reqImage}
+              alt="New Application Icon"
+              sx={{
+                width: '85%',
+                height: '85%',
+                objectFit: 'contain',
+                animation: `shake 0.5s infinite alternate`,
+                ...shakeAnimation,
+              }}
+            />
+            <Box
+              sx={{
+                width: '110%',
+                bgcolor: '#98c293',
+                py: 1,
+                textAlign: 'center',
+                borderBottomLeftRadius: '12px',
+                borderBottomRightRadius: '12px',
+              }}
+            >
+              <Typography variant="body2" sx={{ color: '#fff', fontWeight: 'bold' }}>
+                NEW APPLICATION REQ.
+              </Typography>
+            </Box>
+          </Box>
+          {/* Renewal Requirements Button */}
+          <Box
+            onClick={() => handleOpen('renewal')}
+            sx={{
+              width: 170,
+              height: 170,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-start',
+              alignItems: 'center',
+              p: 1,
+              borderRadius: '12px',
+              bgcolor: '#d2ead0',
+              cursor: 'pointer',
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+              transition: 'transform 0.2s',
+              '&:hover': {
+                transform: 'scale(1.05)',
+                boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
+              },
+            }}
+          >
+            <Box
+              className="icon"
+              component="img"
+              src={renewImage}
+              alt="Renewal Icon"
+              sx={{
+                width: '85%',
+                height: '85%',
+                objectFit: 'contain',
+                animation: `shake 0.5s infinite alternate`,
+                ...shakeAnimation,
+              }}
+            />
+            <Box
+              sx={{
+                width: '110%',
+                bgcolor: '#98c293',
+                py: 1,
+                textAlign: 'center',
+                borderBottomLeftRadius: '12px',
+                borderBottomRightRadius: '12px',
+              }}
+            >
+              <Typography variant="body2" sx={{ color: '#fff', fontWeight: 'bold' }}>
+                RENEWAL REQ.
+              </Typography>
+            </Box>
+          </Box>
+        </Stack>
 
         {/* Modal component */}
         <Modal
@@ -222,22 +362,21 @@ function HomePage() {
             <Box sx={modalStyle}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography id="transition-modal-title" variant="h6" component="h2" fontWeight="bold">
-                  Renewal Requirements
+                  {modalTitle}
                 </Typography>
                 <Button onClick={handleClose} color="error" sx={{ minWidth: 0, p: 0 }}>
                   <CloseIcon />
                 </Button>
               </Box>
               <Typography id="transition-modal-description" sx={{ mt: 2 }}>
-                To renew your application, please submit the following documents:
-                <br />
-                - A valid ID (e.g., driver's license, passport)
-                <br />
-                - Previous permit number
-                <br />
-                - Proof of address (utility bill, bank statement)
-                <br />
-                - Updated contact information
+                <List dense>
+                  {modalItems.map((item, index) => (
+                    // I have removed the ListItemIcon component to remove the empty space for the icon.
+                    <ListItem key={index} sx={{ py: 0.5, px: 0 }}>
+                      <ListItemText primary={item.text} sx={{ color: 'text.secondary' }} />
+                    </ListItem>
+                  ))}
+                </List>
               </Typography>
             </Box>
           </Fade>
