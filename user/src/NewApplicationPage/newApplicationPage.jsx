@@ -188,12 +188,19 @@ function NewApplicationPage() {
         if (!filesState[field]) {
           newErrors[field] = "This field is required";
         }
+        if (step === 6 && businessLines.length === 0) {
+          newErrors.businessLines =
+            "At least one line of business is required.";
+        }
       } else {
         if (!formDataState[field]) {
           newErrors[field] = "This field is required";
         }
       }
     });
+    if (step === 6 && businessLines.length === 0) {
+      newErrors.businessLines = "At least one line of business is required.";
+    }
 
     // Validate TIN format
     if (
@@ -365,14 +372,22 @@ function NewApplicationPage() {
         );
       case 6:
         return (
-          <Step6BusinessActivity
-            formData={formDataState}
-            handleChange={handleChange}
-            handleFileChange={handleFileChange}
-            businessLines={businessLines}
-            setBusinessLines={setBusinessLines}
-            errors={errors}
-          />
+          <>
+            <Step6BusinessActivity
+              formData={formDataState}
+              handleChange={handleChange}
+              handleFileChange={handleFileChange}
+              businessLines={businessLines}
+              setBusinessLines={setBusinessLines}
+              errors={errors}
+            />
+
+            {errors.businessLines && (
+              <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+                {errors.businessLines}
+              </Typography>
+            )}
+          </>
         );
       case 7:
         return (

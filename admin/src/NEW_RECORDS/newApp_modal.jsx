@@ -28,7 +28,7 @@ const Field = ({ label, value }) => (
       fullWidth
       variant="outlined"
       size="small"
-      disabled
+      // disabled
       InputProps={{
         sx: {
           color: "black",
@@ -66,7 +66,7 @@ const FileField = ({ label, fileKey, fileData, baseUrl }) => (
       fullWidth
       variant="outlined"
       size="small"
-      disabled
+      // disabled
       InputProps={{
         sx: {
           color: "black",

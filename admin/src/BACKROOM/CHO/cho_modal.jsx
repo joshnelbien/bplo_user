@@ -147,7 +147,7 @@ function ChoApplicantModal({ applicant, isOpen, onClose, onApprove }) {
       <DialogContent dividers>
         {/* Business Info */}
         <Section title="Business Information">
-          <Field label="Status" value={applicant.status} />
+          <Field label="Status" value={applicant.CHO} />
           <Field label="ID" value={applicant.id} />
           <Field label="Business Type" value={applicant.BusinessType} />
           <Field label="DSC Registration No" value={applicant.dscRegNo} />

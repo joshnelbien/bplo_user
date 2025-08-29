@@ -190,7 +190,7 @@ function ZoningApplicantModal({
           <>
             {/* Business Info */}
             <Section title="Business Information">
-              <Field label="Status" value={applicant.status} />
+              <Field label="Status" value={applicant.ZONING} />
               <Field label="ID" value={applicant.id} />
               <Field label="Business Type" value={applicant.BusinessType} />
               <Field label="DSC Registration No" value={applicant.dscRegNo} />

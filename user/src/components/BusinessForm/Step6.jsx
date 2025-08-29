@@ -5,6 +5,11 @@ import {
   Button,
   Card,
   CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   FormControl,
   IconButton,
   InputLabel,
@@ -21,7 +26,7 @@ export default function Step6BusinessActivity({
   handleChange,
   handleFileChange,
   businessLines,
-  setBusinessLines
+  setBusinessLines,
 }) {
   const files = [{ label: "TIGE Files", name: "tIGEfiles" }];
 
@@ -34,16 +39,38 @@ export default function Step6BusinessActivity({
   });
   const [editingIndex, setEditingIndex] = useState(null);
 
-const handleFileSelect = (e) => {
-  const { name, files } = e.target;
-  console.log("Step6 selected:", name, files[0]); // 👈 check this fires
-  setSelectedFiles((prev) => ({
-    ...prev,
-    [name]: files[0] ? files[0].name : "",
-  }));
-  handleFileChange(e); // pass file to parent
-};
+  // 🆕 Confirmation dialog state
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [deleteIndex, setDeleteIndex] = useState(null);
 
+  const handleOpenConfirm = (index) => {
+    setDeleteIndex(index);
+    setOpenConfirm(true);
+  };
+
+  const handleCloseConfirm = () => {
+    setOpenConfirm(false);
+    setDeleteIndex(null);
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteIndex !== null) {
+      const updated = [...businessLines];
+      updated.splice(deleteIndex, 1);
+      setBusinessLines(updated);
+    }
+    handleCloseConfirm();
+  };
+
+  const handleFileSelect = (e) => {
+    const { name, files } = e.target;
+    console.log("Step6 selected:", name, files[0]);
+    setSelectedFiles((prev) => ({
+      ...prev,
+      [name]: files[0] ? files[0].name : "",
+    }));
+    handleFileChange(e); // pass file to parent
+  };
 
   const handleBusinessChange = (e) => {
     const { name, value } = e.target;
@@ -73,18 +100,17 @@ const handleFileSelect = (e) => {
       setBusinessLines([...businessLines, newBusiness]);
     }
 
-    setNewBusiness({ lineOfBusiness: "", productService: "", Units: "", capital: "" });
+    setNewBusiness({
+      lineOfBusiness: "",
+      productService: "",
+      Units: "",
+      capital: "",
+    });
   };
 
   const editBusinessLine = (index) => {
     setNewBusiness(businessLines[index]);
     setEditingIndex(index);
-  };
-
-  const deleteBusinessLine = (index) => {
-    const updated = [...businessLines];
-    updated.splice(index, 1);
-    setBusinessLines(updated);
   };
 
   // ✅ Calculate total capital using useMemo (efficient re-rendering)
@@ -95,10 +121,10 @@ const handleFileSelect = (e) => {
     );
   }, [businessLines]);
 
-useEffect(() => {
-  handleChange({ target: { name: "totalCapital", value: totalCapital } });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [totalCapital]);
+  useEffect(() => {
+    handleChange({ target: { name: "totalCapital", value: totalCapital } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [totalCapital]);
 
   return (
     <div style={{ marginBottom: 20 }}>
@@ -240,10 +266,18 @@ useEffect(() => {
                 <Typography variant="body2">Units: {biz.Units}</Typography>
                 <Typography variant="body2">Capital: {biz.capital}</Typography>
                 <Stack direction="row" spacing={1} mt={1}>
-                  <IconButton onClick={() => editBusinessLine(index)}>
+                  <IconButton
+                    onClick={() => editBusinessLine(index)}
+                    color="success"
+                  >
+                    <Typography>Edit</Typography>
                     <EditIcon />
                   </IconButton>
-                  <IconButton onClick={() => deleteBusinessLine(index)}>
+                  <IconButton
+                    onClick={() => handleOpenConfirm(index)}
+                    color="error"
+                  >
+                    <Typography>Delete</Typography>
                     <DeleteIcon />
                   </IconButton>
                 </Stack>
@@ -259,6 +293,30 @@ useEffect(() => {
           </Typography>
         )}
       </Stack>
+
+      {/* 🆕 Delete Confirmation Modal */}
+      <Dialog
+        open={openConfirm}
+        onClose={handleCloseConfirm}
+        aria-labelledby="confirm-delete-title"
+      >
+        <DialogTitle id="confirm-delete-title">Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this line of business?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirm}>Cancel</Button>
+          <Button
+            onClick={handleConfirmDelete}
+            color="error"
+            variant="contained"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
