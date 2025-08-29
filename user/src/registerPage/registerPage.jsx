@@ -38,7 +38,7 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 
 function RegisterPage() {
   const navigate = useNavigate();
-  const API = "http://localhost:5000";
+  const API = import.meta.env.VITE_API_BASE;
 
   const [form, setForm] = useState({
     lastname: "",
@@ -77,7 +77,8 @@ function RegisterPage() {
     if (!form.email) newErrors.email = "Email is required";
     if (!form.mobile) newErrors.mobile = "Mobile Number is required";
     if (!form.password) newErrors.password = "Password is required";
-    if (!form.confirmPassword) newErrors.confirmPassword = "Confirm Password is required";
+    if (!form.confirmPassword)
+      newErrors.confirmPassword = "Confirm Password is required";
 
     if (form.email && !form.email.includes("@")) {
       newErrors.email = "Email must contain @";
@@ -88,7 +89,11 @@ function RegisterPage() {
     if (form.password && form.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
-    if (form.password && form.confirmPassword && form.password !== form.confirmPassword) {
+    if (
+      form.password &&
+      form.confirmPassword &&
+      form.password !== form.confirmPassword
+    ) {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
@@ -122,7 +127,8 @@ function RegisterPage() {
       setOpenSuccessDialog(true);
     } catch (err) {
       setLoading(false);
-      const errorMessage = err.response?.data?.error || "Registration failed. Please try again.";
+      const errorMessage =
+        err.response?.data?.error || "Registration failed. Please try again.";
       setSnackbar({
         open: true,
         message: errorMessage,
@@ -223,7 +229,9 @@ function RegisterPage() {
               onChange={handleChange}
               fullWidth
               InputProps={{
-                startAdornment: <InputAdornment position="start">+63</InputAdornment>,
+                startAdornment: (
+                  <InputAdornment position="start">+63</InputAdornment>
+                ),
               }}
               error={!!errors.mobile}
               helperText={errors.mobile}
@@ -253,7 +261,9 @@ function RegisterPage() {
               variant="contained"
               fullWidth
               disabled={loading}
-              startIcon={loading && <CircularProgress size={20} color="inherit" />}
+              startIcon={
+                loading && <CircularProgress size={20} color="inherit" />
+              }
             >
               {loading ? "Registering..." : "Register"}
             </GreenButton>
@@ -296,10 +306,7 @@ function RegisterPage() {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <GreenButton
-              onClick={handleCloseSuccessDialog}
-              variant="contained"
-            >
+            <GreenButton onClick={handleCloseSuccessDialog} variant="contained">
               Proceed to Login
             </GreenButton>
           </DialogActions>
@@ -311,10 +318,7 @@ function RegisterPage() {
           onClose={handleCloseSnackbar}
           anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
-          <Alert
-            onClose={handleCloseSnackbar}
-            severity={snackbar.severity}
-          >
+          <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
             {snackbar.message}
           </Alert>
         </Snackbar>

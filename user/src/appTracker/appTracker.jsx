@@ -23,20 +23,22 @@ function AppTracker() {
   const departments = ["BPLO", "CSMWO", "OBO", "CHO", "CENRO", "ZONING"];
 
   useEffect(() => {
+    let intervalId;
+
     const fetchData = async () => {
       try {
-        // Fetch trackers
         const trackerRes = await axios.get(`${API}/backroom/backrooms/${id}`);
-        if (trackerRes.data.length > 0) setTrackers(trackerRes.data);
+        if (trackerRes.data.length > 0) {
+          setTrackers(trackerRes.data); // always update
+        }
 
-        // Fetch only file statuses
         const filesRes = await axios.get(`${API}/api/files/${id}`);
         if (filesRes.data.length > 0) {
           const statusList = filesRes.data.map((file) => ({
             trackerId: file.trackerId,
             status: file.status || "pending",
           }));
-          setFileStatuses(statusList);
+          setFileStatuses(statusList); // always update
         }
       } catch (err) {
         console.error("Error fetching tracker/files:", err);
@@ -45,8 +47,12 @@ function AppTracker() {
       }
     };
 
-    fetchData();
-  }, [id]);
+    fetchData(); // initial fetch
+
+    intervalId = setInterval(fetchData, 5000); // auto fetch every 5s
+
+    return () => clearInterval(intervalId);
+  }, [id, API]);
 
   if (loading)
     return (

@@ -50,7 +50,7 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const API = import.meta.env.VITE_API_BASE || "http://localhost:5000"; // Fallback for debugging
+  const API = import.meta.env.VITE_API_BASE;
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({ email: "", password: "" });
   const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
@@ -365,7 +365,8 @@ const LoginPage = () => {
           onClose={handleSnackbarClose}
           severity={snackbarState.severity}
           sx={{
-            backgroundColor: snackbarState.severity === "success" ? "#4caf50" : "#f44336",
+            backgroundColor:
+              snackbarState.severity === "success" ? "#4caf50" : "#f44336",
           }}
         >
           {snackbarState.message}

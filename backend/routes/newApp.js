@@ -58,7 +58,7 @@ router.post(
 
 router.get("/files", async (req, res) => {
   try {
-    const files = await File.findAll({ order: [["createdAt", "DESC"]] });
+    const files = await File.findAll();
     res.json(files);
   } catch (err) {
     console.error(err);

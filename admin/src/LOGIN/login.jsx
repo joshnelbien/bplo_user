@@ -1,16 +1,16 @@
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
-import Paper from '@mui/material/Paper';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import Dialog from '@mui/material/Dialog';
-import DialogContent from '@mui/material/DialogContent';
-import CircularProgress from '@mui/material/CircularProgress'; // Optional: for a loading spinner
-import CheckIcon from '@mui/icons-material/Check'; // If you have @mui/icons-material installed
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Container from "@mui/material/Container";
+import Paper from "@mui/material/Paper";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import CircularProgress from "@mui/material/CircularProgress"; // Optional: for a loading spinner
+import CheckIcon from "@mui/icons-material/Check"; // If you have @mui/icons-material installed
 
 import { useNavigate } from "react-router-dom";
-import React from 'react';
+import React from "react";
 
 function Login() {
   const navigate = useNavigate();
@@ -28,10 +28,6 @@ function Login() {
       setOpenSuccessDialog(false); // Close the dialog
       navigate("/dashboard");
     }, 2000); // 2000ms delay
-  };
-
-  const handleRegister = () => {
-    navigate("/register");
   };
 
   return (
@@ -59,7 +55,7 @@ function Login() {
             borderRadius: 2,
             width: "100%",
             maxWidth: 400,
-            textAlign: "center"
+            textAlign: "center",
           }}
         >
           <Box sx={{ mb: 2 }}>
@@ -70,7 +66,7 @@ function Login() {
             />
           </Box>
 
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold' }}>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold" }}>
             Login
           </Typography>
 
@@ -86,15 +82,14 @@ function Login() {
               label="Email"
               variant="outlined"
               fullWidth
-              defaultValue="jeremie@gmail.com"
               InputLabelProps={{ shrink: true }}
               sx={{
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': { borderColor: '#cccccc' },
-                  '&:hover fieldset': { borderColor: '#999999' },
-                  '&.Mui-focused fieldset': { borderColor: '#666666' },
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": { borderColor: "#cccccc" },
+                  "&:hover fieldset": { borderColor: "#999999" },
+                  "&.Mui-focused fieldset": { borderColor: "#666666" },
                 },
-                '& .MuiInputBase-input': { padding: '12px 14px' },
+                "& .MuiInputBase-input": { padding: "12px 14px" },
               }}
             />
 
@@ -104,15 +99,14 @@ function Login() {
               type="password"
               variant="outlined"
               fullWidth
-              defaultValue="••••••••"
               InputLabelProps={{ shrink: true }}
               sx={{
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': { borderColor: '#cccccc' },
-                  '&:hover fieldset': { borderColor: '#999999' },
-                  '&.Mui-focused fieldset': { borderColor: '#666666' },
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": { borderColor: "#cccccc" },
+                  "&:hover fieldset": { borderColor: "#999999" },
+                  "&.Mui-focused fieldset": { borderColor: "#666666" },
                 },
-                '& .MuiInputBase-input': { padding: '12px 14px' },
+                "& .MuiInputBase-input": { padding: "12px 14px" },
               }}
             />
 
@@ -121,36 +115,20 @@ function Login() {
               variant="contained"
               fullWidth
               sx={{
-                backgroundColor: '#4CAF50',
-                '&:hover': { backgroundColor: '#45a049' },
+                backgroundColor: "#4CAF50",
+                "&:hover": { backgroundColor: "#45a049" },
                 py: 1.5,
-                fontSize: '1rem',
-                textTransform: 'uppercase',
-                boxShadow: 'none',
+                fontSize: "1rem",
+                textTransform: "uppercase",
+                boxShadow: "none",
               }}
             >
               Login
             </Button>
-
-            <Button
-              onClick={handleRegister}
-              variant="contained"
-              fullWidth
-              sx={{
-                backgroundColor: '#4CAF50',
-                '&:hover': { backgroundColor: '#45a049' },
-                py: 1.5,
-                fontSize: '1rem',
-                textTransform: 'uppercase',
-                boxShadow: 'none',
-              }}
-            >
-              Register
-            </Button>
           </Box>
         </Paper>
       </Container>
-      
+
       {/* Success Dialog */}
       <Dialog
         open={openSuccessDialog}
@@ -159,8 +137,8 @@ function Login() {
           sx: {
             borderRadius: 2, // Apply rounded corners to the dialog paper
             minWidth: 300, // Adjust min-width as needed
-            textAlign: 'center'
-          }
+            textAlign: "center",
+          },
         }}
         // disableBackdropClick // Uncomment to prevent closing on outside click
         // disableEscapeKeyDown // Uncomment to prevent closing on Escape key
@@ -168,9 +146,9 @@ function Login() {
         <DialogContent sx={{ padding: 4 }}>
           <Box
             sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
               gap: 2, // Space between elements
             }}
           >
@@ -181,29 +159,33 @@ function Login() {
               sx={{
                 width: 60,
                 height: 60,
-                borderRadius: '50%',
-                backgroundColor: '#4CAF50', // Green background
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                color: 'white', // White checkmark
+                borderRadius: "50%",
+                backgroundColor: "#4CAF50", // Green background
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                color: "white", // White checkmark
                 fontSize: 40,
-                fontWeight: 'bold',
+                fontWeight: "bold",
                 // Using CheckIcon from @mui/icons-material
                 // If not installed, you might just use a div with content '✓'
               }}
             >
-              <CheckIcon sx={{ fontSize: 40 }} /> 
+              <CheckIcon sx={{ fontSize: 40 }} />
             </Box>
 
-            <Typography variant="h5" component="div" sx={{ fontWeight: 'bold' }}>
+            <Typography
+              variant="h5"
+              component="div"
+              sx={{ fontWeight: "bold" }}
+            >
               Login Successful!
             </Typography>
             <Typography variant="body1" color="text.secondary">
               Redirecting to your dashboard...
             </Typography>
             {/* Optional: A small loading spinner */}
-            <CircularProgress size={20} sx={{ mt: 1, color: '#4CAF50' }} />
+            <CircularProgress size={20} sx={{ mt: 1, color: "#4CAF50" }} />
           </Box>
         </DialogContent>
       </Dialog>

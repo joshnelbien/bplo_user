@@ -12,7 +12,12 @@ import {
   Paper,
   TextField,
   Typography,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
+
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import DownloadIcon from "@mui/icons-material/Download";
 
 // Component to display a normal text field
 const Field = ({ label, value }) => (
@@ -84,22 +89,35 @@ const FileField = ({ label, fileKey, fileData, baseUrl }) => (
       }}
     />
     {fileData[fileKey] && (
-      <Typography variant="body2" sx={{ mt: 0.5 }}>
-        <a
-          href={`${baseUrl}/${fileData.id}/${fileKey}`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          View
-        </a>{" "}
-        |{" "}
-        <a
-          href={`${baseUrl}/${fileData.id}/${fileKey}/download`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Download
-        </a>
+      <Typography
+        variant="body2"
+        sx={{ mt: 0.5, display: "flex", gap: 1, alignItems: "center" }}
+      >
+        <Tooltip title="View File">
+          <IconButton
+            size="small"
+            component="a"
+            href={`${baseUrl}/${fileData.id}/${fileKey}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Typography component="span">view</Typography>
+            <VisibilityIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title="Download File">
+          <IconButton
+            size="small"
+            component="a"
+            href={`${baseUrl}/${fileData.id}/${fileKey}/download`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Typography component="span">download</Typography>
+            <DownloadIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       </Typography>
     )}
   </Grid>

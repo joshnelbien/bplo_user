@@ -15,7 +15,7 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import { styled } from "@mui/system";
-import MuiAlert from '@mui/material/Alert';
+import MuiAlert from "@mui/material/Alert";
 import axios from "axios";
 import { useState, forwardRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -30,21 +30,21 @@ import Step6BusinessActivity from "../components/BusinessForm/Step6";
 import Section7FileUploads from "../components/BusinessForm/Step7";
 
 const GreenButton = styled(Button)(({ theme, variant }) => ({
-  borderRadius: '8px',
-  ...(variant === 'contained' && {
-    backgroundColor: '#4caf50',
-    color: '#fff',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    '&:hover': {
-      backgroundColor: '#388e3c',
+  borderRadius: "8px",
+  ...(variant === "contained" && {
+    backgroundColor: "#4caf50",
+    color: "#fff",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    "&:hover": {
+      backgroundColor: "#388e3c",
     },
   }),
-  ...(variant === 'outlined' && {
-    borderColor: '#4caf50',
-    color: '#4caf50',
-    '&:hover': {
-      backgroundColor: 'rgba(76, 175, 80, 0.08)',
-      borderColor: '#4caf50',
+  ...(variant === "outlined" && {
+    borderColor: "#4caf50",
+    color: "#4caf50",
+    "&:hover": {
+      backgroundColor: "rgba(76, 175, 80, 0.08)",
+      borderColor: "#4caf50",
     },
   }),
 }));
@@ -59,7 +59,7 @@ function NewApplicationPage() {
   const [businessLines, setBusinessLines] = useState([]);
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   const [formDataState, setFormDataState] = useState({
     userId: id,
     BusinessType: "",
@@ -132,7 +132,6 @@ function NewApplicationPage() {
   });
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogChecked, setDialogChecked] = useState(false);
   const [errors, setErrors] = useState({});
 
   const steps = [
@@ -152,34 +151,57 @@ function NewApplicationPage() {
 
   const validateStep = () => {
     const newErrors = {};
-    
+
     // Required fields for each step
     const requiredFields = {
-      1: ['BusinessType', 'businessName', 'tinNo', 'TradeName'],
-      2: ['firstName', 'lastName', 'sex', 'eMailAdd', 'mobileNo'],
-      3: ['region', 'province', 'cityOrMunicipality', 'barangay', 'addressLine1', 'zipCode'],
-      4: ['Taxregion', 'Taxprovince', 'TaxcityOrMunicipality', 'Taxbarangay', 'TaxaddressLine1', 'TaxzipCode'],
-      5: ['totalFloorArea', 'numberOfEmployee', 'maleEmployee', 'femaleEmployee'],
+      1: ["BusinessType", "businessName", "tinNo", "TradeName"],
+      2: ["firstName", "lastName", "sex", "eMailAdd", "mobileNo"],
+      3: [
+        "region",
+        "province",
+        "cityOrMunicipality",
+        "barangay",
+        "addressLine1",
+        "zipCode",
+      ],
+      4: [
+        "Taxregion",
+        "Taxprovince",
+        "TaxcityOrMunicipality",
+        "Taxbarangay",
+        "TaxaddressLine1",
+        "TaxzipCode",
+      ],
+      5: [
+        "totalFloorArea",
+        "numberOfEmployee",
+        "maleEmployee",
+        "femaleEmployee",
+      ],
       // 6: ['lineOfBusiness', 'productService', 'Units', 'capital'],
-      7: ['proofOfReg', 'brgyClearance', 'cedula'],
+      7: ["proofOfReg", "brgyClearance", "cedula"],
     };
 
     // Validate required fields for current step
-    requiredFields[step]?.forEach(field => {
+    requiredFields[step]?.forEach((field) => {
       if (step === 7) {
         if (!filesState[field]) {
-          newErrors[field] = 'This field is required';
+          newErrors[field] = "This field is required";
         }
       } else {
         if (!formDataState[field]) {
-          newErrors[field] = 'This field is required';
+          newErrors[field] = "This field is required";
         }
       }
     });
 
     // Validate TIN format
-    if (step === 1 && formDataState.tinNo && !validateTIN(formDataState.tinNo)) {
-      newErrors.tinNo = 'TIN must be in format NNN-NN-NNNN starting with 9';
+    if (
+      step === 1 &&
+      formDataState.tinNo &&
+      !validateTIN(formDataState.tinNo)
+    ) {
+      newErrors.tinNo = "TIN must be in format NNN-NN-NNNN starting with 9";
     }
 
     setErrors(newErrors);
@@ -188,20 +210,25 @@ function NewApplicationPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Format TIN as user types
-    if (name === 'tinNo') {
-      let formattedValue = value.replace(/[^0-9]/g, '');
-      if (formattedValue.length > 0 && formattedValue[0] !== '9') {
-        formattedValue = '9' + formattedValue.slice(1);
+    if (name === "tinNo") {
+      let formattedValue = value.replace(/[^0-9]/g, "");
+      if (formattedValue.length > 0 && formattedValue[0] !== "9") {
+        formattedValue = "9" + formattedValue.slice(1);
       }
       if (formattedValue.length > 3) {
-        formattedValue = formattedValue.slice(0, 3) + '-' + formattedValue.slice(3);
+        formattedValue =
+          formattedValue.slice(0, 3) + "-" + formattedValue.slice(3);
       }
       if (formattedValue.length > 6) {
-        formattedValue = formattedValue.slice(0, 6) + '-' + formattedValue.slice(6);
+        formattedValue =
+          formattedValue.slice(0, 6) + "-" + formattedValue.slice(6);
       }
-      setFormDataState((prev) => ({ ...prev, [name]: formattedValue.slice(0, 11) }));
+      setFormDataState((prev) => ({
+        ...prev,
+        [name]: formattedValue.slice(0, 11),
+      }));
     } else {
       setFormDataState((prev) => ({ ...prev, [name]: value }));
     }
@@ -229,16 +256,13 @@ function NewApplicationPage() {
   };
 
   const handleDialogConfirm = () => {
-    if (dialogChecked) {
-      setStep(step + 1);
-      setDialogOpen(false);
-      setDialogChecked(false);
-      setSnackbarState({
-        open: true,
-        message: "Data saved successfully!",
-        severity: "success",
-      });
-    }
+    setStep(step + 1);
+    setDialogOpen(false);
+    setSnackbarState({
+      open: true,
+      message: "Data saved successfully!",
+      severity: "success",
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -396,8 +420,8 @@ function NewApplicationPage() {
           align="center"
           gutterBottom
           sx={{
-            fontWeight: 'bold',
-            color: '#333',
+            fontWeight: "bold",
+            color: "#333",
             mt: 2,
           }}
         >
@@ -411,17 +435,17 @@ function NewApplicationPage() {
             mb: 4,
             flexWrap: "wrap",
             justifyContent: "center",
-            '& .MuiStepIcon-root': {
-              color: '#4caf50',
-              '&.Mui-active': {
-                color: '#388e3c',
+            "& .MuiStepIcon-root": {
+              color: "#4caf50",
+              "&.Mui-active": {
+                color: "#388e3c",
               },
-              '&.Mui-completed': {
-                color: '#4caf50',
+              "&.Mui-completed": {
+                color: "#4caf50",
               },
             },
-            '& .MuiStepConnector-line': {
-              borderColor: '#4caf50',
+            "& .MuiStepConnector-line": {
+              borderColor: "#4caf50",
             },
           }}
         >
@@ -432,8 +456,8 @@ function NewApplicationPage() {
                 sx={{
                   "& .MuiStepLabel-label": {
                     fontSize: { xs: "0.6rem", sm: "0.75rem", md: "0.9rem" },
-                    textAlign: 'center',
-                    color: step - 1 >= index ? '#4caf50' : '#333',
+                    textAlign: "center",
+                    color: step - 1 >= index ? "#4caf50" : "#333",
                   },
                 }}
               >
@@ -483,35 +507,15 @@ function NewApplicationPage() {
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
         <DialogTitle>Confirm Navigation</DialogTitle>
         <DialogContent>
-          <Typography>Are you sure you want to proceed to the next step?</Typography>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={dialogChecked}
-                onChange={(e) => setDialogChecked(e.target.checked)}
-                sx={{
-                  color: '#4caf50',
-                  '&.Mui-checked': {
-                    color: '#4caf50',
-                  },
-                }}
-              />
-            }
-            label="I confirm the information provided is correct"
-          />
+          <Typography>
+            Are you sure you want to proceed to the next step?
+          </Typography>
         </DialogContent>
         <DialogActions>
-          <GreenButton
-            variant="outlined"
-            onClick={() => setDialogOpen(false)}
-          >
+          <GreenButton variant="outlined" onClick={() => setDialogOpen(false)}>
             Cancel
           </GreenButton>
-          <GreenButton
-            variant="contained"
-            onClick={handleDialogConfirm}
-            disabled={!dialogChecked}
-          >
+          <GreenButton variant="contained" onClick={handleDialogConfirm}>
             Confirm
           </GreenButton>
         </DialogActions>
@@ -527,7 +531,8 @@ function NewApplicationPage() {
           onClose={handleSnackbarClose}
           severity={snackbarState.severity}
           sx={{
-            backgroundColor: snackbarState.severity === 'success' ? '#4caf50' : '#d32f2f',
+            backgroundColor:
+              snackbarState.severity === "success" ? "#4caf50" : "#d32f2f",
           }}
         >
           {snackbarState.message}
