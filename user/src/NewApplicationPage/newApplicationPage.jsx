@@ -132,7 +132,6 @@ function NewApplicationPage() {
   });
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogChecked, setDialogChecked] = useState(false);
   const [errors, setErrors] = useState({});
 
   const steps = [
@@ -257,16 +256,13 @@ function NewApplicationPage() {
   };
 
   const handleDialogConfirm = () => {
-    if (dialogChecked) {
-      setStep(step + 1);
-      setDialogOpen(false);
-      setDialogChecked(false);
-      setSnackbarState({
-        open: true,
-        message: "Data saved successfully!",
-        severity: "success",
-      });
-    }
+    setStep(step + 1);
+    setDialogOpen(false);
+    setSnackbarState({
+      open: true,
+      message: "Data saved successfully!",
+      severity: "success",
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -514,31 +510,12 @@ function NewApplicationPage() {
           <Typography>
             Are you sure you want to proceed to the next step?
           </Typography>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={dialogChecked}
-                onChange={(e) => setDialogChecked(e.target.checked)}
-                sx={{
-                  color: "#4caf50",
-                  "&.Mui-checked": {
-                    color: "#4caf50",
-                  },
-                }}
-              />
-            }
-            label="I confirm the information provided is correct"
-          />
         </DialogContent>
         <DialogActions>
           <GreenButton variant="outlined" onClick={() => setDialogOpen(false)}>
             Cancel
           </GreenButton>
-          <GreenButton
-            variant="contained"
-            onClick={handleDialogConfirm}
-            disabled={!dialogChecked}
-          >
+          <GreenButton variant="contained" onClick={handleDialogConfirm}>
             Confirm
           </GreenButton>
         </DialogActions>

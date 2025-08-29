@@ -12,7 +12,11 @@ import {
   Paper,
   TextField,
   Typography,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import DownloadIcon from "@mui/icons-material/Download";
 
 // Component to display a normal text field
 const Field = ({ label, value }) => (
@@ -56,9 +60,7 @@ const FileField = ({ label, fileKey, fileData }) => (
     <TextField
       label={label}
       value={
-        fileData[fileKey]
-          ? fileData[`${fileKey}_filename`]
-          : "No file uploaded"
+        fileData[fileKey] ? fileData[`${fileKey}_filename`] : "No file uploaded"
       }
       fullWidth
       variant="outlined"
@@ -85,23 +87,37 @@ const FileField = ({ label, fileKey, fileData }) => (
         },
       }}
     />
+
     {fileData[fileKey] && (
-      <Typography variant="body2" sx={{ mt: 0.5 }}>
-        <a
-          href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          View
-        </a>{" "}
-        |{" "}
-        <a
-          href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}/download`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Download
-        </a>
+      <Typography
+        component="span" // ✅ prevent nested <p>
+        sx={{ mt: 0.5, display: "flex", gap: 1, alignItems: "center" }}
+      >
+        <Tooltip title="View File">
+          <IconButton
+            size="small"
+            component="a"
+            href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Typography component="span"> View</Typography>
+            <VisibilityIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title="Download File">
+          <IconButton
+            size="small"
+            component="a"
+            href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}/download`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Typography component="span"> Download</Typography>
+            <DownloadIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       </Typography>
     )}
   </Grid>
@@ -160,7 +176,10 @@ function CmswoApplicantModal({ applicant, isOpen, onClose, onApprove }) {
         <Section title="Business Address">
           <Field label="Region" value={applicant.region} />
           <Field label="Province" value={applicant.province} />
-          <Field label="City/Municipality" value={applicant.cityOrMunicipality} />
+          <Field
+            label="City/Municipality"
+            value={applicant.cityOrMunicipality}
+          />
           <Field label="Barangay" value={applicant.barangay} />
           <Field label="Address Line 1" value={applicant.addressLine1} />
           <Field label="Zip Code" value={applicant.zipCode} />
@@ -184,7 +203,10 @@ function CmswoApplicantModal({ applicant, isOpen, onClose, onApprove }) {
         <Section title="Taxpayer Address">
           <Field label="Tax Region" value={applicant.Taxregion} />
           <Field label="Tax Province" value={applicant.Taxprovince} />
-          <Field label="Tax City/Municipality" value={applicant.TaxcityOrMunicipality} />
+          <Field
+            label="Tax City/Municipality"
+            value={applicant.TaxcityOrMunicipality}
+          />
           <Field label="Tax Barangay" value={applicant.Taxbarangay} />
           <Field label="Tax Address Line 1" value={applicant.TaxaddressLine1} />
           <Field label="Tax Zip Code" value={applicant.TaxzipCode} />
@@ -203,62 +225,99 @@ function CmswoApplicantModal({ applicant, isOpen, onClose, onApprove }) {
 
         {/* Business Activity */}
         <Section title="Business Activity & Incentives">
-  <Field label="Tax Incentives" value={applicant.tIGE} />
-  {applicant.tIGE === "Yes" && (
-    <FileField
-      fileKey="tIGEfiles"
-      label="Tax Incentives From Government"
-      fileData={applicant}
-    />
-  )}
+          <Field label="Tax Incentives" value={applicant.tIGE} />
+          {applicant.tIGE === "Yes" && (
+            <FileField
+              fileKey="tIGEfiles"
+              label="Tax Incentives From Government"
+              fileData={applicant}
+            />
+          )}
 
-  <Field label="Office Type" value={applicant.officeType} />
+          <Field label="Office Type" value={applicant.officeType} />
 
-  {applicant.lineOfBusiness?.split(",").map((lob, index) => {
-    const product = applicant.productService?.split(",")[index] || "";
-    const unit = applicant.Units?.split(",")[index] || "";
-    const capital = applicant.capital?.split(",")[index] || "";
+          {applicant.lineOfBusiness?.split(",").map((lob, index) => {
+            const product = applicant.productService?.split(",")[index] || "";
+            const unit = applicant.Units?.split(",")[index] || "";
+            const capital = applicant.capital?.split(",")[index] || "";
 
-    return (
-      <Paper
-        key={index}
-        elevation={2}
-        sx={{ p: 2, mb: 2, borderRadius: 2, backgroundColor: "#f9f9f9" }}
-      >
-        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-          Business Line {index + 1}
-        </Typography>
+            return (
+              <Paper
+                key={index}
+                elevation={2}
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  borderRadius: 2,
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                  Business Line {index + 1}
+                </Typography>
 
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Field label="Line of Business" value={lob.trim()} />
-          </Grid>
-          <Grid item xs={12}>
-            <Field label="Product/Service" value={product.trim()} />
-          </Grid>
-          <Grid item xs={12}>
-            <Field label="Units" value={unit.trim()} />
-          </Grid>
-          <Grid item xs={12}>
-            <Field label="Capital" value={capital.trim()} />
-          </Grid>
-        </Grid>
-      </Paper>
-    );
-  })}
-</Section>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Field label="Line of Business" value={lob.trim()} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Field label="Product/Service" value={product.trim()} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Field label="Units" value={unit.trim()} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Field label="Capital" value={capital.trim()} />
+                  </Grid>
+                </Grid>
+              </Paper>
+            );
+          })}
+        </Section>
 
         {/* Business Requirements */}
         <Section title="Business Requirements">
-          <FileField fileKey="proofOfReg" label="Proof of Registration" fileData={applicant} />
-          <FileField fileKey="proofOfRightToUseLoc" label="Proof of Right to Use Location" fileData={applicant} />
-          <FileField fileKey="locationPlan" label="Location Plan" fileData={applicant} />
-          <FileField fileKey="brgyClearance" label="Barangay Clearance" fileData={applicant} />
-          <FileField fileKey="marketClearance" label="Market Clearance" fileData={applicant} />
-          <FileField fileKey="occupancyPermit" label="Occupancy Permit" fileData={applicant} />
+          <FileField
+            fileKey="proofOfReg"
+            label="Proof of Registration"
+            fileData={applicant}
+          />
+          <FileField
+            fileKey="proofOfRightToUseLoc"
+            label="Proof of Right to Use Location"
+            fileData={applicant}
+          />
+          <FileField
+            fileKey="locationPlan"
+            label="Location Plan"
+            fileData={applicant}
+          />
+          <FileField
+            fileKey="brgyClearance"
+            label="Barangay Clearance"
+            fileData={applicant}
+          />
+          <FileField
+            fileKey="marketClearance"
+            label="Market Clearance"
+            fileData={applicant}
+          />
+          <FileField
+            fileKey="occupancyPermit"
+            label="Occupancy Permit"
+            fileData={applicant}
+          />
           <FileField fileKey="cedula" label="Cedula" fileData={applicant} />
-          <FileField fileKey="photoOfBusinessEstInt" label="Photo (Interior)" fileData={applicant} />
-          <FileField fileKey="photoOfBusinessEstExt" label="Photo (Exterior)" fileData={applicant} />
+          <FileField
+            fileKey="photoOfBusinessEstInt"
+            label="Photo (Interior)"
+            fileData={applicant}
+          />
+          <FileField
+            fileKey="photoOfBusinessEstExt"
+            label="Photo (Exterior)"
+            fileData={applicant}
+          />
         </Section>
       </DialogContent>
 
@@ -266,7 +325,11 @@ function CmswoApplicantModal({ applicant, isOpen, onClose, onApprove }) {
         <Button variant="outlined" onClick={onClose} color="secondary">
           Close
         </Button>
-        <Button onClick={() => onApprove(applicant.id)} variant="contained" color="success">
+        <Button
+          onClick={() => onApprove(applicant.id)}
+          variant="contained"
+          color="success"
+        >
           Approve
         </Button>
 

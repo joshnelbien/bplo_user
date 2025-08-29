@@ -74,7 +74,7 @@ const menuItems = [
 const departmentItems = [
   { text: "OBO", path: "/obo", icon: <BusinessIcon /> },
   { text: "CHO", path: "/cho", icon: <LocalHospitalIcon /> },
-  { text: "CMSWO", path: "/cmswo", icon: <FamilyRestroomIcon /> },
+  { text: "CSWMO", path: "/cmswo", icon: <FamilyRestroomIcon /> },
   { text: "ZONING", path: "/zoning", icon: <RoomIcon /> },
   { text: "CENRO", path: "/cenro", icon: <NatureIcon /> },
 ];

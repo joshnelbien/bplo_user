@@ -28,7 +28,9 @@ function AppTracker() {
     const fetchData = async () => {
       try {
         const trackerRes = await axios.get(`${API}/backroom/backrooms/${id}`);
-        if (trackerRes.data.length > 0) setTrackers(trackerRes.data);
+        if (trackerRes.data.length > 0) {
+          setTrackers(trackerRes.data); // always update
+        }
 
         const filesRes = await axios.get(`${API}/api/files/${id}`);
         if (filesRes.data.length > 0) {
@@ -36,7 +38,7 @@ function AppTracker() {
             trackerId: file.trackerId,
             status: file.status || "pending",
           }));
-          setFileStatuses(statusList);
+          setFileStatuses(statusList); // always update
         }
       } catch (err) {
         console.error("Error fetching tracker/files:", err);
@@ -46,9 +48,10 @@ function AppTracker() {
     };
 
     fetchData(); // initial fetch
-    intervalId = setInterval(fetchData, 5000); // fetch every 5s
 
-    return () => clearInterval(intervalId); // cleanup on unmount
+    intervalId = setInterval(fetchData, 5000); // auto fetch every 5s
+
+    return () => clearInterval(intervalId);
   }, [id, API]);
 
   if (loading)

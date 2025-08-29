@@ -12,7 +12,11 @@ import {
   Paper,
   TextField,
   Typography,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import DownloadIcon from "@mui/icons-material/Download";
 
 // Component to display a normal text field
 const Field = ({ label, value }) => (
@@ -83,23 +87,37 @@ const FileField = ({ label, fileKey, fileData }) => (
         },
       }}
     />
+
     {fileData[fileKey] && (
-      <Typography variant="body2" sx={{ mt: 0.5 }}>
-        <a
-          href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          View
-        </a>{" "}
-        |{" "}
-        <a
-          href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}/download`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Download
-        </a>
+      <Typography
+        component="span" // ✅ prevent nested <p>
+        sx={{ mt: 0.5, display: "flex", gap: 1, alignItems: "center" }}
+      >
+        <Tooltip title="View File">
+          <IconButton
+            size="small"
+            component="a"
+            href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Typography component="span"> View</Typography>
+            <VisibilityIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title="Download File">
+          <IconButton
+            size="small"
+            component="a"
+            href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}/download`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Typography component="span"> Download</Typography>
+            <DownloadIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       </Typography>
     )}
   </Grid>

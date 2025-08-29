@@ -30,10 +30,6 @@ function Login() {
     }, 2000); // 2000ms delay
   };
 
-  const handleRegister = () => {
-    navigate("/register");
-  };
-
   return (
     <Box
       sx={{
@@ -128,22 +124,6 @@ function Login() {
               }}
             >
               Login
-            </Button>
-
-            <Button
-              onClick={handleRegister}
-              variant="contained"
-              fullWidth
-              sx={{
-                backgroundColor: "#4CAF50",
-                "&:hover": { backgroundColor: "#45a049" },
-                py: 1.5,
-                fontSize: "1rem",
-                textTransform: "uppercase",
-                boxShadow: "none",
-              }}
-            >
-              Register
             </Button>
           </Box>
         </Paper>
