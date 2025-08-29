@@ -25,17 +25,15 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import RoomIcon from "@mui/icons-material/Room";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
-import GiteIcon from "@mui/icons-material/Gite";
 import NatureIcon from "@mui/icons-material/Nature";
 import LogoutIcon from "@mui/icons-material/Logout";
 import CloseIcon from "@mui/icons-material/Close";
 import BusinessIcon from "@mui/icons-material/Business";
 
-// Define a common style for all list items
+// Common style
 const listItemStyle = {
   borderRadius: "8px",
   my: 0.5,
@@ -44,7 +42,7 @@ const listItemStyle = {
   },
 };
 
-// Define a style for the active list item
+// Active style
 const activeListItemStyle = {
   ...listItemStyle,
   backgroundColor: alpha("#1a7322", 0.2),
@@ -54,7 +52,7 @@ const activeListItemStyle = {
   },
 };
 
-// Define a list of menu items with their text, path, and icon component
+// Main menu items
 const menuItems = [
   { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon /> },
   {
@@ -67,10 +65,9 @@ const menuItems = [
     path: "/renew_records",
     icon: <AutorenewIcon />,
   },
-  // { text: "Business Profile", path: "/profile", icon: <AccountCircleIcon /> },
 ];
 
-// Define a list of department items for the dropdown menu
+// Department items
 const departmentItems = [
   { text: "OBO", path: "/obo", icon: <BusinessIcon /> },
   { text: "CHO", path: "/cho", icon: <LocalHospitalIcon /> },
@@ -79,7 +76,6 @@ const departmentItems = [
   { text: "CENRO", path: "/cenro", icon: <NatureIcon /> },
 ];
 
-// Adjusted drawer width to be slightly wider
 const drawerWidth = 270;
 
 const modalStyle = {
@@ -103,13 +99,12 @@ function Side_bar() {
   const location = useLocation();
   const [openDrawer, setOpenDrawer] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [openDept, setOpenDept] = useState(false); // State for the dropdown menu
-  const [openLogoutDialog, setOpenLogoutDialog] = useState(false); // State for logout confirmation dialog
+  const [openDept, setOpenDept] = useState(false);
+  const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
 
-  // Check if the screen size is mobile
   const isMobile = useMediaQuery("(max-width:768px)");
 
-  // Handle online/offline status changes
+  // Track online/offline status
   useEffect(() => {
     const updateStatus = () => setIsOnline(navigator.onLine);
     window.addEventListener("online", updateStatus);
@@ -120,9 +115,18 @@ function Side_bar() {
     };
   }, []);
 
-  const handleLogout = () => {
-    setOpenLogoutDialog(true);
-  };
+  // ✅ Auto-open when inside a department, close otherwise
+  useEffect(() => {
+    if (
+      departmentItems.some((dept) => location.pathname.startsWith(dept.path))
+    ) {
+      setOpenDept(true);
+    } else {
+      setOpenDept(false);
+    }
+  }, [location.pathname]);
+
+  const handleLogout = () => setOpenLogoutDialog(true);
 
   const confirmLogout = () => {
     navigate("/");
@@ -139,15 +143,15 @@ function Side_bar() {
           alignItems: "center",
         }}
       >
-        {/* Increased SPC Logo size slightly and removed the line under it */}
         <img
           src="/spclogo.png"
           alt="SPC Logo"
           style={{ width: "100px", height: "100px", objectFit: "contain" }}
         />
       </Box>
+
       <List sx={{ p: 2, flexGrow: 1 }}>
-        {/* Main Menu Items */}
+        {/* Main Menu */}
         {menuItems.map((item) => (
           <ListItem key={item.text} disablePadding>
             <ListItemButton
@@ -163,11 +167,9 @@ function Side_bar() {
             >
               <ListItemIcon
                 sx={{
-                  color: "#1a7322", // Always green
-                  transition: "transform 0.3s ease-in-out",
-                  "&:hover": {
-                    transform: "scale(1.1)",
-                  },
+                  color: "#1a7322",
+                  transition: "transform 0.3s",
+                  "&:hover": { transform: "scale(1.1)" },
                 }}
               >
                 {item.icon}
@@ -177,21 +179,13 @@ function Side_bar() {
           </ListItem>
         ))}
 
-        {/* Dropdown Section */}
+        {/* Dropdown */}
         <ListItemButton
           onClick={() => setOpenDept(!openDept)}
           sx={listItemStyle}
         >
           <ListItemIcon>
-            <ExpandMore
-              sx={{
-                color: "#1a7322", // Always green
-                transition: "transform 0.3s ease-in-out",
-                "&:hover": {
-                  transform: "scale(1.1)",
-                },
-              }}
-            />
+            <BusinessIcon sx={{ color: "#1a7322" }} />
           </ListItemIcon>
           <ListItemText primary="Backroom" />
           {openDept ? (
@@ -200,6 +194,7 @@ function Side_bar() {
             <ExpandMore sx={{ color: "#1a7322" }} />
           )}
         </ListItemButton>
+
         <Collapse in={openDept} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             {departmentItems.map((dept) => (
@@ -218,11 +213,9 @@ function Side_bar() {
                 >
                   <ListItemIcon
                     sx={{
-                      color: "#1a7322", // Always green
-                      transition: "transform 0.3s ease-in-out",
-                      "&:hover": {
-                        transform: "scale(1.1)",
-                      },
+                      color: "#1a7322",
+                      transition: "transform 0.3s",
+                      "&:hover": { transform: "scale(1.1)" },
                     }}
                   >
                     {dept.icon}
@@ -235,28 +228,25 @@ function Side_bar() {
         </Collapse>
       </List>
 
-      {/* Logout Button at the bottom */}
+      {/* Logout */}
       <Box sx={{ p: 2, pt: 0 }}>
-        <Divider sx={{ my: 1, borderColor: "transparent" }} />{" "}
-        {/* Removed outline from the divider */}
+        <Divider sx={{ my: 1, borderColor: "transparent" }} />
         <ListItem disablePadding>
           <ListItemButton
             onClick={handleLogout}
             sx={{
               ...listItemStyle,
-              bgcolor: "#F76C6C", // Changed color to #F76C6C
-              "&:hover": { bgcolor: "#E61414" }, // Changed hover color to #E61414
-              border: "none", // Removed outline from logout button
+              bgcolor: "#F76C6C",
+              "&:hover": { bgcolor: "#E61414" },
+              border: "none",
             }}
           >
             <ListItemIcon>
               <LogoutIcon
                 sx={{
                   color: "white",
-                  transition: "transform 0.3s ease-in-out",
-                  "&:hover": {
-                    transform: "scale(1.1)",
-                  },
+                  transition: "transform 0.3s",
+                  "&:hover": { transform: "scale(1.1)" },
                 }}
               />
             </ListItemIcon>
@@ -272,7 +262,7 @@ function Side_bar() {
 
   return (
     <Box sx={{ display: "flex" }}>
-      {/* Container for the online/offline status chip in the top right corner */}
+      {/* Status chip */}
       <Box
         sx={{
           position: "fixed",
@@ -293,7 +283,7 @@ function Side_bar() {
         />
       </Box>
 
-      {/* Drawer for Sidebar */}
+      {/* Drawer */}
       <Box
         component="nav"
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
@@ -302,17 +292,15 @@ function Side_bar() {
           variant={isMobile ? "temporary" : "permanent"}
           open={isMobile ? openDrawer : true}
           onClose={() => setOpenDrawer(false)}
-          ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
-          }}
+          ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: "block", sm: "block" },
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
               width: drawerWidth,
               backgroundColor: "white",
-              boxShadow: "2px 0 5px rgba(0, 0, 0, 0.2)", // Added shadow to the right side
-              borderRight: "none", // Removed outline
+              boxShadow: "2px 0 5px rgba(0,0,0,0.2)",
+              borderRight: "none",
             },
           }}
         >
@@ -320,13 +308,8 @@ function Side_bar() {
         </Drawer>
       </Box>
 
-      {/* Logout Confirmation Dialog */}
-      <Modal
-        open={openLogoutDialog}
-        onClose={() => setOpenLogoutDialog(false)}
-        aria-labelledby="logout-modal-title"
-        aria-describedby="logout-modal-description"
-      >
+      {/* Logout Modal */}
+      <Modal open={openLogoutDialog} onClose={() => setOpenLogoutDialog(false)}>
         <Box sx={modalStyle}>
           <IconButton
             onClick={() => setOpenLogoutDialog(false)}
@@ -335,7 +318,7 @@ function Side_bar() {
               right: 8,
               top: 8,
               color: "grey.500",
-              transition: "transform 0.3s ease-in-out",
+              transition: "0.3s",
               "&:hover": {
                 transform: "scale(1.2) rotate(90deg)",
                 color: "error.main",
@@ -344,10 +327,7 @@ function Side_bar() {
           >
             <CloseIcon />
           </IconButton>
-          <Typography
-            id="logout-modal-description"
-            sx={{ mt: 2, mb: 3, textAlign: "center" }}
-          >
+          <Typography sx={{ mt: 2, mb: 3, textAlign: "center" }}>
             Are you sure you want to log out?
           </Typography>
           <Box sx={{ display: "flex", gap: 2 }}>
