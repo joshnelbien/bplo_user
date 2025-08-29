@@ -18,24 +18,27 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import MuiAlert from "@mui/material/Alert";
 
 const logo = "spclogo.png";
+const mainBackground = "mainbg.png"; // Set the path for the new background image
 
-// Styled GreenButton to match NewApplicationPage
+// Styled GreenButton with updated colors
 const GreenButton = styled(Button)(({ theme, variant }) => ({
   borderRadius: "8px",
   ...(variant === "contained" && {
-    backgroundColor: "#4caf50",
+    // New background color for the buttons
+    backgroundColor: "#22361C",
     color: "#fff",
     boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
     "&:hover": {
-      backgroundColor: "#388e3c",
+      // New background color on hover
+      backgroundColor: "#12300B",
     },
   }),
   ...(variant === "outlined" && {
-    borderColor: "#4caf50",
-    color: "#4caf50",
+    borderColor: "#22361C",
+    color: "#22361C",
     "&:hover": {
-      backgroundColor: "rgba(76, 175, 80, 0.08)",
-      borderColor: "#4caf50",
+      backgroundColor: "rgba(34, 54, 28, 0.08)",
+      borderColor: "#22361C",
     },
   }),
 }));
@@ -163,11 +166,15 @@ const LoginPage = () => {
       <Box
         sx={{
           display: "flex",
-          justifyContent: "center",
+          justifyContent: "flex-end", // Align items to the right
           alignItems: "center",
           minHeight: "100vh",
-          backgroundColor: "#f0f2f5",
           padding: { xs: 2, sm: 4 },
+          // Set background image and properties
+          backgroundImage: `url(${mainBackground})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
         }}
       >
         <Paper
@@ -179,7 +186,9 @@ const LoginPage = () => {
             maxWidth: 400,
             textAlign: "center",
             backgroundColor: "#ffffff",
-            boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.1)",
+            // Enhanced box shadow for a more professional look
+            boxShadow: "0 10px 40px rgba(0, 0, 0, 0.2)",
+            mr: { xs: 0, sm: 10 }, // Add right margin for spacing from the edge
           }}
         >
           <Box sx={{ mb: 3 }}>
@@ -193,6 +202,11 @@ const LoginPage = () => {
                 mb: 2,
                 borderRadius: "50%",
                 boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+                // Professional hover effect for the logo
+                transition: "transform 0.3s ease-in-out",
+                "&:hover": {
+                  transform: "scale(1.1) rotate(5deg)",
+                },
               }}
             />
             <Typography
