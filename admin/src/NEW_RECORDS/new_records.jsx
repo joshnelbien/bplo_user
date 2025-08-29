@@ -28,6 +28,8 @@ function New_records() {
   const recordsPerPage = 20;
 
   useEffect(() => {
+    let intervalId;
+
     const fetchApplicants = async () => {
       try {
         // ✅ Pending applicants
@@ -44,7 +46,10 @@ function New_records() {
       }
     };
 
-    fetchApplicants();
+    fetchApplicants(); // initial fetch
+    intervalId = setInterval(fetchApplicants, 1000); // fetch every 5 seconds
+
+    return () => clearInterval(intervalId);
   }, []);
 
   // ✅ Decide which dataset to show
