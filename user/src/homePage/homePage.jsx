@@ -125,7 +125,7 @@ function HomePage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch(`${API}/userAccounts/${id}`); // <-- adjust API endpoint
+        const response = await fetch(`${API}/userAccountsCloud/${id}`); // <-- adjust API endpoint
         if (!response.ok) throw new Error("Failed to fetch user");
         const data = await response.json();
 

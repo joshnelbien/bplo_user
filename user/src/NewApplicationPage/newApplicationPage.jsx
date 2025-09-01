@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -10,7 +11,7 @@ import {
   Step,
   StepLabel,
   Stepper,
-  Typography
+  Typography,
 } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
 import { styled } from "@mui/system";
@@ -57,6 +58,7 @@ function NewApplicationPage() {
   const [businessLines, setBusinessLines] = useState([]);
   const { id } = useParams();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formDataState, setFormDataState] = useState({
     userId: id,
@@ -271,60 +273,63 @@ function NewApplicationPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateStep()) {
-      setSnackbarState({
-        open: true,
-        message: "Please complete all required fields",
-        severity: "error",
-      });
-      return;
-    }
-
-    const formData = new FormData();
-
-    if (businessLines.length > 0) {
-      formData.append(
-        "lineOfBusiness",
-        businessLines.map((b) => b.lineOfBusiness).join(",")
-      );
-      formData.append(
-        "productService",
-        businessLines.map((b) => b.productService).join(",")
-      );
-      formData.append("Units", businessLines.map((b) => b.Units).join(","));
-      formData.append("capital", businessLines.map((b) => b.capital).join(","));
-    }
-
-    Object.keys(formDataState).forEach((key) => {
-      if (formDataState[key]) formData.append(key, formDataState[key]);
+  e.preventDefault();
+  if (!validateStep()) {
+    setSnackbarState({
+      open: true,
+      message: "Please complete all required fields",
+      severity: "error",
     });
+    return;
+  }
 
-    Object.keys(filesState).forEach((key) => {
-      if (filesState[key]) formData.append(key, filesState[key]);
+  setIsSubmitting(true); // Disable button & show processing text
+
+  const formData = new FormData();
+
+  if (businessLines.length > 0) {
+    formData.append(
+      "lineOfBusiness",
+      businessLines.map((b) => b.lineOfBusiness).join(",")
+    );
+    formData.append(
+      "productService",
+      businessLines.map((b) => b.productService).join(",")
+    );
+    formData.append("Units", businessLines.map((b) => b.Units).join(","));
+    formData.append("capital", businessLines.map((b) => b.capital).join(","));
+  }
+
+  Object.keys(formDataState).forEach((key) => {
+    if (formDataState[key]) formData.append(key, formDataState[key]);
+  });
+
+  Object.keys(filesState).forEach((key) => {
+    if (filesState[key]) formData.append(key, filesState[key]);
+  });
+
+  try {
+    await axios.post(`${API}/api/files`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
-
-    try {
-      await axios.post(`${API}/api/files`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      setSnackbarState({
-        open: true,
-        message: "Application submitted successfully!",
-        severity: "success",
-      });
-      setTimeout(() => {
-        navigate(`/homePage/${id}`);
-      }, 2000);
-    } catch (err) {
-      console.error(err);
-      setSnackbarState({
-        open: true,
-        message: "Submission failed. Please try again.",
-        severity: "error",
-      });
-    }
-  };
+    setSnackbarState({
+      open: true,
+      message: "Application submitted successfully!",
+      severity: "success",
+    });
+    setTimeout(() => {
+      navigate(`/homePage/${id}`);
+    }, 2000);
+  } catch (err) {
+    console.error(err);
+    setSnackbarState({
+      open: true,
+      message: "Submission failed. Please try again.",
+      severity: "error",
+    });
+    setIsSubmitting(false); // Re-enable if error
+  }
+};
 
   const renderStepContent = (step) => {
     switch (step) {
@@ -509,10 +514,22 @@ function NewApplicationPage() {
               </GreenButton>
             )}
             {step === 7 && (
-              <GreenButton type="submit" variant="contained">
-                Submit Form
-              </GreenButton>
-            )}
+  <GreenButton
+    type="submit"
+    variant="contained"
+    disabled={isSubmitting}
+    sx={{ display: "flex", alignItems: "center", gap: 1 }}
+  >
+    {isSubmitting ? (
+      <>
+        <CircularProgress size={20} color="inherit" />
+        Processing...
+      </>
+    ) : (
+      "Submit Form"
+    )}
+  </GreenButton>
+)}
           </Box>
         </form>
       </Paper>

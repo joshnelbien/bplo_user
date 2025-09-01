@@ -1,21 +1,21 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import CancelIcon from "@mui/icons-material/Cancel";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
   Box,
   Button,
-  Paper,
-  TextField,
-  Typography,
   Dialog,
   DialogContent,
   DialogContentText,
+  Paper,
   Snackbar,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { styled } from "@mui/system";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
 import MuiAlert from "@mui/material/Alert";
+import { styled } from "@mui/system";
+import axios from "axios";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const logo = "spclogo.png";
 const mainBackground = "mainbg.png"; // Set the path for the new background image
@@ -113,12 +113,12 @@ const LoginPage = () => {
 
     try {
       // Log request details for debugging
-      console.log("Sending request to:", `${API}/userAccounts/login`, {
+      console.log("Sending request to:", `${API}/userAccountsCloud/login`, {
         data: form,
         headers: { "Content-Type": "application/json" },
       });
 
-      const res = await axios.post(`${API}/userAccounts/login`, form, {
+      const res = await axios.post(`${API}/userAccountsCloud/login`, form, {
         headers: { "Content-Type": "application/json" },
       });
 

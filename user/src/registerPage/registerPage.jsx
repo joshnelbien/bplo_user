@@ -1,24 +1,24 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
   Box,
   Button,
-  Paper,
-  TextField,
-  Typography,
-  InputAdornment,
-  Link,
+  CircularProgress,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogContentText,
-  DialogActions,
+  InputAdornment,
+  Link,
+  Paper,
   Snackbar,
-  CircularProgress,
+  TextField,
+  Typography,
 } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { styled } from "@mui/system";
+import axios from "axios";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Styled GreenButton
 const GreenButton = styled(Button)(({ theme, variant }) => ({
@@ -116,7 +116,7 @@ function RegisterPage() {
 
     try {
       const { lastname, firstname, email, password } = form;
-      await axios.post(`${API}/userAccounts/register`, {
+      await axios.post(`${API}/userAccountsCloud/register`, {
         lastname,
         firstname,
         email,
