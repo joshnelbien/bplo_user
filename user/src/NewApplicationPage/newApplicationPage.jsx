@@ -1,23 +1,21 @@
 import {
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Paper,
+  Snackbar,
   Step,
   StepLabel,
   Stepper,
-  Typography,
-  Snackbar,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Checkbox,
-  FormControlLabel,
+  Typography
 } from "@mui/material";
-import { styled } from "@mui/system";
 import MuiAlert from "@mui/material/Alert";
+import { styled } from "@mui/system";
 import axios from "axios";
-import { useState, forwardRef, useEffect } from "react";
+import { forwardRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 // Assuming these components are available in your project structure
@@ -29,7 +27,7 @@ import Step5BusinessDetails from "../components/BusinessForm/Step5";
 import Step6BusinessActivity from "../components/BusinessForm/Step6";
 import Section7FileUploads from "../components/BusinessForm/Step7";
 
-const GreenButton = styled(Button)(({ theme, variant }) => ({
+const GreenButton = styled(Button)(({ variant }) => ({
   borderRadius: "8px",
   ...(variant === "contained" && {
     backgroundColor: "#4caf50",
