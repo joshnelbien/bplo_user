@@ -15,7 +15,7 @@ const backroom = require("./routes/backroom");
 const app = express();
 app.use(
   cors({
-    origin: "https://bplo-user-40ew.onrender.com",
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
