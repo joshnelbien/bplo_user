@@ -1,31 +1,23 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Typography from "@mui/material/Typography";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
-import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
-import LogoutIcon from "@mui/icons-material/Logout";
-import { alpha } from "@mui/material/styles";
-import Avatar from "@mui/material/Avatar";
-import Stack from "@mui/material/Stack";
-import Button from "@mui/material/Button";
-import Modal from "@mui/material/Modal";
-import Backdrop from "@mui/material/Backdrop";
-import Fade from "@mui/material/Fade";
-import CloseIcon from "@mui/icons-material/Close";
 
-const logo = "/spclogo.png";
+import CloseIcon from "@mui/icons-material/Close";
+import Backdrop from "@mui/material/Backdrop";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Fade from "@mui/material/Fade";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import Modal from "@mui/material/Modal";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { useState } from "react";
+import { useParams } from "react-router-dom";
+
+import Sidebar from "../sideBar/sideBar";
+
 const reqImage = "/req.png";
 const renewImage = "/renew.png";
 
-// Style for the main modal
 const modalStyle = {
   position: "absolute",
   top: "50%",
@@ -40,52 +32,24 @@ const modalStyle = {
   borderRadius: "12px",
 };
 
-// Style for the confirmation modal
-const confirmationModalStyle = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: { xs: "90%", sm: 400 },
-  bgcolor: "background.paper",
-  boxShadow: 24,
-  p: 4,
-  borderRadius: "12px",
-  textAlign: "center",
-};
-
-// Define the shaking keyframes outside the component for better performance
 const shakeAnimation = {
   "@keyframes shake": {
-    "0%, 100%": {
-      transform: "rotate(0deg)",
-    },
-    "25%": {
-      transform: "rotate(-5deg)",
-    },
-    "75%": {
-      transform: "rotate(5deg)",
-    },
+    "0%, 100%": { transform: "rotate(0deg)" },
+    "25%": { transform: "rotate(-5deg)" },
+    "75%": { transform: "rotate(5deg)" },
   },
 };
 
-// Define the content for each modal type
 const modalContents = {
   newApplication: {
     title: "REQUIREMENTS FOR NEW BUSINESS REGISTRATION",
     items: [
       { text: "- Filled-up Unified Business Permit Application Form" },
-      {
-        text: "- 1 (one) photocopy of: DTI Business Name Registration (if sole proprietor), SEC Registration and Articles of Incorporation (if corporation or partnership), CDA Registration and Articles of Cooperation (if cooperative)",
-      },
+      { text: "- 1 photocopy of DTI/SEC/CDA Registration and Articles of Incorporation" },
       { text: "- Barangay Clearance (Window 1-BPLD)" },
       { text: "- Barangay Capitalization" },
-      {
-        text: "- 1 (one) photocopy of Contract of Lease and Lessor Mayor's Permit (if place of business is rented)",
-      },
-      {
-        text: "- Photocopy of Occupancy Permit (if newly constructed building)",
-      },
+      { text: "- Contract of Lease and Lessor Mayor's Permit (if rented)" },
+      { text: "- Photocopy of Occupancy Permit (if newly constructed building)" },
       { text: "- Location of Business (Sketch/Map)" },
       { text: "- Land Tax Clearance/Certificate of Payment" },
       { text: "- Market Clearance (if stallholder)" },
@@ -96,9 +60,7 @@ const modalContents = {
     items: [
       { text: "- Filled-up Unified Business Permit Application Form" },
       { text: "- Previous year's Mayor's Permit" },
-      {
-        text: "- Financial Statement/Income Tax Return of the previous year/Statement of Gross Sales/Receipt",
-      },
+      { text: "- Financial Statement/Income Tax Return of previous year" },
       { text: "- Barangay Clearance (Window 1-BPLD)" },
       { text: "- Land Tax Clearance/ Certificate of Payment" },
       { text: "- Market Clearance (if market stall holder)" },
@@ -107,40 +69,12 @@ const modalContents = {
   },
 };
 
-function HomePage() {
-  const navigate = useNavigate();
+const HomePage = () => {
+  const { id } = useParams();
+
   const [open, setOpen] = useState(false);
-  const [openLogoutModal, setOpenLogoutModal] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalItems, setModalItems] = useState([]);
-  const { id } = useParams();
-  const API = import.meta.env.VITE_API_BASE;
-
-  const [user, setUser] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-  });
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await fetch(`${API}/userAccountsCloud/${id}`); // <-- adjust API endpoint
-        if (!response.ok) throw new Error("Failed to fetch user");
-        const data = await response.json();
-
-        setUser({
-          firstName: data.firstname,
-          lastName: data.lastname,
-          email: data.email,
-        });
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
-    };
-
-    if (id) fetchUser();
-  }, [id]);
 
   const handleOpen = (type) => {
     const content = modalContents[type];
@@ -152,381 +86,128 @@ function HomePage() {
   };
 
   const handleClose = () => setOpen(false);
-  const handleOpenLogoutModal = () => setOpenLogoutModal(true);
-  const handleCloseLogoutModal = () => setOpenLogoutModal(false);
-
-  const handleConfirmLogout = () => {
-    navigate("/");
-  };
 
   return (
     <Box
       sx={{
         display: "flex",
+        flexDirection: { xs: "column", sm: "row" },
         height: "100vh",
-        overflow: "hidden",
         background: "linear-gradient(to right, #ffffff, #eaffe9)",
       }}
     >
-      <Paper
-        elevation={8}
-        sx={{
-          width: { xs: "100%", sm: 280 },
-          maxWidth: 280,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          p: 2,
-          borderRadius: 0,
-          backgroundColor: "#FFFFFF",
-          boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.1)",
-          overflowY: "auto",
-        }}
-      >
-        <Box>
-          <Box
-            component="img"
-            src={logo}
-            alt="SPC Logo"
-            sx={{
-              height: 100,
-              width: 100,
-              mb: 3,
-              borderRadius: "50%",
-              boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-              mx: "auto",
-              display: "block",
-            }}
-          />
-          <Stack
-            direction="row"
-            spacing={2}
-            alignItems="center"
-            sx={{
-              mb: 4,
-              p: 2,
-              border: "1px solid #e0e0e0",
-              borderRadius: "8px",
-              bgcolor: "#f5f5f5",
-            }}
-          >
-            <Avatar sx={{ width: 56, height: 56, bgcolor: "#2E8B57" }}>
-              {user.firstName && user.lastName
-                ? `${user.firstName[0].toLocaleUpperCase()}${user.lastName[0].toLocaleUpperCase()}`
-                : "?"}
-            </Avatar>
-            <Box>
-              <Typography
-                variant="body1"
-                sx={{
-                  wordWrap: "break-word",
-                  whiteSpace: "normal",
-                  maxWidth: "100%",
-                }}
-              >
-                {user.firstName} {user.lastName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" noWrap>
-                {user.email}
-              </Typography>
-            </Box>
-          </Stack>
-          <List component="nav">
-            <ListItemButton
-              onClick={() => navigate(`/newApplicationPage/${id}`)}
-              sx={{
-                borderRadius: "8px",
-                mb: 1,
-                bgcolor: alpha("#076e0cff", 0.1),
-                "&:hover": {
-                  bgcolor: alpha("#085f0cff", 0.2),
-                },
-              }}
-            >
-              <ListItemIcon>
-                <AddCircleOutlineIcon sx={{ color: "#2E8B57" }} />
-              </ListItemIcon>
-              <ListItemText
-                primary="New Application"
-                sx={{ fontWeight: "bold" }}
-              />
-            </ListItemButton>
-            <ListItemButton
-              sx={{
-                borderRadius: "8px",
-                mb: 1,
-                bgcolor: alpha("#076e0cff", 0.1),
-                "&:hover": {
-                  bgcolor: alpha("#085f0cff", 0.2),
-                },
-              }}
-            >
-              <ListItemIcon>
-                <AutorenewIcon sx={{ color: "#2E8B57" }} />
-              </ListItemIcon>
-              <ListItemText
-                primary="Renew Application"
-                sx={{ fontWeight: "bold" }}
-              />
-            </ListItemButton>
-            <ListItemButton
-              onClick={() => navigate(`/appTracker/${id}`)}
-              sx={{
-                borderRadius: "8px",
-                mb: 1,
-                bgcolor: alpha("#2E8B57", 0.1),
-                "&:hover": {
-                  bgcolor: alpha("#2E8B57", 0.2),
-                },
-              }}
-            >
-              <ListItemIcon>
-                <AssignmentTurnedInIcon sx={{ color: "#2E8B57" }} />
-              </ListItemIcon>
-              <ListItemText
-                primary="Application Status"
-                sx={{ fontWeight: "bold" }}
-              />
-            </ListItemButton>
-          </List>
-        </Box>
-        <Box sx={{ p: 2, borderTop: "1px solid #E0E0E0" }}>
-          <ListItemButton
-            onClick={handleOpenLogoutModal}
-            sx={{
-              borderRadius: "8px",
-              bgcolor: "#FF6B6B",
-              "&:hover": {
-                bgcolor: "#E55B5B",
-              },
-            }}
-          >
-            <ListItemIcon>
-              <LogoutIcon sx={{ color: "white" }} />
-            </ListItemIcon>
-            <ListItemText
-              primary="Logout"
-              sx={{ color: "white", fontWeight: "bold" }}
-            />
-          </ListItemButton>
-        </Box>
-      </Paper>
+      <Sidebar id={id} />
+
+      {/* Main content container */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          p: { xs: 2, sm: 4 },
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          flexDirection: "column",
+          p: { xs: 2, sm: 4 },
         }}
       >
-        {/* Container for buttons */}
-        <Stack direction="row" spacing={4} sx={{ mt: 4 }}>
-          {/* New Application Requirements Button */}
-          <Box
-            onClick={() => handleOpen("newApplication")}
-            sx={{
-              width: 170,
-              height: 170,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "flex-start",
-              alignItems: "center",
-              p: 1,
-              borderRadius: "12px",
-              bgcolor: "#d2ead0",
-              cursor: "pointer",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-              transition: "transform 0.2s",
-              "&:hover": {
-                transform: "scale(1.05)",
-                boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
-              },
-            }}
-          >
-            <Box
-              className="icon"
-              component="img"
-              src={reqImage}
-              alt="New Application Icon"
-              sx={{
-                width: "85%",
-                height: "85%",
-                objectFit: "contain",
-                animation: `shake 0.5s infinite alternate`,
-                ...shakeAnimation,
-              }}
-            />
-            <Box
-              sx={{
-                width: "110%",
-                bgcolor: "#98c293",
-                py: 1,
-                textAlign: "center",
-                borderBottomLeftRadius: "12px",
-                borderBottomRightRadius: "12px",
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{ color: "#fff", fontWeight: "bold" }}
-              >
-                NEW APPLICATION REQ.
-              </Typography>
-            </Box>
-          </Box>
-          {/* Renewal Requirements Button */}
-          <Box
-            onClick={() => handleOpen("renewal")}
-            sx={{
-              width: 170,
-              height: 170,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "flex-start",
-              alignItems: "center",
-              p: 1,
-              borderRadius: "12px",
-              bgcolor: "#d2ead0",
-              cursor: "pointer",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-              transition: "transform 0.2s",
-              "&:hover": {
-                transform: "scale(1.05)",
-                boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
-              },
-            }}
-          >
-            <Box
-              className="icon"
-              component="img"
-              src={renewImage}
-              alt="Renewal Icon"
-              sx={{
-                width: "85%",
-                height: "85%",
-                objectFit: "contain",
-                animation: `shake 0.5s infinite alternate`,
-                ...shakeAnimation,
-              }}
-            />
-            <Box
-              sx={{
-                width: "110%",
-                bgcolor: "#98c293",
-                py: 1,
-                textAlign: "center",
-                borderBottomLeftRadius: "12px",
-                borderBottomRightRadius: "12px",
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{ color: "#fff", fontWeight: "bold" }}
-              >
-                RENEWAL REQ.
-              </Typography>
-            </Box>
-          </Box>
-        </Stack>
-
-        {/* Requirements Modal */}
-        <Modal
-          aria-labelledby="transition-modal-title"
-          aria-describedby="transition-modal-description"
-          open={open}
-          onClose={handleClose}
-          closeAfterTransition
-          slots={{ backdrop: Backdrop }}
-          slotProps={{
-            backdrop: {
-              timeout: 500,
-            },
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={{ xs: 2, sm: 4 }}
+          sx={{
+            width: "100%",
+            maxWidth: 900,
+            flexWrap: "wrap",
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          <Fade in={open}>
-            <Box sx={modalStyle}>
+          {["newApplication", "renewal"].map((type) => {
+            const isNew = type === "newApplication";
+            const img = isNew ? reqImage : renewImage;
+            const title = isNew ? "NEW APPLICATION REQ." : "RENEWAL REQ.";
+            return (
               <Box
+                key={type}
+                onClick={() => handleOpen(type)}
                 sx={{
+                  width: { xs: "80%", sm: 170 },
+                  maxWidth: 200,
+                  height: { xs: 160, sm: 170 },
                   display: "flex",
-                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  justifyContent: "flex-start",
                   alignItems: "center",
-                  mb: 2,
+                  p: 1,
+                  borderRadius: "12px",
+                  bgcolor: "#d2ead0",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  transition: "transform 0.2s",
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                    boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
+                  },
                 }}
               >
-                <Typography
-                  id="transition-modal-title"
-                  variant="h6"
-                  component="h2"
-                  fontWeight="bold"
+                <Box
+                  component="img"
+                  src={img}
+                  alt={`${title} Icon`}
+                  sx={{
+                    width: { xs: "80%", sm: "85%" },
+                    height: { xs: "80%", sm: "85%" },
+                    objectFit: "contain",
+                    animation: `shake 0.5s infinite alternate`,
+                    ...shakeAnimation,
+                  }}
+                />
+                <Box
+                  sx={{
+                    width: "110%",
+                    bgcolor: "#98c293",
+                    py: 1,
+                    textAlign: "center",
+                    borderBottomLeftRadius: "12px",
+                    borderBottomRightRadius: "12px",
+                  }}
                 >
-                  {modalTitle}
-                </Typography>
-                <Button
-                  onClick={handleClose}
-                  color="error"
-                  sx={{ minWidth: 0, p: 0 }}
-                >
-                  <CloseIcon />
-                </Button>
+                  <Typography variant="body2" sx={{ color: "#fff", fontWeight: "bold" }}>
+                    {title}
+                  </Typography>
+                </Box>
               </Box>
-              <Typography id="transition-modal-description" sx={{ mt: 2 }}>
-                <List dense>
-                  {modalItems.map((item, index) => (
-                    <ListItem key={index} sx={{ py: 0.5, px: 0 }}>
-                      <ListItemText
-                        primary={item.text}
-                        sx={{ color: "text.secondary" }}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </Typography>
-            </Box>
-          </Fade>
-        </Modal>
-
-        {/* Logout Confirmation Modal */}
-        <Modal
-          open={openLogoutModal}
-          onClose={handleCloseLogoutModal}
-          closeAfterTransition
-          slots={{ backdrop: Backdrop }}
-          slotProps={{
-            backdrop: {
-              timeout: 500,
-            },
-          }}
-        >
-          <Fade in={openLogoutModal}>
-            <Box sx={confirmationModalStyle}>
-              <Typography variant="h6" component="h2" mb={2}>
-                Are you sure you want to log out?
-              </Typography>
-              <Stack direction="row" spacing={2} justifyContent="center">
-                <Button
-                  variant="contained"
-                  color="error"
-                  onClick={handleConfirmLogout}
-                >
-                  Yes
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={handleCloseLogoutModal}
-                >
-                  No
-                </Button>
-              </Stack>
-            </Box>
-          </Fade>
-        </Modal>
+            );
+          })}
+        </Stack>
       </Box>
+
+      {/* Requirement Modal */}
+      <Modal
+        open={open}
+        onClose={handleClose}
+        closeAfterTransition
+        slots={{ backdrop: Backdrop }}
+        slotProps={{ backdrop: { timeout: 500 } }}
+      >
+        <Fade in={open}>
+          <Box sx={modalStyle}>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+              <Typography variant="h6" fontWeight="bold">{modalTitle}</Typography>
+              <Button onClick={handleClose} color="error" sx={{ minWidth: 0, p: 0 }}>
+                <CloseIcon />
+              </Button>
+            </Box>
+            <List dense>
+              {modalItems.map((item, i) => (
+                <ListItemButton key={i} sx={{ py: 0.5, px: 0 }}>
+                  <ListItemText primary={item.text} sx={{ color: "text.secondary" }} />
+                </ListItemButton>
+              ))}
+            </List>
+          </Box>
+        </Fade>
+      </Modal>
     </Box>
   );
-}
+};
 
 export default HomePage;
