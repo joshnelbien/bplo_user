@@ -309,7 +309,7 @@ function NewApplicationPage() {
   });
 
   try {
-    await axios.post(`${API}/api/files`, formData, {
+    await axios.post(`${API}/newApplicationCloud/files`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     setSnackbarState({

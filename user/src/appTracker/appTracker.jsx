@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import {
-  Stepper,
+  Box,
+  Button,
+  CircularProgress,
+  Paper,
   Step,
   StepLabel,
+  Stepper,
   Typography,
-  Box,
-  Paper,
-  CircularProgress,
-  Button,
-  useTheme,
   useMediaQuery,
+  useTheme,
 } from "@mui/material";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 function AppTracker() {
   const { id } = useParams();
@@ -32,12 +32,12 @@ function AppTracker() {
 
     const fetchData = async () => {
       try {
-        const trackerRes = await axios.get(`${API}/backroom/backrooms/${id}`);
+        const trackerRes = await axios.get(`${API}/backroomCloud/backrooms/${id}`);
         if (trackerRes.data.length > 0) {
           setTrackers(trackerRes.data);
         }
 
-        const filesRes = await axios.get(`${API}/api/files/${id}`);
+        const filesRes = await axios.get(`${API}/newApplicationCloud/files/${id}`);
         if (filesRes.data.length > 0) {
           const statusList = filesRes.data.map((file) => ({
             trackerId: file.trackerId,
