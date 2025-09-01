@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogContent,
   DialogContentText,
@@ -18,18 +20,16 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const logo = "spclogo.png";
-const mainBackground = "mainbg.png"; // Set the path for the new background image
+const mainBackground = "mainbg.png";
 
-// Styled GreenButton with updated colors
+// Styled GreenButton
 const GreenButton = styled(Button)(({ theme, variant }) => ({
   borderRadius: "8px",
   ...(variant === "contained" && {
-    // New background color for the buttons
     backgroundColor: "#22361C",
     color: "#fff",
     boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
     "&:hover": {
-      // New background color on hover
       backgroundColor: "#12300B",
     },
   }),
@@ -43,7 +43,6 @@ const GreenButton = styled(Button)(({ theme, variant }) => ({
   }),
 }));
 
-// Snackbar Alert component
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
@@ -61,12 +60,12 @@ const LoginPage = () => {
     severity: "error",
   });
 
-  // Validate email and password
+  const [loading, setLoading] = useState(false); // ✅ for button loading state
+
   const validateForm = () => {
     const newErrors = { email: "", password: "" };
     let isValid = true;
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!form.email) {
       newErrors.email = "Email is required";
@@ -76,7 +75,6 @@ const LoginPage = () => {
       isValid = false;
     }
 
-    // Password validation
     if (!form.password) {
       newErrors.password = "Password is required";
       isValid = false;
@@ -89,19 +87,15 @@ const LoginPage = () => {
     return isValid;
   };
 
-  // Handle input changes
   const handleChange = (e) => {
     const { id, value } = e.target;
     setForm((prev) => ({ ...prev, [id]: value }));
-    // Clear error for the field being edited
     setErrors((prev) => ({ ...prev, [id]: "" }));
   };
 
-  // Handle login submit
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Validate form before sending request
     if (!validateForm()) {
       setSnackbarState({
         open: true,
@@ -112,11 +106,7 @@ const LoginPage = () => {
     }
 
     try {
-      // Log request details for debugging
-      console.log("Sending request to:", `${API}/userAccountsCloud/login`, {
-        data: form,
-        headers: { "Content-Type": "application/json" },
-      });
+      setLoading(true); // ✅ start loading
 
       const res = await axios.post(`${API}/userAccountsCloud/login`, form, {
         headers: { "Content-Type": "application/json" },
@@ -127,7 +117,6 @@ const LoginPage = () => {
         throw new Error("User ID not found in response");
       }
 
-      // Show success dialog
       setOpenSuccessDialog(true);
       setTimeout(() => {
         setOpenSuccessDialog(false);
@@ -147,16 +136,16 @@ const LoginPage = () => {
       setTimeout(() => {
         setOpenErrorDialog(false);
       }, 1500);
+    } finally {
+      setLoading(false); // ✅ stop loading
     }
   };
 
-  // Handle register navigation
   const handleRegister = (e) => {
     e.preventDefault();
     navigate("/registerPage");
   };
 
-  // Handle Snackbar close
   const handleSnackbarClose = () => {
     setSnackbarState({ ...snackbarState, open: false });
   };
@@ -166,11 +155,10 @@ const LoginPage = () => {
       <Box
         sx={{
           display: "flex",
-          justifyContent: "flex-end", // Align items to the right
+          justifyContent: "flex-end",
           alignItems: "center",
           minHeight: "100vh",
           padding: { xs: 2, sm: 4 },
-          // Set background image and properties
           backgroundImage: `url(${mainBackground})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -186,9 +174,8 @@ const LoginPage = () => {
             maxWidth: 400,
             textAlign: "center",
             backgroundColor: "#ffffff",
-            // Enhanced box shadow for a more professional look
             boxShadow: "0 10px 40px rgba(0, 0, 0, 0.2)",
-            mr: { xs: 0, sm: 10 }, // Add right margin for spacing from the edge
+            mr: { xs: 0, sm: 10 },
           }}
         >
           <Box sx={{ mb: 3 }}>
@@ -202,7 +189,6 @@ const LoginPage = () => {
                 mb: 2,
                 borderRadius: "50%",
                 boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-                // Professional hover effect for the logo
                 transition: "transform 0.3s ease-in-out",
                 "&:hover": {
                   transform: "scale(1.1) rotate(5deg)",
@@ -241,17 +227,6 @@ const LoginPage = () => {
               fullWidth
               error={!!errors.email}
               helperText={errors.email}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": { borderColor: "#cccccc" },
-                  "&:hover fieldset": { borderColor: "#4caf50" },
-                  "&.Mui-focused fieldset": { borderColor: "#4caf50" },
-                  "&.Mui-error fieldset": { borderColor: "#f44336" },
-                },
-                "& .MuiInputLabel-root": { color: "#666666" },
-                "& .MuiInputLabel-root.Mui-focused": { color: "#4caf50" },
-                "& .MuiFormHelperText-root": { color: "#f44336" },
-              }}
             />
             <TextField
               id="password"
@@ -263,36 +238,25 @@ const LoginPage = () => {
               fullWidth
               error={!!errors.password}
               helperText={errors.password}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": { borderColor: "#cccccc" },
-                  "&:hover fieldset": { borderColor: "#4caf50" },
-                  "&.Mui-focused fieldset": { borderColor: "#4caf50" },
-                  "&.Mui-error fieldset": { borderColor: "#f44336" },
-                },
-                "& .MuiInputLabel-root": { color: "#666666" },
-                "& .MuiInputLabel-root.Mui-focused": { color: "#4caf50" },
-                "& .MuiFormHelperText-root": { color: "#f44336" },
-              }}
             />
             <GreenButton
               type="submit"
               variant="contained"
               fullWidth
-              sx={{
-                py: 1.5,
-                mt: 1,
-              }}
+              disabled={loading}
+              sx={{ py: 1.5, mt: 1 }}
             >
-              Login
+              {loading ? (
+                <CircularProgress size={24} sx={{ color: "#fff" }} />
+              ) : (
+                "Login"
+              )}
             </GreenButton>
             <GreenButton
               onClick={handleRegister}
               variant="contained"
               fullWidth
-              sx={{
-                py: 1.5,
-              }}
+              sx={{ py: 1.5 }}
             >
               Register
             </GreenButton>
