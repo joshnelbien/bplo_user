@@ -319,6 +319,68 @@ function OboApplicantModal({ applicant, isOpen, onClose, onApprove }) {
             fileData={applicant}
           />
         </Section>
+
+        <Section title="OBO Attachments">
+          <TextField
+            label="Building Structure Architectural Presentability"
+            variant="outlined"
+            size="small"
+            fullWidth
+            sx={{
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
+            }}
+          />
+
+          <TextField
+            label="Sanitary Requirements"
+            variant="outlined"
+            size="small"
+            fullWidth
+            sx={{
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
+            }}
+          />
+
+          <TextField
+            label="Mechanical"
+            variant="outlined"
+            size="small"
+            fullWidth
+            sx={{
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
+            }}
+          />
+
+          <TextField
+            label="Electrical"
+            variant="outlined"
+            size="small"
+            fullWidth
+            sx={{
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
+            }}
+          />
+
+          <TextField
+            label="Signage"
+            variant="outlined"
+            size="small"
+            fullWidth
+            sx={{
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
+            }}
+          />
+
+          <TextField
+            label="Electronics"
+            variant="outlined"
+            size="small"
+            fullWidth
+            sx={{
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
+            }}
+          />
+        </Section>
       </DialogContent>
 
       <DialogActions>

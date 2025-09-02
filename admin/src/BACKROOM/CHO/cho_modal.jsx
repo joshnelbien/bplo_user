@@ -322,10 +322,23 @@ function ChoApplicantModal({ applicant, isOpen, onClose, onApprove }) {
 
         <Section title="CHO Attachments">
           <TextField
+            label="Sanitary Fee"
+            variant="outlined"
+            size="small"
+            fullWidth
+            sx={{
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
+            }}
+          />
+
+          <TextField
             type="file"
             placeholder="No file selected"
             size="small"
             fullWidth
+            InputLabelProps={{
+              shrink: true,
+            }}
           />
         </Section>
       </DialogContent>

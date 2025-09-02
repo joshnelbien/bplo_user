@@ -66,11 +66,11 @@ router.post("/obo/approve/:id", async (req, res) => {
 
 router.post(
   "/zoning/approve/:id",
-
   upload.single("zoningCert"),
   async (req, res) => {
     try {
       const { id } = req.params;
+      const { zoningFee } = req.body; // ✅ grab zoningFee from formData
 
       const applicant = await Backroom.findByPk(id);
       if (!applicant) {
@@ -80,6 +80,9 @@ router.post(
       // ✅ Save zoning approval
       applicant.ZONING = "Approved";
       applicant.ZONINGtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+
+      // ✅ Save zoning fee
+      applicant.zoningFee = zoningFee; // <-- must exist in your DB model
 
       // ✅ If file uploaded, save it in DB
       if (req.file) {
