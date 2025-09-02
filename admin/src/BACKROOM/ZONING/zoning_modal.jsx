@@ -430,8 +430,6 @@ function ZoningApplicantModal({
           <ZoningCert applicant={applicant} />
         )}
       </DialogContent>
-
-      {/* ✅ Cleaned Up Actions */}
       {/* ✅ Cleaned Up Actions */}
       <DialogActions>
         <Button variant="outlined" onClick={onClose} color="secondary">

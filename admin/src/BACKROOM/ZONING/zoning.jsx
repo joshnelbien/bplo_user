@@ -66,7 +66,21 @@ function Zoning() {
     try {
       const formData = new FormData();
       if (selectedFiles["zoningCert"]) {
-        formData.append("zoningCert", selectedFiles["zoningCert"]); // file object
+        formData.append("zoningCert", selectedFiles["zoningCert"]);
+      }
+
+      const applicant = applicants.find((a) => a.id === id);
+      if (applicant) {
+        const calculateZoningFee = (totalCapital) => {
+          if (totalCapital <= 5000) return "Exempted";
+          if (totalCapital >= 5001 && totalCapital <= 10000) return 100;
+          if (totalCapital >= 10001 && totalCapital <= 50000) return 200;
+          if (totalCapital >= 50001 && totalCapital <= 100000) return 300;
+          return ((totalCapital - 100000) * 0.001 + 500).toFixed(2);
+        };
+
+        const zoningFee = calculateZoningFee(Number(applicant.totalCapital));
+        formData.append("zoningFee", zoningFee);
       }
 
       await axios.post(
@@ -77,7 +91,13 @@ function Zoning() {
 
       setApplicants((prev) =>
         prev.map((applicant) =>
-          applicant.id === id ? { ...applicant, ZONING: "Approved" } : applicant
+          applicant.id === id
+            ? {
+                ...applicant,
+                ZONING: "Approved",
+                zoningFee: formData.get("zoningFee"),
+              }
+            : applicant
         )
       );
       alert("Applicant approved");

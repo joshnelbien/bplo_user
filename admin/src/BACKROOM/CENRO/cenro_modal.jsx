@@ -320,6 +320,28 @@ function CenroApplicantModal({ applicant, isOpen, onClose, onApprove }) {
             fileData={applicant}
           />
         </Section>
+
+        <Section title="CENRO Attachments">
+          <TextField
+            label="Sanitary Fee"
+            variant="outlined"
+            size="small"
+            fullWidth
+            sx={{
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
+            }}
+          />
+
+          <TextField
+            type="file"
+            placeholder="No file selected"
+            size="small"
+            fullWidth
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+        </Section>
       </DialogContent>
 
       <DialogActions>

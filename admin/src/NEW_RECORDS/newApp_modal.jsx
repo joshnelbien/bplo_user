@@ -14,6 +14,7 @@ import {
   Typography,
   Tooltip,
   IconButton,
+  Stack,
 } from "@mui/material";
 
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -155,7 +156,6 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
           <Field label="TIN No" value={applicant.tinNo} />
           <Field label="Trade Name" value={applicant.TradeName} />
         </Section>
-
         {/* Personal Info */}
         <Section title="Personal Information">
           <Field label="First Name" value={applicant.firstName} />
@@ -164,14 +164,12 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
           <Field label="Extension Name" value={applicant.extName} />
           <Field label="Sex" value={applicant.sex} />
         </Section>
-
         {/* Contact Info */}
         <Section title="Contact Information">
           <Field label="Email" value={applicant.eMailAdd} />
           <Field label="Telephone No" value={applicant.telNo} />
           <Field label="Mobile No" value={applicant.mobileNo} />
         </Section>
-
         {/* Address */}
         <Section title="Business Address">
           <Field label="Region" value={applicant.region} />
@@ -185,7 +183,6 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
           <Field label="Zip Code" value={applicant.zipCode} />
           <Field label="Pin Address" value={applicant.pinAddress} />
         </Section>
-
         {/* Operations */}
         <Section title="Business Operation">
           <Field label="Total Floor Area" value={applicant.totalFloorArea} />
@@ -198,7 +195,6 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
           <Field label="No. of Nozzles" value={applicant.numNozzle} />
           <Field label="Weigh Scale" value={applicant.weighScale} />
         </Section>
-
         {/* Tax Address */}
         <Section title="Taxpayer Address">
           <Field label="Tax Region" value={applicant.Taxregion} />
@@ -222,7 +218,6 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
             </>
           )}
         </Section>
-
         {/* Business Activity */}
         <Section title="Business Activity & Incentives">
           <Field label="Tax Incentives" value={applicant.tIGE} />
@@ -275,7 +270,6 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
             );
           })}
         </Section>
-
         {/* Business Requirements */}
         <Section title="Business Requirements">
           <FileField
@@ -334,16 +328,98 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
           />
         </Section>
 
-        {applicant.status !== "pending" && (
-          <Section title="Backroom">
-            <FileField
-              fileKey="zoningCert"
-              label="Zoning Certificate"
-              fileData={applicant}
-              baseUrl={baseUrl}
-            />
-          </Section>
-        )}
+        <Section title="Backroom">
+          <Stack spacing={2}>
+            {/* ✅ Zoning */}
+            {applicant.ZONING !== "Pending" && (
+              <Paper
+                elevation={2}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                  Zoning
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <Field label="Zoning Fee" value={applicant.zoningFee} />
+                  <FileField
+                    fileKey="zoningCert"
+                    label="Zoning Certificate"
+                    fileData={applicant}
+                    baseUrl={baseUrl}
+                    fullWidth
+                  />
+                </Grid>
+              </Paper>
+            )}
+
+            {/* ✅ OBO */}
+            {applicant.OBO !== "Pending" && (
+              <Paper
+                elevation={2}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                  OBO
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <TextField
+                    label="OBO Fee"
+                    size="small"
+                    fullWidth
+                    variant="outlined"
+                  />
+                  <FileField
+                    fileKey="OBOcert"
+                    label="OBO Certificate"
+                    fileData={applicant}
+                    baseUrl={baseUrl}
+                  />
+                </Grid>
+              </Paper>
+            )}
+
+            {/* ✅ OBO */}
+            {applicant.CHO !== "Pending" && (
+              <Paper
+                elevation={2}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                  CHO
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <TextField
+                    label="Sanitary Fee"
+                    size="small"
+                    fullWidth
+                    variant="outlined"
+                  />
+                  <FileField
+                    fileKey="CHOcert"
+                    label="CHO Certificate"
+                    fileData={applicant}
+                    baseUrl={baseUrl}
+                  />
+                </Grid>
+              </Paper>
+            )}
+          </Stack>
+        </Section>
       </DialogContent>
 
       <DialogActions>
