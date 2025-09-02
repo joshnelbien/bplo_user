@@ -22,7 +22,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 
 // Component to display a normal text field
 const Field = ({ label, value }) => (
-  <Grid item xs={12} sm={6}>
+  <Grid item xs={15} sm={8}>
     <TextField
       label={label}
       value={value || "—"}
@@ -372,7 +372,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
                 </Typography>
 
                 <Grid container spacing={2}>
-                  <TextField
+                  <Field
                     label="OBO Fee"
                     size="small"
                     fullWidth
@@ -403,7 +403,13 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
                 </Typography>
 
                 <Grid container spacing={2}>
-                  <TextField
+                  <Field
+                    label="Sanitary Fee"
+                    size="small"
+                    fullWidth
+                    variant="outlined"
+                  />
+                  <Field
                     label="Sanitary Fee"
                     size="small"
                     fullWidth
@@ -414,6 +420,54 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
                     label="CHO Certificate"
                     fileData={applicant}
                     baseUrl={baseUrl}
+                  />
+                </Grid>
+              </Paper>
+            )}
+
+            {applicant.CSMWO !== "Pending" && (
+              <Paper
+                elevation={2}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                  CSWMO
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <Field
+                    label="CSWMO Fee"
+                    size="small"
+                    fullWidth
+                    variant="outlined"
+                  />
+                </Grid>
+              </Paper>
+            )}
+
+            {applicant.CENRO !== "Pending" && (
+              <Paper
+                elevation={2}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                  CENRO
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <Field
+                    label="CENRO Fee"
+                    size="small"
+                    fullWidth
+                    variant="outlined"
                   />
                 </Grid>
               </Paper>
