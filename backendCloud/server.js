@@ -6,11 +6,9 @@ require("./db/model/userAccounts");
 require("./db/model/files");
 require("./db/model/backroomCloud");
 
-
 const UserAccountsRoutes = require("./routes/UserAccounts");
 const newApplication = require("./routes/newApp");
 const backroom = require("./routes/backroom");
-
 
 const app = express();
 app.use(
@@ -35,9 +33,9 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
   }
 })();
 
-app.use("/userAccountsCloud", UserAccountsRoutes);
-app.use("/newApplicationCloud", newApplication);
-app.use("/backroomCloud", backroom);
+app.use("/userAccounts", UserAccountsRoutes);
+app.use("/newApplication", newApplication);
+app.use("/backroom", backroom);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

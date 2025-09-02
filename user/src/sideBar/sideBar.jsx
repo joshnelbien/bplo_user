@@ -5,21 +5,21 @@ import AutorenewIcon from "@mui/icons-material/Autorenew";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import {
-    Avatar,
-    Backdrop,
-    Box,
-    Button,
-    Drawer,
-    Fade,
-    IconButton,
-    List,
-    ListItemButton,
-    ListItemIcon,
-    ListItemText,
-    Modal,
-    Paper,
-    Stack,
-    Typography,
+  Avatar,
+  Backdrop,
+  Box,
+  Button,
+  Drawer,
+  Fade,
+  IconButton,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Modal,
+  Paper,
+  Stack,
+  Typography,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useEffect, useState } from "react";
@@ -40,10 +40,14 @@ const Sidebar = ({ id }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch(`${API}/userAccountsCloud/${id}`);
+        const response = await fetch(`${API}/userAccounts/${id}`);
         if (!response.ok) throw new Error("Failed to fetch user");
         const data = await response.json();
-        setUser({ firstName: data.firstname, lastName: data.lastname, email: data.email });
+        setUser({
+          firstName: data.firstname,
+          lastName: data.lastname,
+          email: data.email,
+        });
       } catch (error) {
         console.error("Error fetching user:", error);
       }
@@ -128,7 +132,10 @@ const Sidebar = ({ id }) => {
             <ListItemIcon>
               <AddCircleOutlineIcon sx={{ color: "#2E8B57" }} />
             </ListItemIcon>
-            <ListItemText primary="New Application" sx={{ fontWeight: "bold" }} />
+            <ListItemText
+              primary="New Application"
+              sx={{ fontWeight: "bold" }}
+            />
           </ListItemButton>
 
           <ListItemButton
@@ -142,7 +149,10 @@ const Sidebar = ({ id }) => {
             <ListItemIcon>
               <AutorenewIcon sx={{ color: "#2E8B57" }} />
             </ListItemIcon>
-            <ListItemText primary="Renew Application" sx={{ fontWeight: "bold" }} />
+            <ListItemText
+              primary="Renew Application"
+              sx={{ fontWeight: "bold" }}
+            />
           </ListItemButton>
 
           <ListItemButton
@@ -157,7 +167,10 @@ const Sidebar = ({ id }) => {
             <ListItemIcon>
               <AssignmentTurnedInIcon sx={{ color: "#2E8B57" }} />
             </ListItemIcon>
-            <ListItemText primary="Application Status" sx={{ fontWeight: "bold" }} />
+            <ListItemText
+              primary="Application Status"
+              sx={{ fontWeight: "bold" }}
+            />
           </ListItemButton>
         </List>
       </Box>
@@ -175,7 +188,10 @@ const Sidebar = ({ id }) => {
           <ListItemIcon>
             <LogoutIcon sx={{ color: "white" }} />
           </ListItemIcon>
-          <ListItemText primary="Logout" sx={{ color: "white", fontWeight: "bold" }} />
+          <ListItemText
+            primary="Logout"
+            sx={{ color: "white", fontWeight: "bold" }}
+          />
         </ListItemButton>
       </Box>
 
@@ -206,7 +222,11 @@ const Sidebar = ({ id }) => {
               Are you sure you want to log out?
             </Typography>
             <Stack direction="row" spacing={2} justifyContent="center">
-              <Button variant="contained" color="error" onClick={handleConfirmLogout}>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleConfirmLogout}
+              >
                 Yes
               </Button>
               <Button variant="outlined" onClick={handleLogoutClose}>
@@ -254,7 +274,9 @@ const Sidebar = ({ id }) => {
       </Drawer>
 
       {/* Sidebar for desktop */}
-      <Box sx={{ display: { xs: "none", sm: "block" }, width: 280 }}>{content}</Box>
+      <Box sx={{ display: { xs: "none", sm: "block" }, width: 280 }}>
+        {content}
+      </Box>
     </>
   );
 };

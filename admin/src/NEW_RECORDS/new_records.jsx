@@ -31,7 +31,9 @@ function New_records() {
     const fetchApplicants = async () => {
       try {
         // ✅ Pending applicants
-        const pendingRes = await axios.get("http://localhost:5000/api/files");
+        const pendingRes = await axios.get(
+          "http://localhost:5000/newApplication/files"
+        );
         setPendingApplicants(pendingRes.data);
 
         // ✅ Approved applicants

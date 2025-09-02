@@ -32,6 +32,8 @@ import NatureIcon from "@mui/icons-material/Nature";
 import LogoutIcon from "@mui/icons-material/Logout";
 import CloseIcon from "@mui/icons-material/Close";
 import BusinessIcon from "@mui/icons-material/Business";
+import path from "path";
+import { text } from "stream/consumers";
 
 // Common style
 const listItemStyle = {
@@ -74,6 +76,12 @@ const departmentItems = [
   { text: "CSWMO", path: "/cmswo", icon: <FamilyRestroomIcon /> },
   { text: "ZONING", path: "/zoning", icon: <RoomIcon /> },
   { text: "CENRO", path: "/cenro", icon: <NatureIcon /> },
+];
+
+const treasurers = [
+  { text: "Treasurer's Office", path: "/#" },
+  { text: "Assessor Office", path: "/#" },
+  { text: "Business Tax", path: "/#" },
 ];
 
 const drawerWidth = 270;

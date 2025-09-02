@@ -116,7 +116,7 @@ function RegisterPage() {
 
     try {
       const { lastname, firstname, email, password } = form;
-      await axios.post(`${API}/userAccountsCloud/register`, {
+      await axios.post(`${API}/userAccounts/register`, {
         lastname,
         firstname,
         email,

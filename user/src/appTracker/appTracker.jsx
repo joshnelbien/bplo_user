@@ -32,12 +32,12 @@ function AppTracker() {
 
     const fetchData = async () => {
       try {
-        const trackerRes = await axios.get(`${API}/backroomCloud/backrooms/${id}`);
+        const trackerRes = await axios.get(`${API}/backroom/backrooms/${id}`);
         if (trackerRes.data.length > 0) {
           setTrackers(trackerRes.data);
         }
 
-        const filesRes = await axios.get(`${API}/newApplicationCloud/files/${id}`);
+        const filesRes = await axios.get(`${API}/newApplication/files/${id}`);
         if (filesRes.data.length > 0) {
           const statusList = filesRes.data.map((file) => ({
             trackerId: file.trackerId,

@@ -31,7 +31,7 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
 app.use("/backroom", BackroomRoutes);
 
 // Use routes
-app.use("/api", fileRoutes);
+app.use("/newApplication", fileRoutes);
 
 app.use("/userAccounts", UserAccountsRoutes);
 
