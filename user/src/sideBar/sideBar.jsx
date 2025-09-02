@@ -120,6 +120,7 @@ const Sidebar = ({ id }) => {
 
         {/* Navigation */}
         <List component="nav">
+          {/* New Application */}
           <ListItemButton
             onClick={() => navigate(`/newApplicationPage/${id}`)}
             sx={{
@@ -138,23 +139,23 @@ const Sidebar = ({ id }) => {
             />
           </ListItemButton>
 
+          {/* Renew Application */}
           <ListItemButton
-            sx={{
-              borderRadius: "8px",
-              mb: 1,
-              bgcolor: alpha("#076e0cff", 0.1),
-              "&:hover": { bgcolor: alpha("#085f0cff", 0.2) },
-            }}
-          >
-            <ListItemIcon>
-              <AutorenewIcon sx={{ color: "#2E8B57" }} />
-            </ListItemIcon>
-            <ListItemText
-              primary="Renew Application"
-              sx={{ fontWeight: "bold" }}
-            />
-          </ListItemButton>
+           onClick={() => navigate(`/renew/${id}`)}
+           sx={{
+             borderRadius: "8px",
+            mb: 1,
+            bgcolor: alpha("#076e0cff", 0.1),
+            "&:hover": { bgcolor: alpha("#085f0cff", 0.2) },
+          }}
+           >
+              <ListItemIcon>
+                <AutorenewIcon sx={{ color: "#2E8B57" }} />
+              </ListItemIcon>
+              <ListItemText primary="Renew Application" sx={{ fontWeight: "bold" }} />
+            </ListItemButton>
 
+          {/* Application Tracker */}
           <ListItemButton
             onClick={() => navigate(`/appTracker/${id}`)}
             sx={{
