@@ -20,6 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
+import { NumericFormat } from "react-number-format";
 
 export default function Step6BusinessActivity({
   formData,
@@ -239,12 +240,20 @@ export default function Step6BusinessActivity({
           onChange={handleBusinessChange}
           fullWidth
         />
-        <TextField
+        <NumericFormat
+          customInput={TextField}
           label="Capital"
           name="capital"
-          type="number"
           value={newBusiness.capital}
-          onChange={handleBusinessChange}
+          onValueChange={(values) => {
+            handleBusinessChange({
+              target: { name: "capital", value: values.floatValue || 0 },
+            });
+          }}
+          thousandSeparator=","
+          decimalScale={2}
+          fixedDecimalScale
+          allowNegative={false}
           fullWidth
         />
 
@@ -264,7 +273,17 @@ export default function Step6BusinessActivity({
                   Product and Services : {biz.productService}
                 </Typography>
                 <Typography variant="body2">Units: {biz.Units}</Typography>
-                <Typography variant="body2">Capital: {biz.capital}</Typography>
+                <Typography variant="body2">
+                  Capital:{" "}
+                  <NumericFormat
+                    value={biz.capital}
+                    displayType="text"
+                    thousandSeparator=","
+                    decimalScale={2}
+                    fixedDecimalScale
+                    prefix="₱"
+                  />
+                </Typography>
                 <Stack direction="row" spacing={1} mt={1}>
                   <IconButton
                     onClick={() => editBusinessLine(index)}
