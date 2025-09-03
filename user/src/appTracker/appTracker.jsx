@@ -16,7 +16,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 function AppTracker() {
   const { id } = useParams();
-  const [trackers, setTrackers] = useState([]);
+  const [trackers, setTrackers] = useState([]); 
   const [fileStatuses, setFileStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();

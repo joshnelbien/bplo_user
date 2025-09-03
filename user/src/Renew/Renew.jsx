@@ -62,6 +62,13 @@ function Renewal() {
   // submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate BIN before sending
+    if (!/^\d{10}$/.test(form.bin)) {
+      alert("BIN must be exactly 10 digits.");
+      return;
+    }
+
     try {
       await axios.post(`${API}/renewal/${id}`, form);
       alert("Renewal submitted successfully!");
@@ -135,6 +142,7 @@ function Renewal() {
             required
             fullWidth
             color="primary"
+            InputLabelProps={{ required: true }}
           />
           <TextField
             label="Business Identification Number (BIN)"
@@ -144,6 +152,13 @@ function Renewal() {
             required
             fullWidth
             color="primary"
+            inputProps={{
+              maxLength: 10,
+              pattern: "[0-9]{10}",
+              title: "BIN must be exactly 10 digits",
+            }}
+            helperText="BIN must be exactly 10 digits"
+            InputLabelProps={{ required: true }}
           />
 
           <Button

@@ -33,21 +33,6 @@ const modalStyle = {
   borderRadius: "12px",
 };
 
-const shakeAnimation = {
-  "@keyframes shake": {
-    "0%, 100%": { transform: "rotate(0deg)" },
-    "25%": { transform: "rotate(-5deg)" },
-    "75%": { transform: "rotate(5deg)" },
-  },
-};
-
-const bounceAnimation = {
-  "@keyframes bounce": {
-    "0%, 100%": { transform: "translateY(0)" },
-    "50%": { transform: "translateY(-10px)" },
-  },
-};
-
 const modalContents = {
   newApplication: {
     title: "REQUIREMENTS FOR NEW BUSINESS REGISTRATION",
@@ -145,27 +130,24 @@ const HomePage = () => {
             justifyContent: "center",
             alignItems: "center",
             mb: 4,
+            flexWrap: "wrap",
           }}
         >
           {["newApplication", "renewal", "Holidays", "Officehrs"].map((type) => {
-            let img, title, animation;
+            let img, title;
 
             if (type === "newApplication") {
               img = reqImage;
               title = "NEW APPLICATION REQ.";
-              animation = shakeAnimation;
             } else if (type === "renewal") {
               img = renewImage;
               title = "RENEWAL REQ.";
-              animation = bounceAnimation;
             } else if (type === "Holidays") {
               img = holidaysImage;
               title = "HOLIDAYS INFO.";
-              animation = shakeAnimation;
             } else if (type === "Officehrs") {
               img = officehoursImage;
               title = "OFFICE HOURS INFO.";
-              animation = bounceAnimation;
             }
 
             return (
@@ -200,8 +182,6 @@ const HomePage = () => {
                     width: { xs: "85%", sm: "90%" },
                     height: { xs: "85%", sm: "90%" },
                     objectFit: "contain",
-                    animation: type === "renewal" || type === "Officehrs" ? `bounce 0.6s infinite` : `shake 0.5s infinite alternate`,
-                    ...animation,
                   }}
                 />
                 <Box
