@@ -1,4 +1,3 @@
-
 import CloseIcon from "@mui/icons-material/Close";
 import Backdrop from "@mui/material/Backdrop";
 import Box from "@mui/material/Box";
@@ -17,6 +16,8 @@ import Sidebar from "../sideBar/sideBar";
 
 const reqImage = "/req.png";
 const renewImage = "/renew.png";
+const holidaysImage = "/holidays.png";
+const officehoursImage = "/officehours.png";
 
 const modalStyle = {
   position: "absolute",
@@ -37,6 +38,13 @@ const shakeAnimation = {
     "0%, 100%": { transform: "rotate(0deg)" },
     "25%": { transform: "rotate(-5deg)" },
     "75%": { transform: "rotate(5deg)" },
+  },
+};
+
+const bounceAnimation = {
+  "@keyframes bounce": {
+    "0%, 100%": { transform: "translateY(0)" },
+    "50%": { transform: "translateY(-10px)" },
   },
 };
 
@@ -65,6 +73,24 @@ const modalContents = {
       { text: "- Land Tax Clearance/ Certificate of Payment" },
       { text: "- Market Clearance (if market stall holder)" },
       { text: "- Public Liability Insurance (for certain businesses)" },
+    ],
+  },
+  Holidays: {
+    title: "HOLIDAY SCHEDULE INFORMATION",
+    items: [
+      { text: "- Offices are closed on national holidays." },
+      { text: "- Local government declared holidays may also apply." },
+      { text: "- Please check official announcements for updates." },
+      { text: "- Applications will be processed on the next business day." },
+    ],
+  },
+  Officehrs: {
+    title: "OFFICE HOURS INFORMATION",
+    items: [
+      { text: "- Monday to Friday: 8:00 AM - 5:00 PM" },
+      { text: "- Break time: 12:00 NN - 1:00 PM" },
+      { text: "- No transactions during lunch break." },
+      { text: "- Closed on Saturdays, Sundays, and Holidays." },
     ],
   },
 };
@@ -104,40 +130,58 @@ const HomePage = () => {
         sx={{
           flexGrow: 1,
           display: "flex",
-          justifyContent: "center",
+          flexDirection: "column",
           alignItems: "center",
           p: { xs: 2, sm: 4 },
+          pt: { xs: 4, sm: 6 },
         }}
       >
         <Stack
-          direction={{ xs: "column", sm: "row" }}
+          direction="row"
           spacing={{ xs: 2, sm: 4 }}
           sx={{
             width: "100%",
-            maxWidth: 900,
-            flexWrap: "wrap",
+            maxWidth: 1200,
             justifyContent: "center",
             alignItems: "center",
+            mb: 4,
           }}
         >
-          {["newApplication", "renewal"].map((type) => {
-            const isNew = type === "newApplication";
-            const img = isNew ? reqImage : renewImage;
-            const title = isNew ? "NEW APPLICATION REQ." : "RENEWAL REQ.";
+          {["newApplication", "renewal", "Holidays", "Officehrs"].map((type) => {
+            let img, title, animation;
+
+            if (type === "newApplication") {
+              img = reqImage;
+              title = "NEW APPLICATION REQ.";
+              animation = shakeAnimation;
+            } else if (type === "renewal") {
+              img = renewImage;
+              title = "RENEWAL REQ.";
+              animation = bounceAnimation;
+            } else if (type === "Holidays") {
+              img = holidaysImage;
+              title = "HOLIDAYS INFO.";
+              animation = shakeAnimation;
+            } else if (type === "Officehrs") {
+              img = officehoursImage;
+              title = "OFFICE HOURS INFO.";
+              animation = bounceAnimation;
+            }
+
             return (
               <Box
                 key={type}
                 onClick={() => handleOpen(type)}
                 sx={{
-                  width: { xs: "80%", sm: 170 },
-                  maxWidth: 200,
-                  height: { xs: 160, sm: 170 },
+                  width: { xs: "90%", sm: 220 },
+                  maxWidth: 250,
+                  height: { xs: 200, sm: 220 },
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "flex-start",
                   alignItems: "center",
-                  p: 1,
-                  borderRadius: "12px",
+                  p: 1.5,
+                  borderRadius: "16px",
                   bgcolor: "#d2ead0",
                   cursor: "pointer",
                   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
@@ -153,24 +197,24 @@ const HomePage = () => {
                   src={img}
                   alt={`${title} Icon`}
                   sx={{
-                    width: { xs: "80%", sm: "85%" },
-                    height: { xs: "80%", sm: "85%" },
+                    width: { xs: "85%", sm: "90%" },
+                    height: { xs: "85%", sm: "90%" },
                     objectFit: "contain",
-                    animation: `shake 0.5s infinite alternate`,
-                    ...shakeAnimation,
+                    animation: type === "renewal" || type === "Officehrs" ? `bounce 0.6s infinite` : `shake 0.5s infinite alternate`,
+                    ...animation,
                   }}
                 />
                 <Box
                   sx={{
                     width: "110%",
                     bgcolor: "#98c293",
-                    py: 1,
+                    py: 1.5,
                     textAlign: "center",
-                    borderBottomLeftRadius: "12px",
-                    borderBottomRightRadius: "12px",
+                    borderBottomLeftRadius: "16px",
+                    borderBottomRightRadius: "16px",
                   }}
                 >
-                  <Typography variant="body2" sx={{ color: "#fff", fontWeight: "bold" }}>
+                  <Typography variant="body1" sx={{ color: "#fff", fontWeight: "bold" }}>
                     {title}
                   </Typography>
                 </Box>
