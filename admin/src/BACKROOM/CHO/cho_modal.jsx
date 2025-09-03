@@ -17,9 +17,9 @@ import {
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-// Component to display a normal text field
+// ✅ Component to display a normal text field
 const Field = ({ label, value }) => (
   <Grid item xs={12} sm={6}>
     <TextField
@@ -55,7 +55,7 @@ const Field = ({ label, value }) => (
   </Grid>
 );
 
-// Component to display files as links
+// ✅ Component to display files as links
 const FileField = ({ label, fileKey, fileData }) => (
   <Grid item xs={12} sm={6}>
     <TextField
@@ -91,7 +91,7 @@ const FileField = ({ label, fileKey, fileData }) => (
 
     {fileData[fileKey] && (
       <Typography
-        component="span" // ✅ prevent nested <p>
+        component="span"
         sx={{ mt: 0.5, display: "flex", gap: 1, alignItems: "center" }}
       >
         <Tooltip title="View File">
@@ -133,17 +133,32 @@ function ChoApplicantModal({
 }) {
   if (!isOpen || !applicant) return null;
 
-  const files = [{ label: "CHO Certificate", name: "choCert" }];
+  const [choField, setChoField] = useState({ choFee: "" });
 
+  useEffect(() => {
+    if (applicant) {
+      setChoField({
+        choFee: applicant.choFee || "",
+      });
+    }
+  }, [applicant]);
+
+  const handleChange = (field, value) => {
+    setChoField((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const files = [{ label: "CHO Certificate", name: "choCert" }];
   const [selectedFiles, setSelectedFiles] = useState({});
 
   const handleFileSelect = (e) => {
     const { name, files } = e.target;
-    setSelectedFiles((prev) => ({
-      ...prev,
-      [name]: files[0] ? files[0].name : "",
-    }));
-    handleFileChange(e); // call parent handler
+    if (files[0]) {
+      setSelectedFiles((prev) => ({
+        ...prev,
+        [name]: files[0], // store the actual File object
+      }));
+      +handleFileChange(name, files[0]); // send file up to parent
+    }
   };
 
   const Section = ({ title, children }) => (
@@ -236,9 +251,15 @@ function ChoApplicantModal({
             <Field label="Tax Dec. No." value={applicant.taxdec} />
           ) : (
             <>
-              <Field label="Lessor's Name" value={applicant.lessorName} />
-              <Field label="Monthly Rent" value={applicant.monthlyRent} />
-              <Field label="Tax Dec. No." value={applicant.taxdec} />
+              <Grid item xs={12} sm={6}>
+                <Field label="Lessor's Name" value={applicant.lessorName} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Field label="Monthly Rent" value={applicant.monthlyRent} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Field label="Tax Dec. No." value={applicant.taxdec} />
+              </Grid>
             </>
           )}
         </Section>
@@ -340,16 +361,17 @@ function ChoApplicantModal({
           />
         </Section>
 
+        {/* ✅ CHO Fee input */}
         <TextField
           label="Sanitary Fee"
-          variant="outlined"
-          size="small"
+          value={choField.choFee || ""}
+          onChange={(e) => handleChange("choFee", e.target.value)}
           fullWidth
-          sx={{
-            "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
-          }}
+          size="small"
+          sx={{ mt: 2 }}
         />
 
+        {/* ✅ File Upload */}
         {files.map((file) => (
           <Grid container spacing={1} key={file.name} sx={{ mt: 1 }}>
             <Grid item>
@@ -370,7 +392,7 @@ function ChoApplicantModal({
             </Grid>
             <Grid item xs>
               <TextField
-                value={selectedFiles[file.name] || ""}
+                value={selectedFiles[file.name]?.name || ""}
                 placeholder="No file selected"
                 size="small"
                 fullWidth
@@ -386,13 +408,14 @@ function ChoApplicantModal({
           Close
         </Button>
         <Button
-          onClick={() => onApprove(applicant.id)}
+          onClick={() =>
+            onApprove(applicant.id, choField.choFee, selectedFiles)
+          }
           variant="contained"
           color="success"
         >
           Approve
         </Button>
-
         <Button onClick={onClose} variant="outlined" color="error">
           Decline
         </Button>

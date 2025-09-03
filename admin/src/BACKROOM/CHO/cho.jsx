@@ -27,11 +27,10 @@ function Cho() {
   const recordsPerPage = 20;
   const [selectedFiles, setSelectedFiles] = useState({});
 
-  const handleFileChange = (e) => {
-    const { name, files } = e.target;
+  const handleFileChange = (name, file) => {
     setSelectedFiles((prev) => ({
       ...prev,
-      [name]: files[0] || null, // store the actual File object
+      [name]: file,
     }));
   };
 
@@ -62,14 +61,29 @@ function Cho() {
     indexOfLastRecord
   );
 
-  const handleApprove = async (id) => {
+  const handleApprove = async (id, choFee, selectedFiles) => {
     try {
-      await axios.post(`http://localhost:5000/backroom/cho/approve/${id}`);
+      const formData = new FormData();
+      formData.append("choFee", choFee);
+
+      if (selectedFiles.choCert) {
+        formData.append("choCert", selectedFiles.choCert); // actual File, not just string
+      }
+
+      await axios.post(
+        `http://localhost:5000/backroom/cho/approve/${id}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
       setApplicants((prev) =>
         prev.map((applicant) =>
-          applicant.id === id ? { ...applicant, CHO: "Approved" } : applicant
+          applicant.id === id
+            ? { ...applicant, CHO: "Approved", choFee }
+            : applicant
         )
       );
+
       alert("Applicant approved");
       closeModal();
     } catch (error) {
