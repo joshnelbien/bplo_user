@@ -3,6 +3,9 @@ const express = require("express");
 const cors = require("cors");
 const { sequelize } = require("./db/sequelize");
 
+const Examiners = require("./db/model/examiners");
+const ExaminersRoutes = require("./routes/examiners");
+
 const File = require("./db/model/files");
 const fileRoutes = require("./routes/newApp");
 
@@ -22,6 +25,7 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
 // DB setup
 (async () => {
   await sequelize.authenticate();
+  await Examiners.sync();
   await File.sync();
   await Backroom.sync();
   await UserAccounts.sync();
@@ -29,6 +33,8 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
 })();
 
 app.use("/backroom", BackroomRoutes);
+
+app.use("/examiners", ExaminersRoutes);
 
 // Use routes
 app.use("/newApplication", fileRoutes);

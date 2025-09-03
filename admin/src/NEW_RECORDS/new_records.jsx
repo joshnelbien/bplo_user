@@ -38,7 +38,7 @@ function New_records() {
 
         // ✅ Approved applicants
         const approvedRes = await axios.get(
-          "http://localhost:5000/backroom/backrooms"
+          "http://localhost:5000/examiners/examiners"
         );
         setApprovedApplicants(approvedRes.data);
       } catch (error) {
@@ -69,7 +69,7 @@ function New_records() {
 
     try {
       await axios.post(
-        `http://localhost:5000/backroom/backroom/approve/${applicant.id}`
+        `http://localhost:5000/examiners/examiners/approve/${applicant.id}`
       );
 
       // ✅ remove from pending after approval

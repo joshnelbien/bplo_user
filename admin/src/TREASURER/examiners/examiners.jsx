@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Side_bar from "../../SIDE_BAR/side_bar";
-import ChoApplicantModal from "./cho_modal";
+import ExaminersApplicantModal from "./examiners_modal";
 
 import {
   Box,
@@ -18,7 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 
-function Cho() {
+function Examiners() {
   const [applicants, setApplicants] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
@@ -27,18 +27,12 @@ function Cho() {
   const recordsPerPage = 20;
   const [selectedFiles, setSelectedFiles] = useState({});
 
-  const handleFileChange = (e) => {
-    const { name, files } = e.target;
-    setSelectedFiles((prev) => ({
-      ...prev,
-      [name]: files[0] || null, // store the actual File object
-    }));
-  };
-
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/backroom/backrooms");
+        const res = await axios.get(
+          "http://localhost:5000/examiners/examiners"
+        );
         setApplicants(res.data);
       } catch (error) {
         console.error("Error fetching applicants:", error);
@@ -51,8 +45,8 @@ function Cho() {
   // ✅ Filter applicants based on button selection
   const filteredApplicants =
     filter === "pending"
-      ? applicants.filter((a) => a.CHO !== "Approved")
-      : applicants.filter((a) => a.CHO === "Approved");
+      ? applicants.filter((a) => a.ZONING !== "Approved")
+      : applicants.filter((a) => a.ZONING === "Approved");
 
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
@@ -62,12 +56,50 @@ function Cho() {
     indexOfLastRecord
   );
 
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    setSelectedFiles((prev) => ({
+      ...prev,
+      [name]: files[0] || null, // store the actual File object
+    }));
+  };
+
   const handleApprove = async (id) => {
     try {
-      await axios.post(`http://localhost:5000/backroom/cho/approve/${id}`);
+      const formData = new FormData();
+      if (selectedFiles["zoningCert"]) {
+        formData.append("zoningCert", selectedFiles["zoningCert"]);
+      }
+
+      const applicant = applicants.find((a) => a.id === id);
+      if (applicant) {
+        const calculateZoningFee = (totalCapital) => {
+          if (totalCapital <= 5000) return "Exempted";
+          if (totalCapital >= 5001 && totalCapital <= 10000) return 100;
+          if (totalCapital >= 10001 && totalCapital <= 50000) return 200;
+          if (totalCapital >= 50001 && totalCapital <= 100000) return 300;
+          return ((totalCapital - 100000) * 0.001 + 500).toFixed(2);
+        };
+
+        const zoningFee = calculateZoningFee(Number(applicant.totalCapital));
+        formData.append("zoningFee", zoningFee);
+      }
+
+      await axios.post(
+        `http://localhost:5000/examiners/examiners/approve/${id}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
       setApplicants((prev) =>
         prev.map((applicant) =>
-          applicant.id === id ? { ...applicant, CHO: "Approved" } : applicant
+          applicant.id === id
+            ? {
+                ...applicant,
+                ZONING: "Approved",
+                zoningFee: formData.get("zoningFee"),
+              }
+            : applicant
         )
       );
       alert("Applicant approved");
@@ -96,7 +128,7 @@ function Cho() {
       <Side_bar />
       <Box id="main_content" sx={{ p: 3 }}>
         <Typography variant="h4" gutterBottom>
-          CHO
+          EXAMINERS
         </Typography>
 
         {/* ✅ Button Group Filter */}
@@ -160,7 +192,7 @@ function Cho() {
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.CHO}</TableCell>
+                  <TableCell>{applicant.ZONING}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -180,7 +212,7 @@ function Cho() {
       </Box>
 
       {/* ✅ Modal Component */}
-      <ChoApplicantModal
+      <ExaminersApplicantModal
         applicant={selectedApplicant}
         isOpen={isModalOpen}
         onClose={closeModal}
@@ -192,4 +224,4 @@ function Cho() {
   );
 }
 
-export default Cho;
+export default Examiners;

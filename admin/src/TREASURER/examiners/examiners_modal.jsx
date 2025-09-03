@@ -15,9 +15,9 @@ import {
   IconButton,
   Tooltip,
 } from "@mui/material";
+
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
-import { useState } from "react";
 
 // Component to display a normal text field
 const Field = ({ label, value }) => (
@@ -98,7 +98,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}`}
+            href={`http://localhost:5000/examiners/examiners/${fileData.id}/${fileKey}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -111,7 +111,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}/download`}
+            href={`http://localhost:5000/examiners/examiners/${fileData.id}/${fileKey}/download`}
             target="_blank"
             rel="noreferrer"
           >
@@ -124,27 +124,8 @@ const FileField = ({ label, fileKey, fileData }) => (
   </Grid>
 );
 
-function ChoApplicantModal({
-  applicant,
-  isOpen,
-  onClose,
-  onApprove,
-  handleFileChange,
-}) {
+function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
   if (!isOpen || !applicant) return null;
-
-  const files = [{ label: "CHO Certificate", name: "choCert" }];
-
-  const [selectedFiles, setSelectedFiles] = useState({});
-
-  const handleFileSelect = (e) => {
-    const { name, files } = e.target;
-    setSelectedFiles((prev) => ({
-      ...prev,
-      [name]: files[0] ? files[0].name : "",
-    }));
-    handleFileChange(e); // call parent handler
-  };
 
   const Section = ({ title, children }) => (
     <Accordion>
@@ -167,7 +148,7 @@ function ChoApplicantModal({
       <DialogContent dividers>
         {/* Business Info */}
         <Section title="Business Information">
-          <Field label="Status" value={applicant.CHO} />
+          <Field label="Status" value={applicant.CENRO} />
           <Field label="ID" value={applicant.id} />
           <Field label="Business Type" value={applicant.BusinessType} />
           <Field label="DSC Registration No" value={applicant.dscRegNo} />
@@ -339,46 +320,6 @@ function ChoApplicantModal({
             fileData={applicant}
           />
         </Section>
-
-        <TextField
-          label="Sanitary Fee"
-          variant="outlined"
-          size="small"
-          fullWidth
-          sx={{
-            "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
-          }}
-        />
-
-        {files.map((file) => (
-          <Grid container spacing={1} key={file.name} sx={{ mt: 1 }}>
-            <Grid item>
-              <Button
-                variant="contained"
-                component="label"
-                size="small"
-                sx={{ minWidth: 120 }}
-              >
-                Choose File
-                <input
-                  type="file"
-                  name={file.name}
-                  hidden
-                  onChange={handleFileSelect}
-                />
-              </Button>
-            </Grid>
-            <Grid item xs>
-              <TextField
-                value={selectedFiles[file.name] || ""}
-                placeholder="No file selected"
-                size="small"
-                fullWidth
-                InputProps={{ readOnly: true }}
-              />
-            </Grid>
-          </Grid>
-        ))}
       </DialogContent>
 
       <DialogActions>
@@ -401,4 +342,4 @@ function ChoApplicantModal({
   );
 }
 
-export default ChoApplicantModal;
+export default ExaminersApplicantModal;

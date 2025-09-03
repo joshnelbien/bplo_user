@@ -1,8 +1,8 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../sequelize");
 
-const Backroom = sequelize.define(
-  "Backroom",
+const Examiners = sequelize.define(
+  "Examiners",
   {
     id: {
       type: DataTypes.STRING,
@@ -116,6 +116,8 @@ const Backroom = sequelize.define(
     CSMWOtimeStamp: { type: DataTypes.STRING },
     OBO: { type: DataTypes.STRING, defaultValue: "Pending" },
     OBOtimeStamp: { type: DataTypes.STRING },
+    Examiners: { type: DataTypes.STRING, defaultValue: "Pending" },
+    ExaminerstimeStamp: { type: DataTypes.STRING },
 
     CHO: { type: DataTypes.STRING, defaultValue: "Pending" },
     CHOtimeStamp: { type: DataTypes.STRING },
@@ -138,9 +140,9 @@ const Backroom = sequelize.define(
   },
 
   {
-    tableName: "Backroom",
+    tableName: "Examiners",
     timestamps: true,
   }
 );
 
-module.exports = Backroom;
+module.exports = Examiners;
