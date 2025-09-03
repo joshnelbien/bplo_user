@@ -273,7 +273,7 @@ function New_records() {
         onApprove={handleApprove}
         baseUrl={
           filter === "pending"
-            ? "http://localhost:5000/api/files"
+            ? "http://localhost:5000/newApplication/files"
             : "http://localhost:5000/backroom/backroom"
         }
       />
