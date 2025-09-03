@@ -53,12 +53,20 @@ function Obo() {
     indexOfLastRecord
   );
 
-  const handleApprove = async (id) => {
+  const handleApprove = async (id, oboFields) => {
     try {
-      await axios.post(`http://localhost:5000/backroom/obo/approve/${id}`);
+      await axios.post(
+        `http://localhost:5000/backroom/obo/approve/${id}`,
+        oboFields
+      );
       setApplicants((prev) =>
         prev.map((applicant) =>
-          applicant.id === id ? { ...applicant, OBO: "Approved" } : applicant
+          applicant.id === id
+            ? {
+                ...applicant,
+                ...oboFields,
+              }
+            : applicant
         )
       );
       alert("Applicant approved");
@@ -115,15 +123,28 @@ function Obo() {
         </Box>
 
         {/* ✅ Table */}
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
+        <TableContainer
+          component={Paper}
+          sx={{ borderRadius: 2, boxShadow: 3 }}
+        >
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell><strong>Applicant ID</strong></TableCell>
-                <TableCell><strong>Business Name</strong></TableCell>
-                <TableCell><strong>First Name</strong></TableCell>
-                <TableCell><strong>Last Name</strong></TableCell>
-                <TableCell><strong>Status</strong></TableCell>
+                <TableCell>
+                  <strong>Applicant ID</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Business Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>First Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Last Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Status</strong>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

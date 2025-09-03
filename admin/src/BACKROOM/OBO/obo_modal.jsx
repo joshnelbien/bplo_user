@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Accordion,
@@ -125,6 +126,33 @@ const FileField = ({ label, fileKey, fileData }) => (
 
 function OboApplicantModal({ applicant, isOpen, onClose, onApprove }) {
   if (!isOpen || !applicant) return null;
+
+  const [oboFields, setOboFields] = useState({
+    BSAP: "",
+    SR: "",
+    Mechanical: "",
+    Electrical: "",
+    Signage: "",
+    Electronics: "",
+  });
+
+  // ✅ Populate state when applicant changes
+  useEffect(() => {
+    if (applicant) {
+      setOboFields({
+        BSAP: applicant.BSAP || "",
+        SR: applicant.SR || "",
+        Mechanical: applicant.Mechanical || "",
+        Electrical: applicant.Electrical || "",
+        Signage: applicant.Signage || "",
+        Electronics: applicant.Electronics || "",
+      });
+    }
+  }, [applicant]);
+
+  const handleChange = (field, value) => {
+    setOboFields((prev) => ({ ...prev, [field]: value }));
+  };
 
   const Section = ({ title, children }) => (
     <Accordion>
@@ -320,67 +348,65 @@ function OboApplicantModal({ applicant, isOpen, onClose, onApprove }) {
           />
         </Section>
 
-        <Section title="OBO Attachments">
+        <Grid item xs={12} sm={6}>
           <TextField
             label="Building Structure Architectural Presentability"
-            variant="outlined"
-            size="small"
+            value={oboFields.BSAP}
+            onChange={(e) => handleChange("BSAP", e.target.value)}
             fullWidth
-            sx={{
-              "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
-            }}
+            size="small"
           />
+        </Grid>
 
+        <Grid item xs={12} sm={6}>
           <TextField
             label="Sanitary Requirements"
-            variant="outlined"
-            size="small"
+            value={oboFields.SR}
+            onChange={(e) => handleChange("SR", e.target.value)}
             fullWidth
-            sx={{
-              "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
-            }}
+            size="small"
           />
+        </Grid>
 
+        <Grid item xs={12} sm={6}>
           <TextField
             label="Mechanical"
-            variant="outlined"
-            size="small"
+            value={oboFields.Mechanical}
+            onChange={(e) => handleChange("Mechanical", e.target.value)}
             fullWidth
-            sx={{
-              "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
-            }}
+            size="small"
           />
+        </Grid>
 
+        <Grid item xs={12} sm={6}>
           <TextField
             label="Electrical"
-            variant="outlined"
-            size="small"
+            value={oboFields.Electrical}
+            onChange={(e) => handleChange("Electrical", e.target.value)}
             fullWidth
-            sx={{
-              "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
-            }}
+            size="small"
           />
+        </Grid>
 
+        <Grid item xs={12} sm={6}>
           <TextField
             label="Signage"
-            variant="outlined"
-            size="small"
+            value={oboFields.Signage}
+            onChange={(e) => handleChange("Signage", e.target.value)}
             fullWidth
-            sx={{
-              "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
-            }}
+            size="small"
           />
+        </Grid>
 
+        <Grid item xs={12} sm={6}>
           <TextField
             label="Electronics"
-            variant="outlined"
-            size="small"
+            value={oboFields.Electronics}
+            onChange={(e) => handleChange("Electronics", e.target.value)}
             fullWidth
-            sx={{
-              "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
-            }}
+            size="small"
           />
-        </Section>
+        </Grid>
       </DialogContent>
 
       <DialogActions>
@@ -388,7 +414,7 @@ function OboApplicantModal({ applicant, isOpen, onClose, onApprove }) {
           Close
         </Button>
         <Button
-          onClick={() => onApprove(applicant.id)}
+          onClick={() => onApprove(applicant.id, oboFields)}
           variant="contained"
           color="success"
         >

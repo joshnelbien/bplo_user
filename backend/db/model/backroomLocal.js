@@ -114,8 +114,21 @@ const Backroom = sequelize.define(
     BPLOtimeStamp: { type: DataTypes.STRING },
     CSMWO: { type: DataTypes.STRING, defaultValue: "Pending" },
     CSMWOtimeStamp: { type: DataTypes.STRING },
+
     OBO: { type: DataTypes.STRING, defaultValue: "Pending" },
     OBOtimeStamp: { type: DataTypes.STRING },
+    //Building Structure Architectural Presentability
+    BSAP: { type: DataTypes.STRING },
+    //Sanitary Requirements
+    SR: { type: DataTypes.STRING },
+    //Mechanical
+    Mechanical: { type: DataTypes.STRING },
+    //Electrical
+    Electrical: { type: DataTypes.STRING },
+    //Signage
+    Signage: { type: DataTypes.STRING },
+    //Electronics
+    Electronics: { type: DataTypes.STRING },
 
     Examiners: { type: DataTypes.STRING, defaultValue: "Pending" },
     ExaminerstimeStamp: { type: DataTypes.STRING },

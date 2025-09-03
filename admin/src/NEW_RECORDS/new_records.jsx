@@ -38,7 +38,7 @@ function New_records() {
 
         // ✅ Approved applicants
         const approvedRes = await axios.get(
-          "http://localhost:5000/examiners/examiners"
+          "http://localhost:5000/backroom/backrooms"
         );
         setApprovedApplicants(approvedRes.data);
       } catch (error) {

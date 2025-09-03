@@ -40,9 +40,21 @@ export default function Step6BusinessActivity({
   });
   const [editingIndex, setEditingIndex] = useState(null);
 
-  // 🆕 Confirmation dialog state
+  // Confirmation dialog state
   const [openConfirm, setOpenConfirm] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState(null);
+
+  // Line of Business options from lob.json
+  const [lobOptions, setLobOptions] = useState([]);
+
+  useEffect(() => {
+    fetch("/lob.json")
+      .then((res) => res.json())
+      .then((data) => {
+        setLobOptions(data.lob || []); // expects { "lob": [ ... ] }
+      })
+      .catch((err) => console.error("Failed to load lob.json", err));
+  }, []);
 
   const handleOpenConfirm = (index) => {
     setDeleteIndex(index);
@@ -114,7 +126,7 @@ export default function Step6BusinessActivity({
     setEditingIndex(index);
   };
 
-  // ✅ Calculate total capital using useMemo (efficient re-rendering)
+  // ✅ Calculate total capital using useMemo
   const totalCapital = useMemo(() => {
     return businessLines.reduce(
       (sum, biz) => sum + (parseFloat(biz.capital) || 0),
@@ -218,13 +230,24 @@ export default function Step6BusinessActivity({
         {/* Add Line of Business Section */}
         <Typography variant="subtitle1">Add Line of Business</Typography>
 
-        <TextField
-          label="Line of Business"
-          name="lineOfBusiness"
-          value={newBusiness.lineOfBusiness}
-          onChange={handleBusinessChange}
-          fullWidth
-        />
+        {/* Dropdown for Line of Business */}
+        <FormControl fullWidth>
+          <InputLabel id="lob-label">Line of Business</InputLabel>
+          <Select
+            labelId="lob-label"
+            name="lineOfBusiness"
+            value={newBusiness.lineOfBusiness}
+            onChange={handleBusinessChange}
+          >
+            <MenuItem value="">-- Select Line of Business --</MenuItem>
+            {lobOptions.map((lob, index) => (
+              <MenuItem key={index} value={lob}>
+                {lob}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
         <TextField
           label="Product/Service"
           name="productService"
@@ -313,7 +336,7 @@ export default function Step6BusinessActivity({
         )}
       </Stack>
 
-      {/* 🆕 Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal */}
       <Dialog
         open={openConfirm}
         onClose={handleCloseConfirm}

@@ -373,17 +373,14 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
 
                 <Grid container spacing={2}>
                   <Field
-                    label="OBO Fee"
-                    size="small"
-                    fullWidth
-                    variant="outlined"
+                    label="Building Structure Architectural Presentability"
+                    value={applicant.BSAP}
                   />
-                  <FileField
-                    fileKey="OBOcert"
-                    label="OBO Certificate"
-                    fileData={applicant}
-                    baseUrl={baseUrl}
-                  />
+                  <Field label="Sanitary Requirements" value={applicant.SR} />
+                  <Field label="Mechanical" value={applicant.Mechanical} />
+                  <Field label="Electrical" value={applicant.Electrical} />
+                  <Field label="Signage" value={applicant.Signage} />
+                  <Field label="Electronics" value={applicant.Electronics} />
                 </Grid>
               </Paper>
             )}

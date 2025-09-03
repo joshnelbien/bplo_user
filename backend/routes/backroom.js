@@ -49,13 +49,21 @@ router.post("/obo/approve/:id", async (req, res) => {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
-    // ✅ Update OBO to Approved
+    // ✅ Destructure fields from request body
+    const { BSAP, SR, Mechanical, Electrical, Signage, Electronics } = req.body;
+
+    // ✅ Update fields
     applicant.OBO = "Approved";
     applicant.OBOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
-    await applicant.save();
 
-    // ✅ (Optional) If you really want to destroy it after approval
-    // await applicant.destroy();
+    if (BSAP) applicant.BSAP = BSAP;
+    if (SR) applicant.SR = SR;
+    if (Mechanical) applicant.Mechanical = Mechanical;
+    if (Electrical) applicant.Electrical = Electrical;
+    if (Signage) applicant.Signage = Signage;
+    if (Electronics) applicant.Electronics = Electronics;
+
+    await applicant.save();
 
     res.json({ message: "Applicant approved", applicant });
   } catch (err) {
