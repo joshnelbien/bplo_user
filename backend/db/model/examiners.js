@@ -116,6 +116,7 @@ const Examiners = sequelize.define(
     CSMWOtimeStamp: { type: DataTypes.STRING },
     OBO: { type: DataTypes.STRING, defaultValue: "Pending" },
     OBOtimeStamp: { type: DataTypes.STRING },
+
     Examiners: { type: DataTypes.STRING, defaultValue: "Pending" },
     ExaminerstimeStamp: { type: DataTypes.STRING },
 

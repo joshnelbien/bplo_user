@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const Examiners = require("../db/model/examiners");
 const File = require("../db/model/files");
+const Backroom = require("../db/model/backroomLocal");
 const router = express.Router();
 const moment = require("moment");
 
@@ -55,7 +56,7 @@ router.post(
   }
 );
 
-router.post("/examiners/approve/:id", async (req, res) => {
+router.post("/bplo/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -69,14 +70,43 @@ router.post("/examiners/approve/:id", async (req, res) => {
     const applicantData = applicant.toJSON();
 
     // 3. Add approval fields
-    applicantData.Examiner = "Approved";
-    applicantData.ExaminertimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+    applicantData.BPLO = "Approved";
+    applicantData.BPLOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
     // 4. Insert into Backroom table
     const created = await Examiners.create(applicantData);
 
     // 5. Remove from Files (move instead of copy)
     await applicant.destroy();
+
+    res
+      .status(201)
+      .json({ message: "Applicant approved and moved to Examiners", created });
+  } catch (err) {
+    console.error("Approve error:", err);
+    res.status(500).json({ error: "Failed to approve applicant" });
+  }
+});
+
+router.post("/examiners/approve/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1. Get applicant from Files table
+    const applicant = await Examiners.findByPk(id);
+    if (!applicant) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
+    // 2. Convert to plain object
+    const applicantData = applicant.toJSON();
+
+    // 3. Add approval fields
+    applicantData.Examiners = "Approved";
+    applicantData.ExaminerstimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+
+    // 4. Insert into Backroom table
+    const created = await Backroom.create(applicantData);
 
     res
       .status(201)

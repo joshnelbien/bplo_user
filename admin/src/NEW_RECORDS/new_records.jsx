@@ -69,13 +69,13 @@ function New_records() {
 
     try {
       await axios.post(
-        `http://localhost:5000/examiners/examiners/approve/${applicant.id}`
+        `http://localhost:5000/examiners/bplo/approve/${applicant.id}`
       );
 
       // ✅ remove from pending after approval
       setPendingApplicants((prev) => prev.filter((a) => a.id !== applicant.id));
 
-      alert("Applicant approved and moved to backroom");
+      alert("Applicant approved and moved to examiner's division");
       closeModal();
     } catch (error) {
       console.error("Error approving applicant:", error);

@@ -117,6 +117,9 @@ const Backroom = sequelize.define(
     OBO: { type: DataTypes.STRING, defaultValue: "Pending" },
     OBOtimeStamp: { type: DataTypes.STRING },
 
+    Examiners: { type: DataTypes.STRING, defaultValue: "Pending" },
+    ExaminerstimeStamp: { type: DataTypes.STRING },
+
     CHO: { type: DataTypes.STRING, defaultValue: "Pending" },
     CHOtimeStamp: { type: DataTypes.STRING },
     choFee: { type: DataTypes.STRING },
