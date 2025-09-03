@@ -400,20 +400,10 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
                 </Typography>
 
                 <Grid container spacing={2}>
-                  <Field
-                    label="Sanitary Fee"
-                    size="small"
-                    fullWidth
-                    variant="outlined"
-                  />
-                  <Field
-                    label="Sanitary Fee"
-                    size="small"
-                    fullWidth
-                    variant="outlined"
-                  />
+                  <Field label="Sanitary Fee" value={applicant.choFee} />
+
                   <FileField
-                    fileKey="CHOcert"
+                    fileKey="choCert"
                     label="CHO Certificate"
                     fileData={applicant}
                     baseUrl={baseUrl}

@@ -85,14 +85,11 @@ router.post(
         return res.status(404).json({ error: "Applicant not found" });
       }
 
-      // ✅ Save zoning approval
       applicant.ZONING = "Approved";
       applicant.ZONINGtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
-      // ✅ Save zoning fee
-      applicant.zoningFee = zoningFee; // <-- must exist in your DB model
+      applicant.zoningFee = zoningFee;
 
-      // ✅ If file uploaded, save it in DB
       if (req.file) {
         applicant.zoningCert = req.file.buffer; // store raw binary
         applicant.zoningCert_filename = req.file.originalname;
@@ -110,22 +107,32 @@ router.post(
   }
 );
 
-router.post("/cho/approve/:id", async (req, res) => {
+router.post("/cho/approve/:id", upload.single("choCert"), async (req, res) => {
   try {
     const { id } = req.params;
+    const { choFee } = req.body; // ✅ grab choFee from formData
 
     const applicant = await Backroom.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
-    // ✅ Update cho to Approved
+    // ✅ Save CHO approval
     applicant.CHO = "Approved";
     applicant.CHOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
-    await applicant.save();
 
-    // ✅ (Optional) If you really want to destroy it after approval
-    // await applicant.destroy();
+    // ✅ Save CHO fee
+    applicant.choFee = choFee; // <-- must exist in your DB model
+
+    // ✅ If file uploaded, save it in DB
+    if (req.file) {
+      applicant.choCert = req.file.buffer; // store raw binary
+      applicant.choCert_filename = req.file.originalname;
+      applicant.choCert_mimetype = req.file.mimetype;
+      applicant.choCert_size = req.file.size;
+    }
+
+    await applicant.save();
 
     res.json({ message: "Applicant approved", applicant });
   } catch (err) {
