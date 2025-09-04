@@ -23,12 +23,12 @@ import { useNavigate } from "react-router-dom";
 // Styled GreenButton
 const GreenButton = styled(Button)(({ theme, variant }) => ({
   borderRadius: "8px",
-  backgroundColor: "#4caf50",
+  backgroundColor: "#1c5111ff",
   color: "#fff",
   boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
   "&:hover": {
-    backgroundColor: "#388e3c",
-  },
+    backgroundColor: "#1c5111ff",
+  },  
 }));
 
 // Snackbar Alert component
@@ -38,6 +38,7 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 
 function RegisterPage() {
   const navigate = useNavigate();
+  // NOTE: You'll need to define this API variable if you use it in your environment
   const API = import.meta.env.VITE_API_BASE;
 
   const [form, setForm] = useState({
@@ -154,8 +155,23 @@ function RegisterPage() {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "100vh",
-          backgroundColor: "#f9f9f9",
+          // The background image and blur are applied here
+          backgroundImage: "url(mainbg.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          position: "relative", // Required for the pseudo-element
           padding: { xs: 2, sm: 4 },
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backdropFilter: "blur(5px)", // Blurs the background image
+            backgroundColor: "rgba(249, 249, 249, 0.7)", // Semi-transparent overlay
+            zIndex: -1, // Pushes the overlay behind the content
+          },
         }}
       >
         <Paper
@@ -273,7 +289,7 @@ function RegisterPage() {
               <Link
                 component="button"
                 onClick={() => navigate("/")}
-                sx={{ color: "#2e7d32", fontWeight: "bold" }}
+                sx={{ color: "#1d541fff", fontWeight: "bold" }}
               >
                 Login
               </Link>
@@ -305,11 +321,17 @@ function RegisterPage() {
               Your account has been created.
             </DialogContentText>
           </DialogContent>
-          <DialogActions>
+          <DialogActions
+            sx={{
+              display: "flex",
+              justifyContent: "center", // ⬅️ centers the button horizontally
+            }}
+          >
             <GreenButton onClick={handleCloseSuccessDialog} variant="contained">
               Proceed to Login
             </GreenButton>
           </DialogActions>
+
         </Dialog>
 
         <Snackbar

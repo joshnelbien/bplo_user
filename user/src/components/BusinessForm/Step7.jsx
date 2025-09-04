@@ -1,9 +1,8 @@
-import { Button, Stack, TextField, Typography } from "@mui/material";
+import { Button, Stack, TextField, Typography, Dialog, DialogActions, DialogContent, DialogContentText } from "@mui/material";
 import { useState } from "react";
 
 export default function Section7FileUploads({ handleFileChange }) {
   const files = [
-    // { label: "tGIE", name: "tIGEfiles" },
     { label: "Proof of Registration", name: "proofOfReg" },
     { label: "Proof of Right to Use Location", name: "proofOfRightToUseLoc" },
     { label: "Location Plan", name: "locationPlan" },
@@ -11,18 +10,12 @@ export default function Section7FileUploads({ handleFileChange }) {
     { label: "Market Clearance", name: "marketClearance" },
     { label: "Occupancy Permit", name: "occupancyPermit" },
     { label: "Cedula", name: "cedula" },
-    {
-      label: "Photo of Business Establishment (Interior)",
-      name: "photoOfBusinessEstInt",
-    },
-    {
-      label: "Photo of Business Establishment (Exterior)",
-      name: "photoOfBusinessEstExt",
-    },
+    { label: "Photo of Business Establishment (Interior)", name: "photoOfBusinessEstInt" },
+    { label: "Photo of Business Establishment (Exterior)", name: "photoOfBusinessEstExt" },
   ];
 
-  // State to track selected files
   const [selectedFiles, setSelectedFiles] = useState({});
+  const [openConfirm, setOpenConfirm] = useState(false);
 
   const handleFileSelect = (e) => {
     const { name, files } = e.target;
@@ -31,6 +24,22 @@ export default function Section7FileUploads({ handleFileChange }) {
       [name]: files[0] ? files[0].name : "",
     }));
     handleFileChange(e); // call parent handler
+  };
+
+  // Open confirmation dialog
+  const handleSubmitClick = () => {
+    setOpenConfirm(true);
+  };
+
+  // Close dialog
+  const handleClose = () => {
+    setOpenConfirm(false);
+  };
+
+  // Handle Yes
+  const handleConfirmYes = () => {
+    setOpenConfirm(false);
+    console.log("Form submitted ✅"); // replace with your actual submit logic
   };
 
   return (
@@ -47,8 +56,12 @@ export default function Section7FileUploads({ handleFileChange }) {
               <Button
                 variant="contained"
                 component="label"
-                size="small" // smaller button
-                sx={{ minWidth: 120 }}
+                size="small"
+                sx={{
+                  minWidth: 120,
+                  backgroundColor: "#4caf50", // ✅ your custom green
+                  "&:hover": { backgroundColor: "#15400d" },
+                }}
               >
                 Choose File
                 <input
@@ -58,19 +71,22 @@ export default function Section7FileUploads({ handleFileChange }) {
                   onChange={handleFileSelect}
                 />
               </Button>
+
               <TextField
                 value={selectedFiles[file.name] || ""}
                 placeholder="No file selected"
                 size="small"
                 fullWidth
-                InputProps={{
-                  readOnly: true,
-                }}
+                InputProps={{ readOnly: true }}
               />
             </Stack>
           </Stack>
         ))}
+
+       
       </Stack>
+
+   
     </div>
   );
 }

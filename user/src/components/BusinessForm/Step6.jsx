@@ -280,7 +280,11 @@ export default function Step6BusinessActivity({
           fullWidth
         />
 
-        <Button variant="contained" onClick={addBusinessLine}>
+        <Button
+          variant="contained"
+          onClick={addBusinessLine}
+          style={{ backgroundColor: '#4caf50', color: '#fff' }}
+        >
           {editingIndex !== null ? "Save Changes" : "Add Line of Business"}
         </Button>
 

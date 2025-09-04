@@ -26,11 +26,11 @@ const mainBackground = "mainbg.png";
 const GreenButton = styled(Button)(({ theme, variant }) => ({
   borderRadius: "8px",
   ...(variant === "contained" && {
-    backgroundColor: "#22361C",
+    backgroundColor: "#1c5111ff",
     color: "#fff",
     boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
     "&:hover": {
-      backgroundColor: "#12300B",
+      backgroundColor: "#1c5111ff",
     },
   }),
   ...(variant === "outlined" && {
@@ -155,7 +155,7 @@ const LoginPage = () => {
       <Box
         sx={{
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: "center",
           alignItems: "center",
           minHeight: "100vh",
           padding: { xs: 2, sm: 4 },

@@ -132,6 +132,7 @@ function NewApplicationPage() {
   });
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [submitDialogOpen, setSubmitDialogOpen] = useState(false); // NEW
   const [errors, setErrors] = useState({});
 
   const steps = [
@@ -151,38 +152,10 @@ function NewApplicationPage() {
 
   const validateStep = () => {
     const newErrors = {};
-
-    // Required fields for each step
     const requiredFields = {
       1: ["BusinessType", "businessName", "tinNo", "TradeName"],
-      // 2: ["firstName", "lastName", "sex", "eMailAdd", "mobileNo"],
-      // 3: [
-      //   "region",
-      //   "province",
-      //   "cityOrMunicipality",
-      //   "barangay",
-      //   "addressLine1",
-      //   "zipCode",
-      // ],
-      // 4: [
-      //   "Taxregion",
-      //   "Taxprovince",
-      //   "TaxcityOrMunicipality",
-      //   "Taxbarangay",
-      //   "TaxaddressLine1",
-      //   "TaxzipCode",
-      // ],
-      // 5: [
-      //   "totalFloorArea",
-      //   "numberOfEmployee",
-      //   "maleEmployee",
-      //   "femaleEmployee",
-      // ],
-      // // 6: ['lineOfBusiness', 'productService', 'Units', 'capital'],
-      // 7: ["proofOfReg", "brgyClearance", "cedula"],
     };
 
-    // Validate required fields for current step
     requiredFields[step]?.forEach((field) => {
       if (step === 7) {
         if (!filesState[field]) {
@@ -202,7 +175,6 @@ function NewApplicationPage() {
       newErrors.businessLines = "At least one line of business is required.";
     }
 
-    // Validate TIN format
     if (
       step === 1 &&
       formDataState.tinNo &&
@@ -218,7 +190,6 @@ function NewApplicationPage() {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Format TIN as user types
     if (name === "tinNo") {
       let formattedValue = value.replace(/[^0-9]/g, "");
       if (formattedValue.length > 0 && formattedValue[0] !== "9") {
@@ -272,8 +243,7 @@ function NewApplicationPage() {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     if (!validateStep()) {
       setSnackbarState({
         open: true,
@@ -283,7 +253,7 @@ function NewApplicationPage() {
       return;
     }
 
-    setIsSubmitting(true); // Disable button & show processing text
+    setIsSubmitting(true);
 
     const formData = new FormData();
 
@@ -327,7 +297,7 @@ function NewApplicationPage() {
         message: "Submission failed. Please try again.",
         severity: "error",
       });
-      setIsSubmitting(false); // Re-enable if error
+      setIsSubmitting(false);
     }
   };
 
@@ -419,7 +389,7 @@ function NewApplicationPage() {
           onClick={() => navigate(`/homePage/${id}`)}
           variant="contained"
         >
-          BACK
+          BACK TO DASHBOARD
         </GreenButton>
       </Box>
 
@@ -485,7 +455,7 @@ function NewApplicationPage() {
           ))}
         </Stepper>
 
-        <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+        <form style={{ width: "100%" }}>
           {renderStepContent(step)}
 
           <Box
@@ -515,9 +485,10 @@ function NewApplicationPage() {
             )}
             {step === 7 && (
               <GreenButton
-                type="submit"
+                type="button"
                 variant="contained"
                 disabled={isSubmitting}
+                onClick={() => setSubmitDialogOpen(true)}
                 sx={{ display: "flex", alignItems: "center", gap: 1 }}
               >
                 {isSubmitting ? (
@@ -534,6 +505,7 @@ function NewApplicationPage() {
         </form>
       </Paper>
 
+      {/* Next Step Confirmation */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
         <DialogTitle>Confirm Navigation</DialogTitle>
         <DialogContent>
@@ -541,12 +513,48 @@ function NewApplicationPage() {
             Are you sure you want to proceed to the next step?
           </Typography>
         </DialogContent>
-        <DialogActions>
-          <GreenButton variant="outlined" onClick={() => setDialogOpen(false)}>
+        <DialogActions sx={{ justifyContent: 'center', gap: 2, p: 2 }}>
+          <GreenButton
+            variant="outlined"
+            onClick={() => setDialogOpen(false)}
+            sx={{ minWidth: '90px' }} // Set a consistent minimum width
+          >
             Cancel
           </GreenButton>
-          <GreenButton variant="contained" onClick={handleDialogConfirm}>
+          <GreenButton
+            variant="contained"
+            onClick={handleDialogConfirm}
+            sx={{ minWidth: '120px' }} // Set a consistent minimum width
+          >
             Confirm
+          </GreenButton>
+        </DialogActions>
+      </Dialog>
+
+      {/* Submit Confirmation */}
+      <Dialog
+        open={submitDialogOpen}
+        onClose={() => setSubmitDialogOpen(false)}
+      >
+        <DialogTitle>Submit Application</DialogTitle>
+        <DialogContent>
+          <Typography>Do you want to submit this form?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <GreenButton
+            variant="outlined"
+            onClick={() => setSubmitDialogOpen(false)}
+          >
+            Cancel
+          </GreenButton>
+          <GreenButton
+            variant="contained"
+            onClick={() => {
+              setSubmitDialogOpen(false);
+              handleSubmit();
+            }}
+          >
+            Yes
           </GreenButton>
         </DialogActions>
       </Dialog>
