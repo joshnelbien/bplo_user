@@ -153,6 +153,9 @@ function New_records() {
                       <strong>BPLO</strong>
                     </TableCell>
                     <TableCell>
+                      <strong>Examiner's</strong>
+                    </TableCell>
+                    <TableCell>
                       <strong>CENRO</strong>
                     </TableCell>
                     <TableCell>
@@ -192,6 +195,16 @@ function New_records() {
                           <span>{applicant.BPLO}</span>
                           <span style={{ fontSize: "0.8em", color: "gray" }}>
                             {applicant.BPLOtimeStamp}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div
+                          style={{ display: "flex", flexDirection: "column" }}
+                        >
+                          <span>{applicant.Examiners}</span>
+                          <span style={{ fontSize: "0.8em", color: "gray" }}>
+                            {applicant.ExaminerstimeStamp}
                           </span>
                         </div>
                       </TableCell>

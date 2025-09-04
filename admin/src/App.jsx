@@ -11,6 +11,7 @@ import New_records from "./NEW_RECORDS/new_records";
 import Profile from "./PROFILE/profile";
 import Renew_records from "./RENEW_RECORDS/renew_records";
 import Examiners from "./TREASURER/examiners/examiners";
+import BusinessTax from "./TREASURER/businessTax/businessTax";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route path="/zoning" element={<Zoning />}></Route>
         <Route path="/obo" element={<Obo />}></Route>
         <Route path="/examiners" element={<Examiners />}></Route>
+        <Route path="/businessTax" element={<BusinessTax />}></Route>
       </Routes>
     </BrowserRouter>
   );

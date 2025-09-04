@@ -80,7 +80,7 @@ const departmentItems = [
 const treasurers = [
   { text: "Treasurer's Office", path: "/treasurer" },
   { text: "Assessor Office", path: "/examiners" },
-  { text: "Business Tax", path: "/business_tax" },
+  { text: "Business Tax", path: "/businessTax" },
 ];
 
 const drawerWidth = 270;
