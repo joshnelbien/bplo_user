@@ -22,7 +22,7 @@ function AppTracker() {
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_BASE;
 
-  const departments = ["BPLO", "CSMWO", "OBO", "CHO", "CENRO", "ZONING"];
+  const departments = ["BPLO","Examiners", "CSMWO", "OBO", "CHO", "CENRO", "ZONING"];
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // responsive

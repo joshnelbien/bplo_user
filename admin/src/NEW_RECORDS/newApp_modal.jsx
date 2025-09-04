@@ -461,7 +461,19 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
       </DialogContent>
 
       <DialogActions>
-        <Button variant="outlined" onClick={onClose} color="secondary">
+        <Button
+          onClick={onClose}
+          variant="contained"
+          color="gray"
+          sx={{
+            color: '#1c541eff',
+            borderColor: '#1c541eff',
+            '&:hover': {
+              borderColor: '#1c541eff',
+            },
+            width: '100px', // Set a specific width
+          }}
+        >
           Close
         </Button>
         <Button
@@ -472,7 +484,14 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
           Approve
         </Button>
 
-        <Button onClick={onClose} variant="outlined" color="error">
+        <Button
+          onClick={onClose}
+          variant="contained"
+          color="error"
+          sx={{
+            color: 'white', // Changes the font color to white
+          }}
+        >
           Decline
         </Button>
       </DialogActions>

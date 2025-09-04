@@ -79,7 +79,7 @@ const departmentItems = [
 // Treasurers dropdown items
 const treasurers = [
   { text: "Treasurer's Office", path: "/treasurer" },
-  { text: "Assessor Office", path: "/examiners" },
+  { text: "Examiner's Office", path: "/examiners" },
   { text: "Business Tax", path: "/businessTax" },
 ];
 

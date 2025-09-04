@@ -16,7 +16,52 @@ import {
   TableHead,
   TableRow,
   Typography,
+  Modal,
 } from "@mui/material";
+
+// ✅ New Confirmation Modal Component
+const ConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  message,
+}) => {
+  return (
+    <Modal open={isOpen} onClose={onClose}>
+      <Box
+        sx={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: 400,
+          bgcolor: "background.paper",
+          borderRadius: 2,
+          boxShadow: 24,
+          p: 4,
+          textAlign: "center",
+          outline: "none",
+        }}
+      >
+        <Typography variant="h6" mb={2}>
+          {message}
+        </Typography>
+        <Box display="flex" justifyContent="center" gap={2}>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={onConfirm}
+          >
+            Yes
+          </Button>
+          <Button variant="outlined" onClick={onClose}>
+            No
+          </Button>
+        </Box>
+      </Box>
+    </Modal>
+  );
+};
 
 function New_records() {
   const [pendingApplicants, setPendingApplicants] = useState([]);
@@ -25,6 +70,14 @@ function New_records() {
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filter, setFilter] = useState("pending"); // ✅ pending by default
+
+  // ✅ New state for confirmation modal
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [confirmationData, setConfirmationData] = useState({
+    action: "",
+    applicant: null,
+  });
+
   const recordsPerPage = 20;
 
   useEffect(() => {
@@ -61,25 +114,37 @@ function New_records() {
     indexOfLastRecord
   );
 
-  const handleApprove = async (applicant) => {
+  // ✅ Modified handleApprove to trigger confirmation modal
+  const handleApprove = (applicant) => {
+    setConfirmationData({ action: "approve", applicant });
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleConfirmAction = async () => {
+    setIsConfirmModalOpen(false); // Close the confirmation modal
+
+    const { action, applicant } = confirmationData;
+
     if (!applicant || !applicant.id) {
-      alert("No applicant selected!");
+      alert(`No applicant selected for ${action}!`);
       return;
     }
 
     try {
-      await axios.post(
-        `http://localhost:5000/examiners/bplo/approve/${applicant.id}`
-      );
-
-      // ✅ remove from pending after approval
-      setPendingApplicants((prev) => prev.filter((a) => a.id !== applicant.id));
-
-      alert("Applicant approved and moved to examiner's division");
+      if (action === "approve") {
+        await axios.post(
+          `http://localhost:5000/examiners/bplo/approve/${applicant.id}`
+        );
+        // ✅ remove from pending after approval
+        setPendingApplicants((prev) => prev.filter((a) => a.id !== applicant.id));
+        alert("Applicant approved and moved to examiner's division");
+      }
+      // You can add an else if block for "reject" here if needed
+      
       closeModal();
     } catch (error) {
-      console.error("Error approving applicant:", error);
-      alert("Failed to approve applicant");
+      console.error(`Error ${action}ing applicant:`, error);
+      alert(`Failed to ${action} applicant`);
     }
   };
 
@@ -100,8 +165,14 @@ function New_records() {
   return (
     <>
       <Side_bar />
-      <Box id="main_content" sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
+      <Box id="main_content"
+        sx={{
+          p: 3,
+          minHeight: '100vh',
+          background: 'linear-gradient(to bottom, #FFFFFF, #e6ffe6)'
+        }}
+      >
+        <Typography variant="h4" gutterBottom sx={{ color: '#1c541eff' }}>
           New Records
         </Typography>
 
@@ -109,19 +180,31 @@ function New_records() {
         <Box mb={2}>
           <ButtonGroup variant="contained">
             <Button
-              color={filter === "pending" ? "primary" : "inherit"}
+              color={filter === "pending" ? "success" : "inherit"}
               onClick={() => {
                 setFilter("pending");
                 setCurrentPage(1);
+              }}
+              sx={{
+                bgcolor: filter === "pending" ? "#1c541eff" : undefined,
+                "&:hover": {
+                  bgcolor: filter === "pending" ? "#1c541eff" : undefined,
+                },
               }}
             >
               Pending
             </Button>
             <Button
-              color={filter === "approved" ? "primary" : "inherit"}
+              color={filter === "approved" ? "success" : "inherit"}
               onClick={() => {
                 setFilter("approved");
                 setCurrentPage(1);
+              }}
+              sx={{
+                bgcolor: filter === "approved" ? "#1c541eff" : undefined,
+                "&:hover": {
+                  bgcolor: filter === "approved" ? "#1c541eff" : undefined,
+                },
               }}
             >
               Approved
@@ -272,23 +355,43 @@ function New_records() {
             count={totalPages}
             page={currentPage}
             onChange={handlePageChange}
-            color="primary"
+            sx={{
+              '& .MuiPaginationItem-root.Mui-selected': {
+                bgcolor: '#1c541eff',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: '#1c541eff',
+                },
+              },
+            }}
             shape="rounded"
           />
         </Box>
       </Box>
 
-      {/* ✅ Modal Component */}
+      {/* ✅ Modal Component (Applicant Details) */}
       <ApplicantModal
         applicant={selectedApplicant}
         isOpen={isModalOpen}
         onClose={closeModal}
-        onApprove={handleApprove}
+        // ✅ Pass a function that triggers the confirmation modal
+        onApprove={() => {
+          handleApprove(selectedApplicant);
+          closeModal();
+        }}
         baseUrl={
           filter === "pending"
             ? "http://localhost:5000/newApplication/files"
             : "http://localhost:5000/backroom/backroom"
         }
+      />
+
+      {/* ✅ Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleConfirmAction}
+        message={`Are you sure you want to ${confirmationData.action} approve?`}
       />
     </>
   );
