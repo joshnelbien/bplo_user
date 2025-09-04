@@ -5,21 +5,17 @@ const File = require("../db/model/files");
 const router = express.Router();
 const moment = require("moment");
 
-// Multer in-memory storage
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Upload files + text fields
 router.post("/backroom/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // 1. Get applicant from Files table
     const applicant = await File.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
-    // 2. Insert into Backroom with timestamp
     const backroomData = applicant.toJSON();
 
     backroomData.BPLO = "Approved";
@@ -27,7 +23,6 @@ router.post("/backroom/approve/:id", async (req, res) => {
 
     const created = await Backroom.create(backroomData);
 
-    // 3. Remove from Files (move instead of copy)
     await applicant.destroy();
 
     res
@@ -49,7 +44,6 @@ router.post("/obo/approve/:id", async (req, res) => {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
-    // ✅ Destructure fields from request body
     const { BSAP, SR, Mechanical, Electrical, Signage, Electronics } = req.body;
 
     // ✅ Update fields
@@ -78,7 +72,7 @@ router.post(
   async (req, res) => {
     try {
       const { id } = req.params;
-      const { zoningFee } = req.body; // ✅ grab zoningFee from formData
+      const { zoningFee } = req.body;
 
       const applicant = await Backroom.findByPk(id);
       if (!applicant) {
@@ -91,7 +85,7 @@ router.post(
       applicant.zoningFee = zoningFee;
 
       if (req.file) {
-        applicant.zoningCert = req.file.buffer; // store raw binary
+        applicant.zoningCert = req.file.buffer;
         applicant.zoningCert_filename = req.file.originalname;
         applicant.zoningCert_mimetype = req.file.mimetype;
         applicant.zoningCert_size = req.file.size;
@@ -110,23 +104,20 @@ router.post(
 router.post("/cho/approve/:id", upload.single("choCert"), async (req, res) => {
   try {
     const { id } = req.params;
-    const { choFee } = req.body; // ✅ grab choFee from formData
+    const { choFee } = req.body;
 
     const applicant = await Backroom.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
-    // ✅ Save CHO approval
     applicant.CHO = "Approved";
     applicant.CHOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
-    // ✅ Save CHO fee
-    applicant.choFee = choFee; // <-- must exist in your DB model
+    applicant.choFee = choFee;
 
-    // ✅ If file uploaded, save it in DB
     if (req.file) {
-      applicant.choCert = req.file.buffer; // store raw binary
+      applicant.choCert = req.file.buffer;
       applicant.choCert_filename = req.file.originalname;
       applicant.choCert_mimetype = req.file.mimetype;
       applicant.choCert_size = req.file.size;
@@ -153,17 +144,13 @@ router.post(
       if (!applicant) {
         return res.status(404).json({ error: "Applicant not found" });
       }
-
-      // ✅ Update CENRO to Approved
       applicant.CENRO = "Approved";
       applicant.CENROtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
-      // ✅ Save CHO fee
-      applicant.cenroFee = cenroFee; // <-- must exist in your DB model
+      applicant.cenroFee = cenroFee;
 
-      // ✅ If file uploaded, save it in DB
       if (req.file) {
-        applicant.cenroCert = req.file.buffer; // store raw binary
+        applicant.cenroCert = req.file.buffer;
         applicant.cenroCert_filename = req.file.originalname;
         applicant.cenroCert_mimetype = req.file.mimetype;
         applicant.cenroCert_size = req.file.size;
@@ -184,9 +171,7 @@ router.post(
 router.post("/csmwo/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { csmwoFee } = req.body; // ✅ will now exist
-
-    console.log("Received body:", req.body); // debug
+    const { csmwoFee } = req.body;
 
     const applicant = await Backroom.findByPk(id);
     if (!applicant) {
@@ -201,7 +186,6 @@ router.post("/csmwo/approve/:id", async (req, res) => {
 
     res.json({ message: "Applicant approved", applicant });
   } catch (err) {
-    console.error("Approve error:", err);
     res.status(500).json({ error: "Failed to approve applicant" });
   }
 });
@@ -223,7 +207,7 @@ router.get("/backrooms/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const backrooms = await Backroom.findAll({
-      where: { userId: id }, // ✅ filter by userId
+      where: { userId: id },
       order: [["createdAt", "DESC"]],
     });
     res.json(backrooms);

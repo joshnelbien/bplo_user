@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Side_bar from "../../SIDE_BAR/side_bar";
-import BusinessTaxApplicantModal from "./businessTax_modal";
+import BusinessTax_computation from "./businessTax_computation";
 import {
   Box,
   Button,
@@ -192,7 +192,7 @@ function BusinessTax() {
         </Box>
       </Box>
       ✅ Modal Component
-      <BusinessTaxApplicantModal
+      <BusinessTax_computation
         applicant={selectedApplicant}
         isOpen={isModalOpen}
         onClose={closeModal}
