@@ -100,8 +100,14 @@ function New_records() {
   return (
     <>
       <Side_bar />
-      <Box id="main_content" sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
+      <Box id="main_content"
+        sx={{
+          p: 3,
+          minHeight: '100vh',
+          background: 'linear-gradient(to bottom, #FFFFFF, #e6ffe6)'
+        }}
+      >
+        <Typography variant="h4" gutterBottom sx={{ color: '#1c541eff' }}>
           New Records
         </Typography>
 
@@ -109,19 +115,31 @@ function New_records() {
         <Box mb={2}>
           <ButtonGroup variant="contained">
             <Button
-              color={filter === "pending" ? "primary" : "inherit"}
+              color={filter === "pending" ? "success" : "inherit"}
               onClick={() => {
                 setFilter("pending");
                 setCurrentPage(1);
+              }}
+              sx={{
+                bgcolor: filter === "pending" ? "#1c541eff" : undefined,
+                "&:hover": {
+                  bgcolor: filter === "pending" ? "#1c541eff" : undefined,
+                },
               }}
             >
               Pending
             </Button>
             <Button
-              color={filter === "approved" ? "primary" : "inherit"}
+              color={filter === "approved" ? "success" : "inherit"}
               onClick={() => {
                 setFilter("approved");
                 setCurrentPage(1);
+              }}
+              sx={{
+                bgcolor: filter === "approved" ? "#1c541eff" : undefined,
+                "&:hover": {
+                  bgcolor: filter === "approved" ? "#1c541eff" : undefined,
+                },
               }}
             >
               Approved
@@ -272,7 +290,15 @@ function New_records() {
             count={totalPages}
             page={currentPage}
             onChange={handlePageChange}
-            color="primary"
+            sx={{
+              '& .MuiPaginationItem-root.Mui-selected': {
+                bgcolor: '#1c541eff',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: '#1c541eff',
+                },
+              },
+            }}
             shape="rounded"
           />
         </Box>
