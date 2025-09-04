@@ -141,46 +141,63 @@ router.post("/cho/approve/:id", upload.single("choCert"), async (req, res) => {
   }
 });
 
-router.post("/cenro/approve/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
+router.post(
+  "/cenro/approve/:id",
+  upload.single("cenroCert"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { cenroFee } = req.body;
 
-    const applicant = await Backroom.findByPk(id);
-    if (!applicant) {
-      return res.status(404).json({ error: "Applicant not found" });
+      const applicant = await Backroom.findByPk(id);
+      if (!applicant) {
+        return res.status(404).json({ error: "Applicant not found" });
+      }
+
+      // ✅ Update CENRO to Approved
+      applicant.CENRO = "Approved";
+      applicant.CENROtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+
+      // ✅ Save CHO fee
+      applicant.cenroFee = cenroFee; // <-- must exist in your DB model
+
+      // ✅ If file uploaded, save it in DB
+      if (req.file) {
+        applicant.cenroCert = req.file.buffer; // store raw binary
+        applicant.cenroCert_filename = req.file.originalname;
+        applicant.cenroCert_mimetype = req.file.mimetype;
+        applicant.cenroCert_size = req.file.size;
+      }
+      await applicant.save();
+
+      // ✅ (Optional) If you really want to destroy it after approval
+      // await applicant.destroy();
+
+      res.json({ message: "Applicant approved", applicant });
+    } catch (err) {
+      console.error("Approve error:", err);
+      res.status(500).json({ error: "Failed to approve applicant" });
     }
-
-    // ✅ Update CENRO to Approved
-    applicant.CENRO = "Approved";
-    applicant.CENROtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
-    await applicant.save();
-
-    // ✅ (Optional) If you really want to destroy it after approval
-    // await applicant.destroy();
-
-    res.json({ message: "Applicant approved", applicant });
-  } catch (err) {
-    console.error("Approve error:", err);
-    res.status(500).json({ error: "Failed to approve applicant" });
   }
-});
+);
 
 router.post("/csmwo/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    const { csmwoFee } = req.body; // ✅ will now exist
+
+    console.log("Received body:", req.body); // debug
 
     const applicant = await Backroom.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
-    // ✅ Update  to Approved
     applicant.CSMWO = "Approved";
     applicant.CSMWOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
-    await applicant.save();
+    applicant.csmwoFee = csmwoFee;
 
-    // ✅ (Optional) If you really want to destroy it after approval
-    // await applicant.destroy();
+    await applicant.save();
 
     res.json({ message: "Applicant approved", applicant });
   } catch (err) {

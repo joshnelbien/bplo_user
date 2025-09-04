@@ -112,8 +112,10 @@ const Backroom = sequelize.define(
 
     BPLO: { type: DataTypes.STRING, defaultValue: "Approved" },
     BPLOtimeStamp: { type: DataTypes.STRING },
+
     CSMWO: { type: DataTypes.STRING, defaultValue: "Pending" },
     CSMWOtimeStamp: { type: DataTypes.STRING },
+    csmwoFee: { type: DataTypes.STRING },
 
     OBO: { type: DataTypes.STRING, defaultValue: "Pending" },
     OBOtimeStamp: { type: DataTypes.STRING },
@@ -143,6 +145,11 @@ const Backroom = sequelize.define(
 
     CENRO: { type: DataTypes.STRING, defaultValue: "Pending" },
     CENROtimeStamp: { type: DataTypes.STRING },
+    cenroFee: { type: DataTypes.STRING },
+    cenroCert: { type: DataTypes.BLOB("long"), allowNull: true },
+    cenroCert_filename: { type: DataTypes.STRING, allowNull: true },
+    cenroCert_mimetype: { type: DataTypes.STRING, allowNull: true },
+    cenroCert_size: { type: DataTypes.INTEGER, allowNull: true },
 
     ZONING: { type: DataTypes.STRING, defaultValue: "Pending" },
     ZONINGtimeStamp: { type: DataTypes.STRING },

@@ -426,12 +426,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
                 </Typography>
 
                 <Grid container spacing={2}>
-                  <Field
-                    label="CSWMO Fee"
-                    size="small"
-                    fullWidth
-                    variant="outlined"
-                  />
+                  <Field label="Solid Waste Fee" value={applicant.csmwoFee} />
                 </Grid>
               </Paper>
             )}
@@ -450,11 +445,13 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
                 </Typography>
 
                 <Grid container spacing={2}>
-                  <Field
-                    label="CENRO Fee"
-                    size="small"
-                    fullWidth
-                    variant="outlined"
+                  <Field label="Environment Fee" value={applicant.cenroFee} />
+
+                  <FileField
+                    fileKey="cenroCert"
+                    label="Cenro Certificate"
+                    fileData={applicant}
+                    baseUrl={baseUrl}
                   />
                 </Grid>
               </Paper>

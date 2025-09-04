@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
+import { useState, useEffect } from "react";
 
 // Component to display a normal text field
 const Field = ({ label, value }) => (
@@ -125,6 +126,20 @@ const FileField = ({ label, fileKey, fileData }) => (
 
 function CmswoApplicantModal({ applicant, isOpen, onClose, onApprove }) {
   if (!isOpen || !applicant) return null;
+
+  const [csmwoField, setcmswoField] = useState({ csmwoFee: "" });
+
+  useEffect(() => {
+    if (applicant) {
+      setcmswoField({
+        csmwoFee: applicant.csmwoFee || "",
+      });
+    }
+  }, [applicant]);
+
+  const handleChange = (field, value) => {
+    setcmswoField((prev) => ({ ...prev, [field]: value }));
+  };
 
   const Section = ({ title, children }) => (
     <Accordion>
@@ -319,14 +334,24 @@ function CmswoApplicantModal({ applicant, isOpen, onClose, onApprove }) {
             fileData={applicant}
           />
         </Section>
+
+        <TextField
+          label="Solid waste Fee"
+          value={csmwoField.csmwoFee || ""}
+          onChange={(e) => handleChange("csmwoFee", e.target.value)}
+          fullWidth
+          size="small"
+          sx={{ mt: 2 }}
+        />
       </DialogContent>
 
       <DialogActions>
         <Button variant="outlined" onClick={onClose} color="secondary">
           Close
         </Button>
+
         <Button
-          onClick={() => onApprove(applicant.id)}
+          onClick={() => onApprove(applicant.id, csmwoField.csmwoFee)} // ✅ sends csmwoFee
           variant="contained"
           color="success"
         >

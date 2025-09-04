@@ -53,14 +53,21 @@ function Cmswo() {
     indexOfLastRecord
   );
 
-  const handleApprove = async (id) => {
+  const handleApprove = async (id, csmwoFee) => {
     try {
-      await axios.post(`http://localhost:5000/backroom/csmwo/approve/${id}`);
+      const res = await axios.post(
+        `http://localhost:5000/backroom/csmwo/approve/${id}`,
+        { csmwoFee } // ✅ must match backend & DB field
+      );
+
       setApplicants((prev) =>
         prev.map((applicant) =>
-          applicant.id === id ? { ...applicant, CSMWO: "Approved" } : applicant
+          applicant.id === id
+            ? { ...applicant, CSMWO: "Approved", csmwoFee }
+            : applicant
         )
       );
+
       alert("Applicant approved");
       closeModal();
     } catch (error) {

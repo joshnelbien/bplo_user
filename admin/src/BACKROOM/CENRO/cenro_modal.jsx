@@ -18,6 +18,7 @@ import {
 
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
+import { useState, useEffect } from "react";
 
 // Component to display a normal text field
 const Field = ({ label, value }) => (
@@ -124,8 +125,42 @@ const FileField = ({ label, fileKey, fileData }) => (
   </Grid>
 );
 
-function CenroApplicantModal({ applicant, isOpen, onClose, onApprove }) {
+function CenroApplicantModal({
+  applicant,
+  isOpen,
+  onClose,
+  onApprove,
+  handleFileChange,
+}) {
   if (!isOpen || !applicant) return null;
+
+  const [cenroField, setcenroField] = useState({ cenroFee: "" });
+
+  useEffect(() => {
+    if (applicant) {
+      setcenroField({
+        cenroFee: applicant.cenroFee || "",
+      });
+    }
+  }, [applicant]);
+
+  const handleChange = (field, value) => {
+    setcenroField((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const files = [{ label: "cenro Certificate", name: "cenroCert" }];
+  const [selectedFiles, setSelectedFiles] = useState({});
+
+  const handleFileSelect = (e) => {
+    const { name, files } = e.target;
+    if (files[0]) {
+      setSelectedFiles((prev) => ({
+        ...prev,
+        [name]: files[0], // store the actual File object
+      }));
+      +handleFileChange(name, files[0]); // send file up to parent
+    }
+  };
 
   const Section = ({ title, children }) => (
     <Accordion>
@@ -321,27 +356,46 @@ function CenroApplicantModal({ applicant, isOpen, onClose, onApprove }) {
           />
         </Section>
 
-        <Section title="CENRO Attachments">
-          <TextField
-            label="Sanitary Fee"
-            variant="outlined"
-            size="small"
-            fullWidth
-            sx={{
-              "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
-            }}
-          />
+        {/* ✅ CHO Fee input */}
+        <TextField
+          label="Sanitary Fee"
+          value={cenroField.cenroFee || ""}
+          onChange={(e) => handleChange("cenroFee", e.target.value)}
+          fullWidth
+          size="small"
+          sx={{ mt: 2 }}
+        />
 
-          <TextField
-            type="file"
-            placeholder="No file selected"
-            size="small"
-            fullWidth
-            InputLabelProps={{
-              shrink: true,
-            }}
-          />
-        </Section>
+        {/* ✅ File Upload */}
+        {files.map((file) => (
+          <Grid container spacing={1} key={file.name} sx={{ mt: 1 }}>
+            <Grid item>
+              <Button
+                variant="contained"
+                component="label"
+                size="small"
+                sx={{ minWidth: 120 }}
+              >
+                Choose File
+                <input
+                  type="file"
+                  name={file.name}
+                  hidden
+                  onChange={handleFileSelect}
+                />
+              </Button>
+            </Grid>
+            <Grid item xs>
+              <TextField
+                value={selectedFiles[file.name]?.name || ""}
+                placeholder="No file selected"
+                size="small"
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+            </Grid>
+          </Grid>
+        ))}
       </DialogContent>
 
       <DialogActions>
@@ -349,7 +403,9 @@ function CenroApplicantModal({ applicant, isOpen, onClose, onApprove }) {
           Close
         </Button>
         <Button
-          onClick={() => onApprove(applicant.id)}
+          onClick={() =>
+            onApprove(applicant.id, cenroField.cenroFee, selectedFiles)
+          }
           variant="contained"
           color="success"
         >

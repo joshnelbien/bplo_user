@@ -67,7 +67,7 @@ function Cho() {
       formData.append("choFee", choFee);
 
       if (selectedFiles.choCert) {
-        formData.append("choCert", selectedFiles.choCert); // actual File, not just string
+        formData.append("choCert", selectedFiles.choCert);
       }
 
       await axios.post(

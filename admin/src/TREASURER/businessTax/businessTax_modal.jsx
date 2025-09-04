@@ -363,7 +363,7 @@ function BusinessTaxApplicantModal({
 
         {/* ✅ CHO Fee input */}
         <TextField
-          label="Sanitary Fee"
+          label="Business Tax"
           value={choField.choFee || ""}
           onChange={(e) => handleChange("choFee", e.target.value)}
           fullWidth

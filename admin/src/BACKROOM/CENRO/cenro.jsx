@@ -25,6 +25,14 @@ function Cenro() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filter, setFilter] = useState("pending"); // ✅ pending by default
   const recordsPerPage = 20;
+  const [selectedFiles, setSelectedFiles] = useState({});
+
+  const handleFileChange = (name, file) => {
+    setSelectedFiles((prev) => ({
+      ...prev,
+      [name]: file,
+    }));
+  };
 
   useEffect(() => {
     const fetchApplicants = async () => {
@@ -53,12 +61,25 @@ function Cenro() {
     indexOfLastRecord
   );
 
-  const handleApprove = async (id) => {
+  const handleApprove = async (id, cenroFee, selectedFiles) => {
     try {
-      await axios.post(`http://localhost:5000/backroom/cenro/approve/${id}`);
+      const formData = new FormData();
+      formData.append("cenroFee", cenroFee);
+
+      if (selectedFiles.cenroCert) {
+        formData.append("cenroCert", selectedFiles.cenroCert);
+      }
+
+      await axios.post(
+        `http://localhost:5000/backroom/cenro/approve/${id}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
       setApplicants((prev) =>
         prev.map((applicant) =>
-          applicant.id === id ? { ...applicant, CENRO: "Approved" } : applicant
+          applicant.id === id
+            ? { ...applicant, CENRO: "Approved", cenroFee }
+            : applicant
         )
       );
       alert("Applicant approved");
@@ -115,15 +136,28 @@ function Cenro() {
         </Box>
 
         {/* ✅ Table */}
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
+        <TableContainer
+          component={Paper}
+          sx={{ borderRadius: 2, boxShadow: 3 }}
+        >
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell><strong>Applicant ID</strong></TableCell>
-                <TableCell><strong>Business Name</strong></TableCell>
-                <TableCell><strong>First Name</strong></TableCell>
-                <TableCell><strong>Last Name</strong></TableCell>
-                <TableCell><strong>Status</strong></TableCell>
+                <TableCell>
+                  <strong>Applicant ID</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Business Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>First Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Last Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Status</strong>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -163,6 +197,8 @@ function Cenro() {
         isOpen={isModalOpen}
         onClose={closeModal}
         onApprove={handleApprove}
+        handleFileChange={handleFileChange}
+        selectedFiles={selectedFiles}
       />
     </>
   );
