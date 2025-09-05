@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import {
   Box,
   Button,
@@ -12,6 +14,8 @@ import {
   Snackbar,
   TextField,
   Typography,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
 import { styled } from "@mui/system";
@@ -55,12 +59,13 @@ const LoginPage = () => {
   const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
   const [openErrorDialog, setOpenErrorDialog] = useState(false);
   const [snackbarState, setSnackbarState] = useState({
-    open: false,
+    open: false,  
     message: "",
     severity: "error",
   });
+  const [showPassword, setShowPassword] = useState(false);
 
-  const [loading, setLoading] = useState(false); // ✅ for button loading state
+  const [loading, setLoading] = useState(false);
 
   const validateForm = () => {
     const newErrors = { email: "", password: "" };
@@ -93,6 +98,10 @@ const LoginPage = () => {
     setErrors((prev) => ({ ...prev, [id]: "" }));
   };
 
+  const handleTogglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -117,19 +126,13 @@ const LoginPage = () => {
         throw new Error("User ID not found in response");
       }
 
-      // 🔑 Save user ID in localStorage
       localStorage.setItem("userId", user.id);
 
-      // Success dialog + redirect
       setOpenSuccessDialog(true);
-      setSnackbarState({
-        open: true,
-        message: "Login successful!",
-        severity: "success",
-      });
+     
       setTimeout(() => {
         setOpenSuccessDialog(false);
-        navigate(`/homePage/me`); // ✅ no :id in URL
+        navigate(`/homePage/me`);
       }, 1500);
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);
@@ -161,7 +164,7 @@ const LoginPage = () => {
   return (
     <>
       <Box
-        sx={{
+        sx={{ 
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -235,17 +238,62 @@ const LoginPage = () => {
               fullWidth
               error={!!errors.email}
               helperText={errors.email}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: '#1c5111ff', // Green border when not focused
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#1c5111ff', // Green outline on focus
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#1c5111ff', // Green label color
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: '#1c5111ff', // Green label color when focused
+                },
+              }}
             />
             <TextField
               id="password"
               label="Password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={form.password}
               onChange={handleChange}
               variant="outlined"
               fullWidth
               error={!!errors.password}
               helperText={errors.password}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleTogglePasswordVisibility}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+               sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: '#1c5111ff', // Green border when not focused
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#1c5111ff', // Green outline on focus
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#1c5111ff', // Green label color
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: '#1c5111ff', // Green label color when focused
+                },
+              }}
             />
             <GreenButton
               type="submit"
@@ -365,4 +413,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default LoginPage; 
