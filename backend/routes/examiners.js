@@ -69,19 +69,24 @@ router.post("/bplo/approve/:id", async (req, res) => {
     // 2. Convert to plain object
     const applicantData = applicant.toJSON();
 
-    // 3. Add approval fields
+    // 3. Add approval fields for Examiners
     applicantData.BPLO = "Approved";
     applicantData.BPLOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
-    // 4. Insert into Backroom table
+    // 4. Insert into Examiners table
     const created = await Examiners.create(applicantData);
 
-    // 5. Remove from Files (move instead of copy)
-    await applicant.destroy();
+    // 5. Update applicant status in Files (archive instead of delete)
+    await applicant.update({
+      BPLO: "Approved",
+      BPLOtimeStamp: applicantData.BPLOtimeStamp,
+      status: "Approved",
+    });
 
-    res
-      .status(201)
-      .json({ message: "Applicant approved and moved to Examiners", created });
+    res.status(201).json({
+      message: "Applicant approved, archived in Files, and moved to Examiners",
+      created,
+    });
   } catch (err) {
     console.error("Approve error:", err);
     res.status(500).json({ error: "Failed to approve applicant" });
@@ -92,7 +97,7 @@ router.post("/examiners/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // 1. Get applicant from Files table
+    // 1. Get applicant from Examiners table
     const applicant = await Examiners.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
@@ -102,15 +107,25 @@ router.post("/examiners/approve/:id", async (req, res) => {
     const applicantData = applicant.toJSON();
 
     // 3. Add approval fields
+    const timestamp = moment().format("DD/MM/YYYY HH:mm:ss");
     applicantData.Examiners = "Approved";
-    applicantData.ExaminerstimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+    applicantData.ExaminerstimeStamp = timestamp;
+    applicantData.status = "Approved";
 
     // 4. Insert into Backroom table
     const created = await Backroom.create(applicantData);
 
-    res
-      .status(201)
-      .json({ message: "Applicant approved and moved to Examiners", created });
+    // 5. Update status in Examiners table (archive instead of delete)
+    await applicant.update({
+      Examiners: "Approved",
+      ExaminerstimeStamp: timestamp,
+      status: "Approved",
+    });
+
+    res.status(201).json({
+      message: "Applicant approved and moved to Backroom",
+      created,
+    });
   } catch (err) {
     console.error("Approve error:", err);
     res.status(500).json({ error: "Failed to approve applicant" });
