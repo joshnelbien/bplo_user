@@ -1,400 +1,461 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import Side_bar from "../SIDE_BAR/side_bar";
-import ApplicantModal from "./newApp_modal";
+import Side_bar from "../SIDE_BAR/side_bar.jsx";
+import ApplicantModal from "./newApp_modal.jsx";
 
 import {
-  Box,
-  Button,
-  ButtonGroup,
-  Pagination,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  Modal,
+    Box,
+    Button,
+    ButtonGroup,
+    Pagination,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography,
+    Modal,
 } from "@mui/material";
 
-// ✅ New Confirmation Modal Component
+import { CheckCircleOutline } from "@mui/icons-material"; // Import Material-UI icon
+
+// ✅ New Confirmation Modal Component (already existed)
 const ConfirmationModal = ({
-  isOpen,
-  onClose,
-  onConfirm,
-  message,
+    isOpen,
+    onClose,
+    onConfirm,
+    message,
 }) => {
-  return (
-    <Modal open={isOpen} onClose={onClose}>
-      <Box
-        sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 400,
-          bgcolor: "background.paper",
-          borderRadius: 2,
-          boxShadow: 24,
-          p: 4,
-          textAlign: "center",
-          outline: "none",
-        }}
-      >
-        <Typography variant="h6" mb={2}>
-          {message}
-        </Typography>
-        <Box display="flex" justifyContent="center" gap={2}>
-          <Button
-            variant="contained"
-            color="success"
-            onClick={onConfirm}
-          >
-            Yes
-          </Button>
-          <Button variant="outlined" onClick={onClose}>
-            No
-          </Button>
-        </Box>
-      </Box>
-    </Modal>
-  );
+    return (
+        <Modal open={isOpen} onClose={onClose}>
+            <Box
+                sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    width: 400,
+                    bgcolor: "background.paper",
+                    borderRadius: 2,
+                    boxShadow: 24,
+                    p: 4,
+                    textAlign: "center",
+                    outline: "none",
+                }}
+            >
+                <Typography variant="h6" mb={2}>
+                    {message}
+                </Typography>
+                <Box display="flex" justifyContent="center" gap={2}>
+                    <Button
+                        variant="contained"
+                        color="success"
+                        onClick={onConfirm}
+                    >
+                        Yes
+                    </Button>
+                    <Button variant="outlined" onClick={onClose}>
+                        No
+                    </Button>
+                </Box>
+            </Box>
+        </Modal>
+    );
 };
 
+// ✅ New Success Modal Component
+const SuccessModal = ({ isOpen, onClose, message }) => {
+    return (
+        <Modal open={isOpen} onClose={onClose}>
+            <Box
+                sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    width: 300,
+                    bgcolor: "background.paper",
+                    borderRadius: 2,
+                    boxShadow: 24,
+                    p: 4,
+                    textAlign: "center",
+                    outline: "none",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 2,
+                }}
+            >
+                <CheckCircleOutline sx={{ color: "green", fontSize: 60 }} />
+                <Typography variant="h6" mb={2}>
+                    {message}
+                </Typography>
+                <Button variant="contained" color="success" onClick={onClose}>
+                    OK
+                </Button>
+            </Box>
+        </Modal>
+    );
+};
+
+
 function New_records() {
-  const [pendingApplicants, setPendingApplicants] = useState([]);
-  const [approvedApplicants, setApprovedApplicants] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedApplicant, setSelectedApplicant] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filter, setFilter] = useState("pending"); // ✅ pending by default
+    const [pendingApplicants, setPendingApplicants] = useState([]);
+    const [approvedApplicants, setApprovedApplicants] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [selectedApplicant, setSelectedApplicant] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [filter, setFilter] = useState("pending");
 
-  // ✅ New state for confirmation modal
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [confirmationData, setConfirmationData] = useState({
-    action: "",
-    applicant: null,
-  });
+    // ✅ New state for confirmation modal
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const [confirmationData, setConfirmationData] = useState({
+        action: "",
+        applicant: null,
+    });
 
-  const recordsPerPage = 20;
+    // ✅ New state for success modal
+    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchApplicants = async () => {
-      try {
-        // ✅ Pending applicants
-        const pendingRes = await axios.get(
-          "http://localhost:5000/newApplication/files"
-        );
-        setPendingApplicants(pendingRes.data);
+    const recordsPerPage = 20;
 
-        // ✅ Approved applicants
-        const approvedRes = await axios.get(
-          "http://localhost:5000/backroom/backrooms"
-        );
-        setApprovedApplicants(approvedRes.data);
-      } catch (error) {
-        console.error("Error fetching applicants:", error);
-      }
+    useEffect(() => {
+        const fetchApplicants = async () => {
+            try {
+                // ✅ Pending applicants
+                const pendingRes = await axios.get(
+                    "http://localhost:5000/newApplication/files"
+                );
+                setPendingApplicants(pendingRes.data);
+
+                // ✅ Approved applicants
+                const approvedRes = await axios.get(
+                    "http://localhost:5000/backroom/backrooms"
+                );
+                setApprovedApplicants(approvedRes.data);
+            } catch (error) {
+                console.error("Error fetching applicants:", error);
+            }
+        };
+
+        fetchApplicants();
+    }, []);
+
+    // ✅ Decide which dataset to show
+    const applicants =
+        filter === "pending" ? pendingApplicants : approvedApplicants;
+
+    const totalPages = Math.ceil(applicants.length / recordsPerPage);
+    const indexOfLastRecord = currentPage * recordsPerPage;
+    const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+    const currentRecords = applicants.slice(
+        indexOfFirstRecord,
+        indexOfLastRecord
+    );
+
+    // ✅ Modified handleApprove to trigger confirmation modal
+    const handleApprove = (applicant) => {
+        setConfirmationData({ action: "approve", applicant });
+        setIsConfirmModalOpen(true);
     };
 
-    fetchApplicants();
-  }, []);
+    const handleConfirmAction = async () => {
+        setIsConfirmModalOpen(false); // Close the confirmation modal
 
-  // ✅ Decide which dataset to show
-  const applicants =
-    filter === "pending" ? pendingApplicants : approvedApplicants;
+        const { action, applicant } = confirmationData;
 
-  const totalPages = Math.ceil(applicants.length / recordsPerPage);
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = applicants.slice(
-    indexOfFirstRecord,
-    indexOfLastRecord
-  );
-
-  // ✅ Modified handleApprove to trigger confirmation modal
-  const handleApprove = (applicant) => {
-    setConfirmationData({ action: "approve", applicant });
-    setIsConfirmModalOpen(true);
-  };
-
-  const handleConfirmAction = async () => {
-    setIsConfirmModalOpen(false); // Close the confirmation modal
-
-    const { action, applicant } = confirmationData;
-
-    if (!applicant || !applicant.id) {
-      alert(`No applicant selected for ${action}!`);
-      return;
-    }
-
-    try {
-      if (action === "approve") {
-        await axios.post(
-          `http://localhost:5000/examiners/bplo/approve/${applicant.id}`
-        );
-        // ✅ remove from pending after approval
-        setPendingApplicants((prev) => prev.filter((a) => a.id !== applicant.id));
-        alert("Applicant approved and moved to examiner's division");
-      }
-      // You can add an else if block for "reject" here if needed
-      
-      closeModal();
-    } catch (error) {
-      console.error(`Error ${action}ing applicant:`, error);
-      alert(`Failed to ${action} applicant`);
-    }
-  };
-
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-  };
-
-  const openModal = (applicant) => {
-    setSelectedApplicant(applicant);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setSelectedApplicant(null);
-    setIsModalOpen(false);
-  };
-
-  return (
-    <>
-      <Side_bar />
-      <Box id="main_content"
-        sx={{
-          p: 3,
-          minHeight: '100vh',
-          background: 'linear-gradient(to bottom, #FFFFFF, #e6ffe6)'
-        }}
-      >
-        <Typography variant="h4" gutterBottom sx={{ color: '#1c541eff' }}>
-          New Records
-        </Typography>
-
-        {/* ✅ Button Group Filter */}
-        <Box mb={2}>
-          <ButtonGroup variant="contained">
-            <Button
-              color={filter === "pending" ? "success" : "inherit"}
-              onClick={() => {
-                setFilter("pending");
-                setCurrentPage(1);
-              }}
-              sx={{
-                bgcolor: filter === "pending" ? "#1c541eff" : undefined,
-                "&:hover": {
-                  bgcolor: filter === "pending" ? "#1c541eff" : undefined,
-                },
-              }}
-            >
-              Pending
-            </Button>
-            <Button
-              color={filter === "approved" ? "success" : "inherit"}
-              onClick={() => {
-                setFilter("approved");
-                setCurrentPage(1);
-              }}
-              sx={{
-                bgcolor: filter === "approved" ? "#1c541eff" : undefined,
-                "&:hover": {
-                  bgcolor: filter === "approved" ? "#1c541eff" : undefined,
-                },
-              }}
-            >
-              Approved
-            </Button>
-          </ButtonGroup>
-        </Box>
-
-        {/* ✅ Table */}
-        <TableContainer
-          component={Paper}
-          sx={{ borderRadius: 2, boxShadow: 3 }}
-        >
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell>
-                  <strong>Business Name</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>First Name</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Last Name</strong>
-                </TableCell>
-
-                {filter === "approved" && (
-                  <>
-                    <TableCell>
-                      <strong>BPLO</strong>
-                    </TableCell>
-                    <TableCell>
-                      <strong>Examiner's</strong>
-                    </TableCell>
-                    <TableCell>
-                      <strong>CENRO</strong>
-                    </TableCell>
-                    <TableCell>
-                      <strong>CHO</strong>
-                    </TableCell>
-                    <TableCell>
-                      <strong>ZONING</strong>
-                    </TableCell>
-                    <TableCell>
-                      <strong>CSWMO</strong>
-                    </TableCell>
-                    <TableCell>
-                      <strong>OBO</strong>
-                    </TableCell>
-                  </>
-                )}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {currentRecords.map((applicant) => (
-                <TableRow
-                  key={applicant.id}
-                  hover
-                  sx={{ cursor: "pointer" }}
-                  onClick={() => openModal(applicant)}
-                >
-                  <TableCell>{applicant.businessName}</TableCell>
-                  <TableCell>{applicant.firstName}</TableCell>
-                  <TableCell>{applicant.lastName}</TableCell>
-
-                  {filter === "approved" && (
-                    <>
-                      <TableCell>
-                        <div
-                          style={{ display: "flex", flexDirection: "column" }}
-                        >
-                          <span>{applicant.BPLO}</span>
-                          <span style={{ fontSize: "0.8em", color: "gray" }}>
-                            {applicant.BPLOtimeStamp}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div
-                          style={{ display: "flex", flexDirection: "column" }}
-                        >
-                          <span>{applicant.Examiners}</span>
-                          <span style={{ fontSize: "0.8em", color: "gray" }}>
-                            {applicant.ExaminerstimeStamp}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div
-                          style={{ display: "flex", flexDirection: "column" }}
-                        >
-                          <span>{applicant.CENRO}</span>
-                          <span style={{ fontSize: "0.8em", color: "gray" }}>
-                            {applicant.CENROtimeStamp}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div
-                          style={{ display: "flex", flexDirection: "column" }}
-                        >
-                          <span>{applicant.CHO}</span>
-                          <span style={{ fontSize: "0.8em", color: "gray" }}>
-                            {applicant.CHOtimeStamp}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div
-                          style={{ display: "flex", flexDirection: "column" }}
-                        >
-                          <span>{applicant.ZONING}</span>
-                          <span style={{ fontSize: "0.8em", color: "gray" }}>
-                            {applicant.ZONINGtimeStamp}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div
-                          style={{ display: "flex", flexDirection: "column" }}
-                        >
-                          <span>{applicant.CSMWO}</span>
-                          <span style={{ fontSize: "0.8em", color: "gray" }}>
-                            {applicant.CSMWOtimeStamp}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div
-                          style={{ display: "flex", flexDirection: "column" }}
-                        >
-                          <span>{applicant.OBO}</span>
-                          <span style={{ fontSize: "0.8em", color: "gray" }}>
-                            {applicant.OBOtimeStamp}
-                          </span>
-                        </div>
-                      </TableCell>
-                    </>
-                  )}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        {/* ✅ Pagination */}
-        <Box display="flex" justifyContent="center" mt={3}>
-          <Pagination
-            count={totalPages}
-            page={currentPage}
-            onChange={handlePageChange}
-            sx={{
-              '& .MuiPaginationItem-root.Mui-selected': {
-                bgcolor: '#1c541eff',
-                color: 'white',
-                '&:hover': {
-                  bgcolor: '#1c541eff',
-                },
-              },
-            }}
-            shape="rounded"
-          />
-        </Box>
-      </Box>
-
-      {/* ✅ Modal Component (Applicant Details) */}
-      <ApplicantModal
-        applicant={selectedApplicant}
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        // ✅ Pass a function that triggers the confirmation modal
-        onApprove={() => {
-          handleApprove(selectedApplicant);
-          closeModal();
-        }}
-        baseUrl={
-          filter === "pending"
-            ? "http://localhost:5000/newApplication/files"
-            : "http://localhost:5000/backroom/backroom"
+        if (!applicant || !applicant.id) {
+            // ✅ Using console.error instead of alert
+            console.error(`No applicant selected for ${action}!`);
+            return;
         }
-      />
 
-      {/* ✅ Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={isConfirmModalOpen}
-        onClose={() => setIsConfirmModalOpen(false)}
-        onConfirm={handleConfirmAction}
-        message={`Are you sure you want to ${confirmationData.action} approve?`}
-      />
-    </>
-  );
+        try {
+            if (action === "approve") {
+                await axios.post(
+                    `http://localhost:5000/examiners/bplo/approve/${applicant.id}`
+                );
+                // ✅ remove from pending after approval
+                setPendingApplicants((prev) => prev.filter((a) => a.id !== applicant.id));
+
+                // ✅ Open the success modal instead of using alert
+                setIsSuccessModalOpen(true);
+            }
+            // You can add an else if block for "reject" here if needed
+
+            closeModal();
+        } catch (error) {
+            console.error(`Error ${action}ing applicant:`, error);
+            // ✅ Using console.error instead of alert
+            console.error(`Failed to ${action} applicant`);
+        }
+    };
+
+    const handlePageChange = (event, value) => {
+        setCurrentPage(value);
+    };
+
+    const openModal = (applicant) => {
+        setSelectedApplicant(applicant);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setSelectedApplicant(null);
+        setIsModalOpen(false);
+    };
+
+    return (
+        <>
+            <Side_bar />
+            <Box id="main_content"
+                sx={{
+                    p: 3,
+                    minHeight: '100vh',
+                    background: 'linear-gradient(to bottom, #FFFFFF, #e6ffe6)'
+                }}
+            >
+                <Typography
+                    variant="h4"
+                    gutterBottom
+                    sx={{
+                        color: "darkgreen",
+                        fontWeight: "bold",
+                    }}
+                >
+                    NEW RECORDS
+                </Typography>
+
+
+            {/* ✅ Button Group Filter */}
+            <Box mb={2}>
+                <ButtonGroup variant="contained">
+                    <Button
+                        color={filter === "pending" ? "success" : "inherit"}
+                        onClick={() => {
+                            setFilter("pending");
+                            setCurrentPage(1);
+                        }}
+                        sx={{
+                            bgcolor: filter === "pending" ? "#1c541eff" : undefined,
+                            "&:hover": {
+                                bgcolor: filter === "pending" ? "#1c541eff" : undefined,
+                            },
+                        }}
+                    >
+                        Pending
+                    </Button>
+                    <Button
+                        color={filter === "approved" ? "success" : "inherit"}
+                        onClick={() => {
+                            setFilter("approved");
+                            setCurrentPage(1);
+                        }}
+                        sx={{
+                            bgcolor: filter === "approved" ? "#1c541eff" : undefined,
+                            "&:hover": {
+                                bgcolor: filter === "approved" ? "#1c541eff" : undefined,
+                            },
+                        }}
+                    >
+                        Approved
+                    </Button>
+                </ButtonGroup>
+            </Box>
+
+            {/* ✅ Table */}
+            <TableContainer
+                component={Paper}
+                sx={{ borderRadius: 2, boxShadow: 3 }}
+            >
+                <Table>
+                    <TableHead>
+                        <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                            <TableCell>
+                                <strong>Business Name</strong>
+                            </TableCell>
+                            <TableCell>
+                                <strong>First Name</strong>
+                            </TableCell>
+                            <TableCell>
+                                <strong>Last Name</strong>
+                            </TableCell>
+
+                            {filter === "approved" && (
+                                <>
+                                    <TableCell>
+                                        <strong>BPLO</strong>
+                                    </TableCell>
+                                    <TableCell>
+                                        <strong>Examiner's</strong>
+                                    </TableCell>
+                                    <TableCell>
+                                        <strong>CENRO</strong>
+                                    </TableCell>
+                                    <TableCell>
+                                        <strong>CHO</strong>
+                                    </TableCell>
+                                    <TableCell>
+                                        <strong>ZONING</strong>
+                                    </TableCell>
+                                    <TableCell>
+                                        <strong>CSWMO</strong>
+                                    </TableCell>
+                                    <TableCell>
+                                        <strong>OBO</strong>
+                                    </TableCell>
+                                </>
+                            )}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {currentRecords.map((applicant) => (
+                            <TableRow
+                                key={applicant.id}
+                                hover
+                                sx={{ cursor: "pointer" }}
+                                onClick={() => openModal(applicant)}
+                            >
+                                <TableCell>{applicant.businessName}</TableCell>
+                                <TableCell>{applicant.firstName}</TableCell>
+                                <TableCell>{applicant.lastName}</TableCell>
+
+                                {filter === "approved" && (
+                                    <>
+                                        <TableCell>
+                                            <div
+                                                style={{ display: "flex", flexDirection: "column" }}
+                                            >
+                                                <span>{applicant.BPLO}</span>
+                                                <span style={{ fontSize: "0.8em", color: "gray" }}>
+                                                    {applicant.BPLOtimeStamp}
+                                                </span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div
+                                                style={{ display: "flex", flexDirection: "column" }}
+                                            >
+                                                <span>{applicant.Examiners}</span>
+                                                <span style={{ fontSize: "0.8em", color: "gray" }}>
+                                                    {applicant.ExaminerstimeStamp}
+                                                </span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div
+                                                style={{ display: "flex", flexDirection: "column" }}
+                                            >
+                                                <span>{applicant.CENRO}</span>
+                                                <span style={{ fontSize: "0.8em", color: "gray" }}>
+                                                    {applicant.CENROtimeStamp}
+                                                </span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div
+                                                style={{ display: "flex", flexDirection: "column" }}
+                                            >
+                                                <span>{applicant.CHO}</span>
+                                                <span style={{ fontSize: "0.8em", color: "gray" }}>
+                                                    {applicant.CHOtimeStamp}
+                                                </span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div
+                                                style={{ display: "flex", flexDirection: "column" }}
+                                            >
+                                                <span>{applicant.ZONING}</span>
+                                                <span style={{ fontSize: "0.8em", color: "gray" }}>
+                                                    {applicant.ZONINGtimeStamp}
+                                                </span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div
+                                                style={{ display: "flex", flexDirection: "column" }}
+                                            >
+                                                <span>{applicant.CSMWO}</span>
+                                                <span style={{ fontSize: "0.8em", color: "gray" }}>
+                                                    {applicant.CSMWOtimeStamp}
+                                                </span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div
+                                                style={{ display: "flex", flexDirection: "column" }}
+                                            >
+                                                <span>{applicant.OBO}</span>
+                                                <span style={{ fontSize: "0.8em", color: "gray" }}>
+                                                    {applicant.OBOtimeStamp}
+                                                </span>
+                                            </div>
+                                        </TableCell>
+                                    </>
+                                )}
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+
+            {/* ✅ Pagination */}
+            <Box display="flex" justifyContent="center" mt={3}>
+                <Pagination
+                    count={totalPages}
+                    page={currentPage}
+                    onChange={handlePageChange}
+                    sx={{
+                        "& .MuiPaginationItem-root.Mui-selected": {
+                            bgcolor: "#1c541eff",
+                            color: "white",
+                            "&:hover": {
+                                bgcolor: "#1c541eff",
+                            },
+                        },
+                    }}
+                    shape="rounded"
+                />
+            </Box>
+        </Box >
+
+            {/* ✅ Modal Component (Applicant Details) */ }
+            < ApplicantModal
+    applicant = { selectedApplicant }
+    isOpen = { isModalOpen }
+    onClose = { closeModal }
+    // ✅ Pass a function that triggers the confirmation modal
+    onApprove = {() => {
+        handleApprove(selectedApplicant);
+        closeModal();
+    }
 }
+baseUrl = {
+    filter === "pending"
+    ? "http://localhost:5000/newApplication/files"
+    : "http://localhost:5000/backroom/backroom"
+            }
+        />
+
+{/* ✅ Confirmation Modal */ }
+<ConfirmationModal
+    isOpen={isConfirmModalOpen}
+    onClose={() => setIsConfirmModalOpen(false)}
+    onConfirm={handleConfirmAction}
+    message={`Are you sure you want to ${confirmationData.action} ?`}
+/>
+
+{/* ✅ Success Modal */ }
+<SuccessModal
+    isOpen={isSuccessModalOpen}
+    onClose={() => setIsSuccessModalOpen(false)}
+    message="Approved Successfully!"
+/>
+        </>
+    );
+    }
 
 export default New_records;
