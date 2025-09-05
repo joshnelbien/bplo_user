@@ -106,8 +106,22 @@ function Cenro() {
   return (
     <>
       <Side_bar />
-      <Box id="main_content" sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
+      <Box
+        id="main_content"
+        sx={{
+          p: 3,
+          minHeight: "100vh",
+          background: "linear-gradient(to bottom, #FFFFFF, #e6ffe6)",
+        }}
+      >
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{
+            color: "darkgreen",
+            fontWeight: "bold",
+          }}
+        >
           CENRO
         </Typography>
 
@@ -115,16 +129,28 @@ function Cenro() {
         <Box mb={2}>
           <ButtonGroup variant="contained">
             <Button
-              color={filter === "pending" ? "primary" : "inherit"}
+              sx={{
+                bgcolor: filter === "pending" ? "darkgreen" : "white",
+                color: filter === "pending" ? "white" : "darkgreen",
+                "&:hover": {
+                  bgcolor: filter === "pending" ? "#004d00" : "#f0f0f0",
+                },
+              }}
               onClick={() => {
                 setFilter("pending");
-                setCurrentPage(1); // reset pagination when switching
+                setCurrentPage(1);
               }}
             >
               Pending
             </Button>
             <Button
-              color={filter === "approved" ? "primary" : "inherit"}
+              sx={{
+                bgcolor: filter === "approved" ? "darkgreen" : "white",
+                color: filter === "approved" ? "white" : "darkgreen",
+                "&:hover": {
+                  bgcolor: filter === "approved" ? "#004d00" : "#f0f0f0",
+                },
+              }}
               onClick={() => {
                 setFilter("approved");
                 setCurrentPage(1);
