@@ -28,7 +28,7 @@ const GreenButton = styled(Button)(({ theme, variant }) => ({
   boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
   "&:hover": {
     backgroundColor: "#1c5111ff",
-  },  
+  },
 }));
 
 // Snackbar Alert component
@@ -104,37 +104,33 @@ function RegisterPage() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (!validate()) {
-      setSnackbar({
-        open: true,
-        message: "Please correct the errors in the form.",
-        severity: "error",
-      });
-      return;
-    }
 
-    setLoading(true);
+    if (!validate()) return;
 
     try {
-      const { lastname, firstname, email, password } = form;
-      await axios.post(`${API}/userAccounts/register`, {
-        lastname,
-        firstname,
-        email,
-        password,
+      setLoading(true);
+      const res = await axios.post(`${API}/userAccounts/register`, {
+        lastname: form.lastname,
+        firstname: form.firstname,
+        email: form.email,
+        mobile: form.mobile,
+        password: form.password,
       });
 
-      setLoading(false);
-      setOpenSuccessDialog(true);
-    } catch (err) {
-      setLoading(false);
-      const errorMessage =
-        err.response?.data?.error || "Registration failed. Please try again.";
       setSnackbar({
         open: true,
-        message: errorMessage,
+        message: "Registration successful!",
+        severity: "success",
+      });
+      setOpenSuccessDialog(true);
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: err.response?.data?.error || "Registration failed",
         severity: "error",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -331,7 +327,6 @@ function RegisterPage() {
               Proceed to Login
             </GreenButton>
           </DialogActions>
-
         </Dialog>
 
         <Snackbar

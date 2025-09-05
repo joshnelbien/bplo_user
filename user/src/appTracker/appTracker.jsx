@@ -15,29 +15,41 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 function AppTracker() {
-  const { id } = useParams();
-  const [trackers, setTrackers] = useState([]); 
+  const userId = localStorage.getItem("userId");
+  const [trackers, setTrackers] = useState([]);
   const [fileStatuses, setFileStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_BASE;
 
-  const departments = ["BPLO","Examiners", "CSMWO", "OBO", "CHO", "CENRO", "ZONING"];
+  const departments = [
+    "BPLO",
+    "Examiners",
+    "CSMWO",
+    "OBO",
+    "CHO",
+    "CENRO",
+    "ZONING",
+  ];
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // responsive
 
   useEffect(() => {
-    let intervalId;
+    let intervalId; // ✅ correct variable name
 
     const fetchData = async () => {
       try {
-        const trackerRes = await axios.get(`${API}/backroom/backrooms/${id}`);
+        const trackerRes = await axios.get(
+          `${API}/backroom/backrooms/${userId}`
+        );
         if (trackerRes.data.length > 0) {
           setTrackers(trackerRes.data);
         }
 
-        const filesRes = await axios.get(`${API}/newApplication/files/${id}`);
+        const filesRes = await axios.get(
+          `${API}/newApplication/files/${userId}`
+        );
         if (filesRes.data.length > 0) {
           const statusList = filesRes.data.map((file) => ({
             trackerId: file.trackerId,
@@ -56,7 +68,7 @@ function AppTracker() {
     intervalId = setInterval(fetchData, 5000);
 
     return () => clearInterval(intervalId);
-  }, [id, API]);
+  }, [userId, API]);
 
   if (loading)
     return (
@@ -84,7 +96,7 @@ function AppTracker() {
   return (
     <Box sx={{ p: 4, maxWidth: 900, mx: "auto" }}>
       <Button
-        onClick={() => navigate(`/homePage/${id}`)}
+        onClick={() => navigate(`/homePage/me`)}
         variant="contained"
         color="success"
         sx={{ maxWidth: 150, mb: 3 }}

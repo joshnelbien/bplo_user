@@ -10,7 +10,6 @@ const UserAccounts = sequelize.define("UserAccounts", {
   lastname: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true,
   },
   firstname: {
     type: DataTypes.STRING,
@@ -22,6 +21,10 @@ const UserAccounts = sequelize.define("UserAccounts", {
     unique: true,
   },
   password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  mobile: {
     type: DataTypes.STRING,
     allowNull: false,
   },

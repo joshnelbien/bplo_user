@@ -10,6 +10,7 @@ const File = sequelize.define(
       primaryKey: true,
     },
     userId: DataTypes.UUID,
+    allowNull: false,
     BusinessType: DataTypes.STRING,
     dscRegNo: DataTypes.STRING,
     businessName: DataTypes.STRING,

@@ -12,14 +12,11 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LoginPage />} />
-        <Route path="/homePage/:id" element={<HomePage />} />
-        <Route
-          path="/newApplicationPage/:id"
-          element={<NewApplicationPage />}
-        />
+        <Route path="/homePage/me" element={<HomePage />} />
+        <Route path="/newApplicationPage/me" element={<NewApplicationPage />} />
         <Route path="/registerPage" element={<RegisterPage />} />
-        <Route path="/appTracker/:id" element={<AppTracker />} />
-        <Route path="/renew/:id" element={<Renew />} />
+        <Route path="/appTracker/me" element={<AppTracker />} />
+        <Route path="/renew/me" element={<Renew />} />
       </Routes>
     </BrowserRouter>
   );

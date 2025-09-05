@@ -53,15 +53,16 @@ const Alert = forwardRef(function Alert(props, ref) {
 });
 
 function NewApplicationPage() {
+  const userId = localStorage.getItem("userId");
   const API = import.meta.env.VITE_API_BASE;
   const [step, setStep] = useState(1);
   const [businessLines, setBusinessLines] = useState([]);
-  const { id } = useParams();
+
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formDataState, setFormDataState] = useState({
-    userId: id,
+    userId: userId,
     BusinessType: "",
     dscRegNo: "",
     businessName: "",
@@ -154,31 +155,31 @@ function NewApplicationPage() {
     const newErrors = {};
     const requiredFields = {
       1: ["BusinessType", "businessName", "tinNo", "TradeName"],
-      2: ["firstName", "lastName", "sex", "eMailAdd", "mobileNo"],
-      3: [
-        "region",
-        "province",
-        "cityOrMunicipality",
-        "barangay",
-        "addressLine1",
-        "zipCode",
-      ],
-      4: [
-        "Taxregion",
-        "Taxprovince",
-        "TaxcityOrMunicipality",
-        "Taxbarangay",
-        "TaxaddressLine1",
-        "TaxzipCode",
-      ],
-      5: [
-        "totalFloorArea",
-        "numberOfEmployee",
-        "maleEmployee",
-        "femaleEmployee",
-      ],
-      // 6: ['lineOfBusiness', 'productService', 'Units', 'capital'],
-      7: ["proofOfReg", "brgyClearance", "cedula"],
+      // 2: ["firstName", "lastName", "sex", "eMailAdd", "mobileNo"],
+      // 3: [
+      //   "region",
+      //   "province",
+      //   "cityOrMunicipality",
+      //   "barangay",
+      //   "addressLine1",
+      //   "zipCode",
+      // ],
+      // 4: [
+      //   "Taxregion",
+      //   "Taxprovince",
+      //   "TaxcityOrMunicipality",
+      //   "Taxbarangay",
+      //   "TaxaddressLine1",
+      //   "TaxzipCode",
+      // ],
+      // 5: [
+      //   "totalFloorArea",
+      //   "numberOfEmployee",
+      //   "maleEmployee",
+      //   "femaleEmployee",
+      // ],
+      // // 6: ['lineOfBusiness', 'productService', 'Units', 'capital'],
+      // 7: ["proofOfReg", "brgyClearance", "cedula"],
     };
 
     requiredFields[step]?.forEach((field) => {
@@ -313,7 +314,7 @@ function NewApplicationPage() {
         severity: "success",
       });
       setTimeout(() => {
-        navigate(`/homePage/${id}`);
+        navigate(`/homePage/me`);
       }, 2000);
     } catch (err) {
       console.error(err);
@@ -411,7 +412,7 @@ function NewApplicationPage() {
     >
       <Box sx={{ width: "100%", maxWidth: 900, mx: "auto", mb: 2 }}>
         <GreenButton
-          onClick={() => navigate(`/homePage/${id}`)}
+          onClick={() => navigate(`/homePage/me`)}
           variant="contained"
         >
           BACK TO DASHBOARD
@@ -538,18 +539,18 @@ function NewApplicationPage() {
             Are you sure you want to proceed to the next step?
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ justifyContent: 'center', gap: 2, p: 2 }}>
+        <DialogActions sx={{ justifyContent: "center", gap: 2, p: 2 }}>
           <GreenButton
             variant="outlined"
             onClick={() => setDialogOpen(false)}
-            sx={{ minWidth: '90px' }} // Set a consistent minimum width
+            sx={{ minWidth: "90px" }} // Set a consistent minimum width
           >
             Cancel
           </GreenButton>
           <GreenButton
             variant="contained"
             onClick={handleDialogConfirm}
-            sx={{ minWidth: '120px' }} // Set a consistent minimum width
+            sx={{ minWidth: "120px" }} // Set a consistent minimum width
           >
             Confirm
           </GreenButton>

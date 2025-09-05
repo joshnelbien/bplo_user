@@ -40,8 +40,12 @@ const Sidebar = ({ id }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch(`${API}/userAccounts/${id}`);
+        const userId = localStorage.getItem("userId");
+        if (!userId) return;
+
+        const response = await fetch(`${API}/userAccounts/me/${userId}`);
         if (!response.ok) throw new Error("Failed to fetch user");
+
         const data = await response.json();
         setUser({
           firstName: data.firstname,
@@ -52,13 +56,17 @@ const Sidebar = ({ id }) => {
         console.error("Error fetching user:", error);
       }
     };
-    if (id) fetchUser();
-  }, [id]);
+
+    fetchUser();
+  }, []);
 
   // Logout modal handlers
   const handleLogoutOpen = () => setOpenLogoutModal(true);
   const handleLogoutClose = () => setOpenLogoutModal(false);
-  const handleConfirmLogout = () => navigate("/");
+  const handleConfirmLogout = () => {
+    localStorage.removeItem("userId");
+    navigate("/");
+  };
 
   const content = (
     <Paper
@@ -122,7 +130,7 @@ const Sidebar = ({ id }) => {
         <List component="nav">
           {/* New Application */}
           <ListItemButton
-            onClick={() => navigate(`/newApplicationPage/${id}`)}
+            onClick={() => navigate(`/newApplicationPage/me`)}
             sx={{
               borderRadius: "8px",
               mb: 1,
@@ -141,23 +149,26 @@ const Sidebar = ({ id }) => {
 
           {/* Renew Application */}
           <ListItemButton
-           onClick={() => navigate(`/renew/${id}`)}
-           sx={{
-             borderRadius: "8px",
-            mb: 1,
-            bgcolor: alpha("#076e0cff", 0.1),
-            "&:hover": { bgcolor: alpha("#085f0cff", 0.2) },
-          }}
-           >
-              <ListItemIcon>
-                <AutorenewIcon sx={{ color: "#2E8B57" }} />
-              </ListItemIcon>
-              <ListItemText primary="Renew Application" sx={{ fontWeight: "bold" }} />
-            </ListItemButton>
+            onClick={() => navigate(`/renew/me`)}
+            sx={{
+              borderRadius: "8px",
+              mb: 1,
+              bgcolor: alpha("#076e0cff", 0.1),
+              "&:hover": { bgcolor: alpha("#085f0cff", 0.2) },
+            }}
+          >
+            <ListItemIcon>
+              <AutorenewIcon sx={{ color: "#2E8B57" }} />
+            </ListItemIcon>
+            <ListItemText
+              primary="Renew Application"
+              sx={{ fontWeight: "bold" }}
+            />
+          </ListItemButton>
 
           {/* Application Tracker */}
           <ListItemButton
-            onClick={() => navigate(`/appTracker/${id}`)}
+            onClick={() => navigate(`/appTracker/me`)}
             sx={{
               borderRadius: "8px",
               mb: 1,

@@ -38,11 +38,15 @@ const modalContents = {
     title: "REQUIREMENTS FOR NEW BUSINESS REGISTRATION",
     items: [
       { text: "- Filled-up Unified Business Permit Application Form" },
-      { text: "- 1 photocopy of DTI/SEC/CDA Registration and Articles of Incorporation" },
+      {
+        text: "- 1 photocopy of DTI/SEC/CDA Registration and Articles of Incorporation",
+      },
       { text: "- Barangay Clearance (Window 1-BPLD)" },
       { text: "- Barangay Capitalization" },
       { text: "- Contract of Lease and Lessor Mayor's Permit (if rented)" },
-      { text: "- Photocopy of Occupancy Permit (if newly constructed building)" },
+      {
+        text: "- Photocopy of Occupancy Permit (if newly constructed building)",
+      },
       { text: "- Location of Business (Sketch/Map)" },
       { text: "- Land Tax Clearance/Certificate of Payment" },
       { text: "- Market Clearance (if stallholder)" },
@@ -81,7 +85,7 @@ const modalContents = {
 };
 
 const HomePage = () => {
-  const { id } = useParams();
+  const userId = localStorage.getItem("userId");
 
   const [open, setOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
@@ -107,7 +111,7 @@ const HomePage = () => {
         background: "linear-gradient(to right, #ffffff, #eaffe9)",
       }}
     >
-      <Sidebar id={id} />
+      <Sidebar id={userId} />
 
       {/* Main content container */}
       <Box
@@ -133,74 +137,79 @@ const HomePage = () => {
             flexWrap: "wrap",
           }}
         >
-          {["newApplication", "renewal", "Holidays", "Officehrs"].map((type) => {
-            let img, title;
+          {["newApplication", "renewal", "Holidays", "Officehrs"].map(
+            (type) => {
+              let img, title;
 
-            if (type === "newApplication") {
-              img = reqImage;
-              title = "NEW APPLICATION REQ.";
-            } else if (type === "renewal") {
-              img = renewImage;
-              title = "RENEWAL REQ.";
-            } else if (type === "Holidays") {
-              img = holidaysImage;
-              title = "HOLIDAYS INFO.";
-            } else if (type === "Officehrs") {
-              img = officehoursImage;
-              title = "OFFICE HOURS INFO.";
-            }
+              if (type === "newApplication") {
+                img = reqImage;
+                title = "NEW APPLICATION REQ.";
+              } else if (type === "renewal") {
+                img = renewImage;
+                title = "RENEWAL REQ.";
+              } else if (type === "Holidays") {
+                img = holidaysImage;
+                title = "HOLIDAYS INFO.";
+              } else if (type === "Officehrs") {
+                img = officehoursImage;
+                title = "OFFICE HOURS INFO.";
+              }
 
-            return (
-              <Box
-                key={type}
-                onClick={() => handleOpen(type)}
-                sx={{
-                  width: { xs: "90%", sm: 220 },
-                  maxWidth: 250,
-                  height: { xs: 200, sm: 220 },
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "flex-start",
-                  alignItems: "center",
-                  p: 1.5,
-                  borderRadius: "16px",
-                  bgcolor: "#d2ead0",
-                  cursor: "pointer",
-                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                  transition: "transform 0.2s",
-                  "&:hover": {
-                    transform: "scale(1.05)",
-                    boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
-                  },
-                }}
-              >
+              return (
                 <Box
-                  component="img"
-                  src={img}
-                  alt={`${title} Icon`}
+                  key={type}
+                  onClick={() => handleOpen(type)}
                   sx={{
-                    width: { xs: "85%", sm: "90%" },
-                    height: { xs: "85%", sm: "90%" },
-                    objectFit: "contain",
-                  }}
-                />
-                <Box
-                  sx={{
-                    width: "110%",
-                    bgcolor: "#98c293",
-                    py: 1.5,
-                    textAlign: "center",
-                    borderBottomLeftRadius: "16px",
-                    borderBottomRightRadius: "16px",
+                    width: { xs: "90%", sm: 220 },
+                    maxWidth: 250,
+                    height: { xs: 200, sm: 220 },
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    p: 1.5,
+                    borderRadius: "16px",
+                    bgcolor: "#d2ead0",
+                    cursor: "pointer",
+                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                    transition: "transform 0.2s",
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                      boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
+                    },
                   }}
                 >
-                  <Typography variant="body1" sx={{ color: "#fff", fontWeight: "bold" }}>
-                    {title}
-                  </Typography>
+                  <Box
+                    component="img"
+                    src={img}
+                    alt={`${title} Icon`}
+                    sx={{
+                      width: { xs: "85%", sm: "90%" },
+                      height: { xs: "85%", sm: "90%" },
+                      objectFit: "contain",
+                    }}
+                  />
+                  <Box
+                    sx={{
+                      width: "110%",
+                      bgcolor: "#98c293",
+                      py: 1.5,
+                      textAlign: "center",
+                      borderBottomLeftRadius: "16px",
+                      borderBottomRightRadius: "16px",
+                    }}
+                  >
+                    <Typography
+                      variant="body1"
+                      sx={{ color: "#fff", fontWeight: "bold" }}
+                    >
+                      {title}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            );
-          })}
+              );
+            }
+          )}
         </Stack>
       </Box>
 
@@ -214,16 +223,32 @@ const HomePage = () => {
       >
         <Fade in={open}>
           <Box sx={modalStyle}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-              <Typography variant="h6" fontWeight="bold">{modalTitle}</Typography>
-              <Button onClick={handleClose} color="error" sx={{ minWidth: 0, p: 0 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <Typography variant="h6" fontWeight="bold">
+                {modalTitle}
+              </Typography>
+              <Button
+                onClick={handleClose}
+                color="error"
+                sx={{ minWidth: 0, p: 0 }}
+              >
                 <CloseIcon />
               </Button>
             </Box>
             <List dense>
               {modalItems.map((item, i) => (
                 <ListItemButton key={i} sx={{ py: 0.5, px: 0 }}>
-                  <ListItemText primary={item.text} sx={{ color: "text.secondary" }} />
+                  <ListItemText
+                    primary={item.text}
+                    sx={{ color: "text.secondary" }}
+                  />
                 </ListItemButton>
               ))}
             </List>

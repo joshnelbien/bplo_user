@@ -108,7 +108,7 @@ function Renewal() {
   return (
     <Box sx={{ p: 4, maxWidth: 900, mx: "auto" }}>
       <Button
-        onClick={() => navigate(`/homePage/${id}`)}
+        onClick={() => navigate(`/homePage/me`)}
         variant="contained"
         color="success"
         sx={{ maxWidth: 180, mb: 3, borderRadius: 2 }}
@@ -118,12 +118,7 @@ function Renewal() {
 
       {/* Renewal Form */}
       <Paper elevation={3} sx={{ p: 4, mb: 4, borderRadius: 3 }}>
-        <Typography
-          variant="h5"
-          fontWeight="bold"
-          gutterBottom
-          color="primary"
-        >
+        <Typography variant="h5" fontWeight="bold" gutterBottom color="primary">
           Renewal Application Form
         </Typography>
 
@@ -208,7 +203,11 @@ function Renewal() {
               activeStep === -1 ? orderedDepartments.length : activeStep;
 
             return (
-              <Paper key={idx} elevation={3} sx={{ p: 4, mb: 3, borderRadius: 3 }}>
+              <Paper
+                key={idx}
+                elevation={3}
+                sx={{ p: 4, mb: 3, borderRadius: 3 }}
+              >
                 <Typography
                   variant="h6"
                   fontWeight="bold"

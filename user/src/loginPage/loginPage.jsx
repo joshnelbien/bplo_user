@@ -106,38 +106,46 @@ const LoginPage = () => {
     }
 
     try {
-      setLoading(true); // ✅ start loading
+      setLoading(true);
 
       const res = await axios.post(`${API}/userAccounts/login`, form, {
         headers: { "Content-Type": "application/json" },
       });
 
-      const userId = res.data.user?.id;
-      if (!userId) {
+      const user = res.data.user;
+      if (!user?.id) {
         throw new Error("User ID not found in response");
       }
 
+      // 🔑 Save user ID in localStorage
+      localStorage.setItem("userId", user.id);
+
+      // Success dialog + redirect
       setOpenSuccessDialog(true);
+      setSnackbarState({
+        open: true,
+        message: "Login successful!",
+        severity: "success",
+      });
       setTimeout(() => {
         setOpenSuccessDialog(false);
-        navigate(`/homePage/${userId}`);
+        navigate(`/homePage/me`); // ✅ no :id in URL
       }, 1500);
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);
       const errorMessage =
-        err.response?.data?.message ||
+        err.response?.data?.error ||
         "Invalid email or password. Please try again.";
+
       setOpenErrorDialog(true);
       setSnackbarState({
         open: true,
         message: errorMessage,
         severity: "error",
       });
-      setTimeout(() => {
-        setOpenErrorDialog(false);
-      }, 1500);
+      setTimeout(() => setOpenErrorDialog(false), 1500);
     } finally {
-      setLoading(false); // ✅ stop loading
+      setLoading(false);
     }
   };
 
