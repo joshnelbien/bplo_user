@@ -16,10 +16,9 @@ import {
 import MuiAlert from "@mui/material/Alert";
 import { styled } from "@mui/system";
 import axios from "axios";
-import { forwardRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { forwardRef, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-// Assuming these components are available in your project structure
 import Step1BusinessInfo from "../components/BusinessForm/Step1";
 import Step2PersonalInfo from "../components/BusinessForm/Step2";
 import Step3AddressInfo from "../components/BusinessForm/Step3";
@@ -55,76 +54,88 @@ const Alert = forwardRef(function Alert(props, ref) {
 function NewApplicationPage() {
   const userId = localStorage.getItem("userId");
   const API = import.meta.env.VITE_API_BASE;
-  const [step, setStep] = useState(1);
-  const [businessLines, setBusinessLines] = useState([]);
-
   const navigate = useNavigate();
+
+  // Load saved state from localStorage (if any)
+  const savedFormData =
+    JSON.parse(localStorage.getItem("formDataState")) || null;
+  const savedFiles = JSON.parse(localStorage.getItem("filesState")) || null;
+  const savedBusinessLines =
+    JSON.parse(localStorage.getItem("businessLines")) || [];
+  const savedStep = parseInt(localStorage.getItem("formStep")) || 1;
+
+  const [step, setStep] = useState(savedStep);
+  const [businessLines, setBusinessLines] = useState(savedBusinessLines);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formDataState, setFormDataState] = useState({
-    userId: userId,
-    BusinessType: "",
-    dscRegNo: "",
-    businessName: "",
-    tinNo: "",
-    TradeName: "",
-    firstName: "",
-    middleName: "",
-    lastName: "",
-    extName: "",
-    sex: "",
-    eMailAdd: "",
-    telNo: "",
-    mobileNo: "",
-    region: "",
-    province: "",
-    cityOrMunicipality: "",
-    barangay: "",
-    addressLine1: "",
-    zipCode: "",
-    pinAddress: "",
-    totalFloorArea: "",
-    numberOfEmployee: "",
-    maleEmployee: "",
-    femaleEmployee: "",
-    numVehicleVan: "",
-    numVehicleTruck: "",
-    numVehicleMotor: "",
-    numNozzle: "",
-    weighScale: "",
-    Taxregion: "",
-    Taxprovince: "",
-    TaxcityOrMunicipality: "",
-    Taxbarangay: "",
-    TaxaddressLine1: "",
-    TaxzipCode: "",
-    TaxpinAddress: "",
-    ownPlace: "",
-    taxdec: "",
-    lessorName: "",
-    monthlyRent: "",
-    tIGE: "",
-    officeType: "",
-    officeTypeOther: "",
-    lineOfBusiness: "",
-    productService: "",
-    Units: "",
-    capital: "",
-    totalCapital: "",
-  });
+  const [formDataState, setFormDataState] = useState(
+    savedFormData || {
+      userId: userId,
+      BusinessType: "",
+      dscRegNo: "",
+      businessName: "",
+      tinNo: "",
+      TradeName: "",
+      firstName: "",
+      middleName: "",
+      lastName: "",
+      extName: "",
+      sex: "",
+      eMailAdd: "",
+      telNo: "",
+      mobileNo: "",
+      region: "",
+      province: "",
+      cityOrMunicipality: "",
+      barangay: "",
+      addressLine1: "",
+      zipCode: "",
+      pinAddress: "",
+      totalFloorArea: "",
+      numberOfEmployee: "",
+      maleEmployee: "",
+      femaleEmployee: "",
+      numVehicleVan: "",
+      numVehicleTruck: "",
+      numVehicleMotor: "",
+      numNozzle: "",
+      weighScale: "",
+      Taxregion: "",
+      Taxprovince: "",
+      TaxcityOrMunicipality: "",
+      Taxbarangay: "",
+      TaxaddressLine1: "",
+      TaxzipCode: "",
+      TaxpinAddress: "",
+      ownPlace: "",
+      taxdec: "",
+      lessorName: "",
+      monthlyRent: "",
+      tIGE: "",
+      officeType: "",
+      officeTypeOther: "",
+      lineOfBusiness: "",
+      productService: "",
+      Units: "",
+      capital: "",
+      totalCapital: "",
+    }
+  );
 
-  const [filesState, setFilesState] = useState({
-    proofOfReg: null,
-    proofOfRightToUseLoc: null,
-    locationPlan: null,
-    brgyClearance: null,
-    marketClearance: null,
-    occupancyPermit: null,
-    cedula: null,
-    photoOfBusinessEstInt: null,
-    photoOfBusinessEstExt: null,
-    tIGEfiles: null,
-  });
+  const [filesState, setFilesState] = useState(
+    savedFiles || {
+      proofOfReg: null,
+      proofOfRightToUseLoc: null,
+      locationPlan: null,
+      brgyClearance: null,
+      marketClearance: null,
+      occupancyPermit: null,
+      cedula: null,
+      photoOfBusinessEstInt: null,
+      photoOfBusinessEstExt: null,
+      tIGEfiles: null,
+    }
+  );
 
   const [snackbarState, setSnackbarState] = useState({
     open: false,
@@ -133,7 +144,7 @@ function NewApplicationPage() {
   });
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [submitDialogOpen, setSubmitDialogOpen] = useState(false); // NEW
+  const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
   const [errors, setErrors] = useState({});
 
   const steps = [
@@ -146,6 +157,23 @@ function NewApplicationPage() {
     "Business Requirements",
   ];
 
+  // Persist state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("formDataState", JSON.stringify(formDataState));
+  }, [formDataState]);
+
+  useEffect(() => {
+    localStorage.setItem("filesState", JSON.stringify(filesState));
+  }, [filesState]);
+
+  useEffect(() => {
+    localStorage.setItem("businessLines", JSON.stringify(businessLines));
+  }, [businessLines]);
+
+  useEffect(() => {
+    localStorage.setItem("formStep", step);
+  }, [step]);
+
   const validateTIN = (tin) => {
     const tinRegex = /^9[0-9]{2}-[0-9]{2}-[0-9]{4}$/;
     return tinRegex.test(tin);
@@ -155,30 +183,6 @@ function NewApplicationPage() {
     const newErrors = {};
     const requiredFields = {
       1: ["BusinessType", "businessName", "tinNo", "TradeName"],
-      // 2: ["firstName", "lastName", "sex", "eMailAdd", "mobileNo"],
-      // 3: [
-      //   "region",
-      //   "province",
-      //   "cityOrMunicipality",
-      //   "barangay",
-      //   "addressLine1",
-      //   "zipCode",
-      // ],
-      // 4: [
-      //   "Taxregion",
-      //   "Taxprovince",
-      //   "TaxcityOrMunicipality",
-      //   "Taxbarangay",
-      //   "TaxaddressLine1",
-      //   "TaxzipCode",
-      // ],
-      // 5: [
-      //   "totalFloorArea",
-      //   "numberOfEmployee",
-      //   "maleEmployee",
-      //   "femaleEmployee",
-      // ],
-      // // 6: ['lineOfBusiness', 'productService', 'Units', 'capital'],
       // 7: ["proofOfReg", "brgyClearance", "cedula"],
     };
 
@@ -187,16 +191,13 @@ function NewApplicationPage() {
         if (!filesState[field]) {
           newErrors[field] = "This field is required";
         }
-        if (step === 6 && businessLines.length === 0) {
-          newErrors.businessLines =
-            "At least one line of business is required.";
-        }
       } else {
         if (!formDataState[field]) {
           newErrors[field] = "This field is required";
         }
       }
     });
+
     if (step === 6 && businessLines.length === 0) {
       newErrors.businessLines = "At least one line of business is required.";
     }
@@ -308,6 +309,13 @@ function NewApplicationPage() {
       await axios.post(`${API}/newApplication/files`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+
+      // ✅ Clear localStorage on success
+      localStorage.removeItem("formDataState");
+      localStorage.removeItem("filesState");
+      localStorage.removeItem("businessLines");
+      localStorage.removeItem("formStep");
+
       setSnackbarState({
         open: true,
         message: "Application submitted successfully!",
@@ -380,7 +388,6 @@ function NewApplicationPage() {
               setBusinessLines={setBusinessLines}
               errors={errors}
             />
-
             {errors.businessLines && (
               <Typography color="error" variant="body2" sx={{ mt: 1 }}>
                 {errors.businessLines}
@@ -543,14 +550,14 @@ function NewApplicationPage() {
           <GreenButton
             variant="outlined"
             onClick={() => setDialogOpen(false)}
-            sx={{ minWidth: "90px" }} // Set a consistent minimum width
+            sx={{ minWidth: "90px" }}
           >
             Cancel
           </GreenButton>
           <GreenButton
             variant="contained"
             onClick={handleDialogConfirm}
-            sx={{ minWidth: "120px" }} // Set a consistent minimum width
+            sx={{ minWidth: "120px" }}
           >
             Confirm
           </GreenButton>
