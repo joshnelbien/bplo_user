@@ -396,6 +396,7 @@ function ZoningApplicantModal({
                         component="label"
                         size="small"
                         sx={{ minWidth: 120 }}
+                        color="success" 
                       >
                         Choose File
                         <input
@@ -432,21 +433,40 @@ function ZoningApplicantModal({
       </DialogContent>
       {/* ✅ Cleaned Up Actions */}
       <DialogActions>
-        <Button variant="outlined" onClick={onClose} color="secondary">
-          Close
-        </Button>
-
         {/* Only show Approve/Decline if not yet approved and not viewing cert */}
         {!showCert && applicant.ZONING !== "Approved" && (
           <>
             <Button
-              onClick={() => onApprove(applicant.id)}
-              color="success"
+              onClick={onClose}
               variant="contained"
+              color="gray"
+              sx={{
+                color: '#1c541eff',
+                borderColor: '#1c541eff',
+                '&:hover': {
+                  borderColor: '#1c541eff',
+                },
+                width: '100px', // Set a specific width
+              }}
+            >
+              Close
+            </Button>
+            <Button
+              onClick={() => onApprove(applicant.id)}
+              variant="contained"
+              color="success"
             >
               Approve
             </Button>
-            <Button onClick={onClose} color="error" variant="outlined">
+
+            <Button
+              onClick={onClose}
+              variant="contained"
+              color="error"
+              sx={{
+                color: 'white', // Changes the font color to white
+              }}
+            >
               Decline
             </Button>
           </>

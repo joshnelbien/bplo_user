@@ -197,7 +197,7 @@ function Cmswo() {
             count={totalPages}
             page={currentPage}
             onChange={handlePageChange}
-            color="primary"
+            color="success"
             shape="rounded"
           />
         </Box>
