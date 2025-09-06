@@ -172,6 +172,7 @@ export default function Step6BusinessActivity({
                     variant="contained"
                     component="label"
                     size="small"
+                    color="success"
                     sx={{ minWidth: 120 }}
                   >
                     Choose File

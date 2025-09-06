@@ -12,12 +12,14 @@ import {
   StepLabel,
   Stepper,
   Typography,
+  Grow,
 } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
 import { styled } from "@mui/system";
 import axios from "axios";
 import { forwardRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
 import Step1BusinessInfo from "../components/BusinessForm/Step1";
 import Step2PersonalInfo from "../components/BusinessForm/Step2";
@@ -56,7 +58,6 @@ function NewApplicationPage() {
   const API = import.meta.env.VITE_API_BASE;
   const navigate = useNavigate();
 
-  // Load saved state from localStorage (if any)
   const savedFormData =
     JSON.parse(localStorage.getItem("formDataState")) || null;
   const savedFiles = JSON.parse(localStorage.getItem("filesState")) || null;
@@ -145,6 +146,7 @@ function NewApplicationPage() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false); // ✅ new success popup
   const [errors, setErrors] = useState({});
 
   const steps = [
@@ -157,7 +159,6 @@ function NewApplicationPage() {
     "Business Requirements",
   ];
 
-  // Persist state to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("formDataState", JSON.stringify(formDataState));
   }, [formDataState]);
@@ -183,7 +184,6 @@ function NewApplicationPage() {
     const newErrors = {};
     const requiredFields = {
       1: ["BusinessType", "businessName", "tinNo", "TradeName"],
-      // 7: ["proofOfReg", "brgyClearance", "cedula"],
     };
 
     requiredFields[step]?.forEach((field) => {
@@ -310,17 +310,13 @@ function NewApplicationPage() {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // ✅ Clear localStorage on success
       localStorage.removeItem("formDataState");
       localStorage.removeItem("filesState");
       localStorage.removeItem("businessLines");
       localStorage.removeItem("formStep");
 
-      setSnackbarState({
-        open: true,
-        message: "Application submitted successfully!",
-        severity: "success",
-      });
+      setSuccessDialogOpen(true); // ✅ show success popup
+
       setTimeout(() => {
         navigate(`/homePage/me`);
       }, 2000);
@@ -571,14 +567,14 @@ function NewApplicationPage() {
       >
         <DialogTitle>Submit Application</DialogTitle>
         <DialogContent>
-          <Typography>Do you want to submit this form?</Typography>
+          <Typography>Are you sure you want to submit?</Typography>
         </DialogContent>
         <DialogActions>
           <GreenButton
             variant="outlined"
             onClick={() => setSubmitDialogOpen(false)}
           >
-            Cancel
+            No
           </GreenButton>
           <GreenButton
             variant="contained"
@@ -590,6 +586,30 @@ function NewApplicationPage() {
             Yes
           </GreenButton>
         </DialogActions>
+      </Dialog>
+
+      {/* ✅ Success Popup */}
+      <Dialog
+        open={successDialogOpen}
+        onClose={() => setSuccessDialogOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: "16px",
+            textAlign: "center",
+            p: 3,
+          },
+        }}
+      >
+        <DialogContent
+          sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}
+        >
+          <Grow in={successDialogOpen}>
+            <CheckCircleOutlineIcon sx={{ fontSize: 80, color: "#4caf50" }} />
+          </Grow>
+          <Typography variant="h6" sx={{ fontWeight: "bold", color: "#4caf50" }}>
+            Submitted Successfully!
+          </Typography>
+        </DialogContent>
       </Dialog>
 
       <Snackbar
