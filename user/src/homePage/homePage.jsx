@@ -4,7 +4,6 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Fade from "@mui/material/Fade";
 import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Modal from "@mui/material/Modal";
 import Stack from "@mui/material/Stack";
@@ -14,10 +13,13 @@ import { useParams } from "react-router-dom";
 
 import Sidebar from "../sideBar/sideBar";
 
-const reqImage = "/req.png";
-const renewImage = "/renew.png";
-const holidaysImage = "/holidays.png";
-const officehoursImage = "/officehours.png";
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
+import WbSunnyIcon from '@mui/icons-material/WbSunny';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import DescriptionIcon from '@mui/icons-material/Description';
+import EditIcon from '@mui/icons-material/Edit';
 
 const modalStyle = {
   position: "absolute",
@@ -102,6 +104,22 @@ const HomePage = () => {
 
   const handleClose = () => setOpen(false);
 
+  const buttonStyle = {
+    color: '#2A8238',
+    fontWeight: 'bold',
+    transition: 'transform 0.2s',
+    '&:hover': {
+      transform: 'scale(1.1)',
+    },
+    '& .MuiSvgIcon-root': {
+      transition: 'color 0.2s',
+      color: '#2A8238',
+    },
+    '&:hover .MuiSvgIcon-root': {
+      color: '#1a5f27',
+    },
+  };
+
   return (
     <Box
       sx={{
@@ -122,54 +140,77 @@ const HomePage = () => {
           flexDirection: "column",
           alignItems: "center",
           p: { xs: 2, sm: 4 },
-          pt: { xs: 4, sm: 6 },
+          pt: { xs: 2, sm: 4 },
         }}
       >
         <Stack
           direction="row"
-          spacing={{ xs: 2, sm: 4 }}
+          spacing={{ xs: 1, sm: 2 }}
           sx={{
             width: "100%",
             maxWidth: 1200,
-            justifyContent: "center",
-            alignItems: "center",
-            mb: 4,
+            justifyContent: "flex-end",
+            alignSelf: "flex-end",
+            mb: 2,
             flexWrap: "wrap",
           }}
         >
-          {["newApplication", "renewal", "Holidays", "Officehrs"].map(
-            (type) => {
-              let img, title;
-
+          <Button sx={buttonStyle}>
+            <CampaignIcon sx={{ mr: 1 }} />
+            SPECIAL ANNOUNCEMENT
+          </Button>
+          <Button sx={buttonStyle}>
+            <DescriptionIcon sx={{ mr: 1 }} />
+            NEWS
+          </Button>
+          <Button sx={buttonStyle}>
+            <EditIcon sx={{ mr: 1 }} />
+            EDIT PROFILE
+          </Button>
+        </Stack>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            width: "100%",
+            maxWidth: 900,
+            mt: { xs: 12, sm: 14 }, // Increased top margin for the box group
+          }}
+        >
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={{ xs: 3, sm: 8 }}
+            sx={{
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              mb: { xs: 3, sm: 6 },
+            }}
+          >
+            {["newApplication", "renewal"].map((type) => {
+              let icon, title;
               if (type === "newApplication") {
-                img = reqImage;
+                icon = <AssignmentIcon sx={{ fontSize: '3rem', color: 'white' }} />;
                 title = "NEW APPLICATION REQ.";
-              } else if (type === "renewal") {
-                img = renewImage;
+              } else {
+                icon = <AutorenewIcon sx={{ fontSize: '3rem', color: 'white' }} />;
                 title = "RENEWAL REQ.";
-              } else if (type === "Holidays") {
-                img = holidaysImage;
-                title = "HOLIDAYS INFO.";
-              } else if (type === "Officehrs") {
-                img = officehoursImage;
-                title = "OFFICE HOURS INFO.";
               }
-
               return (
                 <Box
                   key={type}
                   onClick={() => handleOpen(type)}
                   sx={{
-                    width: { xs: "90%", sm: 220 },
-                    maxWidth: 250,
-                    height: { xs: 200, sm: 220 },
+                    width: { xs: "90%", sm: 300 },
+                    height: { xs: 180, sm: 200 },
                     display: "flex",
                     flexDirection: "column",
-                    justifyContent: "flex-start",
+                    justifyContent: "center",
                     alignItems: "center",
                     p: 1.5,
                     borderRadius: "16px",
-                    bgcolor: "#d2ead0",
+                    bgcolor: "#2A8238",
                     cursor: "pointer",
                     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                     transition: "transform 0.2s",
@@ -180,37 +221,88 @@ const HomePage = () => {
                   }}
                 >
                   <Box
-                    component="img"
-                    src={img}
-                    alt={`${title} Icon`}
                     sx={{
-                      width: { xs: "85%", sm: "90%" },
-                      height: { xs: "85%", sm: "90%" },
-                      objectFit: "contain",
-                    }}
-                  />
-                  <Box
-                    sx={{
-                      width: "110%",
-                      bgcolor: "#98c293",
-                      py: 1.5,
-                      textAlign: "center",
-                      borderBottomLeftRadius: "16px",
-                      borderBottomRightRadius: "16px",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
                     }}
                   >
+                    {icon}
                     <Typography
                       variant="body1"
-                      sx={{ color: "#fff", fontWeight: "bold" }}
+                      sx={{ color: "white", fontWeight: "bold", mt: 1 }}
                     >
                       {title}
                     </Typography>
                   </Box>
                 </Box>
               );
-            }
-          )}
-        </Stack>
+            })}
+          </Stack>
+
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={{ xs: 3, sm: 8 }}
+            sx={{
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {["Holidays", "Officehrs"].map((type) => {
+              let icon, title;
+              if (type === "Holidays") {
+                icon = <WbSunnyIcon sx={{ fontSize: '3rem', color: 'white' }} />;
+                title = "HOLIDAYS INFO.";
+              } else {
+                icon = <AccessTimeIcon sx={{ fontSize: '3rem', color: 'white' }} />;
+                title = "OFFICE HOURS INFO.";
+              }
+              return (
+                <Box
+                  key={type}
+                  onClick={() => handleOpen(type)}
+                  sx={{
+                    width: { xs: "90%", sm: 300 },
+                    height: { xs: 180, sm: 200 },
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    p: 1.5,
+                    borderRadius: "16px",
+                    bgcolor: "#2A8238",
+                    cursor: "pointer",
+                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                    transition: "transform 0.2s",
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                      boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
+                    },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {icon}
+                    <Typography
+                      variant="body1"
+                      sx={{ color: "white", fontWeight: "bold", mt: 1 }}
+                    >
+                      {title}
+                    </Typography>
+                  </Box>
+                </Box>
+              );
+            })}
+          </Stack>
+        </Box>
       </Box>
 
       {/* Requirement Modal */}
@@ -244,12 +336,12 @@ const HomePage = () => {
             </Box>
             <List dense>
               {modalItems.map((item, i) => (
-                <ListItemButton key={i} sx={{ py: 0.5, px: 0 }}>
+                <Box key={i} sx={{ py: 0.5, px: 0 }}>
                   <ListItemText
                     primary={item.text}
                     sx={{ color: "text.secondary" }}
                   />
-                </ListItemButton>
+                </Box>
               ))}
             </List>
           </Box>
