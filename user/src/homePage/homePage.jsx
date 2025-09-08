@@ -43,7 +43,7 @@ const modalContents = {
       {
         text: "- 1 photocopy of DTI/SEC/CDA Registration and Articles of Incorporation",
       },
-      { text: "- Barangay Clearance (Window 1-BPLD)" },
+      { text: "- Barangay Business Clearance (Window 1-BPLD)" },
       { text: "- Barangay Capitalization" },
       { text: "- Contract of Lease and Lessor Mayor's Permit (if rented)" },
       {
@@ -60,7 +60,7 @@ const modalContents = {
       { text: "- Filled-up Unified Business Permit Application Form" },
       { text: "- Previous year's Mayor's Permit" },
       { text: "- Financial Statement/Income Tax Return of previous year" },
-      { text: "- Barangay Clearance (Window 1-BPLD)" },
+      { text: "- Barangay Business Clearance (Window 1-BPLD)" },
       { text: "- Land Tax Clearance/ Certificate of Payment" },
       { text: "- Market Clearance (if market stall holder)" },
       { text: "- Public Liability Insurance (for certain businesses)" },
@@ -79,8 +79,7 @@ const modalContents = {
     title: "OFFICE HOURS INFORMATION",
     items: [
       { text: "- Monday to Friday: 8:00 AM - 5:00 PM" },
-      { text: "- Break time: 12:00 NN - 1:00 PM" },
-      { text: "- No transactions during lunch break." },
+      { text: "- No Noon break." },
       { text: "- Closed on Saturdays, Sundays, and Holidays." },
     ],
   },
