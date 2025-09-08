@@ -483,28 +483,68 @@ function ChoApplicantModal({
         open={confirmOpen}
         onClose={handleConfirmClose}
         aria-labelledby="confirm-dialog-title"
+        sx={{ "& .MuiDialog-paper": { borderRadius: "10px", width: "400px" } }}
       >
-        <DialogTitle id="confirm-dialog-title">Confirm Approval</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to approve?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleConfirmClose} color="secondary">
-            No
-          </Button>
-          <Button onClick={handleConfirmApprove} color="success" autoFocus>
+        <DialogTitle
+          id="confirm-dialog-title"
+          align="center"
+          sx={{
+            py: 3,
+            px: 4,
+            fontWeight: "bold",
+            fontSize: "1.25rem",
+            color: "#333",
+          }}
+        >
+          Are you sure you want to approve this applicant?
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, m: 0 }}></DialogContent>
+        <DialogActions
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 2,
+            pb: 2,
+          }}
+        >
+          <Button
+            onClick={handleConfirmApprove}
+            variant="contained"
+            color="success"
+            sx={{
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              minWidth: "100px",
+              bgcolor: "#1a7322",
+              "&:hover": { bgcolor: "#155a1b" },
+            }}
+          >
             Yes
+          </Button>
+          <Button
+            onClick={handleConfirmClose}
+            variant="outlined"
+            color="primary"
+            sx={{
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              minWidth: "100px",
+              color: "#1a7322",
+              borderColor: "#1a7322",
+              "&:hover": { borderColor: "#1a7322", bgcolor: "#e8f5e9" },
+            }}
+          >
+            No
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Success Pop-up */}
-      <Snackbar
+      <Dialog
         open={successOpen}
-        autoHideDuration={2000}
         onClose={handleSuccessClose}
-        anchorOrigin={{ vertical: "center", horizontal: "center" }}
         TransitionComponent={Fade}
+        maxWidth="xs"
       >
         <Paper
           elevation={6}
@@ -513,19 +553,28 @@ function ChoApplicantModal({
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            justifyContent: "center",
             gap: 2,
             backgroundColor: "white",
             color: "#4caf50",
             borderRadius: 2,
-            minWidth: "200px",
-            textAlign: "center",
           }}
         >
-          <CheckCircleIcon sx={{ fontSize: 72 }} />
-          <Typography variant="h6">Successfully Approved!</Typography>
+          <CheckCircleIcon
+            fontSize="large"
+            sx={{ fontSize: "5rem", color: "#4caf50" }}
+          />
+          <Typography variant="h5" fontWeight="bold">
+            Successfully Approved!
+          </Typography>
+          <Button
+            onClick={handleSuccessClose}
+            variant="contained"
+            color="success"
+          >
+            OK
+          </Button>
         </Paper>
-      </Snackbar>
+      </Dialog>
     </>
   );
 }

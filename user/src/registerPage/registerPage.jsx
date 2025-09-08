@@ -117,11 +117,6 @@ function RegisterPage() {
         password: form.password,
       });
 
-      setSnackbar({
-        open: true,
-        message: "Registration successful!",
-        severity: "success",
-      });
       setOpenSuccessDialog(true);
     } catch (err) {
       setSnackbar({

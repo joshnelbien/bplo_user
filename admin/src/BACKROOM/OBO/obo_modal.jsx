@@ -21,6 +21,7 @@ import {
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel"; // New icon for decline
 
 // Component to display a normal text field
 const Field = ({ label, value }) => (
@@ -144,10 +145,11 @@ function OboApplicantModal({
     Signage: "",
     Electronics: "",
   });
-  const [confirmOpen, setConfirmOpen] = useState(false); // State for confirmation dialog
-  const [successOpen, setSuccessOpen] = useState(false); // State for success pop-up
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [declineConfirmOpen, setDeclineConfirmOpen] = useState(false); // New state for decline confirmation
+  const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false); // New state for decline success
 
-  // Populate state when applicant changes
   useEffect(() => {
     if (applicant) {
       setOboFields({
@@ -165,26 +167,29 @@ function OboApplicantModal({
     setOboFields((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Handle opening confirmation dialog
-  const handleApproveClick = () => {
-    setConfirmOpen(true);
-  };
-
-  // Handle confirmation dialog close
-  const handleConfirmClose = () => {
-    setConfirmOpen(false);
-  };
-
-  // Handle approval confirmation
+  // Approve Logic
+  const handleApproveClick = () => setConfirmOpen(true);
+  const handleConfirmClose = () => setConfirmOpen(false);
   const handleConfirmApprove = () => {
     setConfirmOpen(false);
-    onApprove(applicant.id, oboFields); // Call the original onApprove
-    setSuccessOpen(true); // Show success pop-up
+    onApprove(applicant.id, oboFields);
+    setSuccessOpen(true);
   };
-
-  // Handle closing success pop-up
   const handleSuccessClose = () => {
     setSuccessOpen(false);
+    onClose();
+  };
+
+  // Decline Logic
+  const handleDeclineClick = () => setDeclineConfirmOpen(true); // Open decline confirmation
+  const handleDeclineConfirmClose = () => setDeclineConfirmOpen(false);
+  const handleDeclineConfirm = () => {
+    setDeclineConfirmOpen(false);
+    onDecline(applicant.id);
+    setDeclineSuccessOpen(true); // Show decline success pop-up
+  };
+  const handleDeclineSuccessClose = () => {
+    setDeclineSuccessOpen(false);
     onClose();
   };
 
@@ -208,6 +213,7 @@ function OboApplicantModal({
       <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
         <DialogTitle>Applicant Details</DialogTitle>
         <DialogContent dividers>
+          {/* ... (All the sections are the same as before) ... */}
           {/* Business Info */}
           <Section title="Business Information">
             <Field label="Status" value={applicant.OBO} />
@@ -431,10 +437,7 @@ function OboApplicantModal({
           </Button>
 
           <Button
-            onClick={() => {
-              onDecline(applicant.id);
-              onClose(); // close modal after decline
-            }}
+            onClick={handleDeclineClick} // Trigger decline confirmation
             variant="contained"
             color="error"
             sx={{
@@ -446,27 +449,129 @@ function OboApplicantModal({
         </DialogActions>
       </Dialog>
 
-      {/* Confirmation Dialog */}
+      {/* Confirmation Dialog for Approve */}
       <Dialog
         open={confirmOpen}
         onClose={handleConfirmClose}
         aria-labelledby="confirm-dialog-title"
+        sx={{ "& .MuiDialog-paper": { borderRadius: "10px", width: "400px" } }}
       >
-        <DialogTitle id="confirm-dialog-title">Confirm Approval</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to approve?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleConfirmClose} color="secondary">
-            No
-          </Button>
-          <Button onClick={handleConfirmApprove} color="success" autoFocus>
+        <DialogTitle
+          id="confirm-dialog-title"
+          align="center"
+          sx={{
+            py: 3,
+            px: 4,
+            fontWeight: "bold",
+            fontSize: "1.25rem",
+            color: "#333",
+          }}
+        >
+          Are you sure you want to approve this applicant?
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, m: 0 }}></DialogContent>
+        <DialogActions
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 2,
+            pb: 2,
+          }}
+        >
+          <Button
+            onClick={handleConfirmApprove}
+            variant="contained"
+            color="success"
+            sx={{
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              minWidth: "100px",
+              bgcolor: "#1a7322",
+              "&:hover": { bgcolor: "#155a1b" },
+            }}
+          >
             Yes
+          </Button>
+          <Button
+            onClick={handleConfirmClose}
+            variant="outlined"
+            color="primary"
+            sx={{
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              minWidth: "100px",
+              color: "#1a7322",
+              borderColor: "#1a7322",
+              "&:hover": { borderColor: "#1a7322", bgcolor: "#e8f5e9" },
+            }}
+          >
+            No
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Success Pop-up */}
+      {/* Confirmation Dialog for Decline - NEW */}
+      <Dialog
+        open={declineConfirmOpen}
+        onClose={handleDeclineConfirmClose}
+        aria-labelledby="decline-confirm-dialog-title"
+        sx={{ "& .MuiDialog-paper": { borderRadius: "10px", width: "400px" } }}
+      >
+        <DialogTitle
+          id="decline-confirm-dialog-title"
+          align="center"
+          sx={{
+            py: 3,
+            px: 4,
+            fontWeight: "bold",
+            fontSize: "1.25rem",
+            color: "#d32f2f",
+          }}
+        >
+          Are you sure you want to decline this applicant?
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, m: 0 }}></DialogContent>
+        <DialogActions
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 2,
+            pb: 2,
+          }}
+        >
+          <Button
+            onClick={handleDeclineConfirm}
+            variant="contained"
+            color="error"
+            sx={{
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              minWidth: "100px",
+              bgcolor: "#d32f2f",
+              "&:hover": { bgcolor: "#9a0007" },
+            }}
+          >
+            Yes
+          </Button>
+          <Button
+            onClick={handleDeclineConfirmClose}
+            variant="outlined"
+            color="primary"
+            sx={{
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              minWidth: "100px",
+              color: "#d32f2f",
+              borderColor: "#d32f2f",
+              "&:hover": { borderColor: "#d32f2f", bgcolor: "#ffebee" },
+            }}
+          >
+            No
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success Pop-up for Approve */}
       <Dialog
         open={successOpen}
         onClose={handleSuccessClose}
@@ -497,6 +602,43 @@ function OboApplicantModal({
             onClick={handleSuccessClose}
             variant="contained"
             color="success"
+          >
+            OK
+          </Button>
+        </Paper>
+      </Dialog>
+
+      {/* Success Pop-up for Decline - NEW */}
+      <Dialog
+        open={declineSuccessOpen}
+        onClose={handleDeclineSuccessClose}
+        TransitionComponent={Fade}
+        maxWidth="xs"
+      >
+        <Paper
+          elevation={6}
+          sx={{
+            p: 4,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            backgroundColor: "white",
+            color: "#d32f2f",
+            borderRadius: 2,
+          }}
+        >
+          <CancelIcon
+            fontSize="large"
+            sx={{ fontSize: "5rem", color: "#d32f2f" }}
+          />
+          <Typography variant="h5" fontWeight="bold">
+            Successfully Declined!
+          </Typography>
+          <Button
+            onClick={handleDeclineSuccessClose}
+            variant="contained"
+            color="error"
           >
             OK
           </Button>

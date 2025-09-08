@@ -33,6 +33,9 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import CloseIcon from "@mui/icons-material/Close";
 import BusinessIcon from "@mui/icons-material/Business";
 import CampaignIcon from '@mui/icons-material/Campaign';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import CalculateIcon from '@mui/icons-material/Calculate';
 
 // Common style
 const listItemStyle = {
@@ -84,9 +87,9 @@ const departmentItems = [
 
 // Treasurers dropdown items
 const treasurers = [
-  { text: "Treasurer's Office", path: "/treasurer" },
-  { text: "Examiner's Office", path: "/examiners" },
-  { text: "Business Tax", path: "/businessTax" },
+  { text: "Treasurer's Office", path: "/treasurer", icon: <AccountBalanceIcon /> },
+  { text: "Examiner's Office", path: "/examiners", icon: <ReceiptLongIcon /> },
+  { text: "Business Tax", path: "/businessTax", icon: <CalculateIcon /> },
 ];
 
 const drawerWidth = 270;
@@ -113,7 +116,7 @@ function Side_bar() {
   const [openDrawer, setOpenDrawer] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [openDept, setOpenDept] = useState(false);
-  const [openTreasurers, setOpenTreasurers] = useState(false); // ✅ new dropdown
+  const [openTreasurers, setOpenTreasurers] = useState(false);
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
 
   const isMobile = useMediaQuery("(max-width:768px)");
@@ -129,7 +132,7 @@ function Side_bar() {
     };
   }, []);
 
-  // ✅ Auto-open dropdowns if path matches
+  // Auto-open dropdowns if path matches
   useEffect(() => {
     if (
       departmentItems.some((dept) => location.pathname.startsWith(dept.path))
@@ -253,7 +256,7 @@ function Side_bar() {
           sx={listItemStyle}
         >
           <ListItemIcon>
-            <BusinessIcon sx={{ color: "#1a7322" }} />
+            <AccountBalanceIcon sx={{ color: "#1a7322" }} />
           </ListItemIcon>
           <ListItemText primary="Treasurer’s Office" />
           {openTreasurers ? (
@@ -286,7 +289,7 @@ function Side_bar() {
                       "&:hover": { transform: "scale(1.1)" },
                     }}
                   >
-                    <BusinessIcon /> {/* you can replace with unique icons */}
+                    {tre.icon}
                   </ListItemIcon>
                   <ListItemText primary={tre.text} />
                 </ListItemButton>
@@ -304,8 +307,8 @@ function Side_bar() {
             onClick={handleLogout}
             sx={{
               ...listItemStyle,
-              bgcolor: "#F76C6C",
-              "&:hover": { bgcolor: "#E61414" },
+              bgcolor: "#be0606ff",
+              "&:hover": { bgcolor: "#ce0000ff" },
               border: "none",
             }}
           >

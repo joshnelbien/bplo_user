@@ -14,10 +14,13 @@ import {
   Typography,
   IconButton,
   Tooltip,
+  Fade,
 } from "@mui/material";
 
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 import { useState, useEffect } from "react";
 
 // Component to display a normal text field
@@ -135,6 +138,11 @@ function CenroApplicantModal({
   if (!isOpen || !applicant) return null;
 
   const [cenroField, setcenroField] = useState({ cenroFee: "" });
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [declineConfirmOpen, setDeclineConfirmOpen] = useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState({});
 
   useEffect(() => {
     if (applicant) {
@@ -149,7 +157,6 @@ function CenroApplicantModal({
   };
 
   const files = [{ label: "cenro Certificate", name: "cenroCert" }];
-  const [selectedFiles, setSelectedFiles] = useState({});
 
   const handleFileSelect = (e) => {
     const { name, files } = e.target;
@@ -158,8 +165,45 @@ function CenroApplicantModal({
         ...prev,
         [name]: files[0], // store the actual File object
       }));
-      +handleFileChange(name, files[0]); // send file up to parent
+      handleFileChange(name, files[0]); // send file up to parent
     }
+  };
+
+  const handleApproveClick = () => {
+    setConfirmOpen(true);
+  };
+
+  const handleDeclineClick = () => {
+    setDeclineConfirmOpen(true);
+  };
+
+  const handleConfirmApprove = () => {
+    setConfirmOpen(false);
+    onApprove(applicant.id, cenroField.cenroFee, selectedFiles);
+    setSuccessOpen(true);
+  };
+
+  const handleDeclineConfirm = () => {
+    setDeclineConfirmOpen(false);
+    // Add decline logic here if needed
+    setDeclineSuccessOpen(true);
+    onClose(); // Close the main modal after declining
+  };
+
+  const handleConfirmClose = () => {
+    setConfirmOpen(false);
+  };
+
+  const handleDeclineConfirmClose = () => {
+    setDeclineConfirmOpen(false);
+  };
+
+  const handleSuccessClose = () => {
+    setSuccessOpen(false);
+  };
+
+  const handleDeclineSuccessClose = () => {
+    setDeclineSuccessOpen(false);
   };
 
   const Section = ({ title, children }) => (
@@ -178,245 +222,459 @@ function CenroApplicantModal({
   );
 
   return (
-    <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>Applicant Details</DialogTitle>
-      <DialogContent dividers>
-        {/* Business Info */}
-        <Section title="Business Information">
-          <Field label="Status" value={applicant.CENRO} />
-          <Field label="ID" value={applicant.id} />
-          <Field label="Business Type" value={applicant.BusinessType} />
-          <Field label="DSC Registration No" value={applicant.dscRegNo} />
-          <Field label="Business Name" value={applicant.businessName} />
-          <Field label="TIN No" value={applicant.tinNo} />
-          <Field label="Trade Name" value={applicant.TradeName} />
-        </Section>
+    <>
+      <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
+        <DialogTitle>Applicant Details</DialogTitle>
+        <DialogContent dividers>
+          {/* Business Info */}
+          <Section title="Business Information">
+            <Field label="Status" value={applicant.CENRO} />
+            <Field label="ID" value={applicant.id} />
+            <Field label="Business Type" value={applicant.BusinessType} />
+            <Field label="DSC Registration No" value={applicant.dscRegNo} />
+            <Field label="Business Name" value={applicant.businessName} />
+            <Field label="TIN No" value={applicant.tinNo} />
+            <Field label="Trade Name" value={applicant.TradeName} />
+          </Section>
 
-        {/* Personal Info */}
-        <Section title="Personal Information">
-          <Field label="First Name" value={applicant.firstName} />
-          <Field label="Middle Name" value={applicant.middleName} />
-          <Field label="Last Name" value={applicant.lastName} />
-          <Field label="Extension Name" value={applicant.extName} />
-          <Field label="Sex" value={applicant.sex} />
-        </Section>
+          {/* Personal Info */}
+          <Section title="Personal Information">
+            <Field label="First Name" value={applicant.firstName} />
+            <Field label="Middle Name" value={applicant.middleName} />
+            <Field label="Last Name" value={applicant.lastName} />
+            <Field label="Extension Name" value={applicant.extName} />
+            <Field label="Sex" value={applicant.sex} />
+          </Section>
 
-        {/* Contact Info */}
-        <Section title="Contact Information">
-          <Field label="Email" value={applicant.eMailAdd} />
-          <Field label="Telephone No" value={applicant.telNo} />
-          <Field label="Mobile No" value={applicant.mobileNo} />
-        </Section>
+          {/* Contact Info */}
+          <Section title="Contact Information">
+            <Field label="Email" value={applicant.eMailAdd} />
+            <Field label="Telephone No" value={applicant.telNo} />
+            <Field label="Mobile No" value={applicant.mobileNo} />
+          </Section>
 
-        {/* Address */}
-        <Section title="Business Address">
-          <Field label="Region" value={applicant.region} />
-          <Field label="Province" value={applicant.province} />
-          <Field
-            label="City/Municipality"
-            value={applicant.cityOrMunicipality}
-          />
-          <Field label="Barangay" value={applicant.barangay} />
-          <Field label="Address Line 1" value={applicant.addressLine1} />
-          <Field label="Zip Code" value={applicant.zipCode} />
-          <Field label="Pin Address" value={applicant.pinAddress} />
-        </Section>
+          {/* Address */}
+          <Section title="Business Address">
+            <Field label="Region" value={applicant.region} />
+            <Field label="Province" value={applicant.province} />
+            <Field
+              label="City/Municipality"
+              value={applicant.cityOrMunicipality}
+            />
+            <Field label="Barangay" value={applicant.barangay} />
+            <Field label="Address Line 1" value={applicant.addressLine1} />
+            <Field label="Zip Code" value={applicant.zipCode} />
+            <Field label="Pin Address" value={applicant.pinAddress} />
+          </Section>
 
-        {/* Operations */}
-        <Section title="Business Operation">
-          <Field label="Total Floor Area" value={applicant.totalFloorArea} />
-          <Field label="Employees" value={applicant.numberOfEmployee} />
-          <Field label="Male Employees" value={applicant.maleEmployee} />
-          <Field label="Female Employees" value={applicant.femaleEmployee} />
-          <Field label="Vans" value={applicant.numVehicleVan} />
-          <Field label="Trucks" value={applicant.numVehicleTruck} />
-          <Field label="Motorcycles" value={applicant.numVehicleMotor} />
-          <Field label="No. of Nozzles" value={applicant.numNozzle} />
-          <Field label="Weigh Scale" value={applicant.weighScale} />
-        </Section>
+          {/* Operations */}
+          <Section title="Business Operation">
+            <Field label="Total Floor Area" value={applicant.totalFloorArea} />
+            <Field label="Employees" value={applicant.numberOfEmployee} />
+            <Field label="Male Employees" value={applicant.maleEmployee} />
+            <Field label="Female Employees" value={applicant.femaleEmployee} />
+            <Field label="Vans" value={applicant.numVehicleVan} />
+            <Field label="Trucks" value={applicant.numVehicleTruck} />
+            <Field label="Motorcycles" value={applicant.numVehicleMotor} />
+            <Field label="No. of Nozzles" value={applicant.numNozzle} />
+            <Field label="Weigh Scale" value={applicant.weighScale} />
+          </Section>
 
-        {/* Tax Address */}
-        <Section title="Taxpayer Address">
-          <Field label="Tax Region" value={applicant.Taxregion} />
-          <Field label="Tax Province" value={applicant.Taxprovince} />
-          <Field
-            label="Tax City/Municipality"
-            value={applicant.TaxcityOrMunicipality}
-          />
-          <Field label="Tax Barangay" value={applicant.Taxbarangay} />
-          <Field label="Tax Address Line 1" value={applicant.TaxaddressLine1} />
-          <Field label="Tax Zip Code" value={applicant.TaxzipCode} />
-          <Field label="Tax Pin Address" value={applicant.TaxpinAddress} />
-          <Field label="Own Place" value={applicant.ownPlace} />
-          {applicant.ownPlace === "Yes" ? (
-            <Field label="Tax Dec. No." value={applicant.taxdec} />
-          ) : (
-            <>
-              <Field label="Lessor's Name" value={applicant.lessorName} />
-              <Field label="Monthly Rent" value={applicant.monthlyRent} />
+          {/* Tax Address */}
+          <Section title="Taxpayer Address">
+            <Field label="Tax Region" value={applicant.Taxregion} />
+            <Field label="Tax Province" value={applicant.Taxprovince} />
+            <Field
+              label="Tax City/Municipality"
+              value={applicant.TaxcityOrMunicipality}
+            />
+            <Field label="Tax Barangay" value={applicant.Taxbarangay} />
+            <Field label="Tax Address Line 1" value={applicant.TaxaddressLine1} />
+            <Field label="Tax Zip Code" value={applicant.TaxzipCode} />
+            <Field label="Tax Pin Address" value={applicant.TaxpinAddress} />
+            <Field label="Own Place" value={applicant.ownPlace} />
+            {applicant.ownPlace === "Yes" ? (
               <Field label="Tax Dec. No." value={applicant.taxdec} />
-            </>
-          )}
-        </Section>
+            ) : (
+              <>
+                <Field label="Lessor's Name" value={applicant.lessorName} />
+                <Field label="Monthly Rent" value={applicant.monthlyRent} />
+                <Field label="Tax Dec. No." value={applicant.taxdec} />
+              </>
+            )}
+          </Section>
 
-        {/* Business Activity */}
-        <Section title="Business Activity & Incentives">
-          <Field label="Tax Incentives" value={applicant.tIGE} />
-          {applicant.tIGE === "Yes" && (
+          {/* Business Activity */}
+          <Section title="Business Activity & Incentives">
+            <Field label="Tax Incentives" value={applicant.tIGE} />
+            {applicant.tIGE === "Yes" && (
+              <FileField
+                fileKey="tIGEfiles"
+                label="Tax Incentives From Government"
+                fileData={applicant}
+              />
+            )}
+
+            <Field label="Office Type" value={applicant.officeType} />
+
+            {applicant.lineOfBusiness?.split(",").map((lob, index) => {
+              const product = applicant.productService?.split(",")[index] || "";
+              const unit = applicant.Units?.split(",")[index] || "";
+              const capital = applicant.capital?.split(",")[index] || "";
+
+              return (
+                <Paper
+                  key={index}
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    mb: 2,
+                    borderRadius: 2,
+                    backgroundColor: "#f9f9f9",
+                  }}
+                >
+                  <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                    Business Line {index + 1}
+                  </Typography>
+
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <Field label="Line of Business" value={lob.trim()} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Field label="Product/Service" value={product.trim()} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Field label="Units" value={unit.trim()} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Field label="Capital" value={capital.trim()} />
+                    </Grid>
+                  </Grid>
+                </Paper>
+              );
+            })}
+          </Section>
+
+          {/* Business Requirements */}
+          <Section title="Business Requirements">
             <FileField
-              fileKey="tIGEfiles"
-              label="Tax Incentives From Government"
+              fileKey="proofOfReg"
+              label="Proof of Registration"
               fileData={applicant}
             />
-          )}
+            <FileField
+              fileKey="proofOfRightToUseLoc"
+              label="Proof of Right to Use Location"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="locationPlan"
+              label="Location Plan"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="brgyClearance"
+              label="Barangay Clearance"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="marketClearance"
+              label="Market Clearance"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="occupancyPermit"
+              label="Occupancy Permit"
+              fileData={applicant}
+            />
+            <FileField fileKey="cedula" label="Cedula" fileData={applicant} />
+            <FileField
+              fileKey="photoOfBusinessEstInt"
+              label="Photo (Interior)"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="photoOfBusinessEstExt"
+              label="Photo (Exterior)"
+              fileData={applicant}
+            />
+          </Section>
 
-          <Field label="Office Type" value={applicant.officeType} />
+          {/* ✅ CENRO Fee input */}
+          <TextField
+            label="Environmental Fee"
+            value={cenroField.cenroFee || ""}
+            onChange={(e) => handleChange("cenroFee", e.target.value)}
+            fullWidth
+            size="small"
+            sx={{ mt: 2 }}
+          />
 
-          {applicant.lineOfBusiness?.split(",").map((lob, index) => {
-            const product = applicant.productService?.split(",")[index] || "";
-            const unit = applicant.Units?.split(",")[index] || "";
-            const capital = applicant.capital?.split(",")[index] || "";
-
-            return (
-              <Paper
-                key={index}
-                elevation={2}
-                sx={{
-                  p: 2,
-                  mb: 2,
-                  borderRadius: 2,
-                  backgroundColor: "#f9f9f9",
-                }}
-              >
-                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                  Business Line {index + 1}
-                </Typography>
-
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Field label="Line of Business" value={lob.trim()} />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Field label="Product/Service" value={product.trim()} />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Field label="Units" value={unit.trim()} />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Field label="Capital" value={capital.trim()} />
-                  </Grid>
-                </Grid>
-              </Paper>
-            );
-          })}
-        </Section>
-
-        {/* Business Requirements */}
-        <Section title="Business Requirements">
-          <FileField
-            fileKey="proofOfReg"
-            label="Proof of Registration"
-            fileData={applicant}
-          />
-          <FileField
-            fileKey="proofOfRightToUseLoc"
-            label="Proof of Right to Use Location"
-            fileData={applicant}
-          />
-          <FileField
-            fileKey="locationPlan"
-            label="Location Plan"
-            fileData={applicant}
-          />
-          <FileField
-            fileKey="brgyClearance"
-            label="Barangay Clearance"
-            fileData={applicant}
-          />
-          <FileField
-            fileKey="marketClearance"
-            label="Market Clearance"
-            fileData={applicant}
-          />
-          <FileField
-            fileKey="occupancyPermit"
-            label="Occupancy Permit"
-            fileData={applicant}
-          />
-          <FileField fileKey="cedula" label="Cedula" fileData={applicant} />
-          <FileField
-            fileKey="photoOfBusinessEstInt"
-            label="Photo (Interior)"
-            fileData={applicant}
-          />
-          <FileField
-            fileKey="photoOfBusinessEstExt"
-            label="Photo (Exterior)"
-            fileData={applicant}
-          />
-        </Section>
-
-        {/* ✅ CHO Fee input */}
-        <TextField
-          label="Sanitary Fee"
-          value={cenroField.cenroFee || ""}
-          onChange={(e) => handleChange("cenroFee", e.target.value)}
-          fullWidth
-          size="small"
-          sx={{ mt: 2 }}
-        />
-
-        {/* ✅ File Upload */}
-        {files.map((file) => (
-          <Grid container spacing={1} key={file.name} sx={{ mt: 1 }}>
-            <Grid item>
-              <Button
-                variant="contained"
-                component="label"
-                size="small"
-                sx={{ minWidth: 120 }}
-              >
-                Choose File
-                <input
-                  type="file"
-                  name={file.name}
-                  hidden
-                  onChange={handleFileSelect}
+          {/* ✅ File Upload */}
+          {files.map((file) => (
+            <Grid container spacing={1} key={file.name} sx={{ mt: 1 }}>
+              <Grid item>
+                <Button
+                  variant="contained"
+                  component="label"
+                  size="small"
+                  color="success"
+                  sx={{ minWidth: 120 }}
+                >
+                  Choose File
+                  <input
+                    type="file"
+                    name={file.name}
+                    hidden
+                    onChange={handleFileSelect}
+                  />
+                </Button>
+              </Grid>
+              <Grid item xs>
+                <TextField
+                  value={selectedFiles[file.name]?.name || ""}
+                  placeholder="No file selected"
+                  size="small"
+                  fullWidth
+                  InputProps={{ readOnly: true }}
                 />
-              </Button>
+              </Grid>
             </Grid>
-            <Grid item xs>
-              <TextField
-                value={selectedFiles[file.name]?.name || ""}
-                placeholder="No file selected"
-                size="small"
-                fullWidth
-                InputProps={{ readOnly: true }}
-              />
-            </Grid>
-          </Grid>
-        ))}
-      </DialogContent>
+          ))}
+        </DialogContent>
 
-      <DialogActions>
-        <Button variant="outlined" onClick={onClose} color="secondary">
-          Close
-        </Button>
-        <Button
-          onClick={() =>
-            onApprove(applicant.id, cenroField.cenroFee, selectedFiles)
-          }
-          variant="contained"
-          color="success"
+        <DialogActions>
+          <Button
+            variant="outlined"
+            onClick={onClose}
+            color="secondary"
+            sx={{
+              color: "#1c541eff",
+              borderColor: "#1c541eff",
+              "&:hover": {
+                borderColor: "#1c541eff",
+              },
+              width: "100px",
+            }}
+          >
+            Close
+          </Button>
+          <Button
+            onClick={handleApproveClick}
+            variant="contained"
+            color="success"
+            sx={{ width: "100px" }}
+          >
+            Approve
+          </Button>
+          <Button
+            onClick={handleDeclineClick}
+            variant="contained"
+            color="error"
+            sx={{ width: "100px" }}
+          >
+            Decline
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Confirmation Dialog for Approve */}
+      <Dialog
+        open={confirmOpen}
+        onClose={handleConfirmClose}
+        aria-labelledby="confirm-dialog-title"
+        sx={{ "& .MuiDialog-paper": { borderRadius: "10px", width: "400px" } }}
+      >
+        <DialogTitle
+          id="confirm-dialog-title"
+          align="center"
+          sx={{
+            py: 3,
+            px: 4,
+            fontWeight: "bold",
+            fontSize: "1.25rem",
+            color: "#333",
+          }}
         >
-          Approve
-        </Button>
+          Are you sure you want to approve this applicant?
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, m: 0 }}></DialogContent>
+        <DialogActions
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 2,
+            pb: 2,
+          }}
+        >
+          <Button
+            onClick={handleConfirmApprove}
+            variant="contained"
+            color="success"
+            sx={{
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              minWidth: "100px",
+              bgcolor: "#1a7322",
+              "&:hover": { bgcolor: "#155a1b" },
+            }}
+          >
+            Yes
+          </Button>
+          <Button
+            onClick={handleConfirmClose}
+            variant="outlined"
+            color="primary"
+            sx={{
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              minWidth: "100px",
+              color: "#1a7322",
+              borderColor: "#1a7322",
+              "&:hover": { borderColor: "#1a7322", bgcolor: "#e8f5e9" },
+            }}
+          >
+            No
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-        <Button onClick={onClose} variant="outlined" color="error">
-          Decline
-        </Button>
-      </DialogActions>
-    </Dialog>
+      {/* Confirmation Dialog for Decline */}
+      <Dialog
+        open={declineConfirmOpen}
+        onClose={handleDeclineConfirmClose}
+        aria-labelledby="decline-confirm-dialog-title"
+        sx={{ "& .MuiDialog-paper": { borderRadius: "10px", width: "400px" } }}
+      >
+        <DialogTitle
+          id="decline-confirm-dialog-title"
+          align="center"
+          sx={{
+            py: 3,
+            px: 4,
+            fontWeight: "bold",
+            fontSize: "1.25rem",
+            color: "#d32f2f",
+          }}
+        >
+          Are you sure you want to decline this applicant?
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, m: 0 }}></DialogContent>
+        <DialogActions
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 2,
+            pb: 2,
+          }}
+        >
+          <Button
+            onClick={handleDeclineConfirm}
+            variant="contained"
+            color="error"
+            sx={{
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              minWidth: "100px",
+              bgcolor: "#d32f2f",
+              "&:hover": { bgcolor: "#9a0007" },
+            }}
+          >
+            Yes
+          </Button>
+          <Button
+            onClick={handleDeclineConfirmClose}
+            variant="outlined"
+            color="primary"
+            sx={{
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              minWidth: "100px",
+              color: "#d32f2f",
+              borderColor: "#d32f2f",
+              "&:hover": { borderColor: "#d32f2f", bgcolor: "#ffebee" },
+            }}
+          >
+            No
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success Pop-up for Approve */}
+      <Dialog
+        open={successOpen}
+        onClose={handleSuccessClose}
+        TransitionComponent={Fade}
+        maxWidth="xs"
+      >
+        <Paper
+          elevation={6}
+          sx={{
+            p: 4,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            backgroundColor: "white",
+            color: "#4caf50",
+            borderRadius: 2,
+          }}
+        >
+          <CheckCircleIcon
+            fontSize="large"
+            sx={{ fontSize: "5rem", color: "#4caf50" }}
+          />
+          <Typography variant="h5" fontWeight="bold">
+            Successfully Approved!
+          </Typography>
+          <Button
+            onClick={handleSuccessClose}
+            variant="contained"
+            color="success"
+          >
+            OK
+          </Button>
+        </Paper>
+      </Dialog>
+
+      {/* Success Pop-up for Decline */}
+      <Dialog
+        open={declineSuccessOpen}
+        onClose={handleDeclineSuccessClose}
+        TransitionComponent={Fade}
+        maxWidth="xs"
+      >
+        <Paper
+          elevation={6}
+          sx={{
+            p: 4,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            backgroundColor: "white",
+            color: "#d32f2f",
+            borderRadius: 2,
+          }}
+        >
+          <CancelIcon
+            fontSize="large"
+            sx={{ fontSize: "5rem", color: "#d32f2f" }}
+          />
+          <Typography variant="h5" fontWeight="bold">
+            Successfully Declined!
+          </Typography>
+          <Button
+            onClick={handleDeclineSuccessClose}
+            variant="contained"
+            color="error"
+          >
+            OK
+          </Button>
+        </Paper>
+      </Dialog>
+    </>
   );
 }
 

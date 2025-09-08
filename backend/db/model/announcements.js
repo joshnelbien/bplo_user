@@ -1,21 +1,21 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../sequelize");
 
-const Announcement = sequelize.define("announcement", {
+const Announcements = sequelize.define("Announcements", {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
   text: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
   },
   date: {
     type: DataTypes.DATE,
-    allowNull: false,
     defaultValue: DataTypes.NOW,
+    allowNull: false,
   },
 });
 
-module.exports = Announcement;
+module.exports = Announcements;

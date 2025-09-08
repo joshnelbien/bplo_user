@@ -621,7 +621,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
               console.log("Passing to business Tax:", applicant);
             }}
             variant="contained"
-            color="primary"
+            color="success"
           >
             Pass to Business Tax
           </Button>
