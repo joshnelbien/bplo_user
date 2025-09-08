@@ -15,12 +15,42 @@ import {
   Tooltip,
   IconButton,
   Stack,
+  Stepper,
+  Step,
+  StepLabel,
 } from "@mui/material";
 
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
 
-// Component to display a normal text field
+// ✅ Custom Colored Step Icon
+function ColorStepIcon(props) {
+  const { icon, status } = props;
+
+  let color = "gray";
+  if (status === "Approved") color = "green";
+  else if (status === "Declined") color = "red";
+
+  return (
+    <div
+      style={{
+        backgroundColor: color,
+        color: "white",
+        borderRadius: "50%",
+        width: 28,
+        height: 28,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontWeight: "bold",
+      }}
+    >
+      {icon}
+    </div>
+  );
+}
+
+// ✅ Component to display a normal text field
 const Field = ({ label, value }) => (
   <Grid item xs={15} sm={8}>
     <TextField
@@ -29,7 +59,6 @@ const Field = ({ label, value }) => (
       fullWidth
       variant="outlined"
       size="small"
-      // disabled
       InputProps={{
         sx: {
           color: "black",
@@ -56,7 +85,7 @@ const Field = ({ label, value }) => (
   </Grid>
 );
 
-// Component to display files as links
+// ✅ Component to display files as links
 const FileField = ({ label, fileKey, fileData, baseUrl }) => (
   <Grid item xs={12} sm={6}>
     <TextField
@@ -67,7 +96,6 @@ const FileField = ({ label, fileKey, fileData, baseUrl }) => (
       fullWidth
       variant="outlined"
       size="small"
-      // disabled
       InputProps={{
         sx: {
           color: "black",
@@ -127,6 +155,22 @@ const FileField = ({ label, fileKey, fileData, baseUrl }) => (
 function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
   if (!isOpen || !applicant) return null;
 
+  // ✅ Stepper definitions
+  const steps = [
+    { key: "BPLO", label: "BPLO", timeKey: "BPLOtimeStamp" },
+    { key: "Examiners", label: "Examiner's", timeKey: "ExaminerstimeStamp" },
+    { key: "CENRO", label: "CENRO", timeKey: "CENROtimeStamp" },
+    { key: "CHO", label: "CHO", timeKey: "CHOtimeStamp" },
+    { key: "ZONING", label: "ZONING", timeKey: "ZONINGtimeStamp" },
+    { key: "CSMWO", label: "CSWMO", timeKey: "CSMWOtimeStamp" },
+    { key: "OBO", label: "OBO", timeKey: "OBOtimeStamp" },
+  ];
+
+  // Active step = first "Pending"
+  const activeStep = steps.findIndex(
+    (step) => applicant[step.key] === "Pending"
+  );
+
   const Section = ({ title, children }) => (
     <Accordion>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -145,6 +189,57 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
   return (
     <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>Applicant Details</DialogTitle>
+
+      {/* ✅ Stepper Flow */}
+      <DialogContent>
+        <Stepper activeStep={activeStep === -1 ? steps.length : activeStep}>
+          {steps
+            // ✅ Sort by timestamp (oldest first), Pending always last
+            .sort((a, b) => {
+              const aTime = applicant[a.timeKey];
+              const bTime = applicant[b.timeKey];
+
+              // If both are pending, keep order
+              if (!aTime && !bTime) return 0;
+              // If only a is pending, b comes first
+              if (!aTime) return 1;
+              // If only b is pending, a comes first
+              if (!bTime) return -1;
+
+              // Both have timestamps → sort by date/time
+              return new Date(aTime) - new Date(bTime);
+            })
+            .map((step) => (
+              <Step key={step.key}>
+                <StepLabel
+                  StepIconComponent={(props) => (
+                    <ColorStepIcon
+                      {...props}
+                      status={applicant[step.key]} // status controls color
+                    />
+                  )}
+                >
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <span>{step.label}</span>
+                    {applicant[step.timeKey] && (
+                      <span
+                        style={{
+                          fontSize: "0.7em",
+                          color: "gray",
+                          marginTop: "2px",
+                        }}
+                      >
+                        {applicant[step.timeKey]}
+                      </span>
+                    )}
+                  </div>
+                </StepLabel>
+              </Step>
+            ))}
+        </Stepper>
+      </DialogContent>
+
+      {/* ✅ Existing Sections (unchanged) */}
       <DialogContent dividers>
         {/* Business Info */}
         <Section title="Business Information">
@@ -482,40 +577,55 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
         )}
       </DialogContent>
 
+      {/* ✅ Actions */}
       <DialogActions>
+        {/* Close Button */}
         <Button
           onClick={onClose}
           variant="contained"
-          color="gray"
           sx={{
+            backgroundColor: "white",
             color: "#1c541eff",
-            borderColor: "#1c541eff",
-            "&:hover": {
-              borderColor: "#1c541eff",
-            },
-            width: "100px", // Set a specific width
+            border: "1px solid #1c541eff",
+            "&:hover": { backgroundColor: "#f5f5f5" },
+            width: "100px",
           }}
         >
           Close
         </Button>
-        <Button
-          onClick={() => onApprove(applicant)}
-          variant="contained"
-          color="success"
-        >
-          Approve
-        </Button>
 
-        <Button
-          onClick={onClose}
-          variant="contained"
-          color="error"
-          sx={{
-            color: "white", // Changes the font color to white
-          }}
-        >
-          Decline
-        </Button>
+        {/* Show Approve/Decline only if not yet Approved */}
+        {applicant.BPLO?.toLowerCase() !== "approved" ? (
+          <>
+            <Button
+              onClick={() => onApprove(applicant)}
+              variant="contained"
+              color="success"
+            >
+              Approve
+            </Button>
+            <Button
+              onClick={onClose}
+              variant="contained"
+              color="error"
+              sx={{ color: "white" }}
+            >
+              Decline
+            </Button>
+          </>
+        ) : (
+          // ✅ If already approved → show Pass to Backroom
+          <Button
+            onClick={() => {
+              // call your "pass to backroom" logic here
+              console.log("Passing to business Tax:", applicant);
+            }}
+            variant="contained"
+            color="primary"
+          >
+            Pass to Business Tax
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );
