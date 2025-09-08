@@ -1,7 +1,7 @@
-// src/components/BusinessForm/Step6BusinessActivity.jsx
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import {
+  Autocomplete,
   Button,
   Card,
   CardContent,
@@ -231,23 +231,21 @@ export default function Step6BusinessActivity({
         {/* Add Line of Business Section */}
         <Typography variant="subtitle1">Add Line of Business</Typography>
 
-        {/* Dropdown for Line of Business */}
-        <FormControl fullWidth>
-          <InputLabel id="lob-label">Line of Business</InputLabel>
-          <Select
-            labelId="lob-label"
-            name="lineOfBusiness"
-            value={newBusiness.lineOfBusiness}
-            onChange={handleBusinessChange}
-          >
-            <MenuItem value="">-- Select Line of Business --</MenuItem>
-            {lobOptions.map((lob, index) => (
-              <MenuItem key={index} value={lob}>
-                {lob}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        {/* Autocomplete for Line of Business */}
+        <Autocomplete
+          options={lobOptions}
+          value={newBusiness.lineOfBusiness}
+          onChange={(event, newValue) => {
+            setNewBusiness((prev) => ({
+              ...prev,
+              lineOfBusiness: newValue,
+            }));
+          }}
+          renderInput={(params) => (
+            <TextField {...params} label="Line of Business" />
+          )}
+          fullWidth
+        />
 
         <TextField
           label="Product/Service"
