@@ -32,6 +32,7 @@ import NatureIcon from "@mui/icons-material/Nature";
 import LogoutIcon from "@mui/icons-material/Logout";
 import CloseIcon from "@mui/icons-material/Close";
 import BusinessIcon from "@mui/icons-material/Business";
+import CampaignIcon from '@mui/icons-material/Campaign';
 
 // Common style
 const listItemStyle = {
@@ -64,6 +65,11 @@ const menuItems = [
     text: "Renew Application",
     path: "/renew_records",
     icon: <AutorenewIcon />,
+  },
+  {
+    text: "Announcement",
+    path: "/announcement",
+    icon: <CampaignIcon />,
   },
 ];
 

@@ -187,6 +187,8 @@ const Sidebar = ({ id }) => {
         </List>
       </Box>
 
+      
+
       {/* Logout */}
       <Box sx={{ p: 2, borderTop: "1px solid #E0E0E0" }}>
         <ListItemButton

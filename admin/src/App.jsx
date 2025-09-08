@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-
+import Announce from "./ANNOUNCEMENT/announcement";
 import Cenro from "./BACKROOM/CENRO/cenro";
 import Cho from "./BACKROOM/CHO/cho";
 import Cmswo from "./BACKROOM/CMSWO/cmswo";
@@ -29,6 +29,7 @@ function App() {
         <Route path="/obo" element={<Obo />}></Route>
         <Route path="/examiners" element={<Examiners />}></Route>
         <Route path="/businessTax" element={<BusinessTax />}></Route>
+        <Route path ="/announcement" element={<Announce />}></Route>
       </Routes>
     </BrowserRouter>
   );
