@@ -66,6 +66,28 @@ router.post("/obo/approve/:id", async (req, res) => {
   }
 });
 
+router.post("/obo/decline/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const applicant = await Backroom.findByPk(id);
+    if (!applicant) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
+    // ✅ Update fields
+    applicant.OBO = "Declined";
+    applicant.OBOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+
+    await applicant.save();
+
+    res.json({ message: "Applicant declined", applicant });
+  } catch (err) {
+    console.error("Decline error:", err);
+    res.status(500).json({ error: "Failed to Decline applicant" });
+  }
+});
+
 router.post(
   "/zoning/approve/:id",
   upload.single("zoningCert"),

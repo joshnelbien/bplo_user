@@ -327,137 +327,159 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
             baseUrl={baseUrl}
           />
         </Section>
+        {/* Backroom Section */}
+        {applicant.status !== "pending" && (
+          <Section title="Backroom">
+            <Stack spacing={2}>
+              {/* ✅ Zoning */}
+              {applicant.ZONING !== "Pending" && (
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: "#f9f9f9",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    gutterBottom
+                  >
+                    Zoning
+                  </Typography>
 
-        <Section title="Backroom">
-          <Stack spacing={2}>
-            {/* ✅ Zoning */}
-            {applicant.ZONING !== "Pending" && (
-              <Paper
-                elevation={2}
-                sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  backgroundColor: "#f9f9f9",
-                }}
-              >
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                  Zoning
-                </Typography>
+                  <Grid container spacing={2}>
+                    <Field label="Zoning Fee" value={applicant.zoningFee} />
+                    <FileField
+                      fileKey="zoningCert"
+                      label="Zoning Certificate"
+                      fileData={applicant}
+                      baseUrl={baseUrl}
+                      fullWidth
+                    />
+                  </Grid>
+                </Paper>
+              )}
 
-                <Grid container spacing={2}>
-                  <Field label="Zoning Fee" value={applicant.zoningFee} />
-                  <FileField
-                    fileKey="zoningCert"
-                    label="Zoning Certificate"
-                    fileData={applicant}
-                    baseUrl={baseUrl}
-                    fullWidth
-                  />
-                </Grid>
-              </Paper>
-            )}
+              {/* ✅ OBO */}
+              {applicant.OBO !== "Pending" && (
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: "#f9f9f9",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    gutterBottom
+                  >
+                    OBO
+                  </Typography>
 
-            {/* ✅ OBO */}
-            {applicant.OBO !== "Pending" && (
-              <Paper
-                elevation={2}
-                sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  backgroundColor: "#f9f9f9",
-                }}
-              >
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                  OBO
-                </Typography>
+                  <Grid container spacing={2}>
+                    <Field
+                      label="Building Structure Architectural Presentability"
+                      value={applicant.BSAP}
+                    />
+                    <Field label="Sanitary Requirements" value={applicant.SR} />
+                    <Field label="Mechanical" value={applicant.Mechanical} />
+                    <Field label="Electrical" value={applicant.Electrical} />
+                    <Field label="Signage" value={applicant.Signage} />
+                    <Field label="Electronics" value={applicant.Electronics} />
+                  </Grid>
+                </Paper>
+              )}
 
-                <Grid container spacing={2}>
-                  <Field
-                    label="Building Structure Architectural Presentability"
-                    value={applicant.BSAP}
-                  />
-                  <Field label="Sanitary Requirements" value={applicant.SR} />
-                  <Field label="Mechanical" value={applicant.Mechanical} />
-                  <Field label="Electrical" value={applicant.Electrical} />
-                  <Field label="Signage" value={applicant.Signage} />
-                  <Field label="Electronics" value={applicant.Electronics} />
-                </Grid>
-              </Paper>
-            )}
+              {/* ✅ CHO */}
+              {applicant.CHO !== "Pending" && (
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: "#f9f9f9",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    gutterBottom
+                  >
+                    CHO
+                  </Typography>
 
-            {/* ✅ OBO */}
-            {applicant.CHO !== "Pending" && (
-              <Paper
-                elevation={2}
-                sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  backgroundColor: "#f9f9f9",
-                }}
-              >
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                  CHO
-                </Typography>
+                  <Grid container spacing={2}>
+                    <Field label="Sanitary Fee" value={applicant.choFee} />
+                    <FileField
+                      fileKey="choCert"
+                      label="CHO Certificate"
+                      fileData={applicant}
+                      baseUrl={baseUrl}
+                    />
+                  </Grid>
+                </Paper>
+              )}
 
-                <Grid container spacing={2}>
-                  <Field label="Sanitary Fee" value={applicant.choFee} />
+              {/* ✅ CSWMO */}
+              {applicant.CSMWO !== "Pending" && (
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: "#f9f9f9",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    gutterBottom
+                  >
+                    CSWMO
+                  </Typography>
 
-                  <FileField
-                    fileKey="choCert"
-                    label="CHO Certificate"
-                    fileData={applicant}
-                    baseUrl={baseUrl}
-                  />
-                </Grid>
-              </Paper>
-            )}
+                  <Grid container spacing={2}>
+                    <Field label="Solid Waste Fee" value={applicant.csmwoFee} />
+                  </Grid>
+                </Paper>
+              )}
 
-            {applicant.CSMWO !== "Pending" && (
-              <Paper
-                elevation={2}
-                sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  backgroundColor: "#f9f9f9",
-                }}
-              >
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                  CSWMO
-                </Typography>
+              {/* ✅ CENRO */}
+              {applicant.CENRO !== "Pending" && (
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: "#f9f9f9",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    gutterBottom
+                  >
+                    CENRO
+                  </Typography>
 
-                <Grid container spacing={2}>
-                  <Field label="Solid Waste Fee" value={applicant.csmwoFee} />
-                </Grid>
-              </Paper>
-            )}
-
-            {applicant.CENRO !== "Pending" && (
-              <Paper
-                elevation={2}
-                sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  backgroundColor: "#f9f9f9",
-                }}
-              >
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                  CENRO
-                </Typography>
-
-                <Grid container spacing={2}>
-                  <Field label="Environment Fee" value={applicant.cenroFee} />
-
-                  <FileField
-                    fileKey="cenroCert"
-                    label="Cenro Certificate"
-                    fileData={applicant}
-                    baseUrl={baseUrl}
-                  />
-                </Grid>
-              </Paper>
-            )}
-          </Stack>
-        </Section>
+                  <Grid container spacing={2}>
+                    <Field label="Environment Fee" value={applicant.cenroFee} />
+                    <FileField
+                      fileKey="cenroCert"
+                      label="Cenro Certificate"
+                      fileData={applicant}
+                      baseUrl={baseUrl}
+                    />
+                  </Grid>
+                </Paper>
+              )}
+            </Stack>
+          </Section>
+        )}
       </DialogContent>
 
       <DialogActions>
@@ -466,12 +488,12 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
           variant="contained"
           color="gray"
           sx={{
-            color: '#1c541eff',
-            borderColor: '#1c541eff',
-            '&:hover': {
-              borderColor: '#1c541eff',
+            color: "#1c541eff",
+            borderColor: "#1c541eff",
+            "&:hover": {
+              borderColor: "#1c541eff",
             },
-            width: '100px', // Set a specific width
+            width: "100px", // Set a specific width
           }}
         >
           Close
@@ -489,7 +511,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
           variant="contained"
           color="error"
           sx={{
-            color: 'white', // Changes the font color to white
+            color: "white", // Changes the font color to white
           }}
         >
           Decline

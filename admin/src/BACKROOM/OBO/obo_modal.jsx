@@ -127,7 +127,13 @@ const FileField = ({ label, fileKey, fileData }) => (
   </Grid>
 );
 
-function OboApplicantModal({ applicant, isOpen, onClose, onApprove }) {
+function OboApplicantModal({
+  applicant,
+  isOpen,
+  onClose,
+  onApprove,
+  onDecline,
+}) {
   if (!isOpen || !applicant) return null;
 
   const [oboFields, setOboFields] = useState({
@@ -179,6 +185,7 @@ function OboApplicantModal({ applicant, isOpen, onClose, onApprove }) {
   // Handle closing success pop-up
   const handleSuccessClose = () => {
     setSuccessOpen(false);
+    onClose();
   };
 
   const Section = ({ title, children }) => (
@@ -264,7 +271,10 @@ function OboApplicantModal({ applicant, isOpen, onClose, onApprove }) {
               value={applicant.TaxcityOrMunicipality}
             />
             <Field label="Tax Barangay" value={applicant.Taxbarangay} />
-            <Field label="Tax Address Line 1" value={applicant.TaxaddressLine1} />
+            <Field
+              label="Tax Address Line 1"
+              value={applicant.TaxaddressLine1}
+            />
             <Field label="Tax Zip Code" value={applicant.TaxzipCode} />
             <Field label="Tax Pin Address" value={applicant.TaxpinAddress} />
             <Field label="Own Place" value={applicant.ownPlace} />
@@ -308,7 +318,11 @@ function OboApplicantModal({ applicant, isOpen, onClose, onApprove }) {
                     backgroundColor: "#f9f9f9",
                   }}
                 >
-                  <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                  <Typography
+                    variant="subtitle2"
+                    fontWeight="bold"
+                    gutterBottom
+                  >
                     Business Line {index + 1}
                   </Typography>
 
@@ -398,12 +412,12 @@ function OboApplicantModal({ applicant, isOpen, onClose, onApprove }) {
             variant="contained"
             color="gray"
             sx={{
-              color: '#1c541eff',
-              borderColor: '#1c541eff',
-              '&:hover': {
-                borderColor: '#1c541eff',
+              color: "#1c541eff",
+              borderColor: "#1c541eff",
+              "&:hover": {
+                borderColor: "#1c541eff",
               },
-              width: '100px', // Set a specific width
+              width: "100px", // Set a specific width
             }}
           >
             Close
@@ -416,9 +430,17 @@ function OboApplicantModal({ applicant, isOpen, onClose, onApprove }) {
             Approve
           </Button>
 
-          <Button onClick={onClose} variant="contained" color="error" sx={{
-            color: 'white', // Changes the font color to white
-          }}>
+          <Button
+            onClick={() => {
+              onDecline(applicant.id);
+              onClose(); // close modal after decline
+            }}
+            variant="contained"
+            color="error"
+            sx={{
+              color: "white",
+            }}
+          >
             Decline
           </Button>
         </DialogActions>
@@ -430,9 +452,7 @@ function OboApplicantModal({ applicant, isOpen, onClose, onApprove }) {
         onClose={handleConfirmClose}
         aria-labelledby="confirm-dialog-title"
       >
-        <DialogTitle id="confirm-dialog-title">
-          Confirm Approval
-        </DialogTitle>
+        <DialogTitle id="confirm-dialog-title">Confirm Approval</DialogTitle>
         <DialogContent>
           <Typography>Are you sure you want to approve?</Typography>
         </DialogContent>
@@ -466,9 +486,18 @@ function OboApplicantModal({ applicant, isOpen, onClose, onApprove }) {
             borderRadius: 2,
           }}
         >
-          <CheckCircleIcon fontSize="large" sx={{ fontSize: "5rem", color: "#4caf50" }} />
-          <Typography variant="h5" fontWeight="bold">Successfully Approved!</Typography>
-          <Button onClick={handleSuccessClose} variant="contained" color="success">
+          <CheckCircleIcon
+            fontSize="large"
+            sx={{ fontSize: "5rem", color: "#4caf50" }}
+          />
+          <Typography variant="h5" fontWeight="bold">
+            Successfully Approved!
+          </Typography>
+          <Button
+            onClick={handleSuccessClose}
+            variant="contained"
+            color="success"
+          >
             OK
           </Button>
         </Paper>

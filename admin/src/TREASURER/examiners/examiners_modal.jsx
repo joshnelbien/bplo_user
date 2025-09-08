@@ -154,10 +154,11 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
     setConfirmDialogOpen(false);
     setSuccessDialogOpen(true);
     if (onApprove) {
-      onApprove(applicant.id); // ✅ no more alert inside here
+      onApprove(applicant.id);
     }
     setTimeout(() => {
       setSuccessDialogOpen(false);
+      onClose();
     }, 2000);
   };
 
@@ -401,14 +402,20 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
       </Dialog>
 
       {/* Success Dialog */}
-      <Dialog open={successDialogOpen} onClose={() => setSuccessDialogOpen(false)}>
+      <Dialog
+        open={successDialogOpen}
+        onClose={() => setSuccessDialogOpen(false)}
+      >
         <DialogContent
           sx={{
             textAlign: "center",
             p: 4,
           }}
         >
-          <CheckCircleOutlineIcon color="success" sx={{ fontSize: 60, mb: 2 }} />
+          <CheckCircleOutlineIcon
+            color="success"
+            sx={{ fontSize: 60, mb: 2 }}
+          />
           <Typography variant="h6" gutterBottom>
             Approved Successfully!
           </Typography>

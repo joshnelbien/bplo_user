@@ -186,7 +186,7 @@ function ChoApplicantModal({
   // Handle closing success pop-up
   const handleSuccessClose = (event, reason) => {
     if (reason === "clickaway") {
-      return; // Prevents the snackbar from closing on a click outside
+      return;
     }
     setSuccessOpen(false);
   };
@@ -274,7 +274,10 @@ function ChoApplicantModal({
               value={applicant.TaxcityOrMunicipality}
             />
             <Field label="Tax Barangay" value={applicant.Taxbarangay} />
-            <Field label="Tax Address Line 1" value={applicant.TaxaddressLine1} />
+            <Field
+              label="Tax Address Line 1"
+              value={applicant.TaxaddressLine1}
+            />
             <Field label="Tax Zip Code" value={applicant.TaxzipCode} />
             <Field label="Tax Pin Address" value={applicant.TaxpinAddress} />
             <Field label="Own Place" value={applicant.ownPlace} />
@@ -324,7 +327,11 @@ function ChoApplicantModal({
                     backgroundColor: "#f9f9f9",
                   }}
                 >
-                  <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                  <Typography
+                    variant="subtitle2"
+                    fontWeight="bold"
+                    gutterBottom
+                  >
                     Business Line {index + 1}
                   </Typography>
 
@@ -477,9 +484,7 @@ function ChoApplicantModal({
         onClose={handleConfirmClose}
         aria-labelledby="confirm-dialog-title"
       >
-        <DialogTitle id="confirm-dialog-title">
-          Confirm Approval
-        </DialogTitle>
+        <DialogTitle id="confirm-dialog-title">Confirm Approval</DialogTitle>
         <DialogContent>
           <Typography>Are you sure you want to approve?</Typography>
         </DialogContent>
@@ -514,7 +519,7 @@ function ChoApplicantModal({
             color: "#4caf50",
             borderRadius: 2,
             minWidth: "200px",
-            textAlign: "center"
+            textAlign: "center",
           }}
         >
           <CheckCircleIcon sx={{ fontSize: 72 }} />

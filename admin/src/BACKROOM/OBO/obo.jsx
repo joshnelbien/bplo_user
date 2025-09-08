@@ -42,9 +42,10 @@ function Obo() {
   // ✅ Filter applicants based on button selection
   const filteredApplicants =
     filter === "pending"
-      ? applicants.filter((a) => a.OBO !== "Approved")
-      : applicants.filter((a) => a.OBO === "Approved");
-
+      ? applicants.filter((a) => a.OBO !== "Approved" && a.OBO !== "Declined")
+      : filter === "approved"
+      ? applicants.filter((a) => a.OBO === "Approved")
+      : applicants.filter((a) => a.OBO === "Declined");
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
@@ -63,14 +64,30 @@ function Obo() {
         prev.map((applicant) =>
           applicant.id === id
             ? {
-              ...applicant,
-              ...oboFields,
-            }
+                ...applicant,
+                ...oboFields,
+              }
             : applicant
         )
       );
-      alert("Applicant approved");
-      closeModal();
+    } catch (error) {
+      console.error("Error approving applicant:", error);
+    }
+  };
+
+  const handleDeclined = async (id) => {
+    try {
+      await axios.post(`http://localhost:5000/backroom/obo/decline/${id}`);
+      setApplicants((prev) =>
+        prev.map((applicant) =>
+          applicant.id === id
+            ? {
+                ...applicant,
+              }
+            : applicant
+        )
+      );
+      alert("declined successfully!");
     } catch (error) {
       console.error("Error approving applicant:", error);
     }
@@ -130,6 +147,7 @@ function Obo() {
             >
               Pending
             </Button>
+
             <Button
               sx={{
                 bgcolor: filter === "approved" ? "darkgreen" : "white",
@@ -144,6 +162,23 @@ function Obo() {
               }}
             >
               Approved
+            </Button>
+
+            {/* ✅ New Declined Button */}
+            <Button
+              sx={{
+                bgcolor: filter === "declined" ? "darkgreen" : "white",
+                color: filter === "declined" ? "white" : "darkgreen",
+                "&:hover": {
+                  bgcolor: filter === "declined" ? "#004d00" : "#f0f0f0",
+                },
+              }}
+              onClick={() => {
+                setFilter("declined");
+                setCurrentPage(1);
+              }}
+            >
+              Declined
             </Button>
           </ButtonGroup>
         </Box>
@@ -210,6 +245,7 @@ function Obo() {
         isOpen={isModalOpen}
         onClose={closeModal}
         onApprove={handleApprove}
+        onDecline={handleDeclined}
       />
     </>
   );

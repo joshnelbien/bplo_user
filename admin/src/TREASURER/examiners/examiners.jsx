@@ -67,14 +67,12 @@ function Examiners() {
         prev.map((applicant) =>
           applicant.id === id
             ? {
-              ...applicant,
-              Examiners: "Approved",
-            }
+                ...applicant,
+                Examiners: "Approved",
+              }
             : applicant
         )
       );
-      alert("Applicant approved");
-      closeModal();
     } catch (error) {
       console.error("Error approving applicant:", error);
     }
