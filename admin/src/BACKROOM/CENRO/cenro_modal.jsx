@@ -134,6 +134,7 @@ function CenroApplicantModal({
   onClose,
   onApprove,
   handleFileChange,
+  onDecline,
 }) {
   if (!isOpen || !applicant) return null;
 
@@ -477,10 +478,13 @@ function CenroApplicantModal({
             Approve
           </Button>
           <Button
-            onClick={handleDeclineClick}
+            onClick={() => onDecline(applicant.id)}
             variant="contained"
             color="error"
-            sx={{ width: "100px" }}
+            sx={{
+              color: "white",
+              width: "100px",
+            }}
           >
             Decline
           </Button>

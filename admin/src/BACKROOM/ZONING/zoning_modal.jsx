@@ -130,6 +130,7 @@ function ZoningApplicantModal({
   onClose,
   onApprove,
   handleFileChange,
+  onDecline,
 }) {
   const [showCert, setShowCert] = useState(false);
 
@@ -460,11 +461,12 @@ function ZoningApplicantModal({
             </Button>
 
             <Button
-              onClick={onClose}
+              onClick={() => onDecline(applicant.id)}
               variant="contained"
               color="error"
               sx={{
-                color: "white", // Changes the font color to white
+                color: "white",
+                width: "100px",
               }}
             >
               Decline

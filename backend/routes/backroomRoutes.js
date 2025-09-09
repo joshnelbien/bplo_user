@@ -123,6 +123,33 @@ router.post(
   }
 );
 
+router.post("/zoning/decline/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const applicant = await Backroom.findByPk(id);
+    if (!applicant) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
+    // 2. Update status & timestamp
+    applicant.ZONING = "Declined";
+    applicant.ZONINGtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+
+    // 3. Save changes
+    await applicant.save();
+
+    // 4. Respond
+    res.json({
+      message: "Applicant declined successfully",
+      applicant,
+    });
+  } catch (err) {
+    console.error("Decline error:", err);
+    res.status(500).json({ error: "Failed to decline applicant" });
+  }
+});
+
 router.post("/cho/approve/:id", upload.single("choCert"), async (req, res) => {
   try {
     const { id } = req.params;
@@ -210,6 +237,27 @@ router.post(
     }
   }
 );
+
+router.post("/cenro/decline/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const applicant = await Backroom.findByPk(id);
+    if (!applicant) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
+    applicant.CENRO = "Declined";
+    applicant.CENROtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+
+    await applicant.save();
+
+    res.json({ message: "Applicant declined", applicant });
+  } catch (err) {
+    console.error("Approve error:", err);
+    res.status(500).json({ error: "Failed to approve applicant" });
+  }
+});
 
 router.post("/csmwo/approve/:id", async (req, res) => {
   try {

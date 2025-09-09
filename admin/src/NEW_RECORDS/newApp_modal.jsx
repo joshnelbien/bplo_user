@@ -1,31 +1,600 @@
-// NEW_RECORDS/newApp_modal.jsx
-import React from "react";
-import { Dialog, DialogTitle, DialogActions, Button } from "@mui/material";
-import axios from "axios";
-import ApplicantDetails from "./applicantDetails";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  Paper,
+  TextField,
+  Typography,
+  Tooltip,
+  IconButton,
+  Stack,
+  Stepper,
+  Step,
+  StepLabel,
+} from "@mui/material";
+
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import DownloadIcon from "@mui/icons-material/Download";
+
+// ✅ Custom Colored Step Icon
+function ColorStepIcon(props) {
+  const { icon, status } = props;
+
+  let color = "gray";
+  if (status === "Approved") color = "green";
+  else if (status === "Declined") color = "red";
+
+  return (
+    <div
+      style={{
+        backgroundColor: color,
+        color: "white",
+        borderRadius: "50%",
+        width: 28,
+        height: 28,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontWeight: "bold",
+      }}
+    >
+      {icon}
+    </div>
+  );
+}
+
+// ✅ Component to display a normal text field
+const Field = ({ label, value }) => (
+  <Grid item xs={15} sm={8}>
+    <TextField
+      label={label}
+      value={value || "—"}
+      fullWidth
+      variant="outlined"
+      size="small"
+      InputProps={{
+        sx: {
+          color: "black",
+          "& .MuiInputBase-input.Mui-disabled": {
+            WebkitTextFillColor: "black",
+          },
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "black",
+          },
+          "&.Mui-disabled .MuiOutlinedInput-notchedOutline": {
+            borderColor: "black",
+          },
+        },
+      }}
+      InputLabelProps={{
+        sx: {
+          color: "black",
+          "&.Mui-disabled": {
+            color: "black",
+          },
+        },
+      }}
+    />
+  </Grid>
+);
+
+// ✅ Component to display files as links
+const FileField = ({ label, fileKey, fileData, baseUrl }) => (
+  <Grid item xs={12} sm={6}>
+    <TextField
+      label={label}
+      value={
+        fileData[fileKey] ? fileData[`${fileKey}_filename`] : "No file uploaded"
+      }
+      fullWidth
+      variant="outlined"
+      size="small"
+      InputProps={{
+        sx: {
+          color: "black",
+          "& .MuiInputBase-input.Mui-disabled": {
+            WebkitTextFillColor: "black",
+          },
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "black",
+          },
+          "&.Mui-disabled .MuiOutlinedInput-notchedOutline": {
+            borderColor: "black",
+          },
+        },
+      }}
+      InputLabelProps={{
+        sx: {
+          color: "black",
+          "&.Mui-disabled": { color: "black" },
+        },
+      }}
+    />
+    {fileData[fileKey] && (
+      <Typography
+        variant="body2"
+        sx={{ mt: 0.5, display: "flex", gap: 1, alignItems: "center" }}
+      >
+        <Tooltip title="View File">
+          <IconButton
+            size="small"
+            component="a"
+            href={`${baseUrl}/${fileData.id}/${fileKey}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Typography component="span">view</Typography>
+            <VisibilityIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title="Download File">
+          <IconButton
+            size="small"
+            component="a"
+            href={`${baseUrl}/${fileData.id}/${fileKey}/download`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Typography component="span">download</Typography>
+            <DownloadIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Typography>
+    )}
+  </Grid>
+);
 
 function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
   if (!isOpen || !applicant) return null;
 
-  // Check if all approved (needed for Pass to Business Tax button)
-  const steps = ["BPLO", "Examiners", "CENRO", "CHO", "ZONING", "CSMWO", "OBO"];
-  const allApproved = steps.every(
-    (step) => applicant[step]?.toLowerCase() === "approved"
+  // ✅ Stepper definitions
+  const steps = [
+    { key: "BPLO", label: "BPLO", timeKey: "BPLOtimeStamp" },
+    { key: "Examiners", label: "Examiner's", timeKey: "ExaminerstimeStamp" },
+    { key: "CENRO", label: "CENRO", timeKey: "CENROtimeStamp" },
+    { key: "CHO", label: "CHO", timeKey: "CHOtimeStamp" },
+    { key: "ZONING", label: "ZONING", timeKey: "ZONINGtimeStamp" },
+    { key: "CSMWO", label: "CSWMO", timeKey: "CSMWOtimeStamp" },
+    { key: "OBO", label: "OBO", timeKey: "OBOtimeStamp" },
+  ];
+
+  // Active step = first "Pending"
+  const activeStep = steps.findIndex(
+    (step) => applicant[step.key] === "Pending"
+  );
+
+  const Section = ({ title, children }) => (
+    <Accordion>
+      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <Typography variant="subtitle1" fontWeight="bold">
+          {title}
+        </Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        <Grid container spacing={2}>
+          {children}
+        </Grid>
+      </AccordionDetails>
+    </Accordion>
   );
 
   return (
     <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>Applicant Details</DialogTitle>
 
-      {/* ✅ Details Moved to Separate File */}
-      <ApplicantDetails applicant={applicant} baseUrl={baseUrl} />
+      {/* ✅ Stepper Flow */}
+      <DialogContent>
+        <Stepper activeStep={activeStep === -1 ? steps.length : activeStep}>
+          {steps
+            // ✅ Sort by timestamp (oldest first), Pending always last
+            .sort((a, b) => {
+              const aTime = applicant[a.timeKey];
+              const bTime = applicant[b.timeKey];
+
+              // If both are pending, keep order
+              if (!aTime && !bTime) return 0;
+              // If only a is pending, b comes first
+              if (!aTime) return 1;
+              // If only b is pending, a comes first
+              if (!bTime) return -1;
+
+              // Both have timestamps → sort by date/time
+              return new Date(aTime) - new Date(bTime);
+            })
+            .map((step) => (
+              <Step key={step.key}>
+                <StepLabel
+                  StepIconComponent={(props) => (
+                    <ColorStepIcon
+                      {...props}
+                      status={applicant[step.key]} // status controls color
+                    />
+                  )}
+                >
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <span>{step.label}</span>
+                    {applicant[step.timeKey] && (
+                      <span
+                        style={{
+                          fontSize: "0.7em",
+                          color: "gray",
+                          marginTop: "2px",
+                        }}
+                      >
+                        {applicant[step.timeKey]}
+                      </span>
+                    )}
+                  </div>
+                </StepLabel>
+              </Step>
+            ))}
+        </Stepper>
+      </DialogContent>
+
+      {/* ✅ Existing Sections (unchanged) */}
+      <DialogContent dividers>
+        {/* Business Info */}
+        <Section title="Business Information">
+          <Field label="Status" value={applicant.status} />
+          <Field label="ID" value={applicant.id} />
+          <Field label="Business Type" value={applicant.BusinessType} />
+          <Field label="DSC Registration No" value={applicant.dscRegNo} />
+          <Field label="Business Name" value={applicant.businessName} />
+          <Field label="TIN No" value={applicant.tinNo} />
+          <Field label="Trade Name" value={applicant.TradeName} />
+        </Section>
+        {/* Personal Info */}
+        <Section title="Personal Information">
+          <Field label="First Name" value={applicant.firstName} />
+          <Field label="Middle Name" value={applicant.middleName} />
+          <Field label="Last Name" value={applicant.lastName} />
+          <Field label="Extension Name" value={applicant.extName} />
+          <Field label="Sex" value={applicant.sex} />
+        </Section>
+        {/* Contact Info */}
+        <Section title="Contact Information">
+          <Field label="Email" value={applicant.eMailAdd} />
+          <Field label="Telephone No" value={applicant.telNo} />
+          <Field label="Mobile No" value={applicant.mobileNo} />
+        </Section>
+        {/* Address */}
+        <Section title="Business Address">
+          <Field label="Region" value={applicant.region} />
+          <Field label="Province" value={applicant.province} />
+          <Field
+            label="City/Municipality"
+            value={applicant.cityOrMunicipality}
+          />
+          <Field label="Barangay" value={applicant.barangay} />
+          <Field label="Address Line 1" value={applicant.addressLine1} />
+          <Field label="Zip Code" value={applicant.zipCode} />
+          <Field label="Pin Address" value={applicant.pinAddress} />
+        </Section>
+        {/* Operations */}
+        <Section title="Business Operation">
+          <Field label="Total Floor Area" value={applicant.totalFloorArea} />
+          <Field label="Employees" value={applicant.numberOfEmployee} />
+          <Field label="Male Employees" value={applicant.maleEmployee} />
+          <Field label="Female Employees" value={applicant.femaleEmployee} />
+          <Field label="Vans" value={applicant.numVehicleVan} />
+          <Field label="Trucks" value={applicant.numVehicleTruck} />
+          <Field label="Motorcycles" value={applicant.numVehicleMotor} />
+          <Field label="No. of Nozzles" value={applicant.numNozzle} />
+          <Field label="Weigh Scale" value={applicant.weighScale} />
+        </Section>
+        {/* Tax Address */}
+        <Section title="Taxpayer Address">
+          <Field label="Tax Region" value={applicant.Taxregion} />
+          <Field label="Tax Province" value={applicant.Taxprovince} />
+          <Field
+            label="Tax City/Municipality"
+            value={applicant.TaxcityOrMunicipality}
+          />
+          <Field label="Tax Barangay" value={applicant.Taxbarangay} />
+          <Field label="Tax Address Line 1" value={applicant.TaxaddressLine1} />
+          <Field label="Tax Zip Code" value={applicant.TaxzipCode} />
+          <Field label="Tax Pin Address" value={applicant.TaxpinAddress} />
+          <Field label="Own Place" value={applicant.ownPlace} />
+          {applicant.ownPlace === "Yes" ? (
+            <Field label="Tax Dec. No." value={applicant.taxdec} />
+          ) : (
+            <>
+              <Field label="Lessor's Name" value={applicant.lessorName} />
+              <Field label="Monthly Rent" value={applicant.monthlyRent} />
+              <Field label="Tax Dec. No." value={applicant.taxdec} />
+            </>
+          )}
+        </Section>
+        {/* Business Activity */}
+        <Section title="Business Activity & Incentives">
+          <Field label="Tax Incentives" value={applicant.tIGE} />
+          {applicant.tIGE === "Yes" && (
+            <FileField
+              fileKey="tIGEfiles"
+              label="Tax Incentives From Government"
+              fileData={applicant}
+              baseUrl={baseUrl}
+            />
+          )}
+
+          <Field label="Office Type" value={applicant.officeType} />
+
+          {applicant.lineOfBusiness?.split(",").map((lob, index) => {
+            const product = applicant.productService?.split(",")[index] || "";
+            const unit = applicant.Units?.split(",")[index] || "";
+            const capital = applicant.capital?.split(",")[index] || "";
+
+            return (
+              <Paper
+                key={index}
+                elevation={2}
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  borderRadius: 2,
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                  Business Line {index + 1}
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Field label="Line of Business" value={lob.trim()} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Field label="Product/Service" value={product.trim()} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Field label="Units" value={unit.trim()} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Field label="Capital" value={capital.trim()} />
+                  </Grid>
+                </Grid>
+              </Paper>
+            );
+          })}
+        </Section>
+        {/* Business Requirements */}
+        <Section title="Business Requirements">
+          <FileField
+            fileKey="proofOfReg"
+            label="Proof of Registration"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
+          <FileField
+            fileKey="proofOfRightToUseLoc"
+            label="Proof of Right to Use Location"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
+          <FileField
+            fileKey="locationPlan"
+            label="Location Plan"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
+          <FileField
+            fileKey="brgyClearance"
+            label="Barangay Clearance"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
+          <FileField
+            fileKey="marketClearance"
+            label="Market Clearance"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
+          <FileField
+            fileKey="occupancyPermit"
+            label="Occupancy Permit"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
+          <FileField
+            fileKey="cedula"
+            label="Cedula"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
+          <FileField
+            fileKey="photoOfBusinessEstInt"
+            label="Photo (Interior)"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
+          <FileField
+            fileKey="photoOfBusinessEstExt"
+            label="Photo (Exterior)"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
+        </Section>
+        {/* Backroom Section */}
+        {applicant.status !== "pending" && (
+          <Section title="Backroom">
+            <Stack spacing={2}>
+              {/* ✅ Zoning */}
+              {applicant.ZONING !== "Pending" && (
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: "#f9f9f9",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    gutterBottom
+                  >
+                    Zoning
+                  </Typography>
+
+                  <Grid container spacing={2}>
+                    <Field label="Zoning Fee" value={applicant.zoningFee} />
+                    <FileField
+                      fileKey="zoningCert"
+                      label="Zoning Certificate"
+                      fileData={applicant}
+                      baseUrl={baseUrl}
+                      fullWidth
+                    />
+                  </Grid>
+                </Paper>
+              )}
+
+              {/* ✅ OBO */}
+              {applicant.OBO !== "Pending" && (
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: "#f9f9f9",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    gutterBottom
+                  >
+                    OBO
+                  </Typography>
+
+                  <Grid container spacing={2}>
+                    <Field
+                      label="Building Structure Architectural Presentability"
+                      value={applicant.BSAP}
+                    />
+                    <Field label="Sanitary Requirements" value={applicant.SR} />
+                    <Field label="Mechanical" value={applicant.Mechanical} />
+                    <Field label="Electrical" value={applicant.Electrical} />
+                    <Field label="Signage" value={applicant.Signage} />
+                    <Field label="Electronics" value={applicant.Electronics} />
+                  </Grid>
+                </Paper>
+              )}
+
+              {/* ✅ CHO */}
+              {applicant.CHO !== "Pending" && (
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: "#f9f9f9",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    gutterBottom
+                  >
+                    CHO
+                  </Typography>
+
+                  <Grid container spacing={2}>
+                    <Field label="Sanitary Fee" value={applicant.choFee} />
+                    <FileField
+                      fileKey="choCert"
+                      label="CHO Certificate"
+                      fileData={applicant}
+                      baseUrl={baseUrl}
+                    />
+                  </Grid>
+                </Paper>
+              )}
+
+              {/* ✅ CSWMO */}
+              {applicant.CSMWO !== "Pending" && (
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: "#f9f9f9",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    gutterBottom
+                  >
+                    CSWMO
+                  </Typography>
+
+                  <Grid container spacing={2}>
+                    <Field label="Solid Waste Fee" value={applicant.csmwoFee} />
+                  </Grid>
+                </Paper>
+              )}
+
+              {/* ✅ CENRO */}
+              {applicant.CENRO !== "Pending" && (
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: "#f9f9f9",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    gutterBottom
+                  >
+                    CENRO
+                  </Typography>
+
+                  <Grid container spacing={2}>
+                    <Field label="Environment Fee" value={applicant.cenroFee} />
+                    <FileField
+                      fileKey="cenroCert"
+                      label="Cenro Certificate"
+                      fileData={applicant}
+                      baseUrl={baseUrl}
+                    />
+                  </Grid>
+                </Paper>
+              )}
+            </Stack>
+          </Section>
+        )}
+      </DialogContent>
 
       {/* ✅ Actions */}
       <DialogActions>
-        <Button onClick={onClose} variant="outlined">
+        {/* Close Button */}
+        <Button
+          onClick={onClose}
+          variant="contained"
+          sx={{
+            backgroundColor: "white",
+            color: "#1c541eff",
+            border: "1px solid #1c541eff",
+            "&:hover": { backgroundColor: "#f5f5f5" },
+            width: "100px",
+          }}
+        >
           Close
         </Button>
 
+        {/* Show Approve/Decline only if not yet Approved */}
         {applicant.BPLO?.toLowerCase() !== "approved" ? (
           <>
             <Button
@@ -35,39 +604,27 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
             >
               Approve
             </Button>
-            <Button onClick={onClose} variant="contained" color="error">
+            <Button
+              onClick={onClose}
+              variant="contained"
+              color="error"
+              sx={{ color: "white" }}
+            >
               Decline
             </Button>
           </>
         ) : (
-          <>
-            {allApproved ? (
-              <Button
-                onClick={async () => {
-                  try {
-                    const res = await axios.post(
-                      `http://localhost:5000/businessTax/businessTax/approve/${applicant.id}`
-                    );
-                    if (res.status === 201) {
-                      alert("Applicant successfully passed to Business Tax!");
-                      onClose();
-                    }
-                  } catch (error) {
-                    console.error("Error passing to Business Tax:", error);
-                    alert("Failed to pass applicant to Business Tax");
-                  }
-                }}
-                variant="contained"
-                color="success"
-              >
-                Pass to Business Tax
-              </Button>
-            ) : (
-              <Button variant="contained" color="success" disabled>
-                Pass to Business Tax
-              </Button>
-            )}
-          </>
+          // ✅ If already approved → show Pass to Backroom
+          <Button
+            onClick={() => {
+              // call your "pass to backroom" logic here
+              console.log("Passing to business Tax:", applicant);
+            }}
+            variant="contained"
+            color="success"
+          >
+            Pass to Business Tax
+          </Button>
         )}
       </DialogActions>
     </Dialog>

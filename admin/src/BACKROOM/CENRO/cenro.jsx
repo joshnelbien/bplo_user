@@ -23,7 +23,7 @@ function Cenro() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filter, setFilter] = useState("pending"); // ✅ pending by default
+  const [filter, setFilter] = useState("pending"); // ✅ Default: pending
   const recordsPerPage = 20;
   const [selectedFiles, setSelectedFiles] = useState({});
 
@@ -50,8 +50,12 @@ function Cenro() {
   // ✅ Filter applicants based on button selection
   const filteredApplicants =
     filter === "pending"
-      ? applicants.filter((a) => a.CENRO !== "Approved")
-      : applicants.filter((a) => a.CENRO === "Approved");
+      ? applicants.filter(
+          (a) => a.CENRO !== "Approved" && a.CENRO !== "Declined"
+        )
+      : filter === "approved"
+      ? applicants.filter((a) => a.CENRO === "Approved")
+      : applicants.filter((a) => a.CENRO === "Declined");
 
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
@@ -86,6 +90,23 @@ function Cenro() {
       closeModal();
     } catch (error) {
       console.error("Error approving applicant:", error);
+    }
+  };
+
+  const handleDecline = async (id) => {
+    try {
+      await axios.post(`http://localhost:5000/backroom/cenro/decline/${id}`);
+
+      setApplicants((prev) =>
+        prev.map((applicant) =>
+          applicant.id === id ? { ...applicant, CENRO: "Declined" } : applicant
+        )
+      );
+
+      alert("Applicant declined");
+      closeModal();
+    } catch (error) {
+      console.error("Error declining applicant:", error);
     }
   };
 
@@ -158,6 +179,21 @@ function Cenro() {
             >
               Approved
             </Button>
+            <Button
+              sx={{
+                bgcolor: filter === "declined" ? "darkgreen" : "white",
+                color: filter === "declined" ? "white" : "darkgreen",
+                "&:hover": {
+                  bgcolor: filter === "declined" ? "#004d00" : "#f0f0f0",
+                },
+              }}
+              onClick={() => {
+                setFilter("declined");
+                setCurrentPage(1);
+              }}
+            >
+              Declined
+            </Button>
           </ButtonGroup>
         </Box>
 
@@ -225,6 +261,7 @@ function Cenro() {
         onApprove={handleApprove}
         handleFileChange={handleFileChange}
         selectedFiles={selectedFiles}
+        onDecline={handleDecline}
       />
     </>
   );

@@ -19,86 +19,82 @@ import {
   Modal,
 } from "@mui/material";
 
-// ✅ New Confirmation Modal Component
-const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
-  return (
-    <Modal open={isOpen} onClose={onClose}>
-      <Box
-        sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 400,
-          bgcolor: "background.paper",
-          borderRadius: 2,
-          boxShadow: 24,
-          p: 4,
-          textAlign: "center",
-          outline: "none",
-        }}
-      >
-        <Typography variant="h6" mb={2}>
-          {message}
-        </Typography>
-        <Box display="flex" justifyContent="center" gap={2}>
-          <Button variant="contained" color="success" onClick={onConfirm}>
-            Yes
-          </Button>
-          <Button variant="outlined" onClick={onClose}>
-            No
-          </Button>
-        </Box>
-      </Box>
-    </Modal>
-  );
-};
-
-// ✅ New Success Modal Component
-const SuccessModal = ({ isOpen, onClose, message }) => {
-  return (
-    <Modal open={isOpen} onClose={onClose}>
-      <Box
-        sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 300,
-          bgcolor: "background.paper",
-          borderRadius: 2,
-          boxShadow: 24,
-          p: 4,
-          textAlign: "center",
-          outline: "none",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 2,
-        }}
-      >
-        <CheckCircleOutline sx={{ color: "green", fontSize: 60 }} />
-        <Typography variant="h6" mb={2}>
-          {message}
-        </Typography>
-        <Button variant="contained" color="success" onClick={onClose}>
-          OK
+// ✅ Confirmation Modal Component
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => (
+  <Modal open={isOpen} onClose={onClose}>
+    <Box
+      sx={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: 400,
+        bgcolor: "background.paper",
+        borderRadius: 2,
+        boxShadow: 24,
+        p: 4,
+        textAlign: "center",
+        outline: "none",
+      }}
+    >
+      <Typography variant="h6" mb={2}>
+        {message}
+      </Typography>
+      <Box display="flex" justifyContent="center" gap={2}>
+        <Button variant="contained" color="success" onClick={onConfirm}>
+          Yes
+        </Button>
+        <Button variant="outlined" onClick={onClose}>
+          No
         </Button>
       </Box>
-    </Modal>
-  );
-};
+    </Box>
+  </Modal>
+);
+
+// ✅ Success Modal Component
+const SuccessModal = ({ isOpen, onClose, message }) => (
+  <Modal open={isOpen} onClose={onClose}>
+    <Box
+      sx={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: 300,
+        bgcolor: "background.paper",
+        borderRadius: 2,
+        boxShadow: 24,
+        p: 4,
+        textAlign: "center",
+        outline: "none",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+      }}
+    >
+      <CheckCircleOutline sx={{ color: "green", fontSize: 60 }} />
+      <Typography variant="h6" mb={2}>
+        {message}
+      </Typography>
+      <Button variant="contained" color="success" onClick={onClose}>
+        OK
+      </Button>
+    </Box>
+  </Modal>
+);
 
 function Zoning() {
   const [applicants, setApplicants] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filter, setFilter] = useState("pending");
+  const [filter, setFilter] = useState("pending"); // ✅ now supports pending/approved/declined
   const recordsPerPage = 20;
   const [selectedFiles, setSelectedFiles] = useState({});
 
-  // ✅ New state for confirmation and success modals
+  // ✅ Confirmation & Success state
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [confirmationData, setConfirmationData] = useState(null);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
@@ -116,10 +112,14 @@ function Zoning() {
     fetchApplicants();
   }, []);
 
-  const filteredApplicants =
-    filter === "pending"
-      ? applicants.filter((a) => a.ZONING !== "Approved")
-      : applicants.filter((a) => a.ZONING === "Approved");
+  // ✅ Unified filtering logic
+  const filteredApplicants = applicants.filter((a) => {
+    if (filter === "pending")
+      return a.ZONING !== "Approved" && a.ZONING !== "Declined";
+    if (filter === "approved") return a.ZONING === "Approved";
+    if (filter === "declined") return a.ZONING === "Declined";
+    return true;
+  });
 
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
@@ -135,6 +135,23 @@ function Zoning() {
       ...prev,
       [name]: files[0] || null,
     }));
+  };
+
+  const handleDecline = async (id) => {
+    try {
+      await axios.post(`http://localhost:5000/backroom/zoning/decline/${id}`);
+
+      setApplicants((prev) =>
+        prev.map((applicant) =>
+          applicant.id === id ? { ...applicant, ZONING: "Declined" } : applicant
+        )
+      );
+
+      alert("Applicant declined");
+      closeModal();
+    } catch (error) {
+      console.error("Error declining applicant:", error);
+    }
   };
 
   const handleApprove = async (id) => {
@@ -176,10 +193,10 @@ function Zoning() {
         prev.map((applicant) =>
           applicant.id === id
             ? {
-              ...applicant,
-              ZONING: "Approved",
-              zoningFee: formData.get("zoningFee"),
-            }
+                ...applicant,
+                ZONING: "Approved",
+                zoningFee: formData.get("zoningFee"),
+              }
             : applicant
         )
       );
@@ -228,15 +245,13 @@ function Zoning() {
           ZONING
         </Typography>
 
+        {/* ✅ Filter Button Group */}
         <Box mb={2}>
           <ButtonGroup variant="contained">
             <Button
               sx={{
                 bgcolor: filter === "pending" ? "darkgreen" : "white",
                 color: filter === "pending" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "pending" ? "#004d00" : "#f0f0f0",
-                },
               }}
               onClick={() => {
                 setFilter("pending");
@@ -249,9 +264,6 @@ function Zoning() {
               sx={{
                 bgcolor: filter === "approved" ? "darkgreen" : "white",
                 color: filter === "approved" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "approved" ? "#004d00" : "#f0f0f0",
-                },
               }}
               onClick={() => {
                 setFilter("approved");
@@ -260,11 +272,26 @@ function Zoning() {
             >
               Approved
             </Button>
+            <Button
+              sx={{
+                bgcolor: filter === "declined" ? "darkgreen" : "white",
+                color: filter === "declined" ? "white" : "darkgreen",
+              }}
+              onClick={() => {
+                setFilter("declined");
+                setCurrentPage(1);
+              }}
+            >
+              Declined
+            </Button>
           </ButtonGroup>
         </Box>
 
-
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
+        {/* ✅ Applicants Table */}
+        <TableContainer
+          component={Paper}
+          sx={{ borderRadius: 2, boxShadow: 3 }}
+        >
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
@@ -304,6 +331,7 @@ function Zoning() {
           </Table>
         </TableContainer>
 
+        {/* ✅ Pagination */}
         <Box display="flex" justifyContent="center" mt={3}>
           <Pagination
             count={totalPages}
@@ -315,11 +343,13 @@ function Zoning() {
         </Box>
       </Box>
 
+      {/* ✅ Modals */}
       <ZoningApplicantModal
         applicant={selectedApplicant}
         isOpen={isModalOpen}
         onClose={closeModal}
         onApprove={handleApprove}
+        onDecline={handleDecline}
         handleFileChange={handleFileChange}
         selectedFiles={selectedFiles}
       />
