@@ -1,3 +1,4 @@
+// NEW_RECORDS/ApplicantModal.jsx
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Accordion,
@@ -19,7 +20,7 @@ import {
   Step,
   StepLabel,
 } from "@mui/material";
-
+import axios from "axios";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
 
@@ -186,6 +187,25 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
     </Accordion>
   );
 
+  // ✅ Function to send applicant to Business Tax
+  const handlePassToBusinessTax = async () => {
+    try {
+      const res = await axios.post(
+        `http://localhost:5000/businessTax/businessTax/approve/${applicant.id}`
+      );
+
+      if (res.status === 201) {
+        alert("✅ Applicant successfully passed to Business Tax!");
+        onClose();
+      } else {
+        alert("⚠️ Unexpected response from server.");
+      }
+    } catch (error) {
+      console.error("❌ Error passing to Business Tax:", error);
+      alert("Failed to pass applicant to Business Tax");
+    }
+  };
+
   return (
     <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>Applicant Details</DialogTitle>
@@ -194,29 +214,19 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
       <DialogContent>
         <Stepper activeStep={activeStep === -1 ? steps.length : activeStep}>
           {steps
-            // ✅ Sort by timestamp (oldest first), Pending always last
             .sort((a, b) => {
               const aTime = applicant[a.timeKey];
               const bTime = applicant[b.timeKey];
-
-              // If both are pending, keep order
               if (!aTime && !bTime) return 0;
-              // If only a is pending, b comes first
               if (!aTime) return 1;
-              // If only b is pending, a comes first
               if (!bTime) return -1;
-
-              // Both have timestamps → sort by date/time
               return new Date(aTime) - new Date(bTime);
             })
             .map((step) => (
               <Step key={step.key}>
                 <StepLabel
                   StepIconComponent={(props) => (
-                    <ColorStepIcon
-                      {...props}
-                      status={applicant[step.key]} // status controls color
-                    />
+                    <ColorStepIcon {...props} status={applicant[step.key]} />
                   )}
                 >
                   <div style={{ display: "flex", flexDirection: "column" }}>
@@ -239,7 +249,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
         </Stepper>
       </DialogContent>
 
-      {/* ✅ Existing Sections (unchanged) */}
+      {/* ✅ All your sections stay the same */}
       <DialogContent dividers>
         {/* Business Info */}
         <Section title="Business Information">
@@ -614,12 +624,9 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
             </Button>
           </>
         ) : (
-          // ✅ If already approved → show Pass to Backroom
+          // ✅ If already approved → show Pass to Business Tax
           <Button
-            onClick={() => {
-              // call your "pass to backroom" logic here
-              console.log("Passing to business Tax:", applicant);
-            }}
+            onClick={handlePassToBusinessTax}
             variant="contained"
             color="success"
           >

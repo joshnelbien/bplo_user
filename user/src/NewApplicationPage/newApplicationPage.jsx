@@ -184,6 +184,31 @@ function NewApplicationPage() {
     const newErrors = {};
     const requiredFields = {
       1: ["BusinessType", "businessName", "tinNo", "TradeName"],
+      // 2: ["firstName", "lastName", "sex", "eMailAdd", "mobileNo"],
+      // 3: [
+      //   "region",
+      //   "province",
+      //   "cityOrMunicipality",
+      //   "barangay",
+      //   "addressLine1",
+      //   "zipCode",
+      // ],
+      // 4: [
+      //   "Taxregion",
+      //   "Taxprovince",
+      //   "TaxcityOrMunicipality",
+      //   "Taxbarangay",
+      //   "TaxaddressLine1",
+      //   "TaxzipCode",
+      // ],
+      // 5: [
+      //   "totalFloorArea",
+      //   "numberOfEmployee",
+      //   "maleEmployee",
+      //   "femaleEmployee",
+      // ],
+      // // 6: ['lineOfBusiness', 'productService', 'Units', 'capital'],
+      // 7: ["proofOfReg", "brgyClearance", "cedula"],
     };
 
     requiredFields[step]?.forEach((field) => {
@@ -601,12 +626,20 @@ function NewApplicationPage() {
         }}
       >
         <DialogContent
-          sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+          }}
         >
           <Grow in={successDialogOpen}>
             <CheckCircleOutlineIcon sx={{ fontSize: 80, color: "#4caf50" }} />
           </Grow>
-          <Typography variant="h6" sx={{ fontWeight: "bold", color: "#4caf50" }}>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: "bold", color: "#4caf50" }}
+          >
             Submitted Successfully!
           </Typography>
         </DialogContent>
