@@ -253,6 +253,9 @@ function New_records() {
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                 <TableCell>
+                  <strong>BIN</strong>
+                </TableCell>
+                <TableCell>
                   <strong>Business Name</strong>
                 </TableCell>
                 <TableCell>
@@ -297,6 +300,7 @@ function New_records() {
                   sx={{ cursor: "pointer" }}
                   onClick={() => openModal(applicant)}
                 >
+                  <TableCell>{applicant.BIN}</TableCell>
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
