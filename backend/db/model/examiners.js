@@ -8,6 +8,10 @@ const Examiners = sequelize.define(
       type: DataTypes.STRING,
       primaryKey: true,
     },
+    BIN: {
+      type: DataTypes.STRING,
+      unique: true,
+    },
     userId: DataTypes.UUID,
     BusinessType: DataTypes.STRING,
     dscRegNo: DataTypes.STRING,

@@ -223,7 +223,7 @@ export default function ApplicantDetails({ applicant, baseUrl }) {
       {/* Business Info Section Example */}
       <Section title="Business Information">
         <Field label="Status" value={applicant.status} />
-        <Field label="ID" value={applicant.id} />
+        <Field label="BIN" value={applicant.BIN} />
         <Field label="Business Type" value={applicant.BusinessType} />
         <Field label="DSC Registration No" value={applicant.dscRegNo} />
         <Field label="Business Name" value={applicant.businessName} />
