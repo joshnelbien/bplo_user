@@ -42,8 +42,12 @@ function Cmswo() {
   // ✅ Filter applicants based on button selection
   const filteredApplicants =
     filter === "pending"
-      ? applicants.filter((a) => a.CSMWO !== "Approved")
-      : applicants.filter((a) => a.CSMWO === "Approved");
+      ? applicants.filter(
+          (a) => a.CSMWO !== "Approved" && a.CSMWO !== "Declined"
+        )
+      : filter === "approved"
+      ? applicants.filter((a) => a.CSMWO === "Approved")
+      : applicants.filter((a) => a.CSMWO === "Declined");
 
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
@@ -162,6 +166,21 @@ function Cmswo() {
               }}
             >
               Approved
+            </Button>
+            <Button
+              sx={{
+                bgcolor: filter === "declined" ? "darkgreen" : "white",
+                color: filter === "declined" ? "white" : "darkgreen",
+                "&:hover": {
+                  bgcolor: filter === "declined" ? "#004d00" : "#f0f0f0",
+                },
+              }}
+              onClick={() => {
+                setFilter("declined");
+                setCurrentPage(1);
+              }}
+            >
+              Declined
             </Button>
           </ButtonGroup>
         </Box>
