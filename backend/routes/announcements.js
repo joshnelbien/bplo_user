@@ -6,9 +6,14 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const announcements = await Announcements.findAll({
-      order: [["date", "DESC"]],
+      order: [["createdAt", "DESC"]],
     });
-    res.json(announcements);
+    // Convert BLOB to base64 for frontend compatibility
+    const response = announcements.map(ann => ({
+      ...ann.toJSON(),
+      attachedImageBlob: ann.attachedImageBlob ? ann.attachedImageBlob.toString('base64') : null,
+    }));
+    res.json(response);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
@@ -17,13 +22,27 @@ router.get("/", async (req, res) => {
 
 // POST a new announcement
 router.post("/", async (req, res) => {
-  const { text } = req.body;
-  if (!text) {
-    return res.status(400).json({ error: "Text is required" });
+  const { text, startDate, endDate, createdBy, attachedImageBlob } = req.body;
+
+  if (!text || !startDate || !endDate || !createdBy) {
+    return res.status(400).json({ error: "Missing required fields" });
   }
+
   try {
-    const newAnnouncement = await Announcements.create({ text });
-    res.status(201).json(newAnnouncement);
+    // Convert base64 string to Buffer for BLOB storage
+    const imageBuffer = attachedImageBlob ? Buffer.from(attachedImageBlob, 'base64') : null;
+
+    const newAnnouncement = await Announcements.create({
+      text,
+      startDate,
+      endDate,
+      createdBy,
+      attachedImageBlob: imageBuffer,
+    });
+    res.status(201).json({
+      ...newAnnouncement.toJSON(),
+      attachedImageBlob: newAnnouncement.attachedImageBlob ? newAnnouncement.attachedImageBlob.toString('base64') : null,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });

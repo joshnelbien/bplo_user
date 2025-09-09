@@ -45,12 +45,10 @@ const Announcement = () => {
     text: "",
     startDate: "",
     endDate: "",
-    createdBy: "Admin", // This should be dynamically set from user data
+    createdBy: "Admin",
     attachedImageBlob: null,
   });
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -83,7 +81,9 @@ const Announcement = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setNewAnnouncement({ ...newAnnouncement, attachedImageBlob: reader.result });
+        // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
+        const base64String = reader.result.split(',')[1];
+        setNewAnnouncement({ ...newAnnouncement, attachedImageBlob: base64String });
       };
       reader.readAsDataURL(file);
     }
@@ -111,7 +111,7 @@ const Announcement = () => {
           throw new Error("Failed to add announcement.");
         }
         setNewAnnouncement({ text: "", startDate: "", endDate: "", createdBy: "Admin", attachedImageBlob: null });
-        setIsCreateModalOpen(false);
+        setIsModalOpen(false);
         await fetchAnnouncements();
       } catch (e) {
         console.error("Failed to add announcement:", e);
@@ -142,33 +142,15 @@ const Announcement = () => {
     setSnackbarOpen(false);
   };
 
-  const openDetailModal = (announcement) => {
-    setSelectedAnnouncement(announcement);
-    setIsDetailModalOpen(true);
-  };
-
-  const closeDetailModal = () => {
-    setSelectedAnnouncement(null);
-    setIsDetailModalOpen(false);
-  };
-
   return (
-    <Box
-      sx={{
-        display: "flex",
-        background: "linear-gradient(to bottom, #ffffff, #e6ffe6)",
-        minHeight: "100vh",
-      }}
-    >
+    <Box sx={{ display: 'flex', background: 'linear-gradient(to bottom, #ffffff, #e6ffe6)', minHeight: '100vh' }}>
       <Side_bar />
-      <Box
-        sx={{
-          flexGrow: 1,
-          p: { xs: 2, sm: 4 },
-          maxWidth: "800px",
-          mx: "auto",
-        }}
-      >
+      <Box sx={{
+        flexGrow: 1,
+        p: { xs: 2, sm: 4 },
+        maxWidth: "800px",
+        mx: "auto",
+      }}>
         {/* Add New Announcement Button */}
         <Box sx={{ mb: 4, textAlign: "left" }}>
           <Button
@@ -179,7 +161,7 @@ const Announcement = () => {
               borderRadius: "8px",
             }}
             startIcon={<AddIcon />}
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => setIsModalOpen(true)}
           >
             New Announcement
           </Button>
@@ -209,10 +191,7 @@ const Announcement = () => {
                       <IconButton
                         edge="end"
                         aria-label="delete"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteAnnouncement(ann.id);
-                        }}
+                        onClick={() => handleDeleteAnnouncement(ann.id)}
                         sx={{
                           color: "#d32f2f",
                           transition: "transform 0.3s",
@@ -222,15 +201,24 @@ const Announcement = () => {
                         <DeleteIcon />
                       </IconButton>
                     }
-                    onClick={() => openDetailModal(ann)}
-                    sx={{
-                      cursor: "pointer",
-                      "&:hover": { backgroundColor: "#f5f5f5" },
-                      borderRadius: "8px",
-                    }}
                   >
                     <ListItemText
-                      primary={`Created by: ${ann.createdBy}`}
+                      primary={ann.text}
+                      secondary={
+                        <Box component="span" sx={{ display: "flex", flexDirection: "column", mt: 1 }}>
+                          <Typography component="span" variant="body2" color="text.secondary">
+                            **Created by:** {ann.createdBy}
+                          </Typography>
+                          <Typography component="span" variant="body2" color="text.secondary">
+                            **Active:** {new Date(ann.startDate).toLocaleDateString()} to {new Date(ann.endDate).toLocaleDateString()}
+                          </Typography>
+                          {ann.attachedImageBlob && (
+                            <Box component="span" sx={{ mt: 1 }}>
+                              <img src={`data:image/jpeg;base64,${ann.attachedImageBlob}`} alt="Announcement" style={{ maxWidth: '100%', height: 'auto' }} />
+                            </Box>
+                          )}
+                        </Box>
+                      }
                       primaryTypographyProps={{ fontWeight: "medium" }}
                     />
                   </ListItem>
@@ -242,10 +230,10 @@ const Announcement = () => {
         </Paper>
 
         {/* Add Announcement Modal */}
-        <Modal open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)}>
+        <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
           <Box sx={modalStyle} component="form" onSubmit={handleAddAnnouncement}>
             <IconButton
-              onClick={() => setIsCreateModalOpen(false)}
+              onClick={() => setIsModalOpen(false)}
               sx={{
                 position: "absolute",
                 right: 8,
@@ -324,58 +312,6 @@ const Announcement = () => {
             >
               Submit
             </Button>
-          </Box>
-        </Modal>
-
-        {/* Announcement Detail Modal */}
-        <Modal open={isDetailModalOpen} onClose={closeDetailModal}>
-          <Box sx={modalStyle}>
-            <IconButton
-              onClick={closeDetailModal}
-              sx={{
-                position: "absolute",
-                right: 8,
-                top: 8,
-                color: "grey.500",
-                "&:hover": { color: "error.main", transform: "scale(1.2)" },
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-            {selectedAnnouncement && (
-              <Box>
-                <Typography variant="h6" component="h2" fontWeight="bold">
-                  Announcement Details
-                </Typography>
-                <Divider sx={{ my: 2 }} />
-                <Typography
-                  variant="body1"
-                  sx={{
-                    mt: 1,
-                    wordWrap: 'break-word',
-                    whiteSpace: 'normal',
-                  }}
-                >
-                  **Message:** {selectedAnnouncement.text}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  **Created by:** {selectedAnnouncement.createdBy || "Unknown"}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  **Active:** {new Date(selectedAnnouncement.startDate).toLocaleDateString()} to{" "}
-                  {new Date(selectedAnnouncement.endDate).toLocaleDateString()}
-                </Typography>
-                {selectedAnnouncement.attachedImageBlob && (
-                  <Box sx={{ mt: 2 }}>
-                    <img
-                      src={selectedAnnouncement.attachedImageBlob}
-                      alt="Announcement Attachment"
-                      style={{ maxWidth: "100%", height: "auto" }}
-                    />
-                  </Box>
-                )}
-              </Box>
-            )}
           </Box>
         </Modal>
 

@@ -11,19 +11,21 @@ const Announcements = sequelize.define("Announcements", {
     type: DataTypes.TEXT,
     allowNull: false,
   },
-  date: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
+  createdBy: {
+    type: DataTypes.STRING,
     allowNull: false,
   },
-  createdBy: {
-    type: DataTypes.STRING, // Use STRING to store the creator's name
-    allowNull: false, // Ensure this is not null to prevent "Unknown" from appearing
-    defaultValue: "Admin", // Set a default value if not provided
+  startDate: {
+    type: DataTypes.DATEONLY,
+    allowNull: false,
   },
-  attachedImageBlob: {
-    type: DataTypes.TEXT("long"), // Use TEXT("long") to store a potentially large base64 image string
-    allowNull: true, // This field can be null if no image is attached
+  endDate: {
+    type: DataTypes.DATEONLY,
+    allowNull: false,
+  },
+  attachedImageBlob: { // Reverted to attachedImageBlob with BLOB
+    type: DataTypes.BLOB('long'),
+    allowNull: true,
   },
 });
 
