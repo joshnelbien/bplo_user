@@ -16,6 +16,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import BusinessTaxApplicantModal from "./businessTax_modal";
 
 function BusinessTax() {
   const [applicants, setApplicants] = useState([]);
@@ -220,7 +221,7 @@ function BusinessTax() {
         </Box>
       </Box>
       ✅ Modal Component
-      <BusinessTax_computation
+      <BusinessTaxApplicantModal
         applicant={selectedApplicant}
         isOpen={isModalOpen}
         onClose={closeModal}
