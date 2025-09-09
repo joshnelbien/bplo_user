@@ -14,13 +14,15 @@ import {
   Modal,
   CircularProgress,
   Snackbar,
-  Alert
+  Alert,
+  InputAdornment
 } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import Side_bar from '../SIDE_BAR/side_bar';
 
 const modalStyle = {
   position: "absolute",
@@ -40,13 +42,18 @@ const modalStyle = {
 const Announcement = () => {
   const navigate = useNavigate();
   const [announcements, setAnnouncements] = useState([]);
-  const [newAnnouncement, setNewAnnouncement] = useState("");
+  const [newAnnouncement, setNewAnnouncement] = useState({
+    text: "",
+    startDate: "",
+    endDate: "",
+    createdBy: "Admin", // This should be dynamically set from user data
+    attachedImageBlob: null,
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  // Function to fetch announcements from the backend
   const fetchAnnouncements = async () => {
     setIsLoading(true);
     setError(null);
@@ -66,23 +73,43 @@ const Announcement = () => {
     }
   };
 
-  // Fetch announcements on component mount
   useEffect(() => {
     fetchAnnouncements();
   }, []);
 
-  const handleAddAnnouncement = async () => {
-    if (newAnnouncement.trim() !== "") {
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewAnnouncement({ ...newAnnouncement, attachedImageBlob: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAddAnnouncement = async (e) => {
+    e.preventDefault();
+    if (newAnnouncement.text.trim() !== "" && newAnnouncement.startDate && newAnnouncement.endDate) {
+      const announcementData = {
+        text: newAnnouncement.text,
+        startDate: newAnnouncement.startDate,
+        endDate: newAnnouncement.endDate,
+        createdBy: newAnnouncement.createdBy,
+        attachedImageBlob: newAnnouncement.attachedImageBlob,
+      };
+
       try {
         const response = await fetch("/api/announcements", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: newAnnouncement }),
+          body: JSON.stringify(announcementData),
         });
+
         if (!response.ok) {
           throw new Error("Failed to add announcement.");
         }
-        setNewAnnouncement("");
+        setNewAnnouncement({ text: "", startDate: "", endDate: "", createdBy: "Admin", attachedImageBlob: null });
         setIsModalOpen(false);
         await fetchAnnouncements();
       } catch (e) {
@@ -115,145 +142,185 @@ const Announcement = () => {
   };
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 4 }, maxWidth: "800px", mx: "auto" }}>
-      {/* Header and Back Button */}
-      <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-        <IconButton
-          onClick={() => navigate(-1)}
-          sx={{
-            color: "#1a7322",
-            mr: 2,
-            transition: "transform 0.3s",
-            "&:hover": { transform: "scale(1.1)" },
-          }}
-        >
-          <ArrowBackIcon />
-        </IconButton>
-        <Typography variant="h4" component="h1" sx={{ flexGrow: 1, fontWeight: "bold", color: "#333" }}>
-          Special Announcements
-        </Typography>
-      </Box>
-
-      {/* Admin Only Warning */}
-      <Paper elevation={3} sx={{ p: 2, mb: 4, borderRadius: "12px", bgcolor: "#fff3e0", border: "1px solid #ff9800" }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <FiberManualRecordIcon sx={{ color: "#ff9800", fontSize: "1rem" }} />
-          <Typography variant="body1" sx={{ color: "#e65100", fontWeight: "medium" }}>
-            This page is for administrators only.
-          </Typography>
-        </Box>
-      </Paper>
-
-      {/* Add New Announcement Button */}
-      <Box sx={{ mb: 4, textAlign: "right" }}>
-        <Button
-          variant="contained"
-          sx={{
-            bgcolor: "#1a7322",
-            "&:hover": { bgcolor: "#155a1b" },
-            borderRadius: "8px",
-          }}
-          startIcon={<AddIcon />}
-          onClick={() => setIsModalOpen(true)}
-        >
-          New Announcement
-        </Button>
-      </Box>
-
-      {/* Announcement History */}
-      <Paper elevation={5} sx={{ p: { xs: 2, sm: 4 }, borderRadius: "12px", bgcolor: "#fafafa" }}>
-        <Typography variant="h5" component="h2" sx={{ mb: 2, fontWeight: "bold", color: "#333" }}>
-          Announcement History
-        </Typography>
-        <Divider sx={{ mb: 2 }} />
-        {isLoading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress color="success" />
-          </Box>
-        ) : announcements.length === 0 ? (
-          <Typography variant="body1" color="text.secondary" sx={{ textAlign: "center", py: 4 }}>
-            No announcements found.
-          </Typography>
-        ) : (
-          <List>
-            {announcements.map((ann, index) => (
-              <React.Fragment key={ann.id}>
-                <ListItem
-                  disableGutters
-                  secondaryAction={
-                    <IconButton
-                      edge="end"
-                      aria-label="delete"
-                      onClick={() => handleDeleteAnnouncement(ann.id)}
-                      sx={{
-                        color: "#d32f2f",
-                        transition: "transform 0.3s",
-                        "&:hover": { transform: "scale(1.2)" },
-                      }}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  }
-                >
-                  <ListItemText
-                    primary={ann.text}
-                    secondary={new Date(ann.date).toLocaleString()}
-                    primaryTypographyProps={{
-                      fontWeight: "medium",
-                    }}
-                  />
-                </ListItem>
-                {index < announcements.length - 1 && <Divider />}
-              </React.Fragment>
-            ))}
-          </List>
-        )}
-      </Paper>
-
-      {/* Add Announcement Modal */}
-      <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <Box sx={modalStyle}>
-          <IconButton
-            onClick={() => setIsModalOpen(false)}
-            sx={{
-              position: "absolute",
-              right: 8,
-              top: 8,
-              color: "grey.500",
-              "&:hover": { color: "error.main", transform: "scale(1.2)" },
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-          <Typography variant="h6" component="h2" fontWeight="bold">
-            Create New Announcement
-          </Typography>
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            variant="outlined"
-            label="Announcement Message"
-            value={newAnnouncement}
-            onChange={(e) => setNewAnnouncement(e.target.value)}
-          />
+    <Box sx={{ display: 'flex', background: 'linear-gradient(to bottom, #ffffff, #e6ffe6)', minHeight: '100vh' }}>
+      <Side_bar />
+      <Box sx={{
+        flexGrow: 1,
+        p: { xs: 2, sm: 4 },
+        maxWidth: "800px",
+        mx: "auto",
+      }}>
+        {/* Add New Announcement Button */}
+        <Box sx={{ mb: 4, textAlign: "left" }}>
           <Button
             variant="contained"
-            fullWidth
-            onClick={handleAddAnnouncement}
-            sx={{ mt: 2, bgcolor: "#1a7322", "&:hover": { bgcolor: "#155a1b" } }}
+            sx={{
+              bgcolor: "#1a7322",
+              "&:hover": { bgcolor: "#155a1b" },
+              borderRadius: "8px",
+            }}
+            startIcon={<AddIcon />}
+            onClick={() => setIsModalOpen(true)}
           >
-            Submit
+            New Announcement
           </Button>
         </Box>
-      </Modal>
 
-      {/* Snackbar for error messages */}
-      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
-        <Alert onClose={handleSnackbarClose} severity="error" sx={{ width: "100%" }}>
-          {error}
-        </Alert>
-      </Snackbar>
+        {/* Announcement History */}
+        <Paper elevation={5} sx={{ p: { xs: 2, sm: 4 }, borderRadius: "12px", bgcolor: "#fafafa" }}>
+          <Typography variant="h5" component="h2" sx={{ mb: 2, fontWeight: "bold", color: "#333" }}>
+            Announcement History
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          {isLoading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+              <CircularProgress color="success" />
+            </Box>
+          ) : announcements.length === 0 ? (
+            <Typography variant="body1" color="text.secondary" sx={{ textAlign: "center", py: 4 }}>
+              No announcements found.
+            </Typography>
+          ) : (
+            <List>
+              {announcements.map((ann, index) => (
+                <React.Fragment key={ann.id}>
+                  <ListItem
+                    disableGutters
+                    secondaryAction={
+                      <IconButton
+                        edge="end"
+                        aria-label="delete"
+                        onClick={() => handleDeleteAnnouncement(ann.id)}
+                        sx={{
+                          color: "#d32f2f",
+                          transition: "transform 0.3s",
+                          "&:hover": { transform: "scale(1.2)" },
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    }
+                  >
+                    <ListItemText
+                      primary={ann.text}
+                      secondary={
+                        <Box component="span" sx={{ display: "flex", flexDirection: "column", mt: 1 }}>
+                          <Typography component="span" variant="body2" color="text.secondary">
+                            **Created by:** {ann.createdBy}
+                          </Typography>
+                          <Typography component="span" variant="body2" color="text.secondary">
+                            **Active:** {new Date(ann.startDate).toLocaleDateString()} to {new Date(ann.endDate).toLocaleDateString()}
+                          </Typography>
+                          {ann.attachedImageBlob && (
+                            <Box component="span" sx={{ mt: 1 }}>
+                              <img src={ann.attachedImageBlob} alt="Announcement" style={{ maxWidth: '100%', height: 'auto' }} />
+                            </Box>
+                          )}
+                        </Box>
+                      }
+                      primaryTypographyProps={{ fontWeight: "medium" }}
+                    />
+                  </ListItem>
+                  {index < announcements.length - 1 && <Divider />}
+                </React.Fragment>
+              ))}
+            </List>
+          )}
+        </Paper>
+
+        {/* Add Announcement Modal */}
+        <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <Box sx={modalStyle} component="form" onSubmit={handleAddAnnouncement}>
+            <IconButton
+              onClick={() => setIsModalOpen(false)}
+              sx={{
+                position: "absolute",
+                right: 8,
+                top: 8,
+                color: "grey.500",
+                "&:hover": { color: "error.main", transform: "scale(1.2)" },
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+            <Typography variant="h6" component="h2" fontWeight="bold">
+              Create New Announcement
+            </Typography>
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              variant="outlined"
+              label="Announcement Message"
+              value={newAnnouncement.text}
+              onChange={(e) => setNewAnnouncement({ ...newAnnouncement, text: e.target.value })}
+              required
+            />
+            <TextField
+              fullWidth
+              variant="outlined"
+              label="Created By"
+              value={newAnnouncement.createdBy}
+              onChange={(e) => setNewAnnouncement({ ...newAnnouncement, createdBy: e.target.value })}
+              sx={{ mt: 1 }}
+              required
+            />
+            <TextField
+              fullWidth
+              variant="outlined"
+              label="Start Date"
+              type="date"
+              value={newAnnouncement.startDate}
+              onChange={(e) => setNewAnnouncement({ ...newAnnouncement, startDate: e.target.value })}
+              InputLabelProps={{ shrink: true }}
+              sx={{ mt: 1 }}
+              required
+            />
+            <TextField
+              fullWidth
+              variant="outlined"
+              label="End Date"
+              type="date"
+              value={newAnnouncement.endDate}
+              onChange={(e) => setNewAnnouncement({ ...newAnnouncement, endDate: e.target.value })}
+              InputLabelProps={{ shrink: true }}
+              sx={{ mt: 1 }}
+              required
+            />
+            <TextField
+              fullWidth
+              variant="outlined"
+              type="file"
+              label="Attached Image"
+              onChange={handleFileChange}
+              InputLabelProps={{ shrink: true }}
+              sx={{ mt: 1 }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <AttachFileIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              sx={{ mt: 2, bgcolor: "#1a7322", "&:hover": { bgcolor: "#155a1b" } }}
+            >
+              Submit
+            </Button>
+          </Box>
+        </Modal>
+
+        {/* Snackbar for error messages */}
+        <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
+          <Alert onClose={handleSnackbarClose} severity="error" sx={{ width: "100%" }}>
+            {error}
+          </Alert>
+        </Snackbar>
+      </Box>
     </Box>
   );
 };

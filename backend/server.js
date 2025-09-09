@@ -27,7 +27,7 @@ const BusinessTaxRoutes = require("./routes/businessTaxRoutes");
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' })); // Increase JSON payload limit for large images
 
 // Health check
 app.get("/api/health", (_, res) => res.json({ ok: true }));
@@ -39,7 +39,7 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
   await File.sync();
   await Backroom.sync();
   await UserAccounts.sync();
-  await Announcements.sync();
+  await Announcements.sync({ alter: true }); // Use { alter: true } to update schema without dropping
   await BusinessTax.sync();
   console.log("Database ready");
 })();
