@@ -75,6 +75,25 @@ function Cmswo() {
     }
   };
 
+  const handleDecline = async (id) => {
+    try {
+      const res = await axios.post(
+        `http://localhost:5000/backroom/csmwo/decline/${id}`
+      );
+
+      setApplicants((prev) =>
+        prev.map((applicant) =>
+          applicant.id === id ? { ...applicant, CSMWO: "Declined" } : applicant
+        )
+      );
+
+      alert("Applicant declined");
+      closeModal();
+    } catch (error) {
+      console.error("Error approving applicant:", error);
+    }
+  };
+
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
@@ -209,6 +228,7 @@ function Cmswo() {
         isOpen={isModalOpen}
         onClose={closeModal}
         onApprove={handleApprove}
+        onDecline={handleDecline}
       />
     </>
   );

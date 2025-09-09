@@ -92,7 +92,6 @@ router.post("/bplo/approve/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to approve applicant" });
   }
 });
-
 router.post("/examiners/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -108,18 +107,26 @@ router.post("/examiners/approve/:id", async (req, res) => {
 
     // 3. Add approval fields
     const timestamp = moment().format("DD/MM/YYYY HH:mm:ss");
+    const year = new Date().getFullYear();
+    const randomPart = () =>
+      Math.floor(1000000 + Math.random() * 9000000).toString(); // 7-digit random number
+
+    const BIN = `${randomPart()}-${year}-${randomPart()}`;
+
     applicantData.Examiners = "Approved";
     applicantData.ExaminerstimeStamp = timestamp;
     applicantData.status = "Approved";
+    applicantData.BIN = BIN;
 
     // 4. Insert into Backroom table
     const created = await Backroom.create(applicantData);
 
-    // 5. Update status in Examiners table (archive instead of delete)
+    // 5. Update status + BIN in Examiners table
     await applicant.update({
       Examiners: "Approved",
       ExaminerstimeStamp: timestamp,
       status: "Approved",
+      BIN: BIN,
     });
 
     res.status(201).json({

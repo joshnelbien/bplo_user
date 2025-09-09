@@ -191,7 +191,7 @@ function ZoningApplicantModal({
             {/* Business Info */}
             <Section title="Business Information">
               <Field label="Status" value={applicant.ZONING} />
-              <Field label="ID" value={applicant.id} />
+              <Field label="BIN" value={applicant.BIN} />
               <Field label="Business Type" value={applicant.BusinessType} />
               <Field label="DSC Registration No" value={applicant.dscRegNo} />
               <Field label="Business Name" value={applicant.businessName} />
@@ -396,7 +396,7 @@ function ZoningApplicantModal({
                         component="label"
                         size="small"
                         sx={{ minWidth: 120 }}
-                        color="success" 
+                        color="success"
                       >
                         Choose File
                         <input
@@ -441,12 +441,12 @@ function ZoningApplicantModal({
               variant="contained"
               color="gray"
               sx={{
-                color: '#1c541eff',
-                borderColor: '#1c541eff',
-                '&:hover': {
-                  borderColor: '#1c541eff',
+                color: "#1c541eff",
+                borderColor: "#1c541eff",
+                "&:hover": {
+                  borderColor: "#1c541eff",
                 },
-                width: '100px', // Set a specific width
+                width: "100px", // Set a specific width
               }}
             >
               Close
@@ -464,7 +464,7 @@ function ZoningApplicantModal({
               variant="contained"
               color="error"
               sx={{
-                color: 'white', // Changes the font color to white
+                color: "white", // Changes the font color to white
               }}
             >
               Decline

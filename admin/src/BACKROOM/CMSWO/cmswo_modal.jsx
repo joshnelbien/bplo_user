@@ -127,7 +127,13 @@ const FileField = ({ label, fileKey, fileData }) => (
   </Grid>
 );
 
-function CmswoApplicantModal({ applicant, isOpen, onClose, onApprove }) {
+function CmswoApplicantModal({
+  applicant,
+  isOpen,
+  onClose,
+  onApprove,
+  onDecline,
+}) {
   if (!isOpen || !applicant) return null;
 
   const [csmwoField, setcsmwoField] = useState({ csmwoFee: "" });
@@ -208,7 +214,7 @@ function CmswoApplicantModal({ applicant, isOpen, onClose, onApprove }) {
           {/* Business Info */}
           <Section title="Business Information">
             <Field label="Status" value={applicant.CSMWO} />
-            <Field label="ID" value={applicant.id} />
+            <Field label="BIN" value={applicant.BIN} />
             <Field label="Business Type" value={applicant.BusinessType} />
             <Field label="DSC Registration No" value={applicant.dscRegNo} />
             <Field label="Business Name" value={applicant.businessName} />
@@ -268,7 +274,10 @@ function CmswoApplicantModal({ applicant, isOpen, onClose, onApprove }) {
               value={applicant.TaxcityOrMunicipality}
             />
             <Field label="Tax Barangay" value={applicant.Taxbarangay} />
-            <Field label="Tax Address Line 1" value={applicant.TaxaddressLine1} />
+            <Field
+              label="Tax Address Line 1"
+              value={applicant.TaxaddressLine1}
+            />
             <Field label="Tax Zip Code" value={applicant.TaxzipCode} />
             <Field label="Tax Pin Address" value={applicant.TaxpinAddress} />
             <Field label="Own Place" value={applicant.ownPlace} />
@@ -312,7 +321,11 @@ function CmswoApplicantModal({ applicant, isOpen, onClose, onApprove }) {
                     backgroundColor: "#f9f9f9",
                   }}
                 >
-                  <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                  <Typography
+                    variant="subtitle2"
+                    fontWeight="bold"
+                    gutterBottom
+                  >
                     Business Line {index + 1}
                   </Typography>
 
@@ -395,12 +408,12 @@ function CmswoApplicantModal({ applicant, isOpen, onClose, onApprove }) {
             onClick={onClose}
             variant="outlined"
             sx={{
-              color: '#1c541eff',
-              borderColor: '#1c541eff',
-              '&:hover': {
-                borderColor: '#1c541eff',
+              color: "#1c541eff",
+              borderColor: "#1c541eff",
+              "&:hover": {
+                borderColor: "#1c541eff",
               },
-              width: '100px',
+              width: "100px",
             }}
           >
             Close
@@ -415,11 +428,11 @@ function CmswoApplicantModal({ applicant, isOpen, onClose, onApprove }) {
           </Button>
 
           <Button
-            onClick={handleDeclineClick}
+            onClick={() => onDecline(applicant.id)}
             variant="contained"
             color="error"
             sx={{
-              color: 'white',
+              color: "white",
               width: "100px",
             }}
           >

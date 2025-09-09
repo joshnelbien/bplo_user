@@ -233,6 +233,33 @@ router.post("/csmwo/approve/:id", async (req, res) => {
   }
 });
 
+router.post("/csmwo/decline/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1. Find applicant in Backroom
+    const applicant = await Backroom.findByPk(id);
+    if (!applicant) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
+    // 2. Update status & timestamp
+    applicant.CSMWO = "Declined";
+    applicant.CSMWOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+
+    // 3. Save changes
+    await applicant.save();
+
+    // 4. Respond
+    res.json({
+      message: "Applicant declined successfully",
+      applicant,
+    });
+  } catch (err) {
+    console.error("Decline error:", err);
+    res.status(500).json({ error: "Failed to decline applicant" });
+  }
+});
 // List files
 router.get("/backrooms", async (req, res) => {
   try {

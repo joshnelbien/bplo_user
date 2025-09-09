@@ -225,11 +225,12 @@ function CenroApplicantModal({
     <>
       <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
         <DialogTitle>Applicant Details</DialogTitle>
+
         <DialogContent dividers>
           {/* Business Info */}
           <Section title="Business Information">
             <Field label="Status" value={applicant.CENRO} />
-            <Field label="ID" value={applicant.id} />
+            <Field label="BIN" value={applicant.BIN} />
             <Field label="Business Type" value={applicant.BusinessType} />
             <Field label="DSC Registration No" value={applicant.dscRegNo} />
             <Field label="Business Name" value={applicant.businessName} />
@@ -289,7 +290,10 @@ function CenroApplicantModal({
               value={applicant.TaxcityOrMunicipality}
             />
             <Field label="Tax Barangay" value={applicant.Taxbarangay} />
-            <Field label="Tax Address Line 1" value={applicant.TaxaddressLine1} />
+            <Field
+              label="Tax Address Line 1"
+              value={applicant.TaxaddressLine1}
+            />
             <Field label="Tax Zip Code" value={applicant.TaxzipCode} />
             <Field label="Tax Pin Address" value={applicant.TaxpinAddress} />
             <Field label="Own Place" value={applicant.ownPlace} />
@@ -333,7 +337,11 @@ function CenroApplicantModal({
                     backgroundColor: "#f9f9f9",
                   }}
                 >
-                  <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                  <Typography
+                    variant="subtitle2"
+                    fontWeight="bold"
+                    gutterBottom
+                  >
                     Business Line {index + 1}
                   </Typography>
 
