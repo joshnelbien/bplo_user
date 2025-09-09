@@ -1,5 +1,3 @@
-// server.js
-
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -18,9 +16,8 @@ const BackroomRoutes = require("./routes/backroomRoutes");
 const UserAccounts = require("./db/model/userAccounts");
 const UserAccountsRoutes = require("./routes/UserAccountsRoutes");
 
-// Import the new Announcements model and route
 const Announcements = require("./db/model/announcements");
-const AnnouncementsRoutes = require("./routes/announcementsRoutes");
+const AnnouncementsRoutes = require("./routes/announcements");
 
 const BusinessTax = require("./db/model/businessTax");
 const BusinessTaxRoutes = require("./routes/businessTaxRoutes");
@@ -39,7 +36,7 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
   await File.sync();
   await Backroom.sync();
   await UserAccounts.sync();
-  await Announcements.sync({ alter: true }); // Use { alter: true } to update schema without dropping
+  await Announcements.sync();
   await BusinessTax.sync();
   console.log("Database ready");
 })();
