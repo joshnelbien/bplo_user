@@ -9,7 +9,7 @@ import Modal from "@mui/material/Modal";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Add useNavigate here
 
 import Sidebar from "../sideBar/sideBar";
 
@@ -87,6 +87,7 @@ const modalContents = {
 
 const HomePage = () => {
   const userId = localStorage.getItem("userId");
+  const navigate = useNavigate(); // Initialize useNavigate here
 
   const [open, setOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
@@ -102,6 +103,11 @@ const HomePage = () => {
   };
 
   const handleClose = () => setOpen(false);
+
+  // New function to handle navigation
+  const handleAnnouncementClick = () => {
+    navigate(".homePage/announcement");
+  };
 
   const buttonStyle = {
     color: '#2A8238',
@@ -154,7 +160,8 @@ const HomePage = () => {
             flexWrap: "wrap",
           }}
         >
-          <Button sx={buttonStyle}>
+          {/* Update the onClick handler for the SPECIAL ANNOUNCEMENT button */}
+          <Button sx={buttonStyle} onClick={handleAnnouncementClick}> 
             <CampaignIcon sx={{ mr: 1 }} />
             SPECIAL ANNOUNCEMENT
           </Button>
@@ -174,7 +181,7 @@ const HomePage = () => {
             alignItems: "center",
             width: "100%",
             maxWidth: 900,
-            mt: { xs: 12, sm: 14 }, // Increased top margin for the box group
+            mt: { xs: 12, sm: 14 },
           }}
         >
           <Stack
