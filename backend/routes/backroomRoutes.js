@@ -154,6 +154,27 @@ router.post("/cho/approve/:id", upload.single("choCert"), async (req, res) => {
   }
 });
 
+router.post("/cho/decline/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const applicant = await Backroom.findByPk(id);
+    if (!applicant) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
+    applicant.CHO = "Declined";
+    applicant.CHOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+
+    await applicant.save();
+
+    res.json({ message: "Applicant declined", applicant });
+  } catch (err) {
+    console.error("Approve error:", err);
+    res.status(500).json({ error: "Failed to approve applicant" });
+  }
+});
+
 router.post(
   "/cenro/approve/:id",
   upload.single("cenroCert"),

@@ -36,7 +36,9 @@ function BusinessTax() {
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/backroom/backrooms");
+        const res = await axios.get(
+          "http://localhost:5000/businessTax/businessTax"
+        );
         setApplicants(res.data);
       } catch (error) {
         console.error("Error fetching applicants:", error);
@@ -49,8 +51,8 @@ function BusinessTax() {
   // ✅ Filter applicants based on button selection
   const filteredApplicants =
     filter === "pending"
-      ? applicants.filter((a) => a.CHO !== "Approved")
-      : applicants.filter((a) => a.CHO === "Approved");
+      ? applicants.filter((a) => a.BusinessTax !== "Approved")
+      : applicants.filter((a) => a.BusinessTax === "Approved");
 
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
@@ -199,7 +201,7 @@ function BusinessTax() {
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.CHO}</TableCell>
+                  <TableCell>{applicant.BusinessTax}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

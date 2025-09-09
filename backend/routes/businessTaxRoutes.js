@@ -17,24 +17,68 @@ router.post("/businessTax/approve/:id", async (req, res) => {
     // 2. Convert to plain object
     const applicantData = applicant.toJSON();
 
-    applicantData.BusinessTax = "Approved";
+    applicantData.BusinessTax = "pending";
     applicantData.BusinessTaxtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
     const created = await BusinessTax.create(applicantData);
 
-    await applicant.update({
-      BusinessTax: "Approved",
-      BusinessTaxtimeStamp: applicantData.BusinessTaxtimeStamp,
-      status: "Approved",
-    });
-
     res.status(201).json({
-      message: "Applicant approved, archived in Files, and moved to Examiners",
+      message:
+        "Applicant approved, archived in Files, and moved to businessTax",
       created,
     });
   } catch (err) {
     console.error("Approve error:", err);
     res.status(500).json({ error: "Failed to approve applicant" });
+  }
+});
+
+router.get("/businessTax", async (req, res) => {
+  try {
+    const files = await BusinessTax.findAll();
+    res.json(files);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json([]);
+  }
+});
+
+router.get("/businessTax/:id/:key", async (req, res) => {
+  try {
+    const { id, key } = req.params;
+    const file = await businessTax.findByPk(id);
+    if (!file) return res.status(404).send("Not found");
+
+    if (!file[key]) return res.status(404).send("File not found");
+    res.setHeader("Content-Type", file[`${key}_mimetype`]);
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="${file[`${key}_filename`]}"`
+    );
+    res.send(file[key]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error retrieving file");
+  }
+});
+
+// Download file
+router.get("/businessTax/:id/:key/download", async (req, res) => {
+  try {
+    const { id, key } = req.params;
+    const file = await businessTax.findByPk(id);
+    if (!file) return res.status(404).send("Not found");
+
+    if (!file[key]) return res.status(404).send("File not found");
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${file[`${key}_filename`]}"`
+    );
+    res.send(file[key]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error downloading file");
   }
 });
 

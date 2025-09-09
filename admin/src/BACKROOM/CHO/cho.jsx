@@ -23,7 +23,7 @@ function Cho() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filter, setFilter] = useState("pending"); // ✅ pending by default
+  const [filter, setFilter] = useState("pending"); // pending by default
   const recordsPerPage = 20;
   const [selectedFiles, setSelectedFiles] = useState({});
 
@@ -48,10 +48,13 @@ function Cho() {
   }, []);
 
   // ✅ Filter applicants based on button selection
-  const filteredApplicants =
-    filter === "pending"
-      ? applicants.filter((a) => a.CHO !== "Approved")
-      : applicants.filter((a) => a.CHO === "Approved");
+  const filteredApplicants = applicants.filter((a) => {
+    if (filter === "pending")
+      return a.CHO !== "Approved" && a.CHO !== "Declined";
+    if (filter === "approved") return a.CHO === "Approved";
+    if (filter === "declined") return a.CHO === "Declined";
+    return true;
+  });
 
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
@@ -61,6 +64,7 @@ function Cho() {
     indexOfLastRecord
   );
 
+  // ✅ Approve logic
   const handleApprove = async (id, choFee, selectedFiles) => {
     try {
       const formData = new FormData();
@@ -85,6 +89,22 @@ function Cho() {
       );
     } catch (error) {
       console.error("Error approving applicant:", error);
+    }
+  };
+
+  // ✅ Decline logic (fixed)
+  const handleDecline = async (id) => {
+    try {
+      await axios.post(`http://localhost:5000/backroom/cho/decline/${id}`);
+      setApplicants((prev) =>
+        prev.map((applicant) =>
+          applicant.id === id ? { ...applicant, CHO: "Declined" } : applicant
+        )
+      );
+      alert("declined successfully");
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error declining applicant:", error);
     }
   };
 
@@ -127,36 +147,24 @@ function Cho() {
         {/* ✅ Button Group Filter */}
         <Box mb={2}>
           <ButtonGroup variant="contained">
-            <Button
-              sx={{
-                bgcolor: filter === "pending" ? "darkgreen" : "white",
-                color: filter === "pending" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "pending" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("pending");
-                setCurrentPage(1);
-              }}
-            >
-              Pending
-            </Button>
-            <Button
-              sx={{
-                bgcolor: filter === "approved" ? "darkgreen" : "white",
-                color: filter === "approved" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "approved" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("approved");
-                setCurrentPage(1);
-              }}
-            >
-              Approved
-            </Button>
+            {["pending", "approved", "declined"].map((status) => (
+              <Button
+                key={status}
+                sx={{
+                  bgcolor: filter === status ? "darkgreen" : "white",
+                  color: filter === status ? "white" : "darkgreen",
+                  "&:hover": {
+                    bgcolor: filter === status ? "#004d00" : "#f0f0f0",
+                  },
+                }}
+                onClick={() => {
+                  setFilter(status);
+                  setCurrentPage(1);
+                }}
+              >
+                {status.charAt(0).toUpperCase() + status.slice(1)}
+              </Button>
+            ))}
           </ButtonGroup>
         </Box>
 
@@ -222,6 +230,7 @@ function Cho() {
         isOpen={isModalOpen}
         onClose={closeModal}
         onApprove={handleApprove}
+        onDecline={handleDecline}
         handleFileChange={handleFileChange}
         selectedFiles={selectedFiles}
       />

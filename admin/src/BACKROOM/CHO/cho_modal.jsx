@@ -133,6 +133,7 @@ function ChoApplicantModal({
   onClose,
   onApprove,
   handleFileChange,
+  onDecline,
 }) {
   if (!isOpen || !applicant) return null;
 
@@ -466,7 +467,7 @@ function ChoApplicantModal({
             Approve
           </Button>
           <Button
-            onClick={onClose}
+            onClick={() => onDecline(applicant.id)}
             variant="contained"
             color="error"
             sx={{
