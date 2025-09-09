@@ -17,6 +17,141 @@ import {
 } from "@mui/material";
 
 function BusinessTax_computation({ isOpen, onClose, applicant }) {
+  // ✅ Compute Business Tax based on formula
+  const capital = Number(applicant?.totalCapital) || 0;
+  const businessTax = capital * 0.5 * 0.01; // (capital * 50%) * 1%
+
+  // ✅ Define the collection rows as raw numbers
+  const collections = [
+    { label: "BUSINESS TAX", amount: businessTax },
+    { label: "MAYOR’S PERMIT", amount: 0 },
+    { label: "BARANGAY FEE", amount: 0 },
+    { label: "OCCUPATIONAL TAX", amount: 0 },
+    { label: "HEALTH, CER & SSF", amount: 0 },
+    { label: "SWM GARBAGE FEE", amount: Number(applicant?.csmwoFee) || 0 },
+    { label: "OBO", amount: 0 },
+    { label: "SANITARY INSPECTION", amount: Number(applicant?.SR) || 0 },
+    { label: "BUILDING INSPECTION", amount: Number(applicant?.BSAP) || 0 },
+    {
+      label: "MECHANICAL INSPECTION",
+      amount: Number(applicant?.Mechanical) || 0,
+    },
+    {
+      label: "ELECTRICAL INSPECTION",
+      amount: Number(applicant?.Electrical) || 0,
+    },
+    { label: "SIGNBOARD/BILLBOARD", amount: Number(applicant?.Signage) || 0 },
+    {
+      label: "ELECTRONIC INSPECTION",
+      amount: Number(applicant?.Electronics) || 0,
+    },
+    { label: "DELIVERY VAN", amount: 0 },
+    { label: "SURCHARGE", amount: 0 },
+    { label: "INTEREST", amount: 0 },
+    { label: "TINPLATE/STICKER FEE", amount: 0 },
+    { label: "VERIFICATION FEE", amount: 0 },
+    { label: "ZONING FEE", amount: Number(applicant?.zoningFee) || 0 },
+    { label: "CENRO", amount: Number(applicant?.cenroFee) || 0 },
+    { label: "SWMO CERT", amount: Number(applicant?.cenroFee) || 0 },
+    { label: "VETERNARY FEE", amount: 0 },
+    { label: "FIXED TAX", amount: 0 },
+    { label: "VIDEOKE CARABET DANCEHALL", amount: 0 },
+    { label: "CIGARETTES", amount: 0 },
+    { label: "LIQUOR", amount: 0 },
+    { label: "BILLIARDS", amount: 0 },
+    { label: "BOARD AND LOGGING", amount: 0 },
+    { label: "FSIC FEE", amount: 0 },
+  ];
+
+  // ✅ Compute totals
+  const total = collections.reduce((sum, item) => sum + item.amount, 0);
+  const otherChargesTotal = collections
+    .filter((item) => item.label !== "BUSINESS TAX")
+    .reduce((sum, item) => sum + item.amount, 0);
+
+  // ✅ Peso formatter
+  const formatPeso = (value) =>
+    value > 0
+      ? `₱ ${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+      : "₱ ______";
+
+  // ✅ Convert number to words
+  function numberToWords(num) {
+    if (num === 0) return "zero";
+
+    const belowTwenty = [
+      "",
+      "one",
+      "two",
+      "three",
+      "four",
+      "five",
+      "six",
+      "seven",
+      "eight",
+      "nine",
+      "ten",
+      "eleven",
+      "twelve",
+      "thirteen",
+      "fourteen",
+      "fifteen",
+      "sixteen",
+      "seventeen",
+      "eighteen",
+      "nineteen",
+    ];
+    const tens = [
+      "",
+      "",
+      "twenty",
+      "thirty",
+      "forty",
+      "fifty",
+      "sixty",
+      "seventy",
+      "eighty",
+      "ninety",
+    ];
+    const thousands = ["", "thousand", "million", "billion"];
+
+    function helper(n) {
+      if (n === 0) return "";
+      else if (n < 20) return belowTwenty[n] + " ";
+      else if (n < 100) return tens[Math.floor(n / 10)] + " " + helper(n % 10);
+      else
+        return belowTwenty[Math.floor(n / 100)] + " hundred " + helper(n % 100);
+    }
+
+    let word = "";
+    let i = 0;
+
+    while (num > 0) {
+      if (num % 1000 !== 0) {
+        word = helper(num % 1000) + thousands[i] + " " + word;
+      }
+      num = Math.floor(num / 1000);
+      i++;
+    }
+
+    return word.trim();
+  }
+
+  // ✅ Convert total with pesos & centavos
+  function amountInWords(amount) {
+    const pesos = Math.floor(amount);
+    const centavos = Math.round((amount - pesos) * 100);
+
+    let words = "";
+    if (pesos > 0) {
+      words += numberToWords(pesos) + " pesos";
+    }
+    if (centavos > 0) {
+      words += " and " + numberToWords(centavos) + " centavos";
+    }
+    return words || "zero";
+  }
+
   return (
     <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>Business Tax Computation</DialogTitle>
@@ -36,7 +171,7 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
             <Grid item xs={12}>
               <Typography>REFERENCE NO: ___________</Typography>
               <Typography>
-                BUSINESS ID: {applicant?.id || "___________"}
+                BUSINESS ID: {applicant?.BIN || "___________"}
               </Typography>
               <Typography>
                 CAPITAL: {applicant?.capital || "___________"}
@@ -50,14 +185,17 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
           {/* Business Info */}
           <Box mb={2} border={1} borderColor="grey.400" p={2}>
             <Typography>
-              NAME OF OWNER: {applicant?.owner || "(FNAME MNAME LNAME)"}
+              NAME OF OWNER:{" "}
+              {applicant
+                ? `${applicant.firstName || ""} ${applicant.middleName || ""} ${
+                    applicant.lastName || ""
+                  }`
+                : "___________"}
             </Typography>
             <Typography>
               BUSINESS NAME: {applicant?.businessName || "___________"}
             </Typography>
-            <Typography>
-              BUSINESS ADDRESS: {applicant?.address || "___________"}
-            </Typography>
+            <Typography>BUSINESS ADDRESS: {applicant?.barangay}</Typography>
             <Typography>
               NATURE OF BUSINESS: {applicant?.nature || "___________"}
             </Typography>
@@ -77,40 +215,12 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {[
-                  "BUSINESS TAX",
-                  "MAYOR’S PERMIT",
-                  "BARANGAY FEE",
-                  "OCCUPATIONAL TAX",
-                  "HEALTH, CER & SSF",
-                  "SWM GARBAGE FEE",
-                  "OBBO",
-                  "SANITARY INSPECTION",
-                  "BUILDING INSPECTION",
-                  "MECHANICAL INSPECTION",
-                  "ELECTRICAL INSPECTION",
-                  "SIGNBOARD/BILLBOARD",
-                  "ELECTRONIC INSPECTION",
-                  "DELIVERY VAN",
-                  "SURCHARGE",
-                  "INTEREST",
-                  "TINPLATE/STICKER FEE",
-                  "VERIFICATION FEE",
-                  "ZONING FEE",
-                  "CENRO",
-                  "SEWMO CERT",
-                  "VETERNARY FEE",
-                  "FIXED TAX",
-                  "VIDEOKE CARABET DANCEHALL",
-                  "CIGARETTES",
-                  "LIQUOR",
-                  "BILLIARDS",
-                  "BOARD AND LOGGING",
-                  "FSC FEE",
-                ].map((item) => (
-                  <TableRow key={item}>
-                    <TableCell>{item}</TableCell>
-                    <TableCell align="right">₱ ______</TableCell>
+                {collections.map((item) => (
+                  <TableRow key={item.label}>
+                    <TableCell>{item.label}</TableCell>
+                    <TableCell align="right">
+                      {formatPeso(item.amount)}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -119,13 +229,17 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
 
           {/* Totals */}
           <Box mb={2}>
-            <Typography>Other Charges total: ₱ ______</Typography>
-            <Typography>Total: ₱ ______</Typography>
+            <Typography>
+              Other Charges total: {formatPeso(otherChargesTotal)}
+            </Typography>
+            <Typography>Total: {formatPeso(total)}</Typography>
           </Box>
 
           {/* Amount in Words + Service Vehicle + Mode of Payment */}
           <Box mb={2} border={1} borderColor="grey.400" p={2}>
-            <Typography>AMOUNT IN WORDS: ________________________</Typography>
+            <Typography>
+              AMOUNT IN WORDS: {total > 0 ? amountInWords(total) : "__________"}
+            </Typography>
             <Typography>No. Of Service Vehicle: ___________</Typography>
             <Typography>Mode of Payment: ___________</Typography>
           </Box>

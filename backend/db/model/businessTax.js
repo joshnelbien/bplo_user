@@ -8,6 +8,11 @@ const BusinessTax = sequelize.define(
       type: DataTypes.STRING,
       primaryKey: true,
     },
+    BIN: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
     userId: DataTypes.UUID,
     BusinessType: DataTypes.STRING,
     dscRegNo: DataTypes.STRING,

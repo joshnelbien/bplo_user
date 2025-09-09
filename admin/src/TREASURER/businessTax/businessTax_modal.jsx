@@ -164,9 +164,9 @@ function BusinessTaxApplicantModal({
     if (files[0]) {
       setSelectedFiles((prev) => ({
         ...prev,
-        [name]: files[0], // store the actual File object
+        [name]: files[0],
       }));
-      handleFileChange(name, files[0]); // send file up to parent
+      handleFileChange(name, files[0]);
     }
   };
 
@@ -217,8 +217,8 @@ function BusinessTaxApplicantModal({
         <DialogContent dividers>
           {/* Business Info */}
           <Section title="Business Information">
-            <Field label="Status" value={applicant.CHO} />
-            <Field label="ID" value={applicant.id} />
+            <Field label="Status" value={applicant.BusinessTax} />
+            <Field label="BIN" value={applicant.BIN} />
             <Field label="Business Type" value={applicant.BusinessType} />
             <Field label="DSC Registration No" value={applicant.dscRegNo} />
             <Field label="Business Name" value={applicant.businessName} />
