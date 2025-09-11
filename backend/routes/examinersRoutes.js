@@ -5,6 +5,7 @@ const File = require("../db/model/files");
 const Backroom = require("../db/model/backroomLocal");
 const router = express.Router();
 const moment = require("moment");
+const AppStatus = require("../db/model/applicantStatusDB");
 
 // Multer in-memory storage
 const upload = multer({ storage: multer.memoryStorage() });
@@ -65,6 +66,10 @@ router.post("/bplo/approve/:id", async (req, res) => {
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
+    const applicantStatus = await AppStatus.findByPk(id);
+    if (!applicantStatus) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
 
     // 2. Convert to plain object
     const applicantData = applicant.toJSON();
@@ -83,6 +88,11 @@ router.post("/bplo/approve/:id", async (req, res) => {
       status: "Approved",
     });
 
+    await applicantStatus.update({
+      BPLO: "Approved",
+      BPLOtimeStamp: applicantData.BPLOtimeStamp,
+    });
+
     res.status(201).json({
       message: "Applicant approved, archived in Files, and moved to Examiners",
       created,
@@ -92,6 +102,7 @@ router.post("/bplo/approve/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to approve applicant" });
   }
 });
+
 router.post("/examiners/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -99,6 +110,11 @@ router.post("/examiners/approve/:id", async (req, res) => {
     // 1. Get applicant from Examiners table
     const applicant = await Examiners.findByPk(id);
     if (!applicant) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
+    const applicantStatus = await AppStatus.findByPk(id);
+    if (!applicantStatus) {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
@@ -127,6 +143,11 @@ router.post("/examiners/approve/:id", async (req, res) => {
       ExaminerstimeStamp: timestamp,
       status: "Approved",
       BIN: BIN,
+    });
+
+    await applicantStatus.update({
+      Examiners: "Approved",
+      ExaminerstimeStamp: applicantData.ExaminerstimeStamp,
     });
 
     res.status(201).json({

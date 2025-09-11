@@ -1,6 +1,10 @@
 const express = require("express");
 const multer = require("multer");
 const File = require("../db/model/files");
+const AppStatus = require("../db/model/applicantStatusDB");
+const { where } = require("sequelize");
+const { v4: uuidv4 } = require("uuid");
+const { sequelize } = require("../db/sequelize");
 
 const router = express.Router();
 
@@ -23,12 +27,15 @@ router.post(
     { name: "tIGEfiles" },
   ]),
   async (req, res) => {
+    const t = await sequelize.transaction();
     try {
       const files = req.files;
-      const body = req.body; // <- text inputs are here
-      const fileData = {};
+      const body = req.body;
 
-      // Save each uploaded file’s info
+      const sharedId = uuidv4();
+      const { userId } = body; // ✅ extract userId
+
+      const fileData = {};
       if (files) {
         Object.keys(files).forEach((key) => {
           const f = files[key][0];
@@ -39,16 +46,34 @@ router.post(
         });
       }
 
-      // Merge text fields + file data
-      const payload = {
-        ...body,
-        ...fileData,
-      };
+      const createdFile = await File.create(
+        {
+          id: sharedId,
+          userId, // ✅ save userId in File
+          ...body,
+          ...fileData,
+        },
+        { transaction: t }
+      );
 
-      const created = await File.create(payload);
-      res.status(201).json(created);
+      const createdStatus = await AppStatus.create(
+        {
+          id: sharedId,
+          userId, // ✅ also save userId in AppStatus
+        },
+        { transaction: t }
+      );
+
+      await t.commit();
+
+      res.status(201).json({
+        file: createdFile,
+        status: createdStatus,
+        sharedId,
+      });
     } catch (err) {
-      console.error(err);
+      await t.rollback();
+      console.error("Upload failed:", err);
       res.status(500).json({ error: "Upload failed" });
     }
   }

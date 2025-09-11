@@ -332,6 +332,7 @@ function NewApplicationPage() {
 
     try {
       await axios.post(`${API}/newApplication/files`, formData, {
+        userId,
         headers: { "Content-Type": "multipart/form-data" },
       });
 
