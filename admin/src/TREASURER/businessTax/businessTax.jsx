@@ -52,8 +52,8 @@ function BusinessTax() {
   // ✅ Filter applicants based on button selection
   const filteredApplicants =
     filter === "pending"
-      ? applicants.filter((a) => a.BusinessTax !== "Approved")
-      : applicants.filter((a) => a.BusinessTax === "Approved");
+      ? applicants.filter((a) => a.BUSINESSTAX !== "Approved")
+      : applicants.filter((a) => a.BUSINESSTAX === "Approved");
 
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
@@ -192,7 +192,7 @@ function BusinessTax() {
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.BusinessTax}</TableCell>
+                  <TableCell>{applicant.BUSINESSTAX}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

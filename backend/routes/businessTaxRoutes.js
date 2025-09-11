@@ -19,8 +19,8 @@ router.post("/businessTax/approve/:id", async (req, res) => {
     // 2. Convert to plain object
     const applicantData = applicant.toJSON();
 
-    applicantData.BusinessTax = "pending";
-    applicantData.BusinessTaxtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+    applicantData.BUSINESSTAX = "pending";
+    applicantData.BUSINESSTAXtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
     const created = await BusinessTax.create(applicantData);
 
@@ -35,6 +35,7 @@ router.post("/businessTax/approve/:id", async (req, res) => {
   }
 });
 
+//approved to business tax pass to treasurer's office
 router.post("/business/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -49,12 +50,14 @@ router.post("/business/approve/:id", async (req, res) => {
     if (!applicantStatus) {
       return res.status(404).json({ error: "Applicant not found" });
     }
+    applicant.BUSINESSTAX = "Approved";
+    applicant.BUSINESSTAXtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
     // 2. Convert to plain object
     const applicantData = applicant.toJSON();
 
-    applicantData.BusinessTax = "pending";
-    applicantData.BusinessTaxtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+    applicantData.BUSINESSTAX = "Approved";
+    applicantData.BUSINESSTAXtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
     const created = await TreasurersOffice.create(applicantData);
 

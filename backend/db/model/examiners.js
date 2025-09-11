@@ -142,6 +142,9 @@ const Examiners = sequelize.define(
     zoningCert_filename: { type: DataTypes.STRING, allowNull: true },
     zoningCert_mimetype: { type: DataTypes.STRING, allowNull: true },
     zoningCert_size: { type: DataTypes.INTEGER, allowNull: true },
+
+    BUSINESSTAX: { type: DataTypes.STRING, defaultValue: "Pending" },
+    BUSINESSTAXtimeStamp: { type: DataTypes.STRING },
   },
 
   {

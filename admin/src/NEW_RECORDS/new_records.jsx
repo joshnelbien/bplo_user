@@ -2,6 +2,10 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import Side_bar from "../SIDE_BAR/side_bar.jsx";
 import ApplicantModal from "./newApp_modal.jsx";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { IconButton, Tooltip } from "@mui/material";
 
 import {
   Box,
@@ -290,16 +294,16 @@ function New_records() {
                     </TableCell>
                   </>
                 )}
+
+                {/* ✅ New Actions column */}
+                <TableCell align="center">
+                  <strong>Actions</strong>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {currentRecords.map((applicant) => (
-                <TableRow
-                  key={applicant.id}
-                  hover
-                  sx={{ cursor: "pointer" }}
-                  onClick={() => openModal(applicant)}
-                >
+                <TableRow key={applicant.id} hover>
                   <TableCell>{applicant.BIN}</TableCell>
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
@@ -379,6 +383,33 @@ function New_records() {
                       </TableCell>
                     </>
                   )}
+
+                  {/* ✅ Actions column with icons */}
+                  <TableCell align="center">
+                    <Tooltip title="View">
+                      <IconButton
+                        color="primary"
+                        onClick={() => openModal(applicant)}
+                      >
+                        <VisibilityIcon />
+                      </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title="Update">
+                      <IconButton
+                        color="secondary"
+                        onClick={() => console.log("Update", applicant)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title="Delete">
+                      <IconButton color="error">
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
