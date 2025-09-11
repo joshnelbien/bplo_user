@@ -3,6 +3,8 @@ const multer = require("multer");
 const File = require("../db/model/files");
 const AppStatus = require("../db/model/applicantStatusDB");
 const { where } = require("sequelize");
+const { v4: uuidv4 } = require("uuid");
+const { sequelize } = require("../db/sequelize");
 
 const router = express.Router();
 
@@ -25,10 +27,13 @@ router.post(
     { name: "tIGEfiles" },
   ]),
   async (req, res) => {
+    const t = await sequelize.transaction();
     try {
       const files = req.files;
       const body = req.body;
-      const { userId } = body;
+
+      const sharedId = uuidv4();
+      const { userId } = body; // ✅ extract userId
 
       const fileData = {};
       if (files) {
@@ -41,25 +46,34 @@ router.post(
         });
       }
 
-      // Save application form with files
-      const createdFile = await File.create({
-        ...body,
-        ...fileData,
-      });
+      const createdFile = await File.create(
+        {
+          id: sharedId,
+          userId, // ✅ save userId in File
+          ...body,
+          ...fileData,
+        },
+        { transaction: t }
+      );
 
-      // Save AppStatus with userId (insert only if new)
-      const [status, created] = await AppStatus.findOrCreate({
-        where: { userId },
-        defaults: { userId }, // status fields default to "Pending"
-      });
+      const createdStatus = await AppStatus.create(
+        {
+          id: sharedId,
+          userId, // ✅ also save userId in AppStatus
+        },
+        { transaction: t }
+      );
+
+      await t.commit();
 
       res.status(201).json({
         file: createdFile,
-        appStatus: status,
-        newStatusCreated: created,
+        status: createdStatus,
+        sharedId,
       });
     } catch (err) {
-      console.error(err);
+      await t.rollback();
+      console.error("Upload failed:", err);
       res.status(500).json({ error: "Upload failed" });
     }
   }
