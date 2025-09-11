@@ -22,9 +22,11 @@ const AnnouncementsRoutes = require("./routes/announcements");
 const BusinessTax = require("./db/model/businessTax");
 const BusinessTaxRoutes = require("./routes/businessTaxRoutes");
 
+const AppStatus = require("./db/model/applicantStatusDB");
+
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: '50mb' })); // Increase JSON payload limit for large images
+app.use(express.json({ limit: "50mb" })); // Increase JSON payload limit for large images
 
 // Health check
 app.get("/api/health", (_, res) => res.json({ ok: true }));
@@ -38,6 +40,7 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
   await UserAccounts.sync();
   await Announcements.sync();
   await BusinessTax.sync();
+  await AppStatus.sync();
   console.log("Database ready");
 })();
 

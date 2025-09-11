@@ -1,6 +1,8 @@
 const express = require("express");
 const multer = require("multer");
 const File = require("../db/model/files");
+const AppStatus = require("../db/model/applicantStatusDB");
+const { where } = require("sequelize");
 
 const router = express.Router();
 
@@ -25,10 +27,10 @@ router.post(
   async (req, res) => {
     try {
       const files = req.files;
-      const body = req.body; // <- text inputs are here
-      const fileData = {};
+      const body = req.body;
+      const { userId } = body;
 
-      // Save each uploaded file’s info
+      const fileData = {};
       if (files) {
         Object.keys(files).forEach((key) => {
           const f = files[key][0];
@@ -39,14 +41,23 @@ router.post(
         });
       }
 
-      // Merge text fields + file data
-      const payload = {
+      // Save application form with files
+      const createdFile = await File.create({
         ...body,
         ...fileData,
-      };
+      });
 
-      const created = await File.create(payload);
-      res.status(201).json(created);
+      // Save AppStatus with userId (insert only if new)
+      const [status, created] = await AppStatus.findOrCreate({
+        where: { userId },
+        defaults: { userId }, // status fields default to "Pending"
+      });
+
+      res.status(201).json({
+        file: createdFile,
+        appStatus: status,
+        newStatusCreated: created,
+      });
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Upload failed" });
