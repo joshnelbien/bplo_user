@@ -86,8 +86,7 @@ function Cenro() {
             : applicant
         )
       );
-      alert("Applicant approved successfully!");
-      closeModal();
+    
     } catch (error) {
       console.error("Error approving applicant:", error);
     }
@@ -103,8 +102,6 @@ function Cenro() {
         )
       );
 
-      alert("Applicant declined");
-      closeModal();
     } catch (error) {
       console.error("Error declining applicant:", error);
     }

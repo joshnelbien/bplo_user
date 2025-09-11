@@ -72,8 +72,8 @@ function Cmswo() {
         )
       );
 
-      alert("Applicant approved");
-      closeModal();
+      // alert("Applicant approved");
+      // closeModal();
     } catch (error) {
       console.error("Error approving applicant:", error);
     }
@@ -91,8 +91,8 @@ function Cmswo() {
         )
       );
 
-      alert("Applicant declined");
-      closeModal();
+      // alert("Applicant declined");
+      // closeModal();
     } catch (error) {
       console.error("Error approving applicant:", error);
     }
