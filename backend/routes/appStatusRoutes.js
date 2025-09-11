@@ -1,73 +1,63 @@
 // routes/appStatusRoutes.js
 const express = require("express");
 const router = express.Router();
-const appStatus = require("../models/appStatus");
+const AppStatus = require("../db/model/applicantStatusDB");
 
-// ✅ Create (POST)
 router.post("/", async (req, res) => {
   try {
-    const status = await appStatus.create(req.body);
-    res.status(201).json(status);
+    const appStatus = await appStatus.create(req.body);
+    res.status(201).json(appStatus);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to create status" });
+    res.status(400).json({ error: error.message });
   }
 });
 
-// ✅ Read All (GET)
+// ✅ Get all statuses (GET)
 router.get("/", async (req, res) => {
   try {
-    const statuses = await appStatus.findAll();
+    const statuses = await AppStatus.findAll();
     res.json(statuses);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to fetch statuses" });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// ✅ Read One by userId (GET)
-router.get("/:userId", async (req, res) => {
+router.get("/status/:userId", async (req, res) => {
   try {
-    const status = await appStatus.findOne({
-      where: { userId: req.params.userId },
-    });
-    if (!status) return res.status(404).json({ error: "Status not found" });
-    res.json(status);
+    const { userId } = req.params;
+    const statuses = await AppStatus.findAll({ where: { userId } }); // <-- findAll
+    if (!statuses || statuses.length === 0) {
+      return res.status(404).json({ error: "No applications found" });
+    }
+    res.json(statuses);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to fetch status" });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// ✅ Update by userId (PUT)
+// ✅ Update status (PUT)
 router.put("/:userId", async (req, res) => {
   try {
-    const status = await appStatus.findOne({
-      where: { userId: req.params.userId },
-    });
-    if (!status) return res.status(404).json({ error: "Status not found" });
+    const { userId } = req.params;
+    const status = await AppStatus.findByPk(userId);
+    if (!status) return res.status(404).json({ error: "Not found" });
 
     await status.update(req.body);
     res.json(status);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to update status" });
+    res.status(400).json({ error: error.message });
   }
 });
 
-// ✅ Delete by userId (DELETE)
+// ✅ Delete status (DELETE)
 router.delete("/:userId", async (req, res) => {
   try {
-    const status = await appStatus.findOne({
-      where: { userId: req.params.userId },
-    });
-    if (!status) return res.status(404).json({ error: "Status not found" });
-
-    await status.destroy();
-    res.json({ message: "Status deleted" });
+    const { userId } = req.params;
+    const deleted = await AppStatus.destroy({ where: { userId } });
+    if (!deleted) return res.status(404).json({ error: "Not found" });
+    res.json({ message: "Deleted successfully" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to delete status" });
+    res.status(500).json({ error: error.message });
   }
 });
 

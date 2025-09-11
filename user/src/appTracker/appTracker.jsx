@@ -12,12 +12,40 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
+// ✅ Custom Step Icon
+function ColoredStepIcon(props) {
+  const { active, completed, className, icon, status } = props;
+
+  let color = "gray";
+  if (status === "Approved") color = "green";
+  else if (status === "Declined") color = "red";
+  else if (active) color = "blue";
+
+  return (
+    <Box
+      className={className}
+      sx={{
+        width: 30,
+        height: 30,
+        borderRadius: "50%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: color,
+        color: "white",
+        fontWeight: "bold",
+      }}
+    >
+      {icon}
+    </Box>
+  );
+}
 
 function AppTracker() {
   const userId = localStorage.getItem("userId");
   const [trackers, setTrackers] = useState([]);
-  const [fileStatuses, setFileStatuses] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_BASE;
@@ -30,35 +58,23 @@ function AppTracker() {
     "CHO",
     "CENRO",
     "ZONING",
+    "BUSINESS TAX",
   ];
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // responsive
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
-    let intervalId; // ✅ correct variable name
+    let intervalId;
 
     const fetchData = async () => {
       try {
-        const trackerRes = await axios.get(
-          `${API}/backroom/backrooms/${userId}`
-        );
-        if (trackerRes.data.length > 0) {
-          setTrackers(trackerRes.data);
-        }
-
-        const filesRes = await axios.get(
-          `${API}/newApplication/files/${userId}`
-        );
-        if (filesRes.data.length > 0) {
-          const statusList = filesRes.data.map((file) => ({
-            trackerId: file.trackerId,
-            status: file.status || "pending",
-          }));
-          setFileStatuses(statusList);
+        const trackerRes = await axios.get(`${API}/appStatus/status/${userId}`);
+        if (trackerRes.data) {
+          setTrackers(trackerRes.data); // already an array
         }
       } catch (err) {
-        console.error("Error fetching tracker/files:", err);
+        console.error("Error fetching tracker:", err);
       } finally {
         setLoading(false);
       }
@@ -82,14 +98,14 @@ function AppTracker() {
       </Box>
     );
 
-  // Reorder departments so Approved ones appear first
   const reorderDepartments = (tracker) => {
     return [...departments].sort((a, b) => {
-      const aApproved = tracker[a] === "Approved";
-      const bApproved = tracker[b] === "Approved";
-      if (aApproved && !bApproved) return -1;
-      if (!aApproved && bApproved) return 1;
-      return 0;
+      const isANotPending = tracker[a] !== "Pending";
+      const isBNotPending = tracker[b] !== "Pending";
+
+      if (isANotPending && !isBNotPending) return -1; // a first
+      if (!isANotPending && isBNotPending) return 1; // b first
+      return 0; // keep same order otherwise
     });
   };
 
@@ -104,116 +120,69 @@ function AppTracker() {
         Back to Home
       </Button>
 
-      {trackers.length === 0 && fileStatuses.length === 0 ? (
+      {trackers.length === 0 ? (
         <Typography variant="h6" align="center" color="text.secondary">
-          No tracker or file data found.
+          No tracker data found.
         </Typography>
       ) : (
-        <>
-          <Typography
-            variant="h5"
-            fontWeight="bold"
-            gutterBottom
-            color="primary"
-          >
-            Application Tracker
-          </Typography>
+        trackers.map((tracker, idx) => {
+          const orderedDepartments = reorderDepartments(tracker);
+          const activeStep = orderedDepartments.findIndex(
+            (dept) => tracker[dept] !== "Approved"
+          );
+          const currentStep =
+            activeStep === -1 ? orderedDepartments.length : activeStep;
 
-          {/* Trackers */}
-          {trackers.map((tracker, idx) => {
-            const orderedDepartments = reorderDepartments(tracker);
-            const activeStep = orderedDepartments.findIndex(
-              (dept) => tracker[dept] !== "Approved"
-            );
-            const currentStep =
-              activeStep === -1 ? orderedDepartments.length : activeStep;
+          return (
+            <Paper key={idx} elevation={3} sx={{ p: 4, mb: 3 }}>
+              <Typography
+                variant="h6"
+                fontWeight="bold"
+                mb={2}
+                color="text.secondary"
+              >
+                Application {idx + 1}
+              </Typography>
 
-            return (
-              <Paper key={idx} elevation={3} sx={{ p: 4, mb: 3 }}>
-                <Typography
-                  variant="h6"
-                  fontWeight="bold"
-                  mb={2}
-                  color="text.secondary"
-                >
-                  Application {idx + 1}
-                </Typography>
+              <Stepper
+                activeStep={currentStep}
+                orientation={isMobile ? "vertical" : "horizontal"}
+                alternativeLabel={!isMobile}
+              >
+                {orderedDepartments.map((dept, index) => {
+                  const status = tracker[dept];
+                  const textColor =
+                    status === "Approved"
+                      ? "green"
+                      : status === "Declined"
+                      ? "red"
+                      : "text.secondary";
 
-                <Stepper
-                  activeStep={currentStep}
-                  orientation={isMobile ? "vertical" : "horizontal"}
-                  alternativeLabel={!isMobile}
-                >
-                  {orderedDepartments.map((dept) => (
-                    <Step key={dept} completed={tracker[dept] === "Approved"}>
-                      <StepLabel>
+                  return (
+                    <Step key={dept} completed={status === "Approved"}>
+                      <StepLabel
+                        StepIconComponent={(props) => (
+                          <ColoredStepIcon {...props} status={status} />
+                        )}
+                      >
                         <Typography variant="body1">{dept}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {tracker[dept]}{" "}
+                        <Typography
+                          variant="caption"
+                          sx={{ color: textColor, fontWeight: "bold" }}
+                        >
+                          {status}{" "}
                           {tracker[`${dept}timeStamp`]
                             ? `(${tracker[`${dept}timeStamp`]})`
                             : ""}
                         </Typography>
                       </StepLabel>
                     </Step>
-                  ))}
-                </Stepper>
-              </Paper>
-            );
-          })}
-
-          {/* File statuses */}
-          {fileStatuses.map((file, idx) => {
-            // reorder so Approved (BPLO) first
-            const orderedDepartments = [...departments].sort((a, b) => {
-              const aApproved = a === "BPLO" && file.status === "Approved";
-              const bApproved = b === "BPLO" && file.status === "Approved";
-              if (aApproved && !bApproved) return -1;
-              if (!aApproved && bApproved) return 1;
-              return 0;
-            });
-
-            const activeStep = orderedDepartments.findIndex((dept) => {
-              if (dept === "BPLO") return file.status !== "Approved";
-              return true;
-            });
-            const currentStep =
-              activeStep === -1 ? orderedDepartments.length : activeStep;
-
-            return (
-              <Paper key={idx} elevation={3} sx={{ p: 4, mb: 3 }}>
-                <Typography
-                  variant="h6"
-                  fontWeight="bold"
-                  mb={2}
-                  color="text.secondary"
-                >
-                  Application {idx + 1}
-                </Typography>
-
-                <Stepper
-                  activeStep={currentStep}
-                  orientation={isMobile ? "vertical" : "horizontal"}
-                  alternativeLabel={!isMobile}
-                >
-                  {orderedDepartments.map((dept) => {
-                    const status = dept === "BPLO" ? file.status : "pending";
-                    return (
-                      <Step key={dept} completed={status === "Approved"}>
-                        <StepLabel>
-                          <Typography variant="body1">{dept}</Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {status}
-                          </Typography>
-                        </StepLabel>
-                      </Step>
-                    );
-                  })}
-                </Stepper>
-              </Paper>
-            );
-          })}
-        </>
+                  );
+                })}
+              </Stepper>
+            </Paper>
+          );
+        })
       )}
     </Box>
   );

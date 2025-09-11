@@ -23,6 +23,7 @@ const BusinessTax = require("./db/model/businessTax");
 const BusinessTaxRoutes = require("./routes/businessTaxRoutes");
 
 const AppStatus = require("./db/model/applicantStatusDB");
+const appStatusRoutes = require("./routes/appStatusRoutes");
 
 const app = express();
 app.use(cors());
@@ -51,6 +52,7 @@ app.use("/newApplication", fileRoutes);
 app.use("/userAccounts", UserAccountsRoutes);
 app.use("/api/announcements", AnnouncementsRoutes);
 app.use("/businessTax", BusinessTaxRoutes);
+app.use("/appStatus", appStatusRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../sequelize");
 
-const appStatus = sequelize.define(
+const AppStatus = sequelize.define(
   "appStatus",
   {
     id: {
@@ -35,4 +35,4 @@ const appStatus = sequelize.define(
   }
 );
 
-module.exports = appStatus;
+module.exports = AppStatus;
