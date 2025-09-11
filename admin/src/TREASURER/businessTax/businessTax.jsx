@@ -174,7 +174,7 @@ function BusinessTax() {
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                 <TableCell>
-                  <strong>Applicant ID</strong>
+                  <strong>BIN</strong>
                 </TableCell>
                 <TableCell>
                   <strong>Business Name</strong>
@@ -198,7 +198,7 @@ function BusinessTax() {
                   sx={{ cursor: "pointer" }}
                   onClick={() => openModal(applicant)}
                 >
-                  <TableCell>{applicant.id}</TableCell>
+                  <TableCell>{applicant.BIN}</TableCell>
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>

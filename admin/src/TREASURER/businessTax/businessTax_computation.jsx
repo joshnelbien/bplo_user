@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Grid,
@@ -17,15 +18,90 @@ import {
 } from "@mui/material";
 
 function BusinessTax_computation({ isOpen, onClose, applicant }) {
+  const [barangayBrackets, setBarangayBrackets] = useState(null);
+
+  // ✅ Load JSON from public/ once
+  useEffect(() => {
+    fetch("/barangay_brackets.json")
+      .then((res) => res.json())
+      .then((data) => setBarangayBrackets(data))
+      .catch((err) => console.error("Error loading JSON:", err));
+  }, []);
+
   // ✅ Compute Business Tax based on formula
   const capital = Number(applicant?.totalCapital) || 0;
   const businessTax = capital * 0.5 * 0.01; // (capital * 50%) * 1%
+
+  // ✅ Fee ranges per bracket
+  const feeRanges = {
+    "Bracket A": [
+      { min: 1, max: 20000, fee: 100 },
+      { min: 20000, max: 30000, fee: 150 },
+      { min: 30000, max: 40000, fee: 200 },
+      { min: 40000, max: 50000, fee: 250 },
+      { min: 50000, max: 100000, fee: 300 },
+      { min: 100000, max: 300000, fee: 350 },
+      { min: 300000, max: 500000, fee: 400 },
+      { min: 500000, max: 750000, fee: 500 },
+      { min: 750000, max: 900000, fee: 750 },
+      { min: 900000, max: 1000000, fee: 1000 },
+      { min: 1000000, max: Infinity, fee: 1500 },
+    ],
+    "Bracket B": [
+      { min: 1, max: 20000, fee: 100 },
+      { min: 20000, max: 30000, fee: 120 },
+      { min: 30000, max: 40000, fee: 160 },
+      { min: 40000, max: 50000, fee: 200 },
+      { min: 50000, max: 100000, fee: 240 },
+      { min: 100000, max: 300000, fee: 280 },
+      { min: 300000, max: 500000, fee: 320 },
+      { min: 500000, max: 750000, fee: 400 },
+      { min: 750000, max: 900000, fee: 600 },
+      { min: 900000, max: 1000000, fee: 800 },
+      { min: 1000000, max: Infinity, fee: 1200 },
+    ],
+    "Bracket C": [
+      { min: 1, max: 20000, fee: 100 },
+      { min: 20000, max: 30000, fee: 105 },
+      { min: 30000, max: 40000, fee: 140 },
+      { min: 40000, max: 50000, fee: 275 },
+      { min: 50000, max: 100000, fee: 210 },
+      { min: 100000, max: 300000, fee: 245 },
+      { min: 300000, max: 500000, fee: 280 },
+      { min: 500000, max: 750000, fee: 350 },
+      { min: 750000, max: 900000, fee: 475 },
+      { min: 900000, max: 1000000, fee: 700 },
+      { min: 1000000, max: Infinity, fee: 1050 },
+    ],
+  };
+
+  // ✅ Find bracket of applicant’s barangay
+  function getBarangayBracket(barangay) {
+    if (!barangayBrackets) return null;
+    for (const [bracket, list] of Object.entries(barangayBrackets)) {
+      if (list.includes(barangay)) return bracket;
+    }
+    return null;
+  }
+
+  // ✅ Compute Barangay Fee
+  function computeBarangayFee(barangay, capital) {
+    const bracket = getBarangayBracket(barangay);
+    if (!bracket) return 0;
+
+    const range = feeRanges[bracket].find(
+      (r) => capital >= r.min && capital <= r.max
+    );
+    return range ? range.fee : 0;
+  }
+
+  const barangayFee = computeBarangayFee(applicant?.barangay, capital);
 
   // ✅ Define the collection rows as raw numbers
   const collections = [
     { label: "BUSINESS TAX", amount: businessTax },
     { label: "MAYOR’S PERMIT", amount: 0 },
-    { label: "BARANGAY FEE", amount: 0 },
+    { label: "BARANGAY FEE", amount: barangayFee },
     { label: "OCCUPATIONAL TAX", amount: 0 },
     { label: "HEALTH, CER & SSF", amount: 0 },
     { label: "SWM GARBAGE FEE", amount: Number(applicant?.csmwoFee) || 0 },
@@ -174,7 +250,13 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
                 BUSINESS ID: {applicant?.BIN || "___________"}
               </Typography>
               <Typography>
-                CAPITAL: {applicant?.capital || "___________"}
+                CAPITAL:{" "}
+                {capital > 0
+                  ? capital.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })
+                  : "0.00"}
               </Typography>
               <Typography>
                 GROSS: {applicant?.gross || "___________"}
