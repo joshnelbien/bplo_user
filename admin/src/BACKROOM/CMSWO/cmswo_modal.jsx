@@ -136,59 +136,59 @@ function CmswoApplicantModal({
 }) {
   if (!isOpen || !applicant) return null;
 
-  const [csmwoField, setcsmwoField] = useState({ csmwoFee: "" });
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [declineConfirmOpen, setDeclineConfirmOpen] = useState(false);
+  const [csmwoFee, setCsmwoFee] = useState("");
+  const [confirmApproveOpen, setConfirmApproveOpen] = useState(false);
+  const [declineReason, setDeclineReason] = useState("");
+  const [confirmDeclineOpen, setConfirmDeclineOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false);
 
   useEffect(() => {
     if (applicant) {
-      setcsmwoField({
-        csmwoFee: applicant.csmwoFee || "",
-      });
+      setCsmwoFee(applicant.csmwoFee || "");
     }
   }, [applicant]);
 
   const handleChange = (field, value) => {
-    setcsmwoField((prev) => ({ ...prev, [field]: value }));
+    setCsmwoFee(value);
   };
 
   const handleApproveClick = () => {
-    setConfirmOpen(true);
+    setConfirmApproveOpen(true);
   };
 
   const handleDeclineClick = () => {
-    setDeclineConfirmOpen(true);
+    setConfirmDeclineOpen(true);
   };
 
   const handleConfirmApprove = () => {
-    setConfirmOpen(false);
-    onApprove(applicant.id, csmwoField.csmwoFee);
+    setConfirmApproveOpen(false);
+    onApprove(applicant.id, csmwoFee);
     setSuccessOpen(true);
   };
 
   const handleDeclineConfirm = () => {
-    setDeclineConfirmOpen(false);
-    // Add decline logic here if needed, then show success popup
+    setConfirmDeclineOpen(false);
+    onDecline(applicant.id, declineReason);
     setDeclineSuccessOpen(true);
-    onClose(); // Close the main modal after declining
   };
 
   const handleConfirmClose = () => {
-    setConfirmOpen(false);
+    setConfirmApproveOpen(false);
   };
 
   const handleDeclineConfirmClose = () => {
-    setDeclineConfirmOpen(false);
+    setConfirmDeclineOpen(false);
   };
 
   const handleSuccessClose = () => {
     setSuccessOpen(false);
+    onClose();
   };
 
   const handleDeclineSuccessClose = () => {
     setDeclineSuccessOpen(false);
+    onClose();
   };
 
   const Section = ({ title, children }) => (
@@ -395,7 +395,7 @@ function CmswoApplicantModal({
 
           <TextField
             label="Solid waste Fee"
-            value={csmwoField.csmwoFee || ""}
+            value={csmwoFee || ""}
             onChange={(e) => handleChange("csmwoFee", e.target.value)}
             fullWidth
             size="small"
@@ -428,7 +428,7 @@ function CmswoApplicantModal({
           </Button>
 
           <Button
-            onClick={() => onDecline(applicant.id)}
+            onClick={handleDeclineClick}
             variant="contained"
             color="error"
             sx={{
@@ -443,7 +443,7 @@ function CmswoApplicantModal({
 
       {/* Confirmation Dialog for Approve */}
       <Dialog
-        open={confirmOpen}
+        open={confirmApproveOpen}
         onClose={handleConfirmClose}
         aria-labelledby="confirm-dialog-title"
         sx={{ "& .MuiDialog-paper": { borderRadius: "10px", width: "400px" } }}
@@ -502,63 +502,47 @@ function CmswoApplicantModal({
         </DialogActions>
       </Dialog>
 
-      {/* Confirmation Dialog for Decline */}
+      {/* Decline Dialog with Reason TextField */}
       <Dialog
-        open={declineConfirmOpen}
+        open={confirmDeclineOpen}
         onClose={handleDeclineConfirmClose}
-        aria-labelledby="decline-confirm-dialog-title"
-        sx={{ "& .MuiDialog-paper": { borderRadius: "10px", width: "400px" } }}
+        aria-labelledby="decline-dialog-title"
       >
         <DialogTitle
-          id="decline-confirm-dialog-title"
-          align="center"
+          id="decline-dialog-title"
           sx={{
-            py: 3,
-            px: 4,
             fontWeight: "bold",
-            fontSize: "1.25rem",
-            color: "#d32f2f",
+            backgroundColor: "#d32f2f",
+            color: "white",
           }}
         >
-          Are you sure you want to decline this applicant?
+          Decline Applicant
         </DialogTitle>
-        <DialogContent sx={{ p: 0, m: 0 }}></DialogContent>
-        <DialogActions
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            gap: 2,
-            pb: 2,
-          }}
-        >
-          <Button
-            onClick={handleDeclineConfirm}
-            variant="contained"
-            color="error"
-            sx={{
-              fontWeight: "bold",
-              textTransform: "uppercase",
-              minWidth: "100px",
-              bgcolor: "#d32f2f",
-              "&:hover": { bgcolor: "#9a0007" },
-            }}
-          >
-            Yes
+        <DialogContent sx={{ pt: 2, px: 3 }}>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="decline-reason"
+            label="Reason for Decline"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={declineReason}
+            onChange={(e) => setDeclineReason(e.target.value)}
+            multiline
+            rows={4}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeclineConfirmClose} color="primary">
+            Cancel
           </Button>
           <Button
-            onClick={handleDeclineConfirmClose}
-            variant="outlined"
-            color="primary"
-            sx={{
-              fontWeight: "bold",
-              textTransform: "uppercase",
-              minWidth: "100px",
-              color: "#d32f2f",
-              borderColor: "#d32f2f",
-              "&:hover": { borderColor: "#d32f2f", bgcolor: "#ffebee" },
-            }}
+            onClick={handleDeclineConfirm}
+            color="error"
+            variant="contained"
           >
-            No
+            Decline
           </Button>
         </DialogActions>
       </Dialog>

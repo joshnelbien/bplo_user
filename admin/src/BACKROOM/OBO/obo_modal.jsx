@@ -148,6 +148,7 @@ function OboApplicantModal({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [declineConfirmOpen, setDeclineConfirmOpen] = useState(false); // New state for decline confirmation
+  const [declineReason, setDeclineReason] = useState(""); // State for the decline reason
   const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false); // New state for decline success
 
   useEffect(() => {
@@ -185,7 +186,7 @@ function OboApplicantModal({
   const handleDeclineConfirmClose = () => setDeclineConfirmOpen(false);
   const handleDeclineConfirm = () => {
     setDeclineConfirmOpen(false);
-    onDecline(applicant.id);
+    onDecline(applicant.id, declineReason); // Pass the reason to the parent handler
     setDeclineSuccessOpen(true); // Show decline success pop-up
   };
   const handleDeclineSuccessClose = () => {
@@ -510,63 +511,47 @@ function OboApplicantModal({
         </DialogActions>
       </Dialog>
 
-      {/* Confirmation Dialog for Decline - NEW */}
+      {/* Decline Dialog with Reason TextField */}
       <Dialog
         open={declineConfirmOpen}
         onClose={handleDeclineConfirmClose}
-        aria-labelledby="decline-confirm-dialog-title"
-        sx={{ "& .MuiDialog-paper": { borderRadius: "10px", width: "400px" } }}
+        aria-labelledby="decline-dialog-title"
       >
         <DialogTitle
-          id="decline-confirm-dialog-title"
-          align="center"
+          id="decline-dialog-title"
           sx={{
-            py: 3,
-            px: 4,
             fontWeight: "bold",
-            fontSize: "1.25rem",
-            color: "#d32f2f",
+            backgroundColor: "#d32f2f",
+            color: "white",
           }}
         >
-          Are you sure you want to decline this applicant?
+          Decline Applicant
         </DialogTitle>
-        <DialogContent sx={{ p: 0, m: 0 }}></DialogContent>
-        <DialogActions
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            gap: 2,
-            pb: 2,
-          }}
-        >
-          <Button
-            onClick={handleDeclineConfirm}
-            variant="contained"
-            color="error"
-            sx={{
-              fontWeight: "bold",
-              textTransform: "uppercase",
-              minWidth: "100px",
-              bgcolor: "#d32f2f",
-              "&:hover": { bgcolor: "#9a0007" },
-            }}
-          >
-            Yes
+        <DialogContent sx={{ pt: 2, px: 3 }}>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="decline-reason"
+            label="Reason for Decline"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={declineReason}
+            onChange={(e) => setDeclineReason(e.target.value)}
+            multiline
+            rows={4}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeclineConfirmClose} color="primary">
+            Cancel
           </Button>
           <Button
-            onClick={handleDeclineConfirmClose}
-            variant="outlined"
-            color="primary"
-            sx={{
-              fontWeight: "bold",
-              textTransform: "uppercase",
-              minWidth: "100px",
-              color: "#d32f2f",
-              borderColor: "#d32f2f",
-              "&:hover": { borderColor: "#d32f2f", bgcolor: "#ffebee" },
-            }}
+            onClick={handleDeclineConfirm}
+            color="error"
+            variant="contained"
           >
-            No
+            Decline
           </Button>
         </DialogActions>
       </Dialog>

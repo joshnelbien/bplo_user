@@ -1,4 +1,4 @@
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import React, { useState, useEffect } from "react";
 import {
   Accordion,
   AccordionDetails,
@@ -14,15 +14,16 @@ import {
   Typography,
   IconButton,
   Tooltip,
-  Snackbar,
-  Fade,
+  Fade
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { useState, useEffect } from "react";
+import CancelIcon from "@mui/icons-material/Cancel";
+import { styled } from "@mui/system";
 
-// Component to display a normal text field
+// A reusable component for displaying a read-only text field with custom styles.
 const Field = ({ label, value }) => (
   <Grid item xs={12} sm={6}>
     <TextField
@@ -58,14 +59,12 @@ const Field = ({ label, value }) => (
   </Grid>
 );
 
-// Component to display files as links
+// A reusable component for displaying a read-only text field for a file, with view/download links.
 const FileField = ({ label, fileKey, fileData }) => (
   <Grid item xs={12} sm={6}>
     <TextField
       label={label}
-      value={
-        fileData[fileKey] ? fileData[`${fileKey}_filename`] : "No file uploaded"
-      }
+      value={fileData[fileKey] ? fileData[`${fileKey}_filename`] : "No file uploaded"}
       fullWidth
       variant="outlined"
       size="small"
@@ -91,7 +90,6 @@ const FileField = ({ label, fileKey, fileData }) => (
         },
       }}
     />
-
     {fileData[fileKey] && (
       <Typography
         component="span"
@@ -105,11 +103,10 @@ const FileField = ({ label, fileKey, fileData }) => (
             target="_blank"
             rel="noreferrer"
           >
-            <Typography component="span"> View</Typography>
+            <Typography component="span">View</Typography>
             <VisibilityIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-
         <Tooltip title="Download File">
           <IconButton
             size="small"
@@ -118,13 +115,128 @@ const FileField = ({ label, fileKey, fileData }) => (
             target="_blank"
             rel="noreferrer"
           >
-            <Typography component="span"> Download</Typography>
+            <Typography component="span">Download</Typography>
             <DownloadIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       </Typography>
     )}
   </Grid>
+);
+
+// A reusable component for confirmation dialogs.
+const ConfirmDialog = ({ open, title, onConfirm, onCancel, confirmColor }) => (
+  <Dialog
+    open={open}
+    onClose={onCancel}
+    sx={{ "& .MuiDialog-paper": { borderRadius: "10px", width: "400px" } }}
+  >
+    <DialogTitle
+      align="center"
+      sx={{
+        py: 3,
+        px: 4,
+        fontWeight: "bold",
+        fontSize: "1.25rem",
+        color: confirmColor,
+      }}
+    >
+      {title}
+    </DialogTitle>
+    <DialogActions
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        gap: 2,
+        pb: 2,
+      }}
+    >
+      <Button
+        onClick={onConfirm}
+        variant="contained"
+        color={confirmColor}
+        sx={{
+          fontWeight: "bold",
+          textTransform: "uppercase",
+          minWidth: "100px",
+        }}
+      >
+        Yes
+      </Button>
+      <Button
+        onClick={onCancel}
+        variant="outlined"
+        sx={{
+          fontWeight: "bold",
+          textTransform: "uppercase",
+          minWidth: "100px",
+          color: confirmColor,
+          borderColor: confirmColor,
+          "&:hover": { borderColor: confirmColor },
+        }}
+      >
+        No
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
+
+// A reusable component for status dialogs (success/decline).
+const StatusDialog = ({ open, onClose, icon, title, color }) => (
+  <Dialog
+    open={open}
+    onClose={onClose}
+    TransitionComponent={Fade}
+    maxWidth="xs"
+    sx={{
+      "& .MuiDialog-paper": {
+        borderRadius: "10px",
+        backgroundColor: "white",
+      },
+    }}
+  >
+    <Paper
+      elevation={6}
+      sx={{
+        p: 4,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+        color: color,
+      }}
+    >
+      {icon}
+      <Typography variant="h5" fontWeight="bold">
+        {title}
+      </Typography>
+      <Button
+        onClick={onClose}
+        variant="contained"
+        sx={{
+          backgroundColor: color,
+          "&:hover": { backgroundColor: color },
+        }}
+      >
+        OK
+      </Button>
+    </Paper>
+  </Dialog>
+);
+
+const Section = ({ title, children }) => (
+  <Accordion>
+    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+      <Typography variant="subtitle1" fontWeight="bold">
+        {title}
+      </Typography>
+    </AccordionSummary>
+    <AccordionDetails>
+      <Grid container spacing={2}>
+        {children}
+      </Grid>
+    </AccordionDetails>
+  </Accordion>
 );
 
 function ChoApplicantModal({
@@ -137,82 +249,64 @@ function ChoApplicantModal({
 }) {
   if (!isOpen || !applicant) return null;
 
-  const [choField, setChoField] = useState({ choFee: "" });
-  const [confirmOpen, setConfirmOpen] = useState(false); // State for confirmation dialog
-  const [successOpen, setSuccessOpen] = useState(false); // State for success pop-up
+  const [choFee, setChoFee] = useState(applicant.choFee || "");
+  const [declineReason, setDeclineReason] = useState("");
   const [selectedFiles, setSelectedFiles] = useState({});
+
+  // Dialog state management
+  const [approveConfirmOpen, setApproveConfirmOpen] = useState(false);
+  const [declineConfirmOpen, setDeclineConfirmOpen] = useState(false);
+  const [successStatusOpen, setSuccessStatusOpen] = useState(false);
+  const [declineStatusOpen, setDeclineStatusOpen] = useState(false);
 
   useEffect(() => {
     if (applicant) {
-      setChoField({
-        choFee: applicant.choFee || "",
-      });
+      setChoFee(applicant.choFee || "");
     }
   }, [applicant]);
-
-  const handleChange = (field, value) => {
-    setChoField((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const files = [{ label: "CHO Certificate", name: "choCert" }];
 
   const handleFileSelect = (e) => {
     const { name, files } = e.target;
     if (files[0]) {
       setSelectedFiles((prev) => ({
         ...prev,
-        [name]: files[0], // store the actual File object
+        [name]: files[0],
       }));
-      handleFileChange(name, files[0]); // send file up to parent
+      handleFileChange(name, files[0]);
     }
   };
 
-  // Handle opening confirmation dialog
-  const handleApproveClick = () => {
-    setConfirmOpen(true);
+  const handleApproveConfirm = () => {
+    setApproveConfirmOpen(false);
+    onApprove(applicant.id, choFee, selectedFiles);
+    setSuccessStatusOpen(true);
   };
 
-  // Handle confirmation dialog close
-  const handleConfirmClose = () => {
-    setConfirmOpen(false);
-  };
-
-  // Handle approval confirmation
-  const handleConfirmApprove = () => {
-    setConfirmOpen(false);
-    onApprove(applicant.id, choField.choFee, selectedFiles); // Call the original onApprove
-    setSuccessOpen(true); // Show success pop-up
-  };
-
-  // Handle closing success pop-up
-  const handleSuccessClose = (event, reason) => {
-    if (reason === "clickaway") {
+  const handleDeclineConfirm = () => {
+    if (declineReason.trim() === "") {
+      // Reason is required, the button will be disabled
       return;
     }
-    setSuccessOpen(false);
+    setDeclineConfirmOpen(false);
+    onDecline(applicant.id, declineReason);
+    setDeclineStatusOpen(true);
   };
 
-  const Section = ({ title, children }) => (
-    <Accordion>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography variant="subtitle1" fontWeight="bold">
-          {title}
-        </Typography>
-      </AccordionSummary>
-      <AccordionDetails>
-        <Grid container spacing={2}>
-          {children}
-        </Grid>
-      </AccordionDetails>
-    </Accordion>
-  );
+  const handleApproveStatusClose = () => {
+    setSuccessStatusOpen(false);
+    onClose();
+  };
+
+  const handleDeclineStatusClose = () => {
+    setDeclineStatusOpen(false);
+    onClose();
+  };
 
   return (
     <>
       <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
         <DialogTitle>Applicant Details</DialogTitle>
         <DialogContent dividers>
-          {/* Business Info */}
           <Section title="Business Information">
             <Field label="Status" value={applicant.CHO} />
             <Field label="BIN" value={applicant.BIN} />
@@ -223,7 +317,6 @@ function ChoApplicantModal({
             <Field label="Trade Name" value={applicant.TradeName} />
           </Section>
 
-          {/* Personal Info */}
           <Section title="Personal Information">
             <Field label="First Name" value={applicant.firstName} />
             <Field label="Middle Name" value={applicant.middleName} />
@@ -232,28 +325,22 @@ function ChoApplicantModal({
             <Field label="Sex" value={applicant.sex} />
           </Section>
 
-          {/* Contact Info */}
           <Section title="Contact Information">
             <Field label="Email" value={applicant.eMailAdd} />
             <Field label="Telephone No" value={applicant.telNo} />
             <Field label="Mobile No" value={applicant.mobileNo} />
           </Section>
 
-          {/* Address */}
           <Section title="Business Address">
             <Field label="Region" value={applicant.region} />
             <Field label="Province" value={applicant.province} />
-            <Field
-              label="City/Municipality"
-              value={applicant.cityOrMunicipality}
-            />
+            <Field label="City/Municipality" value={applicant.cityOrMunicipality} />
             <Field label="Barangay" value={applicant.barangay} />
             <Field label="Address Line 1" value={applicant.addressLine1} />
             <Field label="Zip Code" value={applicant.zipCode} />
             <Field label="Pin Address" value={applicant.pinAddress} />
           </Section>
 
-          {/* Operations */}
           <Section title="Business Operation">
             <Field label="Total Floor Area" value={applicant.totalFloorArea} />
             <Field label="Employees" value={applicant.numberOfEmployee} />
@@ -266,19 +353,12 @@ function ChoApplicantModal({
             <Field label="Weigh Scale" value={applicant.weighScale} />
           </Section>
 
-          {/* Tax Address */}
           <Section title="Taxpayer Address">
             <Field label="Tax Region" value={applicant.Taxregion} />
             <Field label="Tax Province" value={applicant.Taxprovince} />
-            <Field
-              label="Tax City/Municipality"
-              value={applicant.TaxcityOrMunicipality}
-            />
+            <Field label="Tax City/Municipality" value={applicant.TaxcityOrMunicipality} />
             <Field label="Tax Barangay" value={applicant.Taxbarangay} />
-            <Field
-              label="Tax Address Line 1"
-              value={applicant.TaxaddressLine1}
-            />
+            <Field label="Tax Address Line 1" value={applicant.TaxaddressLine1} />
             <Field label="Tax Zip Code" value={applicant.TaxzipCode} />
             <Field label="Tax Pin Address" value={applicant.TaxpinAddress} />
             <Field label="Own Place" value={applicant.ownPlace} />
@@ -299,7 +379,6 @@ function ChoApplicantModal({
             )}
           </Section>
 
-          {/* Business Activity */}
           <Section title="Business Activity & Incentives">
             <Field label="Tax Incentives" value={applicant.tIGE} />
             {applicant.tIGE === "Yes" && (
@@ -309,14 +388,11 @@ function ChoApplicantModal({
                 fileData={applicant}
               />
             )}
-
             <Field label="Office Type" value={applicant.officeType} />
-
             {applicant.lineOfBusiness?.split(",").map((lob, index) => {
               const product = applicant.productService?.split(",")[index] || "";
               const unit = applicant.Units?.split(",")[index] || "";
               const capital = applicant.capital?.split(",")[index] || "";
-
               return (
                 <Paper
                   key={index}
@@ -335,7 +411,6 @@ function ChoApplicantModal({
                   >
                     Business Line {index + 1}
                   </Typography>
-
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
                       <Field label="Line of Business" value={lob.trim()} />
@@ -355,229 +430,145 @@ function ChoApplicantModal({
             })}
           </Section>
 
-          {/* Business Requirements */}
-          <Section title="Business Requirements">
-            <FileField
-              fileKey="proofOfReg"
-              label="Proof of Registration"
-              fileData={applicant}
-            />
-            <FileField
-              fileKey="proofOfRightToUseLoc"
-              label="Proof of Right to Use Location"
-              fileData={applicant}
-            />
-            <FileField
-              fileKey="locationPlan"
-              label="Location Plan"
-              fileData={applicant}
-            />
-            <FileField
-              fileKey="brgyClearance"
-              label="Barangay Clearance"
-              fileData={applicant}
-            />
-            <FileField
-              fileKey="marketClearance"
-              label="Market Clearance"
-              fileData={applicant}
-            />
-            <FileField
-              fileKey="occupancyPermit"
-              label="Occupancy Permit"
-              fileData={applicant}
-            />
-            <FileField fileKey="cedula" label="Cedula" fileData={applicant} />
-            <FileField
-              fileKey="photoOfBusinessEstInt"
-              label="Photo (Interior)"
-              fileData={applicant}
-            />
-            <FileField
-              fileKey="photoOfBusinessEstExt"
-              label="Photo (Exterior)"
-              fileData={applicant}
-            />
-          </Section>
-
-          {/* CHO Fee input */}
           <TextField
             label="Sanitary Fee"
-            value={choField.choFee || ""}
-            onChange={(e) => handleChange("choFee", e.target.value)}
+            value={choFee}
+            onChange={(e) => setChoFee(e.target.value)}
             fullWidth
             size="small"
             sx={{ mt: 2 }}
           />
-
-          {/* File Upload */}
-          {files.map((file) => (
-            <Grid container spacing={1} key={file.name} sx={{ mt: 1 }}>
-              <Grid item>
-                <Button
-                  variant="contained"
-                  component="label"
-                  size="small"
-                  color="success"
-                  sx={{ minWidth: 120 }}
-                >
-                  Choose File
-                  <input
-                    type="file"
-                    name={file.name}
-                    hidden
-                    onChange={handleFileSelect}
-                  />
-                </Button>
-              </Grid>
-              <Grid item xs>
-                <TextField
-                  value={selectedFiles[file.name]?.name || ""}
-                  placeholder="No file selected"
-                  size="small"
-                  fullWidth
-                  InputProps={{ readOnly: true }}
+          <Grid container spacing={1} sx={{ mt: 1 }}>
+            <Grid item>
+              <Button
+                variant="contained"
+                component="label"
+                size="small"
+                color="success"
+                sx={{ minWidth: 120 }}
+              >
+                Choose File
+                <input
+                  type="file"
+                  name="choCert"
+                  hidden
+                  onChange={handleFileSelect}
                 />
-              </Grid>
+              </Button>
             </Grid>
-          ))}
+            <Grid item xs>
+              <TextField
+                value={selectedFiles.choCert?.name || ""}
+                placeholder="No file selected"
+                size="small"
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+            </Grid>
+          </Grid>
         </DialogContent>
-
         <DialogActions>
           <Button
             onClick={onClose}
             variant="contained"
-            color="gray"
             sx={{
-              color: "#1c541eff",
-              borderColor: "#1c541eff",
+              backgroundColor: "#e0e0e0",
+              color: "#424242",
+              width: "100px",
               "&:hover": {
-                borderColor: "#1c541eff",
+                backgroundColor: "#bdbdbd",
               },
-              width: "100px", // Set a specific width
             }}
           >
             Close
           </Button>
-          <Button
-            onClick={handleApproveClick} // Trigger confirmation dialog
-            variant="contained"
-            color="success"
-          >
+          <Button onClick={() => setApproveConfirmOpen(true)} variant="contained" color="success">
             Approve
           </Button>
-          <Button
-            onClick={() => onDecline(applicant.id)}
-            variant="contained"
-            color="error"
-            sx={{
-              color: "white", // Changes the font color to white
-            }}
-          >
+          <Button onClick={() => setDeclineConfirmOpen(true)} variant="contained" color="error">
             Decline
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Confirmation Dialog */}
-      <Dialog
-        open={confirmOpen}
-        onClose={handleConfirmClose}
-        aria-labelledby="confirm-dialog-title"
-        sx={{ "& .MuiDialog-paper": { borderRadius: "10px", width: "400px" } }}
-      >
-        <DialogTitle
-          id="confirm-dialog-title"
-          align="center"
-          sx={{
-            py: 3,
-            px: 4,
-            fontWeight: "bold",
-            fontSize: "1.25rem",
-            color: "#333",
-          }}
-        >
-          Are you sure you want to approve this applicant?
-        </DialogTitle>
-        <DialogContent sx={{ p: 0, m: 0 }}></DialogContent>
-        <DialogActions
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            gap: 2,
-            pb: 2,
-          }}
-        >
-          <Button
-            onClick={handleConfirmApprove}
-            variant="contained"
-            color="success"
-            sx={{
-              fontWeight: "bold",
-              textTransform: "uppercase",
-              minWidth: "100px",
-              bgcolor: "#1a7322",
-              "&:hover": { bgcolor: "#155a1b" },
-            }}
-          >
-            Yes
-          </Button>
-          <Button
-            onClick={handleConfirmClose}
-            variant="outlined"
-            color="primary"
-            sx={{
-              fontWeight: "bold",
-              textTransform: "uppercase",
-              minWidth: "100px",
-              color: "#1a7322",
-              borderColor: "#1a7322",
-              "&:hover": { borderColor: "#1a7322", bgcolor: "#e8f5e9" },
-            }}
-          >
-            No
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Reusable Confirmation Dialog for Approve */}
+      <ConfirmDialog
+        open={approveConfirmOpen}
+        title="Are you sure you want to approve this applicant?"
+        onConfirm={handleApproveConfirm}
+        onCancel={() => setApproveConfirmOpen(false)}
+        confirmColor="success"
+      />
 
-      {/* Success Pop-up */}
-      <Dialog
-        open={successOpen}
-        onClose={handleSuccessClose}
-        TransitionComponent={Fade}
-        maxWidth="xs"
-      >
-        <Paper
-          elevation={6}
-          sx={{
-            p: 4,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 2,
-            backgroundColor: "white",
-            color: "#4caf50",
-            borderRadius: 2,
-          }}
-        >
-          <CheckCircleIcon
-            fontSize="large"
-            sx={{ fontSize: "5rem", color: "#4caf50" }}
-          />
-          <Typography variant="h5" fontWeight="bold">
-            Successfully Approved!
-          </Typography>
-          <Button
-            onClick={handleSuccessClose}
-            variant="contained"
-            color="success"
-          >
-            OK
-          </Button>
-        </Paper>
-      </Dialog>
+      {/* New Decline Dialog with Reason TextField */}
+      <Dialog 
+        open={declineConfirmOpen} 
+        onClose={() => setDeclineConfirmOpen(false)} 
+        aria-labelledby="decline-dialog-title" 
+      > 
+        <DialogTitle 
+          id="decline-dialog-title" 
+          sx={{ 
+            fontWeight: "bold", 
+            backgroundColor: "#d32f2f", 
+            color: "white", 
+          }} 
+        > 
+          Decline Applicant 
+        </DialogTitle> 
+        <DialogContent sx={{ pt: 2, px: 3 }}> 
+          <TextField 
+            autoFocus 
+            margin="dense" 
+            id="decline-reason" 
+            label="Reason for Decline" 
+            type="text" 
+            fullWidth 
+            variant="outlined" 
+            value={declineReason} 
+            onChange={(e) => setDeclineReason(e.target.value)} 
+            multiline 
+            rows={4} 
+            required
+            error={declineReason.trim() === ""}
+            helperText={declineReason.trim() === "" ? "Reason is required" : ""}
+          /> 
+        </DialogContent> 
+        <DialogActions> 
+          <Button onClick={() => setDeclineConfirmOpen(false)} color="primary"> 
+            Cancel 
+          </Button> 
+          <Button 
+            onClick={handleDeclineConfirm} 
+            color="error" 
+            variant="contained" 
+            disabled={declineReason.trim() === ""}
+          > 
+            Decline 
+          </Button> 
+        </DialogActions> 
+      </Dialog> 
+
+      {/* Reusable Status Dialog for Success */}
+      <StatusDialog
+        open={successStatusOpen}
+        onClose={handleApproveStatusClose}
+        icon={<CheckCircleIcon fontSize="large" sx={{ fontSize: "5rem" }} />}
+        title="Successfully Approved!"
+        color="#4caf50"
+      />
+
+      {/* Reusable Status Dialog for Decline */}
+      <StatusDialog
+        open={declineStatusOpen}
+        onClose={handleDeclineStatusClose}
+        icon={<CancelIcon fontSize="large" sx={{ fontSize: "5rem" }} />}
+        title="Successfully Declined!"
+        color="#d32f2f"
+      />
     </>
   );
 }
 
 export default ChoApplicantModal;
+  
