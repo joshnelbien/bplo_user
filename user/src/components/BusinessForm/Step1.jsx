@@ -3,15 +3,22 @@ import { MenuItem, Stack, TextField, Typography } from "@mui/material";
 export default function Step1BusinessInfo({ formData, handleChange }) {
   const regLabelMap = {
     "Sole Proprietorship": "DTI Registration No.",
-    "Corporation": "SEC Registration No.",
+    Corporation: "SEC Registration No.",
     "One Person Corporation": "SEC Registration No.",
-    "Partnership": "SEC Registration No.",
-    "Cooperative": "CDA Registration No.",
+    Partnership: "SEC Registration No.",
+    Cooperative: "CDA Registration No.",
   };
 
   const regLabel = regLabelMap[formData.BusinessType] || "Registration No.";
 
-    const handleNumberInput = (e) => {
+  // ✅ Convert text to uppercase before saving
+  const handleUppercaseChange = (e) => {
+    const value = (e.target.value || "").toUpperCase();
+    handleChange({ target: { name: e.target.name, value } });
+  };
+
+  // ✅ Numbers only, no letters, still uppercase-safe
+  const handleNumberInput = (e) => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 15);
     handleChange({ target: { name: e.target.name, value } });
   };
@@ -29,17 +36,19 @@ export default function Step1BusinessInfo({ formData, handleChange }) {
           label="Business Type"
           name="BusinessType"
           value={formData.BusinessType || ""}
-          onChange={handleChange}
+          onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
         >
           <MenuItem value="">Select Business Type</MenuItem>
-          <MenuItem value="Sole Proprietorship">Sole Proprietorship</MenuItem>
-          <MenuItem value="Corporation">Corporation</MenuItem>
-          <MenuItem value="One Person Corporation">One Person Corporation</MenuItem>
-          <MenuItem value="Partnership">Partnership</MenuItem>
-          <MenuItem value="Cooperative">Cooperative</MenuItem>
+          <MenuItem value="SOLE PROPRIETORSHIP">Sole Proprietorship</MenuItem>
+          <MenuItem value="CORPORATION">Corporation</MenuItem>
+          <MenuItem value="ONE PERSON CORPORATION">
+            One Person Corporation
+          </MenuItem>
+          <MenuItem value="PARTNERSHIP">Partnership</MenuItem>
+          <MenuItem value="COOPERATIVE">Cooperative</MenuItem>
         </TextField>
 
         {/* Dynamic Registration No. */}
@@ -47,7 +56,7 @@ export default function Step1BusinessInfo({ formData, handleChange }) {
           label={regLabel}
           name="dscRegNo"
           value={formData.dscRegNo || ""}
-          onChange={handleChange}
+          onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
@@ -58,13 +67,13 @@ export default function Step1BusinessInfo({ formData, handleChange }) {
           label="Business Name"
           name="businessName"
           value={formData.businessName || ""}
-          onChange={handleChange}
+          onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
         />
 
-        {/* TIN No. without mask */}
+        {/* TIN No. (numbers only, no uppercase conversion needed) */}
         <TextField
           label="TIN No."
           name="tinNo"
@@ -80,7 +89,7 @@ export default function Step1BusinessInfo({ formData, handleChange }) {
           label="Trade Name"
           name="TradeName"
           value={formData.TradeName || ""}
-          onChange={handleChange}
+          onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}

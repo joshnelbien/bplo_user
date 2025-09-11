@@ -1,5 +1,13 @@
 // src/components/BusinessForm/Step3AddressInfo.jsx
-import { FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useEffect } from "react";
 
 export default function Step3AddressInfo({ formData, handleChange }) {
@@ -83,18 +91,37 @@ export default function Step3AddressInfo({ formData, handleChange }) {
     "SANTO ANGEL",
     "SANTO CRISTO",
     "SANTO NIÑO",
-    "SOLEDAD"
+    "SOLEDAD",
   ];
+
+  // ✅ Uppercase handler
+  const handleUppercaseChange = (e) => {
+    const value = (e.target.value || "").toUpperCase();
+    handleChange({ target: { name: e.target.name, value } });
+  };
 
   // Auto-set fixed values if not set
   useEffect(() => {
-    if (!formData.region || !formData.province || !formData.cityOrMunicipality || !formData.zipCode) {
+    if (
+      !formData.region ||
+      !formData.province ||
+      !formData.cityOrMunicipality ||
+      !formData.zipCode
+    ) {
       handleChange({ target: { name: "region", value: "REGION IV-A" } });
       handleChange({ target: { name: "province", value: "LAGUNA" } });
-      handleChange({ target: { name: "cityOrMunicipality", value: "SAN PABLO CITY" } });
+      handleChange({
+        target: { name: "cityOrMunicipality", value: "SAN PABLO CITY" },
+      });
       handleChange({ target: { name: "zipCode", value: "4000" } });
     }
-  }, [formData.region, formData.province, formData.cityOrMunicipality, formData.zipCode,handleChange]);
+  }, [
+    formData.region,
+    formData.province,
+    formData.cityOrMunicipality,
+    formData.zipCode,
+    handleChange,
+  ]);
 
   return (
     <div style={{ marginBottom: 20 }}>
@@ -140,7 +167,7 @@ export default function Step3AddressInfo({ formData, handleChange }) {
             labelId="barangay-label"
             name="barangay"
             value={formData.barangay || ""}
-            onChange={handleChange}
+            onChange={handleUppercaseChange}
             label="Barangay"
           >
             <MenuItem value="">Select Barangay</MenuItem>
@@ -157,7 +184,7 @@ export default function Step3AddressInfo({ formData, handleChange }) {
           label="Address Line 1"
           name="addressLine1"
           value={formData.addressLine1 || ""}
-          onChange={handleChange}
+          onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
@@ -166,8 +193,7 @@ export default function Step3AddressInfo({ formData, handleChange }) {
         {/* Zip Code */}
         <TextField
           label="Zip Code"
-          name="zipCode"
-          value={"4000"}
+          value="4000"
           disabled
           fullWidth
           variant="outlined"
@@ -179,7 +205,7 @@ export default function Step3AddressInfo({ formData, handleChange }) {
           label="Pin Address"
           name="pinAddress"
           value={formData.pinAddress || ""}
-          onChange={handleChange}
+          onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}

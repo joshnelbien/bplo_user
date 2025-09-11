@@ -80,7 +80,7 @@ export default function Step6BusinessActivity({
     console.log("Step6 selected:", name, files[0]);
     setSelectedFiles((prev) => ({
       ...prev,
-      [name]: files[0] ? files[0].name : "",
+      [name]: files[0] ? files[0].name.toUpperCase() : "",
     }));
     handleFileChange(e); // pass file to parent
   };
@@ -89,7 +89,7 @@ export default function Step6BusinessActivity({
     const { name, value } = e.target;
     setNewBusiness((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: typeof value === "string" ? value.toUpperCase() : value,
     }));
   };
 
@@ -153,16 +153,23 @@ export default function Step6BusinessActivity({
             labelId="tIGE-label"
             name="tIGE"
             value={formData.tIGE || ""}
-            onChange={handleChange}
+            onChange={(e) =>
+              handleChange({
+                target: {
+                  name: e.target.name,
+                  value: e.target.value.toUpperCase(),
+                },
+              })
+            }
           >
             <MenuItem value="">Select</MenuItem>
-            <MenuItem value="No">No</MenuItem>
-            <MenuItem value="Yes">Yes</MenuItem>
+            <MenuItem value="NO">No</MenuItem>
+            <MenuItem value="YES">Yes</MenuItem>
           </Select>
         </FormControl>
 
         {/* File Upload for TIGE */}
-        {formData.tIGE === "Yes" && (
+        {formData.tIGE === "YES" && (
           <Stack spacing={3}>
             {files.map((file) => (
               <Stack key={file.name} direction="column" spacing={1}>
@@ -185,7 +192,7 @@ export default function Step6BusinessActivity({
                   </Button>
                   <TextField
                     value={selectedFiles[file.name] || ""}
-                    placeholder="No file selected"
+                    placeholder="NO FILE SELECTED"
                     size="small"
                     fullWidth
                     InputProps={{
@@ -205,23 +212,37 @@ export default function Step6BusinessActivity({
             labelId="officeType-label"
             name="officeType"
             value={formData.officeType || ""}
-            onChange={handleChange}
+            onChange={(e) =>
+              handleChange({
+                target: {
+                  name: e.target.name,
+                  value: e.target.value.toUpperCase(),
+                },
+              })
+            }
           >
-            <MenuItem value="">-- Select Office Type --</MenuItem>
-            <MenuItem value="Main">Main</MenuItem>
-            <MenuItem value="Branch Office">Branch Office</MenuItem>
-            <MenuItem value="Admin Office Only">Admin Office Only</MenuItem>
-            <MenuItem value="Warehouse">Warehouse</MenuItem>
-            <MenuItem value="Others">Others (Specify)</MenuItem>
+            <MenuItem value="">-- SELECT OFFICE TYPE --</MenuItem>
+            <MenuItem value="MAIN">Main</MenuItem>
+            <MenuItem value="BRANCH OFFICE">Branch Office</MenuItem>
+            <MenuItem value="ADMIN OFFICE ONLY">Admin Office Only</MenuItem>
+            <MenuItem value="WAREHOUSE">Warehouse</MenuItem>
+            <MenuItem value="OTHERS">Others (Specify)</MenuItem>
           </Select>
         </FormControl>
 
-        {formData.officeType === "Others" && (
+        {formData.officeType === "OTHERS" && (
           <TextField
             label="Specify Business Activity"
             name="officeTypeOther"
             value={formData.officeTypeOther || ""}
-            onChange={handleChange}
+            onChange={(e) =>
+              handleChange({
+                target: {
+                  name: e.target.name,
+                  value: e.target.value.toUpperCase(),
+                },
+              })
+            }
             fullWidth
             variant="outlined"
             sx={{ minWidth: 300 }}
@@ -233,16 +254,25 @@ export default function Step6BusinessActivity({
 
         {/* Autocomplete for Line of Business */}
         <Autocomplete
-          options={lobOptions}
+          options={lobOptions.map((opt) => opt.toUpperCase())}
           value={newBusiness.lineOfBusiness}
           onChange={(event, newValue) => {
             setNewBusiness((prev) => ({
               ...prev,
-              lineOfBusiness: newValue,
+              lineOfBusiness: (newValue || "").toUpperCase(),
             }));
           }}
           renderInput={(params) => (
-            <TextField {...params} label="Line of Business" />
+            <TextField
+              {...params}
+              label="Line of Business"
+              onChange={(e) =>
+                setNewBusiness((prev) => ({
+                  ...prev,
+                  lineOfBusiness: e.target.value.toUpperCase(),
+                }))
+              }
+            />
           )}
           fullWidth
         />
@@ -282,9 +312,9 @@ export default function Step6BusinessActivity({
         <Button
           variant="contained"
           onClick={addBusinessLine}
-          style={{ backgroundColor: '#4caf50', color: '#fff' }}
+          style={{ backgroundColor: "#4caf50", color: "#fff" }}
         >
-          {editingIndex !== null ? "Save Changes" : "Add Line of Business"}
+          {editingIndex !== null ? "SAVE CHANGES" : "ADD LINE OF BUSINESS"}
         </Button>
 
         {/* Business List */}
@@ -293,14 +323,14 @@ export default function Step6BusinessActivity({
             <Card key={index} variant="outlined">
               <CardContent>
                 <Typography variant="subtitle2">
-                  Line Of Business : {biz.lineOfBusiness}
+                  LINE OF BUSINESS : {biz.lineOfBusiness}
                 </Typography>
                 <Typography variant="subtitle2">
-                  Product and Services : {biz.productService}
+                  PRODUCT AND SERVICES : {biz.productService}
                 </Typography>
-                <Typography variant="body2">Units: {biz.Units}</Typography>
+                <Typography variant="body2">UNITS: {biz.Units}</Typography>
                 <Typography variant="body2">
-                  Capital:{" "}
+                  CAPITAL:{" "}
                   <NumericFormat
                     value={biz.capital}
                     displayType="text"
@@ -315,14 +345,14 @@ export default function Step6BusinessActivity({
                     onClick={() => editBusinessLine(index)}
                     color="success"
                   >
-                    <Typography>Edit</Typography>
+                    <Typography>EDIT</Typography>
                     <EditIcon />
                   </IconButton>
                   <IconButton
                     onClick={() => handleOpenConfirm(index)}
                     color="error"
                   >
-                    <Typography>Delete</Typography>
+                    <Typography>DELETE</Typography>
                     <DeleteIcon />
                   </IconButton>
                 </Stack>
@@ -334,7 +364,7 @@ export default function Step6BusinessActivity({
         {/* ✅ Total Capital */}
         {businessLines.length > 0 && (
           <Typography variant="h6" sx={{ mt: 2 }}>
-            Total Capital: {totalCapital.toLocaleString()}
+            TOTAL CAPITAL: {totalCapital.toLocaleString()}
           </Typography>
         )}
       </Stack>
@@ -345,20 +375,20 @@ export default function Step6BusinessActivity({
         onClose={handleCloseConfirm}
         aria-labelledby="confirm-delete-title"
       >
-        <DialogTitle id="confirm-delete-title">Confirm Delete</DialogTitle>
+        <DialogTitle id="confirm-delete-title">CONFIRM DELETE</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete this line of business?
+            ARE YOU SURE YOU WANT TO DELETE THIS LINE OF BUSINESS?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseConfirm}>Cancel</Button>
+          <Button onClick={handleCloseConfirm}>CANCEL</Button>
           <Button
             onClick={handleConfirmDelete}
             color="error"
             variant="contained"
           >
-            Delete
+            DELETE
           </Button>
         </DialogActions>
       </Dialog>

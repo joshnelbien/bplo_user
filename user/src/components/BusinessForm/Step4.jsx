@@ -20,6 +20,11 @@ export default function Step4TaxInfo({ formData, handleChange }) {
       .catch((err) => console.error("Error loading PSGC:", err));
   }, []);
 
+  const handleUppercaseChange = (e) => {
+    const { name, value } = e.target;
+    handleChange({ target: { name, value: value.toUpperCase() } });
+  };
+
   const provinceOptions =
     formData.Taxregion && psgc
       ? Object.keys(psgc[formData.Taxregion]?.province_list || {})
@@ -34,9 +39,13 @@ export default function Step4TaxInfo({ formData, handleChange }) {
       : [];
 
   const barangayOptions =
-    formData.Taxregion && formData.Taxprovince && formData.TaxcityOrMunicipality && psgc
+    formData.Taxregion &&
+    formData.Taxprovince &&
+    formData.TaxcityOrMunicipality &&
+    psgc
       ? psgc[formData.Taxregion]?.province_list[formData.Taxprovince]
-          ?.municipality_list[formData.TaxcityOrMunicipality]?.barangay_list || []
+          ?.municipality_list[formData.TaxcityOrMunicipality]?.barangay_list ||
+        []
       : [];
 
   return (
@@ -53,13 +62,13 @@ export default function Step4TaxInfo({ formData, handleChange }) {
             labelId="tax-region-label"
             name="Taxregion"
             value={formData.Taxregion || ""}
-            onChange={handleChange}
+            onChange={handleUppercaseChange}
           >
             <MenuItem value="">Select Region</MenuItem>
             {psgc &&
               Object.entries(psgc).map(([code, data]) => (
                 <MenuItem key={code} value={code}>
-                  {data.region_name}
+                  {data.region_name.toUpperCase()}
                 </MenuItem>
               ))}
           </Select>
@@ -72,13 +81,13 @@ export default function Step4TaxInfo({ formData, handleChange }) {
             labelId="tax-province-label"
             name="Taxprovince"
             value={formData.Taxprovince || ""}
-            onChange={handleChange}
+            onChange={handleUppercaseChange}
             disabled={!formData.Taxregion}
           >
             <MenuItem value="">Select Province</MenuItem>
             {provinceOptions.map((prov) => (
               <MenuItem key={prov} value={prov}>
-                {prov}
+                {prov.toUpperCase()}
               </MenuItem>
             ))}
           </Select>
@@ -91,13 +100,13 @@ export default function Step4TaxInfo({ formData, handleChange }) {
             labelId="tax-city-label"
             name="TaxcityOrMunicipality"
             value={formData.TaxcityOrMunicipality || ""}
-            onChange={handleChange}
+            onChange={handleUppercaseChange}
             disabled={!formData.Taxprovince}
           >
             <MenuItem value="">Select City / Municipality</MenuItem>
             {cityOptions.map((city) => (
               <MenuItem key={city} value={city}>
-                {city}
+                {city.toUpperCase()}
               </MenuItem>
             ))}
           </Select>
@@ -110,13 +119,13 @@ export default function Step4TaxInfo({ formData, handleChange }) {
             labelId="tax-barangay-label"
             name="Taxbarangay"
             value={formData.Taxbarangay || ""}
-            onChange={handleChange}
+            onChange={handleUppercaseChange}
             disabled={!formData.TaxcityOrMunicipality}
           >
             <MenuItem value="">Select Barangay</MenuItem>
             {barangayOptions.map((brgy) => (
               <MenuItem key={brgy} value={brgy}>
-                {brgy}
+                {brgy.toUpperCase()}
               </MenuItem>
             ))}
           </Select>
@@ -127,7 +136,7 @@ export default function Step4TaxInfo({ formData, handleChange }) {
           label="Address Line 1"
           name="TaxaddressLine1"
           value={formData.TaxaddressLine1 || ""}
-          onChange={handleChange}
+          onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
@@ -138,7 +147,7 @@ export default function Step4TaxInfo({ formData, handleChange }) {
           label="Zip Code"
           name="TaxzipCode"
           value={formData.TaxzipCode || ""}
-          onChange={handleChange}
+          onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
@@ -149,7 +158,7 @@ export default function Step4TaxInfo({ formData, handleChange }) {
           label="Pin Address"
           name="TaxpinAddress"
           value={formData.TaxpinAddress || ""}
-          onChange={handleChange}
+          onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
@@ -162,36 +171,36 @@ export default function Step4TaxInfo({ formData, handleChange }) {
             labelId="own-place-label"
             name="ownPlace"
             value={formData.ownPlace || ""}
-            onChange={handleChange}
+            onChange={handleUppercaseChange}
           >
             <MenuItem value="">Select</MenuItem>
-            <MenuItem value="Yes">Yes</MenuItem>
-            <MenuItem value="No">No</MenuItem>
+            <MenuItem value="YES">YES</MenuItem>
+            <MenuItem value="NO">NO</MenuItem>
           </Select>
         </FormControl>
 
-        {/* Conditional: Own Place = Yes */}
-        {formData.ownPlace === "Yes" && (
+        {/* Conditional: Own Place = YES */}
+        {formData.ownPlace === "YES" && (
           <TextField
             label="Tax Declaration No."
             name="taxdec"
             value={formData.taxdec || ""}
-            onChange={handleChange}
+            onChange={handleUppercaseChange}
             fullWidth
             variant="outlined"
             sx={{ minWidth: 300 }}
           />
         )}
 
-        {/* Conditional: Own Place = No */}
-        {formData.ownPlace === "No" && (
+        {/* Conditional: Own Place = NO */}
+        {formData.ownPlace === "NO" && (
           <Stack spacing={3}>
             <Typography variant="subtitle1">Owner’s Address</Typography>
             <TextField
               label="Lessor's Name"
               name="lessorName"
               value={formData.lessorName || ""}
-              onChange={handleChange}
+              onChange={handleUppercaseChange}
               fullWidth
               variant="outlined"
               sx={{ minWidth: 300 }}
@@ -200,7 +209,7 @@ export default function Step4TaxInfo({ formData, handleChange }) {
               label="Monthly Rental"
               name="monthlyRent"
               value={formData.monthlyRent || ""}
-              onChange={handleChange}
+              onChange={handleUppercaseChange}
               fullWidth
               variant="outlined"
               sx={{ minWidth: 300 }}
@@ -209,7 +218,7 @@ export default function Step4TaxInfo({ formData, handleChange }) {
               label="Tax Declaration No."
               name="taxdec"
               value={formData.taxdec || ""}
-              onChange={handleChange}
+              onChange={handleUppercaseChange}
               fullWidth
               variant="outlined"
               sx={{ minWidth: 300 }}

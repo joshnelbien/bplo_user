@@ -1,13 +1,28 @@
-import { FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 
 export default function Step2PersonalInfo({ formData, handleChange }) {
+  // ✅ Uppercase handler for text fields
+  const handleUppercaseChange = (e) => {
+    const value = (e.target.value || "").toUpperCase();
+    handleChange({ target: { name: e.target.name, value } });
+  };
 
-      const handleTelNumberInput = (e) => {
+  // ✅ Telephone number: digits only, max 9
+  const handleTelNumberInput = (e) => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 9);
     handleChange({ target: { name: e.target.name, value } });
   };
 
-       const handlePhoneNumberInput = (e) => {
+  // ✅ Mobile number: digits only, max 11
+  const handlePhoneNumberInput = (e) => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 11);
     handleChange({ target: { name: e.target.name, value } });
   };
@@ -24,7 +39,7 @@ export default function Step2PersonalInfo({ formData, handleChange }) {
           label="First Name"
           name="firstName"
           value={formData.firstName || ""}
-          onChange={handleChange}
+          onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
@@ -35,7 +50,7 @@ export default function Step2PersonalInfo({ formData, handleChange }) {
           label="Middle Name"
           name="middleName"
           value={formData.middleName || ""}
-          onChange={handleChange}
+          onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
@@ -46,7 +61,7 @@ export default function Step2PersonalInfo({ formData, handleChange }) {
           label="Last Name"
           name="lastName"
           value={formData.lastName || ""}
-          onChange={handleChange}
+          onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
@@ -57,7 +72,7 @@ export default function Step2PersonalInfo({ formData, handleChange }) {
           label="Ext. Name"
           name="extName"
           value={formData.extName || ""}
-          onChange={handleChange}
+          onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
@@ -70,22 +85,22 @@ export default function Step2PersonalInfo({ formData, handleChange }) {
             labelId="sex-label"
             name="sex"
             value={formData.sex || ""}
-            onChange={handleChange}
+            onChange={handleUppercaseChange} // ✅ forces "MALE"/"FEMALE"
             label="Gender"
           >
             <MenuItem value="">Select</MenuItem>
-            <MenuItem value="Male">Male</MenuItem>
-            <MenuItem value="Female">Female</MenuItem>
+            <MenuItem value="MALE">Male</MenuItem>
+            <MenuItem value="FEMALE">Female</MenuItem>
           </Select>
         </FormControl>
 
-        {/* Email */}
+        {/* Email (kept normal, not forced uppercase unless you want it) */}
         <TextField
           label="Email"
           type="email"
           name="eMailAdd"
           value={formData.eMailAdd || ""}
-          onChange={handleChange}
+          onChange={handleChange} // lowercase usually better for email
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
