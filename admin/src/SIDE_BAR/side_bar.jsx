@@ -32,10 +32,10 @@ import NatureIcon from "@mui/icons-material/Nature";
 import LogoutIcon from "@mui/icons-material/Logout";
 import CloseIcon from "@mui/icons-material/Close";
 import BusinessIcon from "@mui/icons-material/Business";
-import CampaignIcon from '@mui/icons-material/Campaign';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import CalculateIcon from '@mui/icons-material/Calculate';
+import CampaignIcon from "@mui/icons-material/Campaign";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import CalculateIcon from "@mui/icons-material/Calculate";
 
 // Common style
 const listItemStyle = {
@@ -87,7 +87,11 @@ const departmentItems = [
 
 // Treasurers dropdown items
 const treasurers = [
-  { text: "Treasurer's Office", path: "/treasurer", icon: <AccountBalanceIcon /> },
+  {
+    text: "Treasurer's Office",
+    path: "/treasurers",
+    icon: <AccountBalanceIcon />,
+  },
   { text: "Examiner's Office", path: "/examiners", icon: <ReceiptLongIcon /> },
   { text: "Business Tax", path: "/businessTax", icon: <CalculateIcon /> },
 ];

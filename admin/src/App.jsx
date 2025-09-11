@@ -12,6 +12,7 @@ import Profile from "./PROFILE/profile";
 import Renew_records from "./RENEW_RECORDS/renew_records";
 import Examiners from "./TREASURER/examiners/examiners";
 import BusinessTax from "./TREASURER/businessTax/businessTax";
+import Treasurers from "./TREASURER/treasurers/treasurers";
 
 function App() {
   return (
@@ -29,7 +30,8 @@ function App() {
         <Route path="/obo" element={<Obo />}></Route>
         <Route path="/examiners" element={<Examiners />}></Route>
         <Route path="/businessTax" element={<BusinessTax />}></Route>
-        <Route path ="/announcement" element={<Announce />}></Route>
+        <Route path="/announcement" element={<Announce />}></Route>
+        <Route path="/treasurers" element={<Treasurers />}></Route>
       </Routes>
     </BrowserRouter>
   );

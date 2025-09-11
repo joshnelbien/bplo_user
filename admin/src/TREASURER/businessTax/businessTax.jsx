@@ -63,26 +63,16 @@ function BusinessTax() {
     indexOfLastRecord
   );
 
-  const handleApprove = async (id, choFee, selectedFiles) => {
+  const handleApprove = async (id) => {
     try {
-      const formData = new FormData();
-      formData.append("choFee", choFee);
-
-      if (selectedFiles.choCert) {
-        formData.append("choCert", selectedFiles.choCert); // actual File, not just string
-      }
-
       await axios.post(
-        `http://localhost:5000/backroom/cho/approve/${id}`,
-        formData,
+        `http://localhost:5000/businessTax/business/approve/${id}`,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
       setApplicants((prev) =>
         prev.map((applicant) =>
-          applicant.id === id
-            ? { ...applicant, CHO: "Approved", choFee }
-            : applicant
+          applicant.id === id ? { ...applicant } : applicant
         )
       );
 

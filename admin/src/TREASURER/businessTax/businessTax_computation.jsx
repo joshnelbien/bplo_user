@@ -16,6 +16,7 @@ import {
   DialogActions,
   Button,
 } from "@mui/material";
+import BusinessTaxDocxExport from "./BusinessTaxDocxExport";
 
 function BusinessTax_computation({ isOpen, onClose, applicant }) {
   const [barangayBrackets, setBarangayBrackets] = useState(null);
@@ -28,11 +29,11 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
       .catch((err) => console.error("Error loading JSON:", err));
   }, []);
 
-  // ✅ Compute Business Tax based on formula
+  // ✅ Compute Business Tax
   const capital = Number(applicant?.totalCapital) || 0;
-  const businessTax = capital * 0.5 * 0.01; // (capital * 50%) * 1%
+  const businessTax = capital * 0.5 * 0.01;
 
-  // ✅ Fee ranges per bracket
+  // ✅ Fee ranges
   const feeRanges = {
     "Bracket A": [
       { min: 1, max: 20000, fee: 100 },
@@ -75,7 +76,6 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
     ],
   };
 
-  // ✅ Find bracket of applicant’s barangay
   function getBarangayBracket(barangay) {
     if (!barangayBrackets) return null;
     for (const [bracket, list] of Object.entries(barangayBrackets)) {
@@ -84,11 +84,9 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
     return null;
   }
 
-  // ✅ Compute Barangay Fee
   function computeBarangayFee(barangay, capital) {
     const bracket = getBarangayBracket(barangay);
     if (!bracket) return 0;
-
     const range = feeRanges[bracket].find(
       (r) => capital >= r.min && capital <= r.max
     );
@@ -97,7 +95,7 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
 
   const barangayFee = computeBarangayFee(applicant?.barangay, capital);
 
-  // ✅ Define the collection rows as raw numbers
+  // ✅ Collections
   const collections = [
     { label: "BUSINESS TAX", amount: businessTax },
     { label: "MAYOR’S PERMIT", amount: 0 },
@@ -139,94 +137,15 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
     { label: "FSIC FEE", amount: 0 },
   ];
 
-  // ✅ Compute totals
   const total = collections.reduce((sum, item) => sum + item.amount, 0);
   const otherChargesTotal = collections
     .filter((item) => item.label !== "BUSINESS TAX")
     .reduce((sum, item) => sum + item.amount, 0);
 
-  // ✅ Peso formatter
   const formatPeso = (value) =>
     value > 0
       ? `₱ ${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
       : "₱ ______";
-
-  // ✅ Convert number to words
-  function numberToWords(num) {
-    if (num === 0) return "zero";
-
-    const belowTwenty = [
-      "",
-      "one",
-      "two",
-      "three",
-      "four",
-      "five",
-      "six",
-      "seven",
-      "eight",
-      "nine",
-      "ten",
-      "eleven",
-      "twelve",
-      "thirteen",
-      "fourteen",
-      "fifteen",
-      "sixteen",
-      "seventeen",
-      "eighteen",
-      "nineteen",
-    ];
-    const tens = [
-      "",
-      "",
-      "twenty",
-      "thirty",
-      "forty",
-      "fifty",
-      "sixty",
-      "seventy",
-      "eighty",
-      "ninety",
-    ];
-    const thousands = ["", "thousand", "million", "billion"];
-
-    function helper(n) {
-      if (n === 0) return "";
-      else if (n < 20) return belowTwenty[n] + " ";
-      else if (n < 100) return tens[Math.floor(n / 10)] + " " + helper(n % 10);
-      else
-        return belowTwenty[Math.floor(n / 100)] + " hundred " + helper(n % 100);
-    }
-
-    let word = "";
-    let i = 0;
-
-    while (num > 0) {
-      if (num % 1000 !== 0) {
-        word = helper(num % 1000) + thousands[i] + " " + word;
-      }
-      num = Math.floor(num / 1000);
-      i++;
-    }
-
-    return word.trim();
-  }
-
-  // ✅ Convert total with pesos & centavos
-  function amountInWords(amount) {
-    const pesos = Math.floor(amount);
-    const centavos = Math.round((amount - pesos) * 100);
-
-    let words = "";
-    if (pesos > 0) {
-      words += numberToWords(pesos) + " pesos";
-    }
-    if (centavos > 0) {
-      words += " and " + numberToWords(centavos) + " centavos";
-    }
-    return words || "zero";
-  }
 
   return (
     <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
@@ -242,7 +161,7 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
             </Typography>
           </Box>
 
-          {/* Reference + Capital + Gross */}
+          {/* Reference */}
           <Grid container spacing={2} mb={2}>
             <Grid item xs={12}>
               <Typography>REFERENCE NO: ___________</Typography>
@@ -283,7 +202,7 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
             </Typography>
           </Box>
 
-          {/* Nature of Collection Table */}
+          {/* Collection Table */}
           <TableContainer component={Paper} sx={{ mb: 2 }}>
             <Table size="small">
               <TableHead>
@@ -317,15 +236,6 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
             <Typography>Total: {formatPeso(total)}</Typography>
           </Box>
 
-          {/* Amount in Words + Service Vehicle + Mode of Payment */}
-          <Box mb={2} border={1} borderColor="grey.400" p={2}>
-            <Typography>
-              AMOUNT IN WORDS: {total > 0 ? amountInWords(total) : "__________"}
-            </Typography>
-            <Typography>No. Of Service Vehicle: ___________</Typography>
-            <Typography>Mode of Payment: ___________</Typography>
-          </Box>
-
           {/* Footer */}
           <Box mt={4}>
             <Typography>Computed By: ___________</Typography>
@@ -340,9 +250,12 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
         <Button onClick={onClose} color="secondary" variant="outlined">
           Close
         </Button>
-        <Button color="primary" variant="contained">
-          Print
-        </Button>
+        <BusinessTaxDocxExport
+          applicant={applicant}
+          collections={collections}
+          total={total}
+          otherChargesTotal={otherChargesTotal}
+        />
       </DialogActions>
     </Dialog>
   );

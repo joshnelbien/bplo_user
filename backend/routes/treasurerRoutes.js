@@ -74,9 +74,9 @@ router.post("/business/approve/:id", async (req, res) => {
   }
 });
 
-router.get("/businessTax", async (req, res) => {
+router.get("/treasurer", async (req, res) => {
   try {
-    const files = await BusinessTax.findAll();
+    const files = await TreasurersOffice.findAll();
     res.json(files);
   } catch (err) {
     console.error(err);

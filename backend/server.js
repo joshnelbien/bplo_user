@@ -25,6 +25,9 @@ const BusinessTaxRoutes = require("./routes/businessTaxRoutes");
 const AppStatus = require("./db/model/applicantStatusDB");
 const appStatusRoutes = require("./routes/appStatusRoutes");
 
+const TreasurersOffifce = require("./db/model/treasurersOfficeDB");
+const TreasurersOfficeRoutes = require("./routes/treasurerRoutes");
+
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "50mb" })); // Increase JSON payload limit for large images
@@ -42,6 +45,7 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
   await Announcements.sync();
   await BusinessTax.sync();
   await AppStatus.sync();
+  await TreasurersOffifce.sync();
   console.log("Database ready");
 })();
 
@@ -53,6 +57,7 @@ app.use("/userAccounts", UserAccountsRoutes);
 app.use("/api/announcements", AnnouncementsRoutes);
 app.use("/businessTax", BusinessTaxRoutes);
 app.use("/appStatus", appStatusRoutes);
+app.use("/treasurer", TreasurersOfficeRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
