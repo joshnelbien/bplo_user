@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const Backroom = require("../db/model/backroomLocal");
 const File = require("../db/model/files");
+const AppStatus = require("../db/model/applicantStatusDB");
 const router = express.Router();
 const moment = require("moment");
 
@@ -44,6 +45,11 @@ router.post("/obo/approve/:id", async (req, res) => {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
+    const applicantStatus = await AppStatus.findByPk(id);
+    if (!applicantStatus) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
     const { BSAP, SR, Mechanical, Electrical, Signage, Electronics } = req.body;
 
     // ✅ Update fields
@@ -58,6 +64,11 @@ router.post("/obo/approve/:id", async (req, res) => {
     if (Electronics) applicant.Electronics = Electronics;
 
     await applicant.save();
+
+    await applicantStatus.update({
+      OBO: "Approved",
+      OBOtimeStamp: applicant.OBOtimeStamp,
+    });
 
     res.json({ message: "Applicant approved", applicant });
   } catch (err) {
@@ -75,11 +86,21 @@ router.post("/obo/decline/:id", async (req, res) => {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
+    const applicantStatus = await AppStatus.findByPk(id);
+    if (!applicantStatus) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
     // ✅ Update fields
     applicant.OBO = "Declined";
     applicant.OBOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
     await applicant.save();
+
+    await applicantStatus.update({
+      OBO: "Declined",
+      OBOtimeStamp: applicant.OBOtimeStamp,
+    });
 
     res.json({ message: "Applicant declined", applicant });
   } catch (err) {
@@ -101,6 +122,11 @@ router.post(
         return res.status(404).json({ error: "Applicant not found" });
       }
 
+      const applicantStatus = await AppStatus.findByPk(id);
+      if (!applicantStatus) {
+        return res.status(404).json({ error: "Applicant not found" });
+      }
+
       applicant.ZONING = "Approved";
       applicant.ZONINGtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
@@ -114,6 +140,11 @@ router.post(
       }
 
       await applicant.save();
+
+      await applicantStatus.update({
+        ZONING: "Approved",
+        ZONINGtimeStamp: applicant.ZONINGtimeStamp,
+      });
 
       res.json({ message: "Applicant approved", applicant });
     } catch (err) {
@@ -132,12 +163,22 @@ router.post("/zoning/decline/:id", async (req, res) => {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
+    const applicantStatus = await AppStatus.findByPk(id);
+    if (!applicantStatus) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
     // 2. Update status & timestamp
     applicant.ZONING = "Declined";
     applicant.ZONINGtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
     // 3. Save changes
     await applicant.save();
+
+    await applicantStatus.update({
+      ZONING: "Declined",
+      ZONINGtimeStamp: applicant.ZONINGtimeStamp,
+    });
 
     // 4. Respond
     res.json({
@@ -160,6 +201,11 @@ router.post("/cho/approve/:id", upload.single("choCert"), async (req, res) => {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
+    const applicantStatus = await AppStatus.findByPk(id);
+    if (!applicantStatus) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
     applicant.CHO = "Approved";
     applicant.CHOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
@@ -173,6 +219,11 @@ router.post("/cho/approve/:id", upload.single("choCert"), async (req, res) => {
     }
 
     await applicant.save();
+
+    await applicantStatus.update({
+      CHO: "Approved",
+      CHOtimeStamp: applicant.CHOtimeStamp,
+    });
 
     res.json({ message: "Applicant approved", applicant });
   } catch (err) {
@@ -190,10 +241,20 @@ router.post("/cho/decline/:id", async (req, res) => {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
+    const applicantStatus = await AppStatus.findByPk(id);
+    if (!applicantStatus) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
     applicant.CHO = "Declined";
     applicant.CHOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
     await applicant.save();
+
+    await applicantStatus.update({
+      CHO: "Declined",
+      CHOtimeStamp: applicant.CHOtimeStamp,
+    });
 
     res.json({ message: "Applicant declined", applicant });
   } catch (err) {
@@ -214,6 +275,12 @@ router.post(
       if (!applicant) {
         return res.status(404).json({ error: "Applicant not found" });
       }
+
+      const applicantStatus = await AppStatus.findByPk(id);
+      if (!applicantStatus) {
+        return res.status(404).json({ error: "Applicant not found" });
+      }
+
       applicant.CENRO = "Approved";
       applicant.CENROtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
@@ -226,6 +293,11 @@ router.post(
         applicant.cenroCert_size = req.file.size;
       }
       await applicant.save();
+
+      await applicantStatus.update({
+        CENRO: "Approved",
+        CENROtimeStamp: applicant.CENROtimeStamp,
+      });
 
       // ✅ (Optional) If you really want to destroy it after approval
       // await applicant.destroy();
@@ -247,10 +319,19 @@ router.post("/cenro/decline/:id", async (req, res) => {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
+    const applicantStatus = await AppStatus.findByPk(id);
+    if (!applicantStatus) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
     applicant.CENRO = "Declined";
     applicant.CENROtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
     await applicant.save();
+    await applicantStatus.update({
+      CENRO: "Declined",
+      CENROtimeStamp: applicant.CENROtimeStamp,
+    });
 
     res.json({ message: "Applicant declined", applicant });
   } catch (err) {
@@ -268,12 +349,20 @@ router.post("/csmwo/approve/:id", async (req, res) => {
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
+    const applicantStatus = await AppStatus.findByPk(id);
+    if (!applicantStatus) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
 
     applicant.CSMWO = "Approved";
     applicant.CSMWOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
     applicant.csmwoFee = csmwoFee;
 
     await applicant.save();
+    await applicantStatus.update({
+      CSMWO: "Approved",
+      CSMWOtimeStamp: applicant.CSMWOtimeStamp,
+    });
 
     res.json({ message: "Applicant approved", applicant });
   } catch (err) {
@@ -291,12 +380,21 @@ router.post("/csmwo/decline/:id", async (req, res) => {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
+    const applicantStatus = await AppStatus.findByPk(id);
+    if (!applicantStatus) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
     // 2. Update status & timestamp
     applicant.CSMWO = "Declined";
     applicant.CSMWOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
     // 3. Save changes
     await applicant.save();
+    await applicantStatus.update({
+      CSMWO: "Declined",
+      CSMWOtimeStamp: applicant.CSMWOtimeStamp,
+    });
 
     // 4. Respond
     res.json({
