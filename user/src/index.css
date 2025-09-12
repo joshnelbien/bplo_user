@@ -1,0 +1,9 @@
+/* Leaflet default styles */
+@import "leaflet/dist/leaflet.css";
+
+/* Optional custom map container size */
+.leaflet-container {
+  width: 100%;
+  height: 400px; /* adjust the height */
+  border-radius: 10px;
+}

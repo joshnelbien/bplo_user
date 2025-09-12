@@ -9,6 +9,8 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import L from "leaflet";
 
 export default function Step4TaxInfo({ formData, handleChange }) {
   const [psgc, setPsgc] = useState(null);
@@ -47,6 +49,34 @@ export default function Step4TaxInfo({ formData, handleChange }) {
           ?.municipality_list[formData.TaxcityOrMunicipality]?.barangay_list ||
         []
       : [];
+
+  // Default coordinates (San Pablo City center)
+  const defaultPosition = [14.0697, 121.3259];
+
+  // Leaflet marker icon fix
+  const defaultIcon = new L.Icon({
+    iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+  });
+
+  // Click handler for map
+  function LocationMarker() {
+    useMapEvents({
+      click(e) {
+        const { lat, lng } = e.latlng;
+        handleChange({
+          target: { name: "TaxpinAddress", value: `${lat},${lng}` },
+        });
+      },
+    });
+
+    if (formData.TaxpinAddress) {
+      const [lat, lng] = formData.TaxpinAddress.split(",").map(Number);
+      return <Marker position={[lat, lng]} icon={defaultIcon} />;
+    }
+    return null;
+  }
 
   return (
     <div style={{ marginBottom: 20 }}>
@@ -139,7 +169,6 @@ export default function Step4TaxInfo({ formData, handleChange }) {
           onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
-          sx={{ minWidth: 300 }}
         />
 
         {/* Zip Code */}
@@ -150,19 +179,33 @@ export default function Step4TaxInfo({ formData, handleChange }) {
           onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
-          sx={{ minWidth: 300 }}
         />
 
-        {/* Pin Address */}
-        <TextField
-          label="Pin Address"
-          name="TaxpinAddress"
-          value={formData.TaxpinAddress || ""}
-          onChange={handleUppercaseChange}
-          fullWidth
-          variant="outlined"
-          sx={{ minWidth: 300 }}
-        />
+        {/* Pin Address with Map */}
+        <div>
+          <Typography variant="subtitle1" gutterBottom>
+            Pin Address (Click on the map)
+          </Typography>
+          <MapContainer
+            center={defaultPosition}
+            zoom={13}
+            style={{ height: "400px", width: "100%", borderRadius: "10px" }}
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+            />
+            <LocationMarker />
+          </MapContainer>
+          <TextField
+            label="Coordinates"
+            name="TaxpinAddress"
+            value={formData.TaxpinAddress || ""}
+            fullWidth
+            disabled
+            sx={{ marginTop: 2 }}
+          />
+        </div>
 
         {/* Own Place */}
         <FormControl fullWidth sx={{ minWidth: 300 }}>
@@ -188,7 +231,6 @@ export default function Step4TaxInfo({ formData, handleChange }) {
             onChange={handleUppercaseChange}
             fullWidth
             variant="outlined"
-            sx={{ minWidth: 300 }}
           />
         )}
 
@@ -203,7 +245,6 @@ export default function Step4TaxInfo({ formData, handleChange }) {
               onChange={handleUppercaseChange}
               fullWidth
               variant="outlined"
-              sx={{ minWidth: 300 }}
             />
             <TextField
               label="Monthly Rental"
@@ -212,7 +253,6 @@ export default function Step4TaxInfo({ formData, handleChange }) {
               onChange={handleUppercaseChange}
               fullWidth
               variant="outlined"
-              sx={{ minWidth: 300 }}
             />
             <TextField
               label="Tax Declaration No."
@@ -221,7 +261,6 @@ export default function Step4TaxInfo({ formData, handleChange }) {
               onChange={handleUppercaseChange}
               fullWidth
               variant="outlined"
-              sx={{ minWidth: 300 }}
             />
           </Stack>
         )}
