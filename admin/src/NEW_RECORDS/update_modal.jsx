@@ -46,7 +46,7 @@ const Section = ({ title, children }) => (
   </Paper>
 );
 
-function UpdateModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
+function UpdateModal({ applicant, isOpen, onClose, baseUrl }) {
   if (!isOpen || !applicant) return null;
 
   // ✅ Local editable state
@@ -62,25 +62,10 @@ function UpdateModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
   // ✅ Update handler
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handlePassToBusinessTax = async () => {
-    try {
-      const res = await axios.post(
-        `http://localhost:5000/businessTax/businessTax/approve/${formData.id}`
-      );
-
-      if (res.status === 201) {
-        alert("✅ Applicant successfully passed to Business Tax!");
-        onClose();
-      } else {
-        alert("⚠️ Unexpected response from server.");
-      }
-    } catch (error) {
-      console.error("❌ Error passing to Business Tax:", error);
-      alert("Failed to pass applicant to Business Tax");
-    }
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value.toUpperCase(), // Convert input to uppercase
+    }));
   };
 
   const FileField = ({ label, fileKey, fileData, baseUrl }) => (
@@ -588,23 +573,31 @@ function UpdateModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
           Close
         </Button>
 
-        {formData.BPLO?.toLowerCase() !== "approved" ? (
-          <Button
-            onClick={() => onApprove(formData)} // ✅ Send updated data
-            variant="contained"
-            color="success"
-          >
-            Update
-          </Button>
-        ) : (
-          <Button
-            onClick={handlePassToBusinessTax}
-            variant="contained"
-            color="success"
-          >
-            Pass to Business Tax
-          </Button>
-        )}
+        <Button
+          variant="contained"
+          color="success"
+          onClick={async () => {
+            try {
+              // Send PUT request to update applicant
+              const res = await axios.put(
+                `http://localhost:5000/newApplication/files/${formData.id}`,
+                formData
+              );
+
+              if (res.status === 200) {
+                alert("✅ Applicant updated successfully!");
+                onClose(); // Close modal
+              } else {
+                alert("⚠️ Unexpected response from server.");
+              }
+            } catch (err) {
+              console.error("❌ Update failed:", err);
+              alert("Failed to update applicant.");
+            }
+          }}
+        >
+          Update
+        </Button>
       </DialogActions>
     </Dialog>
   );
