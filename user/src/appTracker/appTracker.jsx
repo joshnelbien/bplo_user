@@ -97,18 +97,26 @@ function AppTracker() {
         <CircularProgress />
       </Box>
     );
-
   const reorderDepartments = (tracker) => {
     return [...departments].sort((a, b) => {
+      // ✅ Force BPLO always first
+      if (a === "BPLO") return -1;
+      if (b === "BPLO") return 1;
+
+      // ✅ Force BUSINESS TAX always last
+      if (a === "BUSINESS TAX") return 1;
+      if (b === "BUSINESS TAX") return -1;
+
+      // ✅ Keep your Pending vs Not Pending logic for the middle ones
       const isANotPending = tracker[a] !== "Pending";
       const isBNotPending = tracker[b] !== "Pending";
 
       if (isANotPending && !isBNotPending) return -1; // a first
       if (!isANotPending && isBNotPending) return 1; // b first
+
       return 0; // keep same order otherwise
     });
   };
-
   return (
     <Box sx={{ p: 4, maxWidth: 900, mx: "auto" }}>
       <Button

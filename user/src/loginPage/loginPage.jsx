@@ -20,7 +20,7 @@ import {
 import MuiAlert from "@mui/material/Alert";
 import { styled } from "@mui/system";
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const logo = "spclogo.png";
@@ -59,13 +59,24 @@ const LoginPage = () => {
   const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
   const [openErrorDialog, setOpenErrorDialog] = useState(false);
   const [snackbarState, setSnackbarState] = useState({
-    open: false,  
+    open: false,
     message: "",
     severity: "error",
   });
   const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const handleUnload = () => {
+      localStorage.removeItem("userId");
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleUnload);
+    };
+  }, []);
 
   const validateForm = () => {
     const newErrors = { email: "", password: "" };
@@ -129,7 +140,7 @@ const LoginPage = () => {
       localStorage.setItem("userId", user.id);
 
       setOpenSuccessDialog(true);
-     
+
       setTimeout(() => {
         setOpenSuccessDialog(false);
         navigate(`/homePage/me`);
@@ -164,7 +175,7 @@ const LoginPage = () => {
   return (
     <>
       <Box
-        sx={{ 
+        sx={{
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -239,19 +250,19 @@ const LoginPage = () => {
               error={!!errors.email}
               helperText={errors.email}
               sx={{
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: '#1c5111ff', // Green border when not focused
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "#1c5111ff",
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1c5111ff', // Green outline on focus
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#1c5111ff",
                   },
                 },
-                '& .MuiInputLabel-root': {
-                  color: '#1c5111ff', // Green label color
+                "& .MuiInputLabel-root": {
+                  color: "#1c5111ff",
                 },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1c5111ff', // Green label color when focused
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: "#1c5111ff",
                 },
               }}
             />
@@ -278,20 +289,20 @@ const LoginPage = () => {
                   </InputAdornment>
                 ),
               }}
-               sx={{
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: '#1c5111ff', // Green border when not focused
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "#1c5111ff", // Green border when not focused
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1c5111ff', // Green outline on focus
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#1c5111ff", // Green outline on focus
                   },
                 },
-                '& .MuiInputLabel-root': {
-                  color: '#1c5111ff', // Green label color
+                "& .MuiInputLabel-root": {
+                  color: "#1c5111ff", // Green label color
                 },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#1c5111ff', // Green label color when focused
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: "#1c5111ff", // Green label color when focused
                 },
               }}
             />
@@ -413,4 +424,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage; 
+export default LoginPage;

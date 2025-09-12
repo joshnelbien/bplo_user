@@ -52,72 +52,32 @@ function ColorStepIcon(props) {
 }
 
 // ✅ Component to display a normal text field
-const Field = ({ label, value }) => (
+const Field = ({ label, value, onChange, name }) => (
   <Grid item xs={15} sm={8}>
     <TextField
       label={label}
-      value={value || "—"}
+      name={name}
+      value={value || ""}
+      onChange={onChange}
       fullWidth
       variant="outlined"
       size="small"
-      InputProps={{
-        sx: {
-          color: "black",
-          "& .MuiInputBase-input.Mui-disabled": {
-            WebkitTextFillColor: "black",
-          },
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "black",
-          },
-          "&.Mui-disabled .MuiOutlinedInput-notchedOutline": {
-            borderColor: "black",
-          },
-        },
-      }}
-      InputLabelProps={{
-        sx: {
-          color: "black",
-          "&.Mui-disabled": {
-            color: "black",
-          },
-        },
-      }}
     />
   </Grid>
 );
 
-// ✅ Component to display files as links
-const FileField = ({ label, fileKey, fileData, baseUrl }) => (
+// ✅ File Upload Field (editable)
+const FileField = ({ label, fileKey, fileData, baseUrl, onFileChange }) => (
   <Grid item xs={12} sm={6}>
-    <TextField
-      label={label}
-      value={
-        fileData[fileKey] ? fileData[`${fileKey}_filename`] : "No file uploaded"
-      }
-      fullWidth
-      variant="outlined"
-      size="small"
-      InputProps={{
-        sx: {
-          color: "black",
-          "& .MuiInputBase-input.Mui-disabled": {
-            WebkitTextFillColor: "black",
-          },
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "black",
-          },
-          "&.Mui-disabled .MuiOutlinedInput-notchedOutline": {
-            borderColor: "black",
-          },
-        },
-      }}
-      InputLabelProps={{
-        sx: {
-          color: "black",
-          "&.Mui-disabled": { color: "black" },
-        },
-      }}
-    />
+    <Button variant="outlined" component="label" fullWidth>
+      {label}
+      <input
+        type="file"
+        hidden
+        onChange={(e) => onFileChange(fileKey, e.target.files[0])}
+      />
+    </Button>
+
     {fileData[fileKey] && (
       <Typography
         variant="body2"
@@ -152,7 +112,6 @@ const FileField = ({ label, fileKey, fileData, baseUrl }) => (
     )}
   </Grid>
 );
-
 function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
   if (!isOpen || !applicant) return null;
 
