@@ -1,3 +1,4 @@
+// src/pages/homePage/homePage.jsx
 import CloseIcon from "@mui/icons-material/Close";
 import Backdrop from "@mui/material/Backdrop";
 import Box from "@mui/material/Box";
@@ -9,10 +10,8 @@ import Modal from "@mui/material/Modal";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // Add useNavigate here
-
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../sideBar/sideBar";
-
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
@@ -20,6 +19,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import DescriptionIcon from '@mui/icons-material/Description';
 import EditIcon from '@mui/icons-material/Edit';
+import AnnouncementModal from "../homePage/announcement";
 
 const modalStyle = {
   position: "absolute",
@@ -43,8 +43,6 @@ const modalContents = {
       {
         text: "- 1 photocopy of DTI/SEC/CDA Registration and Articles of Incorporation",
       },
-      { text: "- Barangay Business Clearance (Window 1-BPLD)" },
-      { text: "- Barangay Capitalization" },
       { text: "- Contract of Lease and Lessor Mayor's Permit (if rented)" },
       {
         text: "- Photocopy of Occupancy Permit (if newly constructed building)",
@@ -63,7 +61,6 @@ const modalContents = {
       { text: "- Barangay Business Clearance (Window 1-BPLD)" },
       { text: "- Land Tax Clearance/ Certificate of Payment" },
       { text: "- Market Clearance (if market stall holder)" },
-      { text: "- Public Liability Insurance (for certain businesses)" },
     ],
   },
   Holidays: {
@@ -87,11 +84,13 @@ const modalContents = {
 
 const HomePage = () => {
   const userId = localStorage.getItem("userId");
-  const navigate = useNavigate(); // Initialize useNavigate here
+  const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalItems, setModalItems] = useState([]);
+  const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(false);
+  const [announcements, setAnnouncements] = useState([]);
 
   const handleOpen = (type) => {
     const content = modalContents[type];
@@ -104,9 +103,42 @@ const HomePage = () => {
 
   const handleClose = () => setOpen(false);
 
-  // New function to handle navigation
-  const handleAnnouncementClick = () => {
-    navigate(".homePage/announcement");
+  const handleAnnouncementClick = async () => {
+    try {
+      // Replace with your actual API URL
+      const response = await fetch("http://localhost:5000/api/announcements", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          // Uncomment and add authentication token if required
+          // "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.error(`Failed to fetch announcements: ${response.status} ${response.statusText}`);
+        setAnnouncements([]);
+        return;
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error("Response is not JSON:", await response.text());
+        setAnnouncements([]);
+        return;
+      }
+
+      const data = await response.json();
+      setAnnouncements(data);
+    } catch (e) {
+      console.error("Error fetching announcements:", e);
+      setAnnouncements([]);
+    }
+    setIsAnnouncementModalOpen(true);
+  };
+
+  const handleCloseAnnouncementModal = () => {
+    setIsAnnouncementModalOpen(false);
   };
 
   const buttonStyle = {
@@ -136,7 +168,6 @@ const HomePage = () => {
     >
       <Sidebar id={userId} />
 
-      {/* Main content container */}
       <Box
         component="main"
         sx={{
@@ -160,8 +191,7 @@ const HomePage = () => {
             flexWrap: "wrap",
           }}
         >
-          {/* Update the onClick handler for the SPECIAL ANNOUNCEMENT button */}
-          <Button sx={buttonStyle} onClick={handleAnnouncementClick}> 
+          <Button sx={buttonStyle} onClick={handleAnnouncementClick}>
             <CampaignIcon sx={{ mr: 1 }} />
             SPECIAL ANNOUNCEMENT
           </Button>
@@ -311,7 +341,6 @@ const HomePage = () => {
         </Box>
       </Box>
 
-      {/* Requirement Modal */}
       <Modal
         open={open}
         onClose={handleClose}
@@ -353,6 +382,12 @@ const HomePage = () => {
           </Box>
         </Fade>
       </Modal>
+
+      <AnnouncementModal
+        open={isAnnouncementModalOpen}
+        onClose={handleCloseAnnouncementModal}
+        announcements={announcements}
+      />
     </Box>
   );
 };
