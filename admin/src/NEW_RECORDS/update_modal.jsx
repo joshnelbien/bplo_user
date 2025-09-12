@@ -1,4 +1,4 @@
-// NEW_RECORDS/ApplicantModal.jsx
+// NEW_RECORDS/UpdateModal.jsx
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Accordion,
@@ -112,7 +112,7 @@ const FileField = ({ label, fileKey, fileData, baseUrl, onFileChange }) => (
     )}
   </Grid>
 );
-function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
+function UpdateModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
   if (!isOpen || !applicant) return null;
 
   // ✅ Stepper definitions
@@ -597,4 +597,4 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
   );
 }
 
-export default ApplicantModal;
+export default UpdateModal;
