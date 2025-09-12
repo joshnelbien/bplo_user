@@ -20,7 +20,9 @@ import BusinessTaxDocxExport from "./BusinessTaxDocxExport";
 
 function BusinessTax_computation({ isOpen, onClose, applicant }) {
   const [barangayBrackets, setBarangayBrackets] = useState(null);
-
+  // ✅ Debug: log numberOfEmployees
+  const numberOfEmployee = Number(applicant?.numberOfEmployee) || 0;
+  const occupationalTax = numberOfEmployee * 50;
   // ✅ Load JSON from public/ once
   useEffect(() => {
     fetch("/barangay_brackets.json")
@@ -100,7 +102,10 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
     { label: "BUSINESS TAX", amount: businessTax },
     { label: "MAYOR’S PERMIT", amount: 0 },
     { label: "BARANGAY FEE", amount: barangayFee },
-    { label: "OCCUPATIONAL TAX", amount: 0 },
+    {
+      label: "OCCUPATIONAL TAX",
+      amount: occupationalTax,
+    },
     { label: "HEALTH, CER & SSF", amount: 0 },
     { label: "SWM GARBAGE FEE", amount: Number(applicant?.csmwoFee) || 0 },
     { label: "OBO", amount: 0 },
