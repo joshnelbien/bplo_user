@@ -6,6 +6,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { IconButton, Tooltip } from "@mui/material";
+import UpdateModal from "./update_modal.jsx";
 
 import {
   Box,
@@ -102,7 +103,8 @@ function New_records() {
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filter, setFilter] = useState("pending");
-
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [updateApplicant, setUpdateApplicant] = useState(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [confirmationData, setConfirmationData] = useState({
     action: "",
@@ -112,6 +114,16 @@ function New_records() {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   const recordsPerPage = 20;
+
+  const openUpdateModal = (applicant) => {
+    setUpdateApplicant(applicant);
+    setIsUpdateModalOpen(true);
+  };
+
+  const closeUpdateModal = () => {
+    setUpdateApplicant(null);
+    setIsUpdateModalOpen(false);
+  };
 
   useEffect(() => {
     const fetchApplicants = async () => {
@@ -398,7 +410,7 @@ function New_records() {
                     <Tooltip title="Update">
                       <IconButton
                         color="secondary"
-                        onClick={() => console.log("Update", applicant)}
+                        onClick={() => openUpdateModal(applicant)}
                       >
                         <EditIcon />
                       </IconButton>
@@ -463,6 +475,17 @@ function New_records() {
         isOpen={isSuccessModalOpen}
         onClose={() => setIsSuccessModalOpen(false)}
         message="Approved Successfully!"
+      />
+
+      <UpdateModal
+        applicant={updateApplicant}
+        isOpen={isUpdateModalOpen}
+        onClose={closeUpdateModal}
+        baseUrl={
+          filter === "pending"
+            ? "http://localhost:5000/newApplication/files"
+            : "http://localhost:5000/backroom/backroom"
+        }
       />
     </>
   );
