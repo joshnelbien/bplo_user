@@ -136,4 +136,20 @@ router.get("/files/:id/:key/download", async (req, res) => {
   res.send(file[key]);
 });
 
+router.put("/files/:id", async (req, res) => {
+  const { id } = req.params;
+  const updates = req.body;
+
+  try {
+    const file = await File.findByPk(id);
+    if (!file) return res.status(404).json({ error: "Applicant not found" });
+
+    await file.update(updates); // update only provided fields
+    res.status(200).json(file);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Update failed" });
+  }
+});
+
 module.exports = router;
