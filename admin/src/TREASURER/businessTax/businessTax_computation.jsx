@@ -15,15 +15,19 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  TextField,
 } from "@mui/material";
 import BusinessTaxDocxExport from "./BusinessTaxDocxExport";
 
 function BusinessTax_computation({ isOpen, onClose, applicant }) {
   const [barangayBrackets, setBarangayBrackets] = useState(null);
-  // ✅ Debug: log numberOfEmployees
+  const [collections, setCollections] = useState([]);
+
+  // Employee-based fee
   const numberOfEmployee = Number(applicant?.numberOfEmployee) || 0;
   const occupationalTax = numberOfEmployee * 50;
-  // ✅ Load JSON from public/ once
+
+  // Load JSON (brackets) once
   useEffect(() => {
     fetch("/barangay_brackets.json")
       .then((res) => res.json())
@@ -31,50 +35,66 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
       .catch((err) => console.error("Error loading JSON:", err));
   }, []);
 
-  // ✅ Compute Business Tax
+  // Compute Business Tax
   const capital = Number(applicant?.totalCapital) || 0;
   const businessTax = capital * 0.5 * 0.01;
 
-  // ✅ Fee ranges
+  const nonEditableFields = new Set([
+    "BUSINESS TAX",
+    "BARANGAY FEE",
+    "OCCUPATIONAL TAX",
+    "HEALTH, CER & SSF",
+    "SWM GARBAGE FEE",
+    "SANITARY INSPECTION",
+    "BUILDING INSPECTION",
+    "MECHANICAL INSPECTION",
+    "ELECTRICAL INSPECTION",
+    "SIGNBOARD/BILLBOARD",
+    "ELECTRONIC INSPECTION",
+    "ZONING FEE",
+    "CENRO",
+    "SWMO CERT",
+  ]);
+
   const feeRanges = {
     "Bracket A": [
       { min: 1, max: 20000, fee: 100 },
-      { min: 20000, max: 30000, fee: 150 },
-      { min: 30000, max: 40000, fee: 200 },
-      { min: 40000, max: 50000, fee: 250 },
-      { min: 50000, max: 100000, fee: 300 },
-      { min: 100000, max: 300000, fee: 350 },
-      { min: 300000, max: 500000, fee: 400 },
-      { min: 500000, max: 750000, fee: 500 },
-      { min: 750000, max: 900000, fee: 750 },
-      { min: 900000, max: 1000000, fee: 1000 },
-      { min: 1000000, max: Infinity, fee: 1500 },
+      { min: 20001, max: 30000, fee: 150 },
+      { min: 30001, max: 40000, fee: 200 },
+      { min: 40001, max: 50000, fee: 250 },
+      { min: 50001, max: 100000, fee: 300 },
+      { min: 100001, max: 300000, fee: 350 },
+      { min: 300001, max: 500000, fee: 400 },
+      { min: 500001, max: 750000, fee: 500 },
+      { min: 750001, max: 900000, fee: 750 },
+      { min: 900001, max: 1000000, fee: 1000 },
+      { min: 1000001, max: Infinity, fee: 1500 },
     ],
     "Bracket B": [
       { min: 1, max: 20000, fee: 100 },
-      { min: 20000, max: 30000, fee: 120 },
-      { min: 30000, max: 40000, fee: 160 },
-      { min: 40000, max: 50000, fee: 200 },
-      { min: 50000, max: 100000, fee: 240 },
-      { min: 100000, max: 300000, fee: 280 },
-      { min: 300000, max: 500000, fee: 320 },
-      { min: 500000, max: 750000, fee: 400 },
-      { min: 750000, max: 900000, fee: 600 },
-      { min: 900000, max: 1000000, fee: 800 },
-      { min: 1000000, max: Infinity, fee: 1200 },
+      { min: 20001, max: 30000, fee: 120 },
+      { min: 30001, max: 40000, fee: 160 },
+      { min: 40001, max: 50000, fee: 200 },
+      { min: 50001, max: 100000, fee: 240 },
+      { min: 100001, max: 300000, fee: 280 },
+      { min: 300001, max: 500000, fee: 320 },
+      { min: 500001, max: 750000, fee: 400 },
+      { min: 750001, max: 900000, fee: 600 },
+      { min: 900001, max: 1000000, fee: 800 },
+      { min: 1000001, max: Infinity, fee: 1200 },
     ],
     "Bracket C": [
       { min: 1, max: 20000, fee: 100 },
-      { min: 20000, max: 30000, fee: 105 },
-      { min: 30000, max: 40000, fee: 140 },
-      { min: 40000, max: 50000, fee: 275 },
-      { min: 50000, max: 100000, fee: 210 },
-      { min: 100000, max: 300000, fee: 245 },
-      { min: 300000, max: 500000, fee: 280 },
-      { min: 500000, max: 750000, fee: 350 },
-      { min: 750000, max: 900000, fee: 475 },
-      { min: 900000, max: 1000000, fee: 700 },
-      { min: 1000000, max: Infinity, fee: 1050 },
+      { min: 20001, max: 30000, fee: 105 },
+      { min: 30001, max: 40000, fee: 140 },
+      { min: 40001, max: 50000, fee: 275 },
+      { min: 50001, max: 100000, fee: 210 },
+      { min: 100001, max: 300000, fee: 245 },
+      { min: 300001, max: 500000, fee: 280 },
+      { min: 500001, max: 750000, fee: 350 },
+      { min: 750001, max: 900000, fee: 475 },
+      { min: 900001, max: 1000000, fee: 700 },
+      { min: 1000001, max: Infinity, fee: 1050 },
     ],
   };
 
@@ -95,57 +115,81 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
     return range ? range.fee : 0;
   }
 
-  const barangayFee = computeBarangayFee(applicant?.barangay, capital);
+  // Recompute fee whenever brackets or applicant changes
+  const [barangayFee, setBarangayFee] = useState(0);
+  useEffect(() => {
+    if (applicant?.barangay && barangayBrackets) {
+      const fee = computeBarangayFee(applicant.barangay, capital);
+      setBarangayFee(fee);
+    }
+  }, [applicant, barangayBrackets, capital]);
 
-  // ✅ Collections
-  const collections = [
-    { label: "BUSINESS TAX", amount: businessTax },
-    { label: "MAYOR’S PERMIT", amount: 0 },
-    { label: "BARANGAY FEE", amount: barangayFee },
-    {
-      label: "OCCUPATIONAL TAX",
-      amount: occupationalTax,
-    },
-    { label: "HEALTH, CER & SSF", amount: 0 },
-    { label: "SWM GARBAGE FEE", amount: Number(applicant?.csmwoFee) || 0 },
-    { label: "OBO", amount: 0 },
-    { label: "SANITARY INSPECTION", amount: Number(applicant?.SR) || 0 },
-    { label: "BUILDING INSPECTION", amount: Number(applicant?.BSAP) || 0 },
-    {
-      label: "MECHANICAL INSPECTION",
-      amount: Number(applicant?.Mechanical) || 0,
-    },
-    {
-      label: "ELECTRICAL INSPECTION",
-      amount: Number(applicant?.Electrical) || 0,
-    },
-    { label: "SIGNBOARD/BILLBOARD", amount: Number(applicant?.Signage) || 0 },
-    {
-      label: "ELECTRONIC INSPECTION",
-      amount: Number(applicant?.Electronics) || 0,
-    },
-    { label: "DELIVERY VAN", amount: 0 },
-    { label: "SURCHARGE", amount: 0 },
-    { label: "INTEREST", amount: 0 },
-    { label: "TINPLATE/STICKER FEE", amount: 0 },
-    { label: "VERIFICATION FEE", amount: 0 },
-    { label: "ZONING FEE", amount: Number(applicant?.zoningFee) || 0 },
-    { label: "CENRO", amount: Number(applicant?.cenroFee) || 0 },
-    { label: "SWMO CERT", amount: Number(applicant?.cenroFee) || 0 },
-    { label: "VETERNARY FEE", amount: 0 },
-    { label: "FIXED TAX", amount: 0 },
-    { label: "VIDEOKE CARABET DANCEHALL", amount: 0 },
-    { label: "CIGARETTES", amount: 0 },
-    { label: "LIQUOR", amount: 0 },
-    { label: "BILLIARDS", amount: 0 },
-    { label: "BOARD AND LOGGING", amount: 0 },
-    { label: "FSIC FEE", amount: 0 },
-  ];
+  // Initialize collections
+  useEffect(() => {
+    setCollections([
+      { label: "BUSINESS TAX", amount: String(businessTax) },
+      { label: "MAYOR’S PERMIT", amount: "" },
+      {
+        label: "BARANGAY FEE",
+        amount: barangayFee > 0 ? String(barangayFee) : "",
+      },
+      { label: "OCCUPATIONAL TAX", amount: String(occupationalTax) },
+      { label: "HEALTH, CER & SSF", amount: String(applicant?.choFee || "") },
+      { label: "SWM GARBAGE FEE", amount: String(applicant?.csmwoFee || "") },
+      { label: "OBO", amount: "" },
+      { label: "SANITARY INSPECTION", amount: String(applicant?.SR || "") },
+      { label: "BUILDING INSPECTION", amount: String(applicant?.BSAP || "") },
+      {
+        label: "MECHANICAL INSPECTION",
+        amount: String(applicant?.Mechanical || ""),
+      },
+      {
+        label: "ELECTRICAL INSPECTION",
+        amount: String(applicant?.Electrical || ""),
+      },
+      {
+        label: "SIGNBOARD/BILLBOARD",
+        amount: String(applicant?.Signage || ""),
+      },
+      {
+        label: "ELECTRONIC INSPECTION",
+        amount: String(applicant?.Electronics || ""),
+      },
+      { label: "DELIVERY VEHICLE", amount: "" },
+      { label: "SURCHARGE", amount: "" },
+      { label: "INTEREST", amount: "" },
+      { label: "TINPLATE/STICKER FEE", amount: "" },
+      { label: "VERIFICATION FEE", amount: "" },
+      { label: "ZONING FEE", amount: String(applicant?.zoningFee || "") },
+      { label: "CENRO", amount: String(applicant?.cenroFee || "") },
+      { label: "SWMO CERT", amount: String(applicant?.cenroFee || "") },
+      { label: "VETERNARY FEE", amount: "" },
+      { label: "FIXED TAX", amount: "" },
+      { label: "VIDEOKE CARABET DANCEHALL", amount: "" },
+      { label: "CIGARETTES", amount: "" },
+      { label: "LIQUOR", amount: "" },
+      { label: "BILLIARDS", amount: "" },
+      { label: "BOARD AND LOGGING", amount: "" },
+      { label: "FSIC FEE", amount: "" },
+    ]);
+  }, [applicant, barangayFee, businessTax, occupationalTax]);
 
-  const total = collections.reduce((sum, item) => sum + item.amount, 0);
+  // Handle editable fields
+  const handleAmountChange = (label, value) => {
+    setCollections((prev) =>
+      prev.map((item) =>
+        item.label === label ? { ...item, amount: value } : item
+      )
+    );
+  };
+
+  const total = collections.reduce(
+    (sum, item) => sum + (Number(item.amount) || 0),
+    0
+  );
   const otherChargesTotal = collections
     .filter((item) => item.label !== "BUSINESS TAX")
-    .reduce((sum, item) => sum + item.amount, 0);
+    .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
 
   const formatPeso = (value) =>
     value > 0
@@ -225,7 +269,20 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
                   <TableRow key={item.label}>
                     <TableCell>{item.label}</TableCell>
                     <TableCell align="right">
-                      {formatPeso(item.amount)}
+                      <TextField
+                        size="small"
+                        type="number"
+                        variant="outlined"
+                        value={item.amount}
+                        onChange={(e) =>
+                          handleAmountChange(item.label, e.target.value)
+                        }
+                        sx={{ width: 140 }}
+                        InputProps={{
+                          startAdornment: <span>₱&nbsp;</span>,
+                          readOnly: nonEditableFields.has(item.label),
+                        }}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

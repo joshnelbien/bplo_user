@@ -224,7 +224,7 @@ function Treasurers() {
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.TREASURERS}</TableCell>
+                  <TableCell>{applicant.TREASURER}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

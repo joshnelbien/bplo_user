@@ -213,7 +213,7 @@ function TreasurersApplicantModal({
         <DialogContent dividers>
           {/* Business Info */}
           <Section title="Business Information">
-            <Field label="Status" value={applicant.CSMWO} />
+            <Field label="Status" value={applicant.TREASURER} />
             <Field label="BIN" value={applicant.BIN} />
             <Field label="Business Type" value={applicant.BusinessType} />
             <Field label="DSC Registration No" value={applicant.dscRegNo} />
@@ -415,19 +415,7 @@ function TreasurersApplicantModal({
             color="success"
             sx={{ width: "100px" }}
           >
-            Approve
-          </Button>
-
-          <Button
-            onClick={handleDeclineClick}
-            variant="contained"
-            color="error"
-            sx={{
-              color: "white",
-              width: "100px",
-            }}
-          >
-            Decline
+            Payment
           </Button>
         </DialogActions>
       </Dialog>

@@ -169,6 +169,9 @@ const TreasurersOffice = sequelize.define(
 
     BUSINESSTAX: { type: DataTypes.STRING, defaultValue: "Pending" },
     BUSINESSTAXtimeStamp: { type: DataTypes.STRING },
+
+    TREASURER: { type: DataTypes.STRING, defaultValue: "Pending" },
+    TREASURERtimeStamp: { type: DataTypes.STRING },
   },
 
   {
