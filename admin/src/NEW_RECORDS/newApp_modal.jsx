@@ -167,7 +167,10 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
     { key: "OBO", label: "OBO", timeKey: "OBOtimeStamp" },
   ];
 
-  // Active step = first "Pending"
+  // ✅ Check if all statuses are approved
+  const allApproved = steps.every((step) => applicant[step.key] === "Approved");
+
+  // ✅ Active step = first "Pending"
   const activeStep = steps.findIndex(
     (step) => applicant[step.key] === "Pending"
   );
@@ -230,7 +233,17 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
                   )}
                 >
                   <div style={{ display: "flex", flexDirection: "column" }}>
-                    <span>{step.label}</span>
+                    {/* Default Label */}
+                    <span>
+                      {step.label}
+                      {applicant[step.key] === "Declined" &&
+                        ["CENRO", "OBO", "ZONING", "CSMWO", "CHO"].includes(
+                          step.key
+                        ) &&
+                        ` Decline`}
+                    </span>
+
+                    {/* Timestamp if available */}
                     {applicant[step.timeKey] && (
                       <span
                         style={{
@@ -242,6 +255,20 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
                         {applicant[step.timeKey]}
                       </span>
                     )}
+
+                    {/* Decline Reason if status is Declined */}
+                    {applicant[step.key] === "Declined" &&
+                      applicant[`${step.key}decline`] && (
+                        <span
+                          style={{
+                            fontSize: "0.8em",
+                            color: "red",
+                            marginTop: "4px",
+                          }}
+                        >
+                          Reason: {applicant[`${step.key}decline`]}
+                        </span>
+                      )}
                   </div>
                 </StepLabel>
               </Step>
@@ -604,7 +631,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
           Close
         </Button>
 
-        {/* Show Approve/Decline only if not yet Approved */}
+        {/* If BPLO is not approved yet → show Approve/Decline */}
         {applicant.BPLO?.toLowerCase() !== "approved" ? (
           <>
             <Button
@@ -624,11 +651,11 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
             </Button>
           </>
         ) : (
-          // ✅ If already approved → show Pass to Business Tax
           <Button
             onClick={handlePassToBusinessTax}
             variant="contained"
             color="success"
+            disabled={!allApproved} // ✅ Disable if not all approved
           >
             Pass to Business Tax
           </Button>

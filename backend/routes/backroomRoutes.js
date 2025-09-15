@@ -241,7 +241,7 @@ router.post("/cho/approve/:id", upload.single("choCert"), async (req, res) => {
 router.post("/cho/decline/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { reason } = req.body; // <-- Get decline reason from frontend
+    const { reason } = req.body;
 
     const applicant = await Backroom.findByPk(id);
     if (!applicant) {
