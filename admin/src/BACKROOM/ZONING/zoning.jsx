@@ -137,13 +137,17 @@ function Zoning() {
     }));
   };
 
-  const handleDecline = async (id) => {
+  const handleDecline = async (id, reason) => {
     try {
-      await axios.post(`http://localhost:5000/backroom/zoning/decline/${id}`);
+      await axios.post(`http://localhost:5000/backroom/zoning/decline/${id}`, {
+        reason, // send body correctly
+      });
 
       setApplicants((prev) =>
         prev.map((applicant) =>
-          applicant.id === id ? { ...applicant, ZONING: "Declined" } : applicant
+          applicant.id === id
+            ? { ...applicant, ZONING: "Declined", ZONINGdecline: reason }
+            : applicant
         )
       );
 

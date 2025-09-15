@@ -161,6 +161,7 @@ const Backroom = sequelize.define(
     cenroCert_size: { type: DataTypes.INTEGER, allowNull: true },
 
     ZONING: { type: DataTypes.STRING, defaultValue: "Pending" },
+    ZONINGdecline: { type: DataTypes.STRING },
     ZONINGtimeStamp: { type: DataTypes.STRING },
     zoningFee: { type: DataTypes.STRING },
     zoningCert: { type: DataTypes.BLOB("long"), allowNull: true },

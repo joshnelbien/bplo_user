@@ -160,6 +160,7 @@ router.post(
 router.post("/zoning/decline/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    const { reason } = req.body; // ✅ get reason from frontend
 
     const applicant = await Backroom.findByPk(id);
     if (!applicant) {
@@ -168,22 +169,23 @@ router.post("/zoning/decline/:id", async (req, res) => {
 
     const applicantStatus = await AppStatus.findByPk(id);
     if (!applicantStatus) {
-      return res.status(404).json({ error: "Applicant not found" });
+      return res.status(404).json({ error: "Applicant status not found" });
     }
 
-    // 2. Update status & timestamp
-    applicant.ZONING = "Declined";
-    applicant.ZONINGtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+    // ✅ Save status, timestamp, and reason
+    const timestamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
-    // 3. Save changes
+    applicant.ZONING = "Declined";
+    applicant.ZONINGtimeStamp = timestamp;
+    applicant.ZONINGdecline = reason; // ✅ save decline reason
     await applicant.save();
 
     await applicantStatus.update({
       ZONING: "Declined",
-      ZONINGtimeStamp: applicant.ZONINGtimeStamp,
+      ZONINGtimeStamp: timestamp,
+      ZONINGdecline: reason, // ✅ also in AppStatus
     });
 
-    // 4. Respond
     res.json({
       message: "Applicant declined successfully",
       applicant,
