@@ -139,25 +139,14 @@ function BusinessTaxApplicantModal({
 }) {
   if (!isOpen || !applicant) return null;
 
-  const [choField, setChoField] = useState({ choFee: "" });
   const [confirmOpen, setConfirmOpen] = useState(false); // State for confirmation dialog
   const [successOpen, setSuccessOpen] = useState(false); // State for success pop-up
   const [selectedFiles, setSelectedFiles] = useState({});
   const [computeOpen, setComputeOpen] = useState(false);
 
-  useEffect(() => {
-    if (applicant) {
-      setChoField({
-        choFee: applicant.choFee || "",
-      });
-    }
-  }, [applicant]);
-
-  const handleChange = (field, value) => {
-    setChoField((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const files = [{ label: "CHO Certificate", name: "choCert" }];
+  const files = [
+    { label: "Business Tax Computation", name: "businessTaxCompute" },
+  ];
 
   const handleFileSelect = (e) => {
     const { name, files } = e.target;
@@ -183,7 +172,7 @@ function BusinessTaxApplicantModal({
   // Handle approval confirmation
   const handleConfirmApprove = () => {
     setConfirmOpen(false);
-    onApprove(applicant.id, choField.choFee, selectedFiles); // Call the original onApprove
+    onApprove(applicant.id, selectedFiles); // Call the original onApprove
     setSuccessOpen(true); // Show success pop-up
   };
 
@@ -552,6 +541,35 @@ function BusinessTaxApplicantModal({
               )}
             </Stack>
           </Section>
+
+          <Grid container spacing={1} sx={{ mt: 1 }}>
+            <Grid item>
+              <Button
+                variant="contained"
+                component="label"
+                size="small"
+                color="success"
+                sx={{ minWidth: 120 }}
+              >
+                Choose File
+                <input
+                  type="file"
+                  name="businessTaxCompute"
+                  hidden
+                  onChange={handleFileSelect}
+                />
+              </Button>
+            </Grid>
+            <Grid item xs>
+              <TextField
+                value={selectedFiles.businessTaxCompute?.name || ""}
+                placeholder="No file selected"
+                size="small"
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+            </Grid>
+          </Grid>
         </DialogContent>
 
         <DialogActions>

@@ -169,6 +169,9 @@ const BusinessTax = sequelize.define(
 
     BUSINESSTAX: { type: DataTypes.STRING, defaultValue: "Pending" },
     BUSINESSTAXtimeStamp: { type: DataTypes.STRING },
+    businesstaxComputaion_filename: { type: DataTypes.STRING, allowNull: true },
+    businesstaxComputaion_mimetype: { type: DataTypes.STRING, allowNull: true },
+    businesstaxComputaion_size: { type: DataTypes.INTEGER, allowNull: true },
 
     TREASURER: { type: DataTypes.STRING, defaultValue: "Pending" },
     TREASURERtimeStamp: { type: DataTypes.STRING },

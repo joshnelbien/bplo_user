@@ -1,7 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Side_bar from "../../SIDE_BAR/side_bar";
-import BusinessTax_computation from "./businessTax_computation";
 import {
   Box,
   Button,
@@ -63,10 +62,16 @@ function BusinessTax() {
     indexOfLastRecord
   );
 
-  const handleApprove = async (id) => {
+  const handleApprove = async (id, selectedFiles) => {
     try {
+      const formData = new FormData();
+      if (selectedFiles.businessTaxCompute) {
+        formData.append("businessTaxCompute", selectedFiles.businessTaxCompute);
+      }
+
       await axios.post(
         `http://localhost:5000/businessTax/business/approve/${id}`,
+        formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
@@ -76,7 +81,7 @@ function BusinessTax() {
         )
       );
 
-      alert("Applicant approved");
+      alert("Applicant approved with file uploaded");
       closeModal();
     } catch (error) {
       console.error("Error approving applicant:", error);
@@ -210,7 +215,6 @@ function BusinessTax() {
           />
         </Box>
       </Box>
-      ✅ Modal Component
       <BusinessTaxApplicantModal
         applicant={selectedApplicant}
         isOpen={isModalOpen}
