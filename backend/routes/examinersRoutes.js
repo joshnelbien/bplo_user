@@ -111,8 +111,6 @@ router.post("/bplo/approve/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to approve applicant" });
   }
 });
-
-// Approve from Examiners -> Backroom
 router.post("/examiners/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -126,10 +124,29 @@ router.post("/examiners/approve/:id", async (req, res) => {
       return res.status(404).json({ error: "Applicant not found" });
 
     const applicantData = applicant.toJSON();
-
     const timestamp = moment().format("DD/MM/YYYY HH:mm:ss");
-    const BIN = generateBIN(); // sequential BIN
 
+    // ✅ Get last BIN from Backroom
+    const lastBackroom = await Backroom.findOne({
+      order: [["createdAt", "DESC"]],
+      attributes: ["BIN"],
+    });
+
+    let newSequence = 403424; // default start
+    let newSuffix = 400; // default start
+
+    if (lastBackroom && lastBackroom.BIN) {
+      const [seq, year, suffix] = lastBackroom.BIN.split("-");
+      newSequence = parseInt(seq, 10) + 1;
+      newSuffix = parseInt(suffix, 10) + 1;
+    }
+
+    const year = new Date().getFullYear();
+    const BIN = `${newSequence.toString().padStart(7, "0")}-${year}-${newSuffix
+      .toString()
+      .padStart(7, "0")}`;
+
+    // ✅ Apply updates
     applicantData.Examiners = "Approved";
     applicantData.ExaminerstimeStamp = timestamp;
     applicantData.status = "Approved";
@@ -141,7 +158,7 @@ router.post("/examiners/approve/:id", async (req, res) => {
       Examiners: "Approved",
       ExaminerstimeStamp: timestamp,
       status: "Approved",
-      BIN: BIN,
+      BIN,
     });
 
     await applicantStatus.update({
