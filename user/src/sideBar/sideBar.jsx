@@ -195,8 +195,8 @@ const Sidebar = ({ id }) => {
           onClick={handleLogoutOpen}
           sx={{
             borderRadius: "8px",
-            bgcolor: "#FF6B6B",
-            "&:hover": { bgcolor: "#E55B5B" },
+            bgcolor: "#be0606ff",
+            "&:hover": { bgcolor: "#ce0000ff" },
           }}
         >
           <ListItemIcon>
