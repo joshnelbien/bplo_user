@@ -132,16 +132,19 @@ function New_records() {
         const pendingRes = await axios.get(
           "http://localhost:5000/newApplication/files"
         );
-        const onlyPending = pendingRes.data.filter(
-          (a) => a.status?.toLowerCase() === "pending"
-        );
+        const onlyPending = pendingRes.data
+          .filter((a) => a.status?.toLowerCase() === "pending")
+          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); // oldest first, newest last
         setPendingApplicants(onlyPending);
 
         // ✅ Approved applicants
         const approvedRes = await axios.get(
           "http://localhost:5000/backroom/backrooms"
         );
-        setApprovedApplicants(approvedRes.data);
+        const sortedApproved = approvedRes.data.sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt) // oldest first, newest last
+        );
+        setApprovedApplicants(sortedApproved);
       } catch (error) {
         console.error("Error fetching applicants:", error);
       }

@@ -194,7 +194,6 @@ router.get("/examiners/:id", async (req, res) => {
     const files = await Examiners.findAll({
       attributes: ["status"],
       where: { userId: id },
-      order: [["createdAt", "DESC"]],
     });
     res.json(files);
   } catch (err) {

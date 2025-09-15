@@ -38,7 +38,11 @@ function Cenro() {
     const fetchApplicants = async () => {
       try {
         const res = await axios.get("http://localhost:5000/backroom/backrooms");
-        setApplicants(res.data);
+        const sortedData = res.data.sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
+
+        setApplicants(sortedData);
       } catch (error) {
         console.error("Error fetching applicants:", error);
       }

@@ -76,7 +76,9 @@ router.post("/business/approve/:id", async (req, res) => {
 
 router.get("/treasurer", async (req, res) => {
   try {
-    const files = await TreasurersOffice.findAll();
+    const files = await TreasurersOffice.findAll({
+      order: [["BUSINESSTAXtimeStamp", "ASC"]], // oldest first, newest last
+    });
     res.json(files);
   } catch (err) {
     console.error(err);

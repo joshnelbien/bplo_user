@@ -103,7 +103,13 @@ function Zoning() {
     const fetchApplicants = async () => {
       try {
         const res = await axios.get("http://localhost:5000/backroom/backrooms");
-        setApplicants(res.data);
+
+        // Sort by createdAt ascending (oldest first, newest at bottom)
+        const sortedData = res.data.sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
+
+        setApplicants(sortedData);
       } catch (error) {
         console.error("Error fetching applicants:", error);
       }
@@ -111,7 +117,6 @@ function Zoning() {
 
     fetchApplicants();
   }, []);
-
   // ✅ Unified filtering logic
   const filteredApplicants = applicants.filter((a) => {
     if (filter === "pending")

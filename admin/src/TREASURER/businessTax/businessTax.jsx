@@ -39,6 +39,11 @@ function BusinessTax() {
         const res = await axios.get(
           "http://localhost:5000/businessTax/businessTax"
         );
+        const sortedData = res.data.sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
+
+        setApplicants(sortedData);
         setApplicants(res.data);
       } catch (error) {
         console.error("Error fetching applicants:", error);
