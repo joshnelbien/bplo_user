@@ -2,7 +2,11 @@
 import { Stack, TextField, Typography } from "@mui/material";
 import { useEffect } from "react";
 
-export default function Step5BusinessDetails({ formData, handleChange }) {
+export default function Step5BusinessDetails({
+  formData,
+  handleChange,
+  errors,
+}) {
   // Only allow digits & limit to 6 characters
   const handleNumberInput = (e) => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 6);
@@ -41,6 +45,8 @@ export default function Step5BusinessDetails({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          error={!!errors.totalFloorArea}
+          helperText={errors.totalFloorArea}
         />
 
         <TextField
@@ -51,6 +57,8 @@ export default function Step5BusinessDetails({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          error={!!errors.maleEmployee}
+          helperText={errors.maleEmployee}
         />
 
         <TextField
@@ -61,6 +69,8 @@ export default function Step5BusinessDetails({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          error={!!errors.femaleEmployee}
+          helperText={errors.femaleEmployee}
         />
 
         <TextField
@@ -71,6 +81,8 @@ export default function Step5BusinessDetails({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          error={!!errors.numberOfEmployee}
+          helperText={errors.numberOfEmployee}
         />
 
         <TextField
@@ -81,6 +93,8 @@ export default function Step5BusinessDetails({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          error={!!errors.numVehicleVan}
+          helperText={errors.numVehicleVan}
         />
 
         <TextField
@@ -91,6 +105,8 @@ export default function Step5BusinessDetails({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          error={!!errors.numVehicleTruck}
+          helperText={errors.numVehicleTruck}
         />
 
         <TextField
@@ -101,6 +117,8 @@ export default function Step5BusinessDetails({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          error={!!errors.numVehicleMotor}
+          helperText={errors.numVehicleMotor}
         />
 
         <TextField
@@ -111,6 +129,8 @@ export default function Step5BusinessDetails({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          error={!!errors.numNozzle}
+          helperText={errors.numNozzle}
         />
 
         <TextField
@@ -121,6 +141,8 @@ export default function Step5BusinessDetails({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          error={!!errors.weighScale}
+          helperText={errors.weighScale}
         />
       </Stack>
     </div>

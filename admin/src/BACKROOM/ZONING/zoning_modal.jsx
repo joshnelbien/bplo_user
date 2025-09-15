@@ -298,7 +298,7 @@ function ZoningApplicantModal({
                     label="Tax Incentives From Government"
                     fileData={applicant}
                   />
-                )}
+                )}  
 
                 <Field label="Office Type" value={applicant.officeType} />
 

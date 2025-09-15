@@ -28,6 +28,7 @@ export default function Step6BusinessActivity({
   handleFileChange,
   businessLines,
   setBusinessLines,
+  errors,
 }) {
   const files = [{ label: "TIGE Files", name: "tIGEfiles" }];
 
@@ -39,6 +40,9 @@ export default function Step6BusinessActivity({
     capital: "",
   });
   const [editingIndex, setEditingIndex] = useState(null);
+
+  // Validation state for the "Add Line of Business" fields
+  const [addErrors, setAddErrors] = useState({});
 
   // Confirmation dialog state
   const [openConfirm, setOpenConfirm] = useState(false);
@@ -77,7 +81,6 @@ export default function Step6BusinessActivity({
 
   const handleFileSelect = (e) => {
     const { name, files } = e.target;
-    console.log("Step6 selected:", name, files[0]);
     setSelectedFiles((prev) => ({
       ...prev,
       [name]: files[0] ? files[0].name.toUpperCase() : "",
@@ -91,16 +94,20 @@ export default function Step6BusinessActivity({
       ...prev,
       [name]: typeof value === "string" ? value.toUpperCase() : value,
     }));
+    setAddErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const addBusinessLine = () => {
-    if (
-      !newBusiness.lineOfBusiness ||
-      !newBusiness.productService ||
-      !newBusiness.Units ||
-      !newBusiness.capital
-    ) {
-      alert("Please fill all fields before adding.");
+    const newErrors = {};
+    if (!newBusiness.lineOfBusiness)
+      newErrors.lineOfBusiness = "Line of Business is required";
+    if (!newBusiness.productService)
+      newErrors.productService = "Product/Service is required";
+    if (!newBusiness.Units) newErrors.Units = "Units is required";
+    if (!newBusiness.capital) newErrors.capital = "Capital is required";
+
+    if (Object.keys(newErrors).length > 0) {
+      setAddErrors(newErrors);
       return;
     }
 
@@ -119,11 +126,13 @@ export default function Step6BusinessActivity({
       Units: "",
       capital: "",
     });
+    setAddErrors({});
   };
 
   const editBusinessLine = (index) => {
     setNewBusiness(businessLines[index]);
     setEditingIndex(index);
+    setAddErrors({});
   };
 
   // ✅ Calculate total capital using useMemo
@@ -147,7 +156,7 @@ export default function Step6BusinessActivity({
 
       <Stack spacing={3}>
         {/* Tax Incentives */}
-        <FormControl fullWidth sx={{ minWidth: 300 }}>
+        <FormControl fullWidth sx={{ minWidth: 300 }} error={!!errors.tIGE}>
           <InputLabel id="tIGE-label">Tax Incentives from Gov't</InputLabel>
           <Select
             labelId="tIGE-label"
@@ -161,11 +170,17 @@ export default function Step6BusinessActivity({
                 },
               })
             }
+            label="Tax Incentives from Gov't"
           >
             <MenuItem value="">Select</MenuItem>
             <MenuItem value="NO">No</MenuItem>
             <MenuItem value="YES">Yes</MenuItem>
           </Select>
+          {!!errors.tIGE && (
+            <Typography variant="caption" color="error">
+              {errors.tIGE}
+            </Typography>
+          )}
         </FormControl>
 
         {/* File Upload for TIGE */}
@@ -198,6 +213,8 @@ export default function Step6BusinessActivity({
                     InputProps={{
                       readOnly: true,
                     }}
+                    error={!!errors[file.name]}
+                    helperText={errors[file.name]}
                   />
                 </Stack>
               </Stack>
@@ -206,7 +223,11 @@ export default function Step6BusinessActivity({
         )}
 
         {/* Office Type */}
-        <FormControl fullWidth sx={{ minWidth: 300 }}>
+        <FormControl
+          fullWidth
+          sx={{ minWidth: 300 }}
+          error={!!errors.officeType}
+        >
           <InputLabel id="officeType-label">Office Type</InputLabel>
           <Select
             labelId="officeType-label"
@@ -220,6 +241,7 @@ export default function Step6BusinessActivity({
                 },
               })
             }
+            label="Office Type"
           >
             <MenuItem value="">-- SELECT OFFICE TYPE --</MenuItem>
             <MenuItem value="MAIN">Main</MenuItem>
@@ -228,6 +250,11 @@ export default function Step6BusinessActivity({
             <MenuItem value="WAREHOUSE">Warehouse</MenuItem>
             <MenuItem value="OTHERS">Others (Specify)</MenuItem>
           </Select>
+          {!!errors.officeType && (
+            <Typography variant="caption" color="error">
+              {errors.officeType}
+            </Typography>
+          )}
         </FormControl>
 
         {formData.officeType === "OTHERS" && (
@@ -246,6 +273,8 @@ export default function Step6BusinessActivity({
             fullWidth
             variant="outlined"
             sx={{ minWidth: 300 }}
+            error={!!errors.officeTypeOther}
+            helperText={errors.officeTypeOther}
           />
         )}
 
@@ -261,6 +290,7 @@ export default function Step6BusinessActivity({
               ...prev,
               lineOfBusiness: (newValue || "").toUpperCase(),
             }));
+            setAddErrors((prev) => ({ ...prev, lineOfBusiness: "" }));
           }}
           renderInput={(params) => (
             <TextField
@@ -272,6 +302,8 @@ export default function Step6BusinessActivity({
                   lineOfBusiness: e.target.value.toUpperCase(),
                 }))
               }
+              error={!!addErrors.lineOfBusiness}
+              helperText={addErrors.lineOfBusiness}
             />
           )}
           fullWidth
@@ -283,6 +315,8 @@ export default function Step6BusinessActivity({
           value={newBusiness.productService}
           onChange={handleBusinessChange}
           fullWidth
+          error={!!addErrors.productService}
+          helperText={addErrors.productService}
         />
         <TextField
           label="Units"
@@ -291,6 +325,8 @@ export default function Step6BusinessActivity({
           value={newBusiness.Units}
           onChange={handleBusinessChange}
           fullWidth
+          error={!!addErrors.Units}
+          helperText={addErrors.Units}
         />
         <NumericFormat
           customInput={TextField}
@@ -307,6 +343,8 @@ export default function Step6BusinessActivity({
           fixedDecimalScale
           allowNegative={false}
           fullWidth
+          error={!!addErrors.capital}
+          helperText={addErrors.capital}
         />
 
         <Button
@@ -364,7 +402,15 @@ export default function Step6BusinessActivity({
         {/* ✅ Total Capital */}
         {businessLines.length > 0 && (
           <Typography variant="h6" sx={{ mt: 2 }}>
-            TOTAL CAPITAL: {totalCapital.toLocaleString()}
+            TOTAL CAPITAL:{" "}
+            <NumericFormat
+              value={totalCapital}
+              displayType="text"
+              thousandSeparator=","
+              decimalScale={2}
+              fixedDecimalScale
+              prefix="₱"
+            />
           </Typography>
         )}
       </Stack>

@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 
-export default function Step2PersonalInfo({ formData, handleChange }) {
+export default function Step2PersonalInfo({ formData, handleChange, errors, setErrors }) {
   // ✅ Uppercase handler for text fields
   const handleUppercaseChange = (e) => {
     const value = (e.target.value || "").toUpperCase();
@@ -21,10 +21,48 @@ export default function Step2PersonalInfo({ formData, handleChange }) {
     handleChange({ target: { name: e.target.name, value } });
   };
 
-  // ✅ Mobile number: digits only, max 11
+  // ✅ Mobile number: digits only, automatic +63 prefix
   const handlePhoneNumberInput = (e) => {
-    const value = e.target.value.replace(/\D/g, "").slice(0, 11);
-    handleChange({ target: { name: e.target.name, value } });
+    let value = e.target.value.replace(/\D/g, "");
+    
+    // Automatically add +63 prefix if not present
+    if (!value.startsWith("63") && value.length > 0) {
+      value = `63${value}`;
+    }
+    
+    // Limit to a total of 12 digits (63 + 9 digits)
+    value = value.slice(0, 12);
+
+    handleChange({ target: { name: e.target.name, value: `+${value}` } });
+  };
+  
+  // ✅ Email handler: validates and automatically adds @gmail.com
+  const handleEmailChange = (e) => {
+    let value = e.target.value;
+    
+    // Check if the input contains '@' and if it ends with '@gmail.com'
+    if (value.includes("@")) {
+        // If the user types a full email, just update the value
+        handleChange({ target: { name: e.target.name, value } });
+    } else {
+        // If the user hasn't typed '@', append '@gmail.com'
+        value = `${value}@gmail.com`;
+        handleChange({ target: { name: e.target.name, value } });
+    }
+    
+    // Regex for basic email validation
+    const emailRegex = /^[^\s@]+@gmail\.com$/i;
+    if (value && !emailRegex.test(value)) {
+      setErrors((prev) => ({
+        ...prev,
+        eMailAdd: "Email must be a valid @gmail.com address",
+      }));
+    } else {
+      setErrors((prev) => ({
+        ...prev,
+        eMailAdd: "",
+      }));
+    }
   };
 
   return (
@@ -43,6 +81,8 @@ export default function Step2PersonalInfo({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          error={!!errors.firstName}
+          helperText={errors.firstName}
         />
 
         {/* Middle Name */}
@@ -54,6 +94,8 @@ export default function Step2PersonalInfo({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          error={!!errors.middleName}
+          helperText={errors.middleName}
         />
 
         {/* Last Name */}
@@ -65,6 +107,8 @@ export default function Step2PersonalInfo({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          error={!!errors.lastName}
+          helperText={errors.lastName}
         />
 
         {/* Ext. Name */}
@@ -76,34 +120,43 @@ export default function Step2PersonalInfo({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          error={!!errors.extName}
+          helperText={errors.extName}
         />
 
         {/* Gender */}
-        <FormControl fullWidth sx={{ minWidth: 300 }}>
+        <FormControl fullWidth sx={{ minWidth: 300 }} error={!!errors.sex}>
           <InputLabel id="sex-label">Gender</InputLabel>
           <Select
             labelId="sex-label"
             name="sex"
             value={formData.sex || ""}
-            onChange={handleUppercaseChange} // ✅ forces "MALE"/"FEMALE"
+            onChange={handleUppercaseChange}
             label="Gender"
           >
             <MenuItem value="">Select</MenuItem>
             <MenuItem value="MALE">Male</MenuItem>
             <MenuItem value="FEMALE">Female</MenuItem>
           </Select>
+          {!!errors.sex && (
+            <Typography variant="caption" color="error">
+              {errors.sex}
+            </Typography>
+          )}
         </FormControl>
 
-        {/* Email (kept normal, not forced uppercase unless you want it) */}
+        {/* Email */}
         <TextField
           label="Email"
           type="email"
           name="eMailAdd"
           value={formData.eMailAdd || ""}
-          onChange={handleChange} // lowercase usually better for email
+          onChange={handleEmailChange} // ✅ validate email
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          error={!!errors.eMailAdd}
+          helperText={errors.eMailAdd}
         />
 
         {/* Telephone No. */}
@@ -115,6 +168,8 @@ export default function Step2PersonalInfo({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          error={!!errors.telNo}
+          helperText={errors.telNo}
         />
 
         {/* Mobile No. */}
@@ -126,6 +181,9 @@ export default function Step2PersonalInfo({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          error={!!errors.mobileNo}
+          helperText={errors.mobileNo}
+          placeholder="+63"
         />
       </Stack>
     </div>

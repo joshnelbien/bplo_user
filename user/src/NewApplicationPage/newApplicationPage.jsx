@@ -146,7 +146,7 @@ function NewApplicationPage() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
-  const [successDialogOpen, setSuccessDialogOpen] = useState(false); // ✅ new success popup
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [errors, setErrors] = useState({});
 
   const steps = [
@@ -184,66 +184,41 @@ function NewApplicationPage() {
     const newErrors = {};
     const requiredFields = {
       1: ["BusinessType", "businessName", "tinNo", "TradeName"],
-    //   2: ["firstName", "lastName", "sex", "eMailAdd", "mobileNo"],
-    //   3: [
-    //     "region",
-    //     "province",
-    //     "cityOrMunicipality",
-    //     "barangay",
-    //     "addressLine1",
-    //     "zipCode",
-    //   ],
-    //   4: [
-    //     "Taxregion",
-    //     "Taxprovince",
-    //     "TaxcityOrMunicipality",
-    //     "Taxbarangay",
-    //     "TaxaddressLine1",
-    //     "TaxzipCode",
-    //   ],
-    //   5: [
-    //     "totalFloorArea",
-    //     "numberOfEmployee",
-    //     "maleEmployee",
-    //     "femaleEmployee",
-    //   ],
-    //   // 6: ["lineOfBusiness", "productService", "Units", "capital"],
-    //   7: ["proofOfReg", "brgyClearance", "cedula"],
-      // 2: ["firstName", "lastName", "sex", "eMailAdd", "mobileNo"],
-      // 3: [
-      //   "region",
-      //   "province",
-      //   "cityOrMunicipality",
-      //   "barangay",
-      //   "addressLine1",
-      //   "zipCode",
-      // ],
-      // 4: [
-      //   "Taxregion",
-      //   "Taxprovince",
-      //   "TaxcityOrMunicipality",
-      //   "Taxbarangay",
-      //   "TaxaddressLine1",
-      //   "TaxzipCode",
-      // ],
-      // 5: [
-      //   "totalFloorArea",
-      //   "numberOfEmployee",
-      //   "maleEmployee",
-      //   "femaleEmployee",
-      // ],
-      // // 6: ["lineOfBusiness", "productService", "Units", "capital"],
-      // 7: ["proofOfReg", "brgyClearance", "cedula"],
+      2: ["firstName", "lastName", "sex", "eMailAdd", "mobileNo"],
+      3: [
+        "region",
+        "province",
+        "cityOrMunicipality",
+        "barangay",
+        "addressLine1",
+        "zipCode",
+      ],
+      4: [
+        "Taxregion",
+        "Taxprovince",
+        "TaxcityOrMunicipality",
+        "Taxbarangay",
+        "TaxaddressLine1",
+        "TaxzipCode",
+      ],
+      5: [
+        "totalFloorArea",
+        "numberOfEmployee",
+        "maleEmployee",
+        "femaleEmployee",
+      ],
+      // 6: ["lineOfBusiness", "productService", "Units", "capital"],
+      7: ["proofOfReg", "brgyClearance", "cedula"],
     };
 
     requiredFields[step]?.forEach((field) => {
       if (step === 7) {
         if (!filesState[field]) {
-          newErrors[field] = "This field is required";
+          newErrors[field] = "Please fill out this field";
         }
       } else {
         if (!formDataState[field]) {
-          newErrors[field] = "This field is required";
+          newErrors[field] = "Please fill out this field";
         }
       }
     });
@@ -366,7 +341,7 @@ function NewApplicationPage() {
       localStorage.removeItem("businessLines");
       localStorage.removeItem("formStep");
 
-      setSuccessDialogOpen(true); // ✅ show success popup
+      setSuccessDialogOpen(true);
 
       setTimeout(() => {
         navigate(`/homePage/me`);
@@ -444,10 +419,7 @@ function NewApplicationPage() {
         );
       case 7:
         return (
-          <Section7FileUploads
-            handleFileChange={handleFileChange}
-            errors={errors}
-          />
+          <Section7FileUploads handleFileChange={handleFileChange} errors={errors} />
         );
       default:
         return "Unknown step";

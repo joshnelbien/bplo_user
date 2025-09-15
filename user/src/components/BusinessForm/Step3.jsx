@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 
-export default function Step3AddressInfo({ formData, handleChange }) {
+export default function Step3AddressInfo({ formData, handleChange, errors }) {
   const barangays = [
     "ATISAN",
     "BAGONG POOK VI-C (POB.)",
@@ -159,13 +159,13 @@ export default function Step3AddressInfo({ formData, handleChange }) {
       </Typography>
 
       <Stack spacing={3}>
-        {/* Fixed Region */}
+        {/* Fixed Region - Not required, no error needed */}
         <TextField label="Region" value="REGION IV-A" disabled fullWidth />
 
-        {/* Fixed Province */}
+        {/* Fixed Province - Not required, no error needed */}
         <TextField label="Province" value="LAGUNA" disabled fullWidth />
 
-        {/* Fixed City */}
+        {/* Fixed City - Not required, no error needed */}
         <TextField
           label="City / Municipality"
           value="SAN PABLO CITY"
@@ -173,8 +173,8 @@ export default function Step3AddressInfo({ formData, handleChange }) {
           fullWidth
         />
 
-        {/* Barangay Dropdown */}
-        <FormControl fullWidth>
+        {/* Barangay Dropdown - ADDED VALIDATION */}
+        <FormControl fullWidth error={!!errors.barangay}>
           <InputLabel id="barangay-label">Barangay</InputLabel>
           <Select
             labelId="barangay-label"
@@ -190,21 +190,28 @@ export default function Step3AddressInfo({ formData, handleChange }) {
               </MenuItem>
             ))}
           </Select>
+          {!!errors.barangay && (
+            <Typography variant="caption" color="error">
+              {errors.barangay}
+            </Typography>
+          )}
         </FormControl>
 
-        {/* Address Line 1 */}
+        {/* Address Line 1 - ADDED VALIDATION */}
         <TextField
           label="Address Line 1"
           name="addressLine1"
           value={formData.addressLine1 || ""}
           onChange={handleUppercaseChange}
           fullWidth
+          error={!!errors.addressLine1}
+          helperText={errors.addressLine1}
         />
 
-        {/* Zip Code */}
+        {/* Fixed Zip Code - Not required, no error needed */}
         <TextField label="Zip Code" value="4000" disabled fullWidth />
 
-        {/* Pin Address with Map */}
+        {/* Pin Address with Map - Not required, no error needed */}
         <div>
           <Typography variant="subtitle1" gutterBottom>
             Pin Address (Click on the map)
