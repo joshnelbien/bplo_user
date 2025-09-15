@@ -10,6 +10,20 @@ const AppStatus = require("../db/model/applicantStatusDB");
 // Multer in-memory storage
 const upload = multer({ storage: multer.memoryStorage() });
 
+// Initialize BIN counters
+let sequenceStart = 403424; // first 7-digit sequence
+let suffixStart = 400; // last 6-digit sequence
+
+function generateBIN() {
+  const year = new Date().getFullYear();
+  const bin = `${sequenceStart
+    .toString()
+    .padStart(7, "0")}-${year}-${suffixStart.toString().padStart(7, "0")}`;
+  sequenceStart++;
+  suffixStart++;
+  return bin;
+}
+
 // Upload files + text fields
 router.post(
   "/examiners",
@@ -57,31 +71,26 @@ router.post(
   }
 );
 
+// Approve from Files -> Examiners
 router.post("/bplo/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // 1. Get applicant from Files table
     const applicant = await File.findByPk(id);
-    if (!applicant) {
+    if (!applicant)
       return res.status(404).json({ error: "Applicant not found" });
-    }
-    const applicantStatus = await AppStatus.findByPk(id);
-    if (!applicantStatus) {
-      return res.status(404).json({ error: "Applicant not found" });
-    }
 
-    // 2. Convert to plain object
+    const applicantStatus = await AppStatus.findByPk(id);
+    if (!applicantStatus)
+      return res.status(404).json({ error: "Applicant not found" });
+
     const applicantData = applicant.toJSON();
 
-    // 3. Add approval fields for Examiners
     applicantData.BPLO = "Approved";
     applicantData.BPLOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
-    // 4. Insert into Examiners table
     const created = await Examiners.create(applicantData);
 
-    // 5. Update applicant status in Files (archive instead of delete)
     await applicant.update({
       BPLO: "Approved",
       BPLOtimeStamp: applicantData.BPLOtimeStamp,
@@ -103,41 +112,31 @@ router.post("/bplo/approve/:id", async (req, res) => {
   }
 });
 
+// Approve from Examiners -> Backroom
 router.post("/examiners/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // 1. Get applicant from Examiners table
     const applicant = await Examiners.findByPk(id);
-    if (!applicant) {
+    if (!applicant)
       return res.status(404).json({ error: "Applicant not found" });
-    }
 
     const applicantStatus = await AppStatus.findByPk(id);
-    if (!applicantStatus) {
+    if (!applicantStatus)
       return res.status(404).json({ error: "Applicant not found" });
-    }
 
-    // 2. Convert to plain object
     const applicantData = applicant.toJSON();
 
-    // 3. Add approval fields
     const timestamp = moment().format("DD/MM/YYYY HH:mm:ss");
-    const year = new Date().getFullYear();
-    const randomPart = () =>
-      Math.floor(1000000 + Math.random() * 9000000).toString(); // 7-digit random number
-
-    const BIN = `${randomPart()}-${year}-${randomPart()}`;
+    const BIN = generateBIN(); // sequential BIN
 
     applicantData.Examiners = "Approved";
     applicantData.ExaminerstimeStamp = timestamp;
     applicantData.status = "Approved";
     applicantData.BIN = BIN;
 
-    // 4. Insert into Backroom table
     const created = await Backroom.create(applicantData);
 
-    // 5. Update status + BIN in Examiners table
     await applicant.update({
       Examiners: "Approved",
       ExaminerstimeStamp: timestamp,
@@ -147,7 +146,7 @@ router.post("/examiners/approve/:id", async (req, res) => {
 
     await applicantStatus.update({
       Examiners: "Approved",
-      ExaminerstimeStamp: applicantData.ExaminerstimeStamp,
+      ExaminerstimeStamp: timestamp,
     });
 
     res.status(201).json({
@@ -176,7 +175,7 @@ router.get("/examiners/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const files = await Examiners.findAll({
-      attributes: ["status"], // ✅ only fetch status
+      attributes: ["status"],
       where: { userId: id },
       order: [["createdAt", "DESC"]],
     });
