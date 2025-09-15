@@ -86,24 +86,28 @@ function Cenro() {
             : applicant
         )
       );
-    
     } catch (error) {
       console.error("Error approving applicant:", error);
     }
   };
 
-  const handleDecline = async (id) => {
+  const handleDecline = async (id, reason) => {
     try {
-      await axios.post(`http://localhost:5000/backroom/cenro/decline/${id}`);
-
-      setApplicants((prev) =>
-        prev.map((applicant) =>
-          applicant.id === id ? { ...applicant, CENRO: "Declined" } : applicant
-        )
+      const res = await fetch(
+        `http://localhost:5000/backroom/cenro/decline/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ reason }),
+        }
       );
 
+      const data = await res.json();
+      console.log("Decline response:", data);
     } catch (error) {
-      console.error("Error declining applicant:", error);
+      console.error("Decline error:", error);
     }
   };
 

@@ -38,14 +38,14 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
 // DB setup
 (async () => {
   await sequelize.authenticate();
-  await Examiners.sync();
-  await File.sync();
-  await Backroom.sync();
-  await UserAccounts.sync();
-  await Announcements.sync();
-  await BusinessTax.sync();
-  await AppStatus.sync();
-  await TreasurersOffifce.sync();
+  await Examiners.sync({ alter: true });
+  await File.sync({ alter: true });
+  await Backroom.sync({ alter: true });
+  await UserAccounts.sync({ alter: true });
+  await Announcements.sync({ alter: true });
+  await BusinessTax.sync({ alter: true });
+  await AppStatus.sync({ alter: true });
+  await TreasurersOffifce.sync({ alter: true });
   console.log("Database ready");
 })();
 

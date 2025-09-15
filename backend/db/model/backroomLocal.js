@@ -149,6 +149,7 @@ const Backroom = sequelize.define(
     choCert_size: { type: DataTypes.INTEGER, allowNull: true },
 
     CENRO: { type: DataTypes.STRING, defaultValue: "Pending" },
+    CENROdecline: { type: DataTypes.STRING },
     CENROtimeStamp: { type: DataTypes.STRING },
     cenroFee: { type: DataTypes.STRING },
     cenroCert: { type: DataTypes.BLOB("long"), allowNull: true },

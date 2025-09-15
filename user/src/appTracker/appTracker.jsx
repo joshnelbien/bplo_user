@@ -97,6 +97,7 @@ function AppTracker() {
         <CircularProgress />
       </Box>
     );
+
   const reorderDepartments = (tracker) => {
     return [...departments].sort((a, b) => {
       // ✅ Force BPLO always first
@@ -117,6 +118,7 @@ function AppTracker() {
       return 0; // keep same order otherwise
     });
   };
+
   return (
     <Box sx={{ p: 4, maxWidth: 900, mx: "auto" }}>
       <Button
@@ -157,7 +159,7 @@ function AppTracker() {
                 orientation={isMobile ? "vertical" : "horizontal"}
                 alternativeLabel={!isMobile}
               >
-                {orderedDepartments.map((dept, index) => {
+                {orderedDepartments.map((dept) => {
                   const status = tracker[dept];
                   const textColor =
                     status === "Approved"
@@ -182,6 +184,17 @@ function AppTracker() {
                           {tracker[`${dept}timeStamp`]
                             ? `(${tracker[`${dept}timeStamp`]})`
                             : ""}
+                          {/* ✅ Show decline reason if CENRO is declined */}
+                          {dept === "CENRO" &&
+                          status === "Declined" &&
+                          tracker.CENROdecline ? (
+                            <Box
+                              component="span"
+                              sx={{ color: "red", display: "block" }}
+                            >
+                              Reason: {tracker.CENROdecline}
+                            </Box>
+                          ) : null}
                         </Typography>
                       </StepLabel>
                     </Step>

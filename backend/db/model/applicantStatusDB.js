@@ -23,6 +23,7 @@ const AppStatus = sequelize.define(
     ZONING: { type: DataTypes.STRING, defaultValue: "Pending" },
     ZONINGtimeStamp: { type: DataTypes.STRING },
     CENRO: { type: DataTypes.STRING, defaultValue: "Pending" },
+    CENROdecline: { type: DataTypes.STRING },
     CENROtimeStamp: { type: DataTypes.STRING },
     OBO: { type: DataTypes.STRING, defaultValue: "Pending" },
     OBOtimeStamp: { type: DataTypes.STRING },

@@ -313,6 +313,7 @@ router.post(
 router.post("/cenro/decline/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    const { reason } = req.body;
 
     const applicant = await Backroom.findByPk(id);
     if (!applicant) {
@@ -321,22 +322,27 @@ router.post("/cenro/decline/:id", async (req, res) => {
 
     const applicantStatus = await AppStatus.findByPk(id);
     if (!applicantStatus) {
-      return res.status(404).json({ error: "Applicant not found" });
+      return res.status(404).json({ error: "Applicant status not found" });
     }
 
+    const declineTimestamp = moment().format("DD/MM/YYYY HH:mm:ss");
+
     applicant.CENRO = "Declined";
-    applicant.CENROtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+    applicant.CENROtimeStamp = declineTimestamp;
+    applicant.CENROdecline = reason;
 
     await applicant.save();
+
     await applicantStatus.update({
       CENRO: "Declined",
-      CENROtimeStamp: applicant.CENROtimeStamp,
+      CENROtimeStamp: declineTimestamp,
+      CENROdecline: reason,
     });
 
     res.json({ message: "Applicant declined", applicant });
   } catch (err) {
-    console.error("Approve error:", err);
-    res.status(500).json({ error: "Failed to approve applicant" });
+    console.error("Decline error:", err);
+    res.status(500).json({ error: "Failed to decline applicant" });
   }
 });
 
