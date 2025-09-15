@@ -58,7 +58,7 @@ function AppTracker() {
     "CHO",
     "CENRO",
     "ZONING",
-    "BUSINESS TAX",
+    "BUSINESSTAX",
   ];
 
   const theme = useTheme();
