@@ -40,35 +40,53 @@ router.post("/business/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // 1. Get applicant from Files table
+    // 1. Get applicant from BusinessTax table
     const applicant = await BusinessTax.findByPk(id);
     if (!applicant) {
-      return res.status(404).json({ error: "Applicant not found" });
+      return res
+        .status(404)
+        .json({ error: "Applicant not found in BusinessTax" });
     }
 
+    // 2. Get applicant from Backroom
+    const applicantbackroom = await Backroom.findByPk(id);
+    if (!applicantbackroom) {
+      return res.status(404).json({ error: "Applicant not found in Backroom" });
+    }
+
+    // 3. Get applicant status
     const applicantStatus = await AppStatus.findByPk(id);
     if (!applicantStatus) {
-      return res.status(404).json({ error: "Applicant not found" });
+      return res.status(404).json({ error: "Applicant status not found" });
     }
-    applicant.BUSINESSTAX = "Approved";
-    applicant.BUSINESSTAXtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
-    // 2. Convert to plain object
-    const applicantData = applicant.toJSON();
+    // 4. Update statuses
+    const timestamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
-    applicantData.BUSINESSTAX = "Approved";
-    applicantData.BUSINESSTAXtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+    await applicantbackroom.update({
+      BUSINESSTAX: "Approved",
+      BUSINESSTAXtimeStamp: timestamp,
+    });
 
-    const created = await TreasurersOffice.create(applicantData);
+    await applicant.update({
+      BUSINESSTAX: "Approved",
+      BUSINESSTAXtimeStamp: timestamp,
+    });
 
     await applicantStatus.update({
       BUSINESSTAX: "Approved",
-      BUSINESSTAXtimeStamp: applicantData.BusinessTaxtimeStamp,
+      BUSINESSTAXtimeStamp: timestamp,
     });
 
+    // 5. Move applicant to Treasurer’s Office
+    const applicantData = applicant.toJSON();
+    applicantData.BUSINESSTAX = "Approved";
+    applicantData.BUSINESSTAXtimeStamp = timestamp;
+
+    const created = await TreasurersOffice.create(applicantData);
+
     res.status(201).json({
-      message:
-        "Applicant approved, archived in Files, and moved to businessTax",
+      message: "Applicant approved and moved to Treasurer's Office",
       created,
     });
   } catch (err) {
