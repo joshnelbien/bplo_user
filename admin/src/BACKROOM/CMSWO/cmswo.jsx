@@ -78,23 +78,25 @@ function Cmswo() {
       console.error("Error approving applicant:", error);
     }
   };
-
-  const handleDecline = async (id) => {
+  const handleDecline = async (id, reason) => {
     try {
       const res = await axios.post(
-        `http://localhost:5000/backroom/csmwo/decline/${id}`
+        `http://localhost:5000/backroom/csmwo/decline/${id}`,
+        { reason } // ⬅️ send reason to backend
       );
 
       setApplicants((prev) =>
         prev.map((applicant) =>
-          applicant.id === id ? { ...applicant, CSMWO: "Declined" } : applicant
+          applicant.id === id
+            ? { ...applicant, CSMWO: "Declined", CSMWOdecline: reason }
+            : applicant
         )
       );
 
       // alert("Applicant declined");
       // closeModal();
     } catch (error) {
-      console.error("Error approving applicant:", error);
+      console.error("Error declining applicant:", error);
     }
   };
 

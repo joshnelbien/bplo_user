@@ -120,9 +120,11 @@ const Backroom = sequelize.define(
 
     CSMWO: { type: DataTypes.STRING, defaultValue: "Pending" },
     CSMWOtimeStamp: { type: DataTypes.STRING },
+    CSMWOdecline: { type: DataTypes.STRING },
     csmwoFee: { type: DataTypes.STRING },
 
     OBO: { type: DataTypes.STRING, defaultValue: "Pending" },
+    OBOdecline: { type: DataTypes.STRING },
     OBOtimeStamp: { type: DataTypes.STRING },
     //Building Structure Architectural Presentability
     BSAP: { type: DataTypes.STRING },
@@ -142,6 +144,7 @@ const Backroom = sequelize.define(
 
     CHO: { type: DataTypes.STRING, defaultValue: "Pending" },
     CHOtimeStamp: { type: DataTypes.STRING },
+    CHOdecline: { type: DataTypes.STRING },
     choFee: { type: DataTypes.STRING },
     choCert: { type: DataTypes.BLOB("long"), allowNull: true },
     choCert_filename: { type: DataTypes.STRING, allowNull: true },

@@ -75,21 +75,27 @@ function Obo() {
     }
   };
 
-  const handleDeclined = async (id) => {
+  const handleDeclined = async (id, reason) => {
     try {
-      await axios.post(`http://localhost:5000/backroom/obo/decline/${id}`);
+      await axios.post(`http://localhost:5000/backroom/obo/decline/${id}`, {
+        reason, // send decline reason in request body
+      });
+
       setApplicants((prev) =>
         prev.map((applicant) =>
           applicant.id === id
             ? {
                 ...applicant,
+                OBO: "Declined",
+                OBOdecline: reason, // update UI with reason
               }
             : applicant
         )
       );
+
       alert("declined successfully!");
     } catch (error) {
-      console.error("Error approving applicant:", error);
+      console.error("Error declining applicant:", error);
     }
   };
 

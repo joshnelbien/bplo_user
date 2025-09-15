@@ -80,6 +80,7 @@ router.post("/obo/approve/:id", async (req, res) => {
 router.post("/obo/decline/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    const { reason } = req.body; // get reason from frontend
 
     const applicant = await Backroom.findByPk(id);
     if (!applicant) {
@@ -88,17 +89,19 @@ router.post("/obo/decline/:id", async (req, res) => {
 
     const applicantStatus = await AppStatus.findByPk(id);
     if (!applicantStatus) {
-      return res.status(404).json({ error: "Applicant not found" });
+      return res.status(404).json({ error: "Applicant status not found" });
     }
 
     // ✅ Update fields
     applicant.OBO = "Declined";
+    applicant.OBOdecline = reason || "Declined"; // save reason
     applicant.OBOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
     await applicant.save();
 
     await applicantStatus.update({
       OBO: "Declined",
+      OBOdecline: applicant.OBOdecline,
       OBOtimeStamp: applicant.OBOtimeStamp,
     });
 
@@ -223,6 +226,7 @@ router.post("/cho/approve/:id", upload.single("choCert"), async (req, res) => {
     await applicantStatus.update({
       CHO: "Approved",
       CHOtimeStamp: applicant.CHOtimeStamp,
+      CHOdecline: "",
     });
 
     res.json({ message: "Applicant approved", applicant });
@@ -235,6 +239,7 @@ router.post("/cho/approve/:id", upload.single("choCert"), async (req, res) => {
 router.post("/cho/decline/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    const { reason } = req.body; // <-- Get decline reason from frontend
 
     const applicant = await Backroom.findByPk(id);
     if (!applicant) {
@@ -243,23 +248,31 @@ router.post("/cho/decline/:id", async (req, res) => {
 
     const applicantStatus = await AppStatus.findByPk(id);
     if (!applicantStatus) {
-      return res.status(404).json({ error: "Applicant not found" });
+      return res.status(404).json({ error: "Applicant status not found" });
     }
 
-    applicant.CHO = "Declined";
-    applicant.CHOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+    const declineTime = moment().format("DD/MM/YYYY HH:mm:ss");
 
+    // Update Backroom
+    applicant.CHO = "Declined";
+    applicant.CHOtimeStamp = declineTime;
+    applicant.CHOdecline = reason;
     await applicant.save();
 
+    // Update AppStatus
     await applicantStatus.update({
       CHO: "Declined",
-      CHOtimeStamp: applicant.CHOtimeStamp,
+      CHOtimeStamp: declineTime,
+      CHOdecline: reason,
     });
 
-    res.json({ message: "Applicant declined", applicant });
+    res.json({
+      message: "Applicant declined",
+      applicant,
+    });
   } catch (err) {
-    console.error("Approve error:", err);
-    res.status(500).json({ error: "Failed to approve applicant" });
+    console.error("Decline error:", err);
+    res.status(500).json({ error: "Failed to decline applicant" });
   }
 });
 
@@ -297,6 +310,7 @@ router.post(
       await applicantStatus.update({
         CENRO: "Approved",
         CENROtimeStamp: applicant.CENROtimeStamp,
+        CENROdecline: "",
       });
 
       // ✅ (Optional) If you really want to destroy it after approval
@@ -368,6 +382,7 @@ router.post("/csmwo/approve/:id", async (req, res) => {
     await applicantStatus.update({
       CSMWO: "Approved",
       CSMWOtimeStamp: applicant.CSMWOtimeStamp,
+      CSMWOdecline: "",
     });
 
     res.json({ message: "Applicant approved", applicant });
@@ -375,10 +390,10 @@ router.post("/csmwo/approve/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to approve applicant" });
   }
 });
-
 router.post("/csmwo/decline/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    const { reason } = req.body; // ⬅️ get reason from frontend
 
     // 1. Find applicant in Backroom
     const applicant = await Backroom.findByPk(id);
@@ -388,21 +403,24 @@ router.post("/csmwo/decline/:id", async (req, res) => {
 
     const applicantStatus = await AppStatus.findByPk(id);
     if (!applicantStatus) {
-      return res.status(404).json({ error: "Applicant not found" });
+      return res.status(404).json({ error: "Applicant status not found" });
     }
 
-    // 2. Update status & timestamp
-    applicant.CSMWO = "Declined";
-    applicant.CSMWOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+    // 2. Update status, timestamp & decline reason
+    const declineTime = moment().format("DD/MM/YYYY HH:mm:ss");
 
-    // 3. Save changes
+    applicant.CSMWO = "Declined";
+    applicant.CSMWOtimeStamp = declineTime;
+    applicant.CSMWOdecline = reason;
     await applicant.save();
+
     await applicantStatus.update({
       CSMWO: "Declined",
-      CSMWOtimeStamp: applicant.CSMWOtimeStamp,
+      CSMWOtimeStamp: declineTime,
+      CSMWOdecline: reason,
     });
 
-    // 4. Respond
+    // 3. Respond
     res.json({
       message: "Applicant declined successfully",
       applicant,
@@ -412,6 +430,7 @@ router.post("/csmwo/decline/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to decline applicant" });
   }
 });
+
 // List files
 router.get("/backrooms", async (req, res) => {
   try {

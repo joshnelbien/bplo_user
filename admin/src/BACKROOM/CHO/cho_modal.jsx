@@ -14,7 +14,7 @@ import {
   Typography,
   IconButton,
   Tooltip,
-  Fade
+  Fade,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -64,7 +64,9 @@ const FileField = ({ label, fileKey, fileData }) => (
   <Grid item xs={12} sm={6}>
     <TextField
       label={label}
-      value={fileData[fileKey] ? fileData[`${fileKey}_filename`] : "No file uploaded"}
+      value={
+        fileData[fileKey] ? fileData[`${fileKey}_filename`] : "No file uploaded"
+      }
       fullWidth
       variant="outlined"
       size="small"
@@ -334,7 +336,10 @@ function ChoApplicantModal({
           <Section title="Business Address">
             <Field label="Region" value={applicant.region} />
             <Field label="Province" value={applicant.province} />
-            <Field label="City/Municipality" value={applicant.cityOrMunicipality} />
+            <Field
+              label="City/Municipality"
+              value={applicant.cityOrMunicipality}
+            />
             <Field label="Barangay" value={applicant.barangay} />
             <Field label="Address Line 1" value={applicant.addressLine1} />
             <Field label="Zip Code" value={applicant.zipCode} />
@@ -356,9 +361,15 @@ function ChoApplicantModal({
           <Section title="Taxpayer Address">
             <Field label="Tax Region" value={applicant.Taxregion} />
             <Field label="Tax Province" value={applicant.Taxprovince} />
-            <Field label="Tax City/Municipality" value={applicant.TaxcityOrMunicipality} />
+            <Field
+              label="Tax City/Municipality"
+              value={applicant.TaxcityOrMunicipality}
+            />
             <Field label="Tax Barangay" value={applicant.Taxbarangay} />
-            <Field label="Tax Address Line 1" value={applicant.TaxaddressLine1} />
+            <Field
+              label="Tax Address Line 1"
+              value={applicant.TaxaddressLine1}
+            />
             <Field label="Tax Zip Code" value={applicant.TaxzipCode} />
             <Field label="Tax Pin Address" value={applicant.TaxpinAddress} />
             <Field label="Own Place" value={applicant.ownPlace} />
@@ -482,10 +493,18 @@ function ChoApplicantModal({
           >
             Close
           </Button>
-          <Button onClick={() => setApproveConfirmOpen(true)} variant="contained" color="success">
+          <Button
+            onClick={() => setApproveConfirmOpen(true)}
+            variant="contained"
+            color="success"
+          >
             Approve
           </Button>
-          <Button onClick={() => setDeclineConfirmOpen(true)} variant="contained" color="error">
+          <Button
+            onClick={() => setDeclineConfirmOpen(true)}
+            variant="contained"
+            color="error"
+          >
             Decline
           </Button>
         </DialogActions>
@@ -501,53 +520,53 @@ function ChoApplicantModal({
       />
 
       {/* New Decline Dialog with Reason TextField */}
-      <Dialog 
-        open={declineConfirmOpen} 
-        onClose={() => setDeclineConfirmOpen(false)} 
-        aria-labelledby="decline-dialog-title" 
-      > 
-        <DialogTitle 
-          id="decline-dialog-title" 
-          sx={{ 
-            fontWeight: "bold", 
-            backgroundColor: "#d32f2f", 
-            color: "white", 
-          }} 
-        > 
-          Decline Applicant 
-        </DialogTitle> 
-        <DialogContent sx={{ pt: 2, px: 3 }}> 
-          <TextField 
-            autoFocus 
-            margin="dense" 
-            id="decline-reason" 
-            label="Reason for Decline" 
-            type="text" 
-            fullWidth 
-            variant="outlined" 
-            value={declineReason} 
-            onChange={(e) => setDeclineReason(e.target.value)} 
-            multiline 
-            rows={4} 
+      <Dialog
+        open={declineConfirmOpen}
+        onClose={() => setDeclineConfirmOpen(false)}
+        aria-labelledby="decline-dialog-title"
+      >
+        <DialogTitle
+          id="decline-dialog-title"
+          sx={{
+            fontWeight: "bold",
+            backgroundColor: "#d32f2f",
+            color: "white",
+          }}
+        >
+          Decline Applicant
+        </DialogTitle>
+        <DialogContent sx={{ pt: 2, px: 3 }}>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="decline-reason"
+            label="Reason for Decline"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={declineReason}
+            onChange={(e) => setDeclineReason(e.target.value)}
+            multiline
+            rows={4}
             required
             error={declineReason.trim() === ""}
             helperText={declineReason.trim() === "" ? "Reason is required" : ""}
-          /> 
-        </DialogContent> 
-        <DialogActions> 
-          <Button onClick={() => setDeclineConfirmOpen(false)} color="primary"> 
-            Cancel 
-          </Button> 
-          <Button 
-            onClick={handleDeclineConfirm} 
-            color="error" 
-            variant="contained" 
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeclineConfirmOpen(false)} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeclineConfirm}
+            color="error"
+            variant="contained"
             disabled={declineReason.trim() === ""}
-          > 
-            Decline 
-          </Button> 
-        </DialogActions> 
-      </Dialog> 
+          >
+            Decline
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Reusable Status Dialog for Success */}
       <StatusDialog
@@ -571,4 +590,3 @@ function ChoApplicantModal({
 }
 
 export default ChoApplicantModal;
-  

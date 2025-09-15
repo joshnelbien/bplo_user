@@ -93,21 +93,26 @@ function Cho() {
   };
 
   // ✅ Decline logic (fixed)
-  const handleDecline = async (id) => {
+  const handleDecline = async (id, reason) => {
     try {
-      await axios.post(`http://localhost:5000/backroom/cho/decline/${id}`);
+      await axios.post(`http://localhost:5000/backroom/cho/decline/${id}`, {
+        reason, // pass decline reason to backend
+      });
+
       setApplicants((prev) =>
         prev.map((applicant) =>
-          applicant.id === id ? { ...applicant, CHO: "Declined" } : applicant
+          applicant.id === id
+            ? { ...applicant, CHO: "Declined", CHOdecline: reason }
+            : applicant
         )
       );
-      alert("declined successfully");
+
+      alert("Declined successfully");
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error declining applicant:", error);
     }
   };
-
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
