@@ -184,15 +184,14 @@ function AppTracker() {
                           {tracker[`${dept}timeStamp`]
                             ? `(${tracker[`${dept}timeStamp`]})`
                             : ""}
-                          {/* ✅ Show decline reason if CENRO is declined */}
-                          {dept === "CENRO" &&
+                          {dept === `${dept}` &&
                           status === "Declined" &&
-                          tracker.CENROdecline ? (
+                          tracker[`${dept}decline`] ? (
                             <Box
                               component="span"
                               sx={{ color: "red", display: "block" }}
                             >
-                              Reason: {tracker.CENROdecline}
+                              Reason: {tracker[`${dept}decline`]}
                             </Box>
                           ) : null}
                         </Typography>

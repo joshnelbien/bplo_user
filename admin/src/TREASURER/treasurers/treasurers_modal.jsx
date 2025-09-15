@@ -392,15 +392,6 @@ function TreasurersApplicantModal({
               fileData={applicant}
             />
           </Section>
-
-          <TextField
-            label="Solid waste Fee"
-            value={csmwoFee || ""}
-            onChange={(e) => handleChange("csmwoFee", e.target.value)}
-            fullWidth
-            size="small"
-            sx={{ mt: 2 }}
-          />
         </DialogContent>
 
         <DialogActions>
