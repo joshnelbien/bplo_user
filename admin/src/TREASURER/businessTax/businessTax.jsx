@@ -65,8 +65,11 @@ function BusinessTax() {
   const handleApprove = async (id, selectedFiles) => {
     try {
       const formData = new FormData();
-      if (selectedFiles.businessTaxCompute) {
-        formData.append("businessTaxCompute", selectedFiles.businessTaxCompute);
+      if (selectedFiles.businessTaxComputation) {
+        formData.append(
+          "businessTaxComputation",
+          selectedFiles.businessTaxComputation
+        );
       }
 
       await axios.post(

@@ -392,6 +392,12 @@ function TreasurersApplicantModal({
               fileData={applicant}
             />
           </Section>
+
+          <FileField
+            fileKey="businesstaxComputation"
+            label="Photo (Exterior)"
+            fileData={applicant}
+          />
         </DialogContent>
 
         <DialogActions>

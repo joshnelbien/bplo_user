@@ -145,7 +145,7 @@ function BusinessTaxApplicantModal({
   const [computeOpen, setComputeOpen] = useState(false);
 
   const files = [
-    { label: "Business Tax Computation", name: "businessTaxCompute" },
+    { label: "Business Tax Computation", name: "businessTaxComputation" },
   ];
 
   const handleFileSelect = (e) => {
@@ -554,7 +554,7 @@ function BusinessTaxApplicantModal({
                 Choose File
                 <input
                   type="file"
-                  name="businessTaxCompute"
+                  name="businessTaxComputation"
                   hidden
                   onChange={handleFileSelect}
                 />
@@ -562,7 +562,7 @@ function BusinessTaxApplicantModal({
             </Grid>
             <Grid item xs>
               <TextField
-                value={selectedFiles.businessTaxCompute?.name || ""}
+                value={selectedFiles.businessTaxComputation?.name || ""}
                 placeholder="No file selected"
                 size="small"
                 fullWidth
