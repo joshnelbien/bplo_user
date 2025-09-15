@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 
-export default function Step4TaxInfo({ formData, handleChange }) {
+export default function Step4TaxInfo({ formData, handleChange, errors }) {
   const [psgc, setPsgc] = useState(null);
 
   useEffect(() => {
@@ -86,13 +86,14 @@ export default function Step4TaxInfo({ formData, handleChange }) {
 
       <Stack spacing={3}>
         {/* Region */}
-        <FormControl fullWidth sx={{ minWidth: 300 }}>
+        <FormControl fullWidth sx={{ minWidth: 300 }} error={!!errors.Taxregion}>
           <InputLabel id="tax-region-label">Region</InputLabel>
           <Select
             labelId="tax-region-label"
             name="Taxregion"
             value={formData.Taxregion || ""}
             onChange={handleUppercaseChange}
+            label="Region"
           >
             <MenuItem value="">Select Region</MenuItem>
             {psgc &&
@@ -102,10 +103,15 @@ export default function Step4TaxInfo({ formData, handleChange }) {
                 </MenuItem>
               ))}
           </Select>
+          {!!errors.Taxregion && (
+            <Typography variant="caption" color="error">
+              {errors.Taxregion}
+            </Typography>
+          )}
         </FormControl>
 
         {/* Province */}
-        <FormControl fullWidth sx={{ minWidth: 300 }}>
+        <FormControl fullWidth sx={{ minWidth: 300 }} error={!!errors.Taxprovince}>
           <InputLabel id="tax-province-label">Province</InputLabel>
           <Select
             labelId="tax-province-label"
@@ -113,6 +119,7 @@ export default function Step4TaxInfo({ formData, handleChange }) {
             value={formData.Taxprovince || ""}
             onChange={handleUppercaseChange}
             disabled={!formData.Taxregion}
+            label="Province"
           >
             <MenuItem value="">Select Province</MenuItem>
             {provinceOptions.map((prov) => (
@@ -121,10 +128,15 @@ export default function Step4TaxInfo({ formData, handleChange }) {
               </MenuItem>
             ))}
           </Select>
+          {!!errors.Taxprovince && (
+            <Typography variant="caption" color="error">
+              {errors.Taxprovince}
+            </Typography>
+          )}
         </FormControl>
 
         {/* City / Municipality */}
-        <FormControl fullWidth sx={{ minWidth: 300 }}>
+        <FormControl fullWidth sx={{ minWidth: 300 }} error={!!errors.TaxcityOrMunicipality}>
           <InputLabel id="tax-city-label">City / Municipality</InputLabel>
           <Select
             labelId="tax-city-label"
@@ -132,6 +144,7 @@ export default function Step4TaxInfo({ formData, handleChange }) {
             value={formData.TaxcityOrMunicipality || ""}
             onChange={handleUppercaseChange}
             disabled={!formData.Taxprovince}
+            label="City / Municipality"
           >
             <MenuItem value="">Select City / Municipality</MenuItem>
             {cityOptions.map((city) => (
@@ -140,10 +153,15 @@ export default function Step4TaxInfo({ formData, handleChange }) {
               </MenuItem>
             ))}
           </Select>
+          {!!errors.TaxcityOrMunicipality && (
+            <Typography variant="caption" color="error">
+              {errors.TaxcityOrMunicipality}
+            </Typography>
+          )}
         </FormControl>
 
         {/* Barangay */}
-        <FormControl fullWidth sx={{ minWidth: 300 }}>
+        <FormControl fullWidth sx={{ minWidth: 300 }} error={!!errors.Taxbarangay}>
           <InputLabel id="tax-barangay-label">Barangay</InputLabel>
           <Select
             labelId="tax-barangay-label"
@@ -151,6 +169,7 @@ export default function Step4TaxInfo({ formData, handleChange }) {
             value={formData.Taxbarangay || ""}
             onChange={handleUppercaseChange}
             disabled={!formData.TaxcityOrMunicipality}
+            label="Barangay"
           >
             <MenuItem value="">Select Barangay</MenuItem>
             {barangayOptions.map((brgy) => (
@@ -159,6 +178,11 @@ export default function Step4TaxInfo({ formData, handleChange }) {
               </MenuItem>
             ))}
           </Select>
+          {!!errors.Taxbarangay && (
+            <Typography variant="caption" color="error">
+              {errors.Taxbarangay}
+            </Typography>
+          )}
         </FormControl>
 
         {/* Address Line 1 */}
@@ -169,6 +193,8 @@ export default function Step4TaxInfo({ formData, handleChange }) {
           onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
+          error={!!errors.TaxaddressLine1}
+          helperText={errors.TaxaddressLine1}
         />
 
         {/* Zip Code */}
@@ -179,6 +205,8 @@ export default function Step4TaxInfo({ formData, handleChange }) {
           onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
+          error={!!errors.TaxzipCode}
+          helperText={errors.TaxzipCode}
         />
 
         {/* Pin Address with Map */}
@@ -208,18 +236,24 @@ export default function Step4TaxInfo({ formData, handleChange }) {
         </div>
 
         {/* Own Place */}
-        <FormControl fullWidth sx={{ minWidth: 300 }}>
+        <FormControl fullWidth sx={{ minWidth: 300 }} error={!!errors.ownPlace}>
           <InputLabel id="own-place-label">Own Place</InputLabel>
           <Select
             labelId="own-place-label"
             name="ownPlace"
             value={formData.ownPlace || ""}
             onChange={handleUppercaseChange}
+            label="Own Place"
           >
             <MenuItem value="">Select</MenuItem>
             <MenuItem value="YES">YES</MenuItem>
             <MenuItem value="NO">NO</MenuItem>
           </Select>
+          {!!errors.ownPlace && (
+            <Typography variant="caption" color="error">
+              {errors.ownPlace}
+            </Typography>
+          )}
         </FormControl>
 
         {/* Conditional: Own Place = YES */}
@@ -231,6 +265,8 @@ export default function Step4TaxInfo({ formData, handleChange }) {
             onChange={handleUppercaseChange}
             fullWidth
             variant="outlined"
+            error={!!errors.taxdec}
+            helperText={errors.taxdec}
           />
         )}
 
@@ -245,6 +281,8 @@ export default function Step4TaxInfo({ formData, handleChange }) {
               onChange={handleUppercaseChange}
               fullWidth
               variant="outlined"
+              error={!!errors.lessorName}
+              helperText={errors.lessorName}
             />
             <TextField
               label="Monthly Rental"
@@ -253,6 +291,8 @@ export default function Step4TaxInfo({ formData, handleChange }) {
               onChange={handleUppercaseChange}
               fullWidth
               variant="outlined"
+              error={!!errors.monthlyRent}
+              helperText={errors.monthlyRent}
             />
             <TextField
               label="Tax Declaration No."
@@ -261,6 +301,8 @@ export default function Step4TaxInfo({ formData, handleChange }) {
               onChange={handleUppercaseChange}
               fullWidth
               variant="outlined"
+              error={!!errors.taxdec}
+              helperText={errors.taxdec}
             />
           </Stack>
         )}

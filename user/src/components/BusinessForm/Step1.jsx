@@ -1,6 +1,6 @@
 import { MenuItem, Stack, TextField, Typography } from "@mui/material";
 
-export default function Step1BusinessInfo({ formData, handleChange }) {
+export default function Step1BusinessInfo({ formData, handleChange, errors }) {
   const regLabelMap = {
     "Sole Proprietorship": "DTI Registration No.",
     Corporation: "SEC Registration No.",
@@ -40,6 +40,9 @@ export default function Step1BusinessInfo({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          // Add error props
+          error={!!errors.BusinessType}
+          helperText={errors.BusinessType}
         >
           <MenuItem value="">Select Business Type</MenuItem>
           <MenuItem value="SOLE PROPRIETORSHIP">Sole Proprietorship</MenuItem>
@@ -60,6 +63,9 @@ export default function Step1BusinessInfo({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          // Add error props (assuming this isn't required by default)
+          error={!!errors.dscRegNo}
+          helperText={errors.dscRegNo}
         />
 
         {/* Business Name */}
@@ -71,6 +77,9 @@ export default function Step1BusinessInfo({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          // Add error props
+          error={!!errors.businessName}
+          helperText={errors.businessName}
         />
 
         {/* TIN No. (numbers only, no uppercase conversion needed) */}
@@ -82,6 +91,9 @@ export default function Step1BusinessInfo({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          // Add error props
+          error={!!errors.tinNo}
+          helperText={errors.tinNo}
         />
 
         {/* Trade Name */}
@@ -93,6 +105,9 @@ export default function Step1BusinessInfo({ formData, handleChange }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          // Add error props
+          error={!!errors.TradeName}
+          helperText={errors.TradeName}
         />
       </Stack>
     </div>
