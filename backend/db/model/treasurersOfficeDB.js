@@ -1,8 +1,8 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../sequelize");
 
-const TreasurersOffifce = sequelize.define(
-  "TreasurersOffifce",
+const TreasurersOffice = sequelize.define(
+  "TreasurersOffice",
   {
     id: {
       type: DataTypes.STRING,
@@ -172,9 +172,9 @@ const TreasurersOffifce = sequelize.define(
   },
 
   {
-    tableName: "TreasurersOffifce",
+    tableName: "TreasurersOffice",
     timestamps: true,
   }
 );
 
-module.exports = TreasurersOffifce;
+module.exports = TreasurersOffice;

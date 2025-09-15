@@ -25,17 +25,15 @@ const BusinessTaxRoutes = require("./routes/businessTaxRoutes");
 const AppStatus = require("./db/model/applicantStatusDB");
 const appStatusRoutes = require("./routes/appStatusRoutes");
 
-const TreasurersOffifce = require("./db/model/treasurersOfficeDB");
+const TreasurersOffice = require("./db/model/treasurersOfficeDB");
 const TreasurersOfficeRoutes = require("./routes/treasurerRoutes");
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: "50mb" })); // Increase JSON payload limit for large images
+app.use(express.json({ limit: "50mb" }));
 
-// Health check
 app.get("/api/health", (_, res) => res.json({ ok: true }));
 
-// DB setup
 (async () => {
   await sequelize.authenticate();
   await Examiners.sync({ alter: true });
@@ -45,7 +43,7 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
   await Announcements.sync({ alter: true });
   await BusinessTax.sync({ alter: true });
   await AppStatus.sync({ alter: true });
-  await TreasurersOffifce.sync({ alter: true });
+  await TreasurersOffice.sync({ alter: true });
   console.log("Database ready");
 })();
 
