@@ -28,6 +28,8 @@ const appStatusRoutes = require("./routes/appStatusRoutes");
 const TreasurersOffice = require("./db/model/treasurersOfficeDB");
 const TreasurersOfficeRoutes = require("./routes/treasurerRoutes");
 
+const BusinessProfile = require("./db/model/businessProfile");
+
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
@@ -44,6 +46,7 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
   await BusinessTax.sync({ alter: true });
   await AppStatus.sync({ alter: true });
   await TreasurersOffice.sync({ alter: true });
+  await BusinessProfile.sync({ alter: true });
   console.log("Database ready");
 })();
 

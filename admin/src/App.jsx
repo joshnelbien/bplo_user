@@ -8,7 +8,6 @@ import Zoning from "./BACKROOM/ZONING/zoning";
 import Dashboard from "./DASHBOARD/dashboard";
 import Login from "./LOGIN/login";
 import New_records from "./NEW_RECORDS/new_records";
-import Profile from "./PROFILE/profile";
 import Renew_records from "./RENEW_RECORDS/renew_records";
 import Examiners from "./TREASURER/examiners/examiners";
 import BusinessTax from "./TREASURER/businessTax/businessTax";
@@ -22,7 +21,6 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />}></Route>
         <Route path="/new_records" element={<New_records />}></Route>
         <Route path="/renew_records" element={<Renew_records />}></Route>
-        <Route path="/profile" element={<Profile />}></Route>
         <Route path="/cenro" element={<Cenro />}></Route>
         <Route path="/cho" element={<Cho />}></Route>
         <Route path="/cmswo" element={<Cmswo />}></Route>
