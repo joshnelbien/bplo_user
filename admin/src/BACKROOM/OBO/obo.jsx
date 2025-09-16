@@ -128,6 +128,8 @@ function Obo() {
           p: 3,
           minHeight: "100vh",
           background: "linear-gradient(to bottom, #FFFFFF, #e6ffe6)",
+          marginLeft: { xs: 0, sm: "250px" }, // 0 on mobile, 250px on larger screens
+          width: { xs: "100%", sm: "calc(100% - 250px)" }, // full width on mobile
         }}
       >
         <Typography
