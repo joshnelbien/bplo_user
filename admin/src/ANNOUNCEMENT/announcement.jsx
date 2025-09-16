@@ -146,7 +146,7 @@ const Announcement = () => {
           try {
             const response = await fetch(
               isEditing
-                ? `/api/announcements/${currentId}`
+                ? `/api/anouncements/${currentId}`
                 : "/api/announcements",
               {
                 method: isEditing ? "PUT" : "POST",

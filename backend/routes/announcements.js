@@ -66,4 +66,20 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.put("/anouncements/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const updated = await Announcements.update({
+      where: { id },
+    });
+    if (updated) {
+      return res.status(204).json({ message: "Announcement updated" });
+    }
+    res.status(404).json({ error: "Announcement not found" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 module.exports = router;
