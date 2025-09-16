@@ -145,11 +145,22 @@ function OboApplicantModal({
     Signage: "",
     Electronics: "",
   });
+
+  // State to manage validation errors for each field
+  const [fieldErrors, setFieldErrors] = useState({
+    BSAP: false,
+    SR: false,
+    Mechanical: false,
+    Electrical: false,
+    Signage: false,
+    Electronics: false,
+  });
+
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
-  const [declineConfirmOpen, setDeclineConfirmOpen] = useState(false); // New state for decline confirmation
-  const [declineReason, setDeclineReason] = useState(""); // State for the decline reason
-  const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false); // New state for decline success
+  const [declineConfirmOpen, setDeclineConfirmOpen] = useState(false);
+  const [declineReason, setDeclineReason] = useState("");
+  const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false);
 
   useEffect(() => {
     if (applicant) {
@@ -164,12 +175,52 @@ function OboApplicantModal({
     }
   }, [applicant]);
 
+  // Function to handle changes and clear the error for the changed field
   const handleChange = (field, value) => {
     setOboFields((prev) => ({ ...prev, [field]: value }));
+    setFieldErrors((prev) => ({ ...prev, [field]: false })); // Clear error on change
+  };
+
+  // Validation function to check if all fields are filled
+  const validateFields = () => {
+    const newErrors = {};
+    let isValid = true;
+
+    if (!oboFields.BSAP) {
+      newErrors.BSAP = true;
+      isValid = false;
+    }
+    if (!oboFields.SR) {
+      newErrors.SR = true;
+      isValid = false;
+    }
+    if (!oboFields.Mechanical) {
+      newErrors.Mechanical = true;
+      isValid = false;
+    }
+    if (!oboFields.Electrical) {
+      newErrors.Electrical = true;
+      isValid = false;
+    }
+    if (!oboFields.Signage) {
+      newErrors.Signage = true;
+      isValid = false;
+    }
+    if (!oboFields.Electronics) {
+      newErrors.Electronics = true;
+      isValid = false;
+    }
+
+    setFieldErrors(newErrors);
+    return isValid;
   };
 
   // Approve Logic
-  const handleApproveClick = () => setConfirmOpen(true);
+  const handleApproveClick = () => {
+    if (validateFields()) {
+      setConfirmOpen(true);
+    }
+  };
   const handleConfirmClose = () => setConfirmOpen(false);
   const handleConfirmApprove = () => {
     setConfirmOpen(false);
@@ -182,12 +233,12 @@ function OboApplicantModal({
   };
 
   // Decline Logic
-  const handleDeclineClick = () => setDeclineConfirmOpen(true); // Open decline confirmation
+  const handleDeclineClick = () => setDeclineConfirmOpen(true);
   const handleDeclineConfirmClose = () => setDeclineConfirmOpen(false);
   const handleDeclineConfirm = () => {
     setDeclineConfirmOpen(false);
-    onDecline(applicant.id, declineReason); // Pass the reason to the parent handler
-    setDeclineSuccessOpen(true); // Show decline success pop-up
+    onDecline(applicant.id, declineReason);
+    setDeclineSuccessOpen(true);
   };
   const handleDeclineSuccessClose = () => {
     setDeclineSuccessOpen(false);
@@ -359,6 +410,8 @@ function OboApplicantModal({
               onChange={(e) => handleChange("BSAP", e.target.value)}
               fullWidth
               size="small"
+              error={fieldErrors.BSAP}
+              helperText={fieldErrors.BSAP && "Required to fill out this field"}
             />
           </Grid>
 
@@ -369,6 +422,8 @@ function OboApplicantModal({
               onChange={(e) => handleChange("SR", e.target.value)}
               fullWidth
               size="small"
+              error={fieldErrors.SR}
+              helperText={fieldErrors.SR && "Required to fill out this field"}
             />
           </Grid>
 
@@ -379,6 +434,10 @@ function OboApplicantModal({
               onChange={(e) => handleChange("Mechanical", e.target.value)}
               fullWidth
               size="small"
+              error={fieldErrors.Mechanical}
+              helperText={
+                fieldErrors.Mechanical && "Required to fill out this field"
+              }
             />
           </Grid>
 
@@ -389,6 +448,10 @@ function OboApplicantModal({
               onChange={(e) => handleChange("Electrical", e.target.value)}
               fullWidth
               size="small"
+              error={fieldErrors.Electrical}
+              helperText={
+                fieldErrors.Electrical && "Required to fill out this field"
+              }
             />
           </Grid>
 
@@ -399,6 +462,10 @@ function OboApplicantModal({
               onChange={(e) => handleChange("Signage", e.target.value)}
               fullWidth
               size="small"
+              error={fieldErrors.Signage}
+              helperText={
+                fieldErrors.Signage && "Required to fill out this field"
+              }
             />
           </Grid>
 
@@ -409,6 +476,10 @@ function OboApplicantModal({
               onChange={(e) => handleChange("Electronics", e.target.value)}
               fullWidth
               size="small"
+              error={fieldErrors.Electronics}
+              helperText={
+                fieldErrors.Electronics && "Required to fill out this field"
+              }
             />
           </Grid>
         </DialogContent>
@@ -424,13 +495,13 @@ function OboApplicantModal({
               "&:hover": {
                 borderColor: "#1c541eff",
               },
-              width: "100px", // Set a specific width
+              width: "100px",
             }}
           >
             Close
           </Button>
           <Button
-            onClick={handleApproveClick} // Trigger confirmation dialog
+            onClick={handleApproveClick}
             variant="contained"
             color="success"
           >
@@ -438,7 +509,7 @@ function OboApplicantModal({
           </Button>
 
           <Button
-            onClick={handleDeclineClick} // Trigger decline confirmation
+            onClick={handleDeclineClick}
             variant="contained"
             color="error"
             sx={{
