@@ -12,12 +12,12 @@ import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../sideBar/sideBar";
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import AutorenewIcon from '@mui/icons-material/Autorenew';
-import WbSunnyIcon from '@mui/icons-material/WbSunny';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import CampaignIcon from '@mui/icons-material/Campaign';
-import DescriptionIcon from '@mui/icons-material/Description';
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import AutorenewIcon from "@mui/icons-material/Autorenew";
+import WbSunnyIcon from "@mui/icons-material/WbSunny";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import CampaignIcon from "@mui/icons-material/Campaign";
+import DescriptionIcon from "@mui/icons-material/Description";
 import AnnouncementModal from "../homePage/announcement";
 
 // Modal styles
@@ -50,7 +50,8 @@ const cardStyle = {
   cursor: "pointer",
   background: "white",
   border: "3px solid transparent",
-  backgroundImage: "linear-gradient(white, white), linear-gradient(135deg, #2A8238, #34d399)",
+  backgroundImage:
+    "linear-gradient(white, white), linear-gradient(135deg, #2A8238, #34d399)",
   backgroundOrigin: "border-box",
   backgroundClip: "content-box, border-box",
   boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
@@ -76,9 +77,13 @@ const modalContents = {
     title: "REQUIREMENTS FOR NEW BUSINESS REGISTRATION",
     items: [
       { text: "- Filled-up Unified Business Permit Application Form" },
-      { text: "- 1 photocopy of DTI/SEC/CDA Registration and Articles of Incorporation" },
+      {
+        text: "- 1 photocopy of DTI/SEC/CDA Registration and Articles of Incorporation",
+      },
       { text: "- Contract of Lease and Lessor Mayor's Permit (if rented)" },
-      { text: "- Photocopy of Occupancy Permit (if newly constructed building)" },
+      {
+        text: "- Photocopy of Occupancy Permit (if newly constructed building)",
+      },
       { text: "- Location of Business (Sketch/Map)" },
       { text: "- Land Tax Clearance/Certificate of Payment" },
       { text: "- Market Clearance (if stallholder)" },
@@ -155,9 +160,9 @@ const HomePage = () => {
   };
 
   const buttonStyle = {
-    color: '#2A8238',
-    fontWeight: 'bold',
-    borderRadius: '10px',
+    color: "#2A8238",
+    fontWeight: "bold",
+    borderRadius: "10px",
     px: 2,
     py: 1,
     border: "2px solid #2A8238",
@@ -182,9 +187,28 @@ const HomePage = () => {
     <Box sx={{ display: "flex", height: "100vh", bgcolor: "#f9fafb" }}>
       <Sidebar id={userId} />
 
-      <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, sm: 4 }, display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: { xs: 2, sm: 4 },
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         {/* Buttons */}
-        <Stack direction="row" spacing={2} sx={{ width: "100%", maxWidth: 1200, justifyContent: "flex-end", mb: 4, flexWrap: "wrap" }}>
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            width: "100%",
+            maxWidth: 1200,
+            justifyContent: "flex-end",
+            mb: 4,
+            flexWrap: "wrap",
+          }}
+        >
           <Button sx={buttonStyle} onClick={handleAnnouncementClick}>
             <CampaignIcon sx={{ mr: 1 }} /> PUBLIC STATEMENT
           </Button>
@@ -194,14 +218,26 @@ const HomePage = () => {
         </Stack>
 
         {/* Cards */}
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={4} sx={{ mb: 4 }}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={4}
+          sx={{ mb: 4 }}
+        >
           {["newApplication", "renewal"].map((type) => {
-            const icons = { newApplication: <AssignmentIcon />, renewal: <AutorenewIcon /> };
-            const titles = { newApplication: "NEW APPLICATION REQ.", renewal: "RENEWAL REQ." };
+            const icons = {
+              newApplication: <AssignmentIcon />,
+              renewal: <AutorenewIcon />,
+            };
+            const titles = {
+              newApplication: "NEW APPLICATION REQUIREMENTS",
+              renewal: "RENEWAL REQUIREMENTS",
+            };
             return (
               <Box key={type} onClick={() => handleOpen(type)} sx={cardStyle}>
                 {icons[type]}
-                <Typography fontWeight="bold" mt={1}>{titles[type]}</Typography>
+                <Typography fontWeight="bold" mt={1}>
+                  {titles[type]}
+                </Typography>
               </Box>
             );
           })}
@@ -209,12 +245,20 @@ const HomePage = () => {
 
         <Stack direction={{ xs: "column", sm: "row" }} spacing={4}>
           {["Holidays", "Officehrs"].map((type) => {
-            const icons = { Holidays: <WbSunnyIcon />, Officehrs: <AccessTimeIcon /> };
-            const titles = { Holidays: "HOLIDAYS INFO.", Officehrs: "OFFICE HOURS INFO." };
+            const icons = {
+              Holidays: <WbSunnyIcon />,
+              Officehrs: <AccessTimeIcon />,
+            };
+            const titles = {
+              Holidays: "HOLIDAYS INFORMATION.",
+              Officehrs: "OFFICE HOURS INFORMATION.",
+            };
             return (
               <Box key={type} onClick={() => handleOpen(type)} sx={cardStyle}>
                 {icons[type]}
-                <Typography fontWeight="bold" mt={1}>{titles[type]}</Typography>
+                <Typography fontWeight="bold" mt={1}>
+                  {titles[type]}
+                </Typography>
               </Box>
             );
           })}
@@ -222,12 +266,31 @@ const HomePage = () => {
       </Box>
 
       {/* Modal */}
-      <Modal open={open} onClose={handleClose} closeAfterTransition slots={{ backdrop: Backdrop }} slotProps={{ backdrop: { timeout: 500 } }}>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        closeAfterTransition
+        slots={{ backdrop: Backdrop }}
+        slotProps={{ backdrop: { timeout: 500 } }}
+      >
         <Fade in={open}>
           <Box sx={modalStyle}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-              <Typography variant="h6" fontWeight="bold">{modalTitle}</Typography>
-              <Button onClick={handleClose} color="error" sx={{ minWidth: 0, p: 0 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <Typography variant="h6" fontWeight="bold">
+                {modalTitle}
+              </Typography>
+              <Button
+                onClick={handleClose}
+                color="error"
+                sx={{ minWidth: 0, p: 0 }}
+              >
                 <CloseIcon />
               </Button>
             </Box>
@@ -243,7 +306,11 @@ const HomePage = () => {
       </Modal>
 
       {/* Announcement Modal */}
-      <AnnouncementModal open={isAnnouncementModalOpen} onClose={handleCloseAnnouncementModal} announcements={announcements} />
+      <AnnouncementModal
+        open={isAnnouncementModalOpen}
+        onClose={handleCloseAnnouncementModal}
+        announcements={announcements}
+      />
     </Box>
   );
 };
