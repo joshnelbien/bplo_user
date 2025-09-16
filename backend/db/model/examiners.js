@@ -145,6 +145,7 @@ const Examiners = sequelize.define(
 
     BUSINESSTAX: { type: DataTypes.STRING, defaultValue: "Pending" },
     BUSINESSTAXtimeStamp: { type: DataTypes.STRING },
+    application: { type: DataTypes.STRING },
   },
 
   {

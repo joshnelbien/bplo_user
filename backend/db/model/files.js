@@ -112,6 +112,7 @@ const File = sequelize.define(
     photoOfBusinessEstExt_size: { type: DataTypes.INTEGER, allowNull: true },
 
     status: { type: DataTypes.STRING, defaultValue: "pending" },
+    application: { type: DataTypes.STRING },
   },
 
   {

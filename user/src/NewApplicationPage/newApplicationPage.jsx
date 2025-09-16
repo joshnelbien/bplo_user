@@ -120,6 +120,7 @@ function NewApplicationPage() {
       Units: "",
       capital: "",
       totalCapital: "",
+      application: "New",
     }
   );
 
@@ -419,7 +420,10 @@ function NewApplicationPage() {
         );
       case 7:
         return (
-          <Section7FileUploads handleFileChange={handleFileChange} errors={errors} />
+          <Section7FileUploads
+            handleFileChange={handleFileChange}
+            errors={errors}
+          />
         );
       default:
         return "Unknown step";
