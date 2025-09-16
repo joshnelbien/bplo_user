@@ -12,6 +12,7 @@ import Renew_records from "./RENEW_RECORDS/renew_records";
 import Examiners from "./TREASURER/examiners/examiners";
 import BusinessTax from "./TREASURER/businessTax/businessTax";
 import Treasurers from "./TREASURER/treasurers/treasurers";
+import BusinessProfile from "./BUSINESSPROFILE/businessProfile";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
         <Route path="/businessTax" element={<BusinessTax />}></Route>
         <Route path="/announcement" element={<Announce />}></Route>
         <Route path="/treasurers" element={<Treasurers />}></Route>
+        <Route path="/businessProfile" element={<BusinessProfile />}></Route>
       </Routes>
     </BrowserRouter>
   );

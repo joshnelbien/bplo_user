@@ -70,6 +70,11 @@ const menuItems = [
     icon: <AutorenewIcon />,
   },
   {
+    text: "Business Profile",
+    path: "/businessProfile",
+    icon: <AutorenewIcon />,
+  },
+  {
     text: "Announcement",
     path: "/announcement",
     icon: <CampaignIcon />,
