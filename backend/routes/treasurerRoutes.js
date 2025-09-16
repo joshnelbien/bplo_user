@@ -5,7 +5,7 @@ const router = express.Router();
 const moment = require("moment");
 const AppStatus = require("../db/model/applicantStatusDB");
 const TreasurersOffice = require("../db/model/treasurersOfficeDB");
-const BusinessProfile = require("../db/model/businessProfile");
+const BusinessProfile = require("../db/model/businessProfileDB");
 
 router.post("/businessTax/approve/:id", async (req, res) => {
   try {

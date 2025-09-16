@@ -20,19 +20,17 @@ import {
 function BusinessProfile() {
   const [applicants, setApplicants] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedApplicant, setSelectedApplicant] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filter, setFilter] = useState("pending"); // ✅ pending by default
+  const [filter, setFilter] = useState("all"); // ✅ default to all
   const recordsPerPage = 20;
 
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/treasurer/treasurer"
+          "http://localhost:5000/businessProfile/businessProfiles"
         );
 
-        // Sort by createdAt ascending (oldest first, newest at bottom)
+        // Sort by createdAt ascending (oldest first)
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
@@ -46,15 +44,13 @@ function BusinessProfile() {
     fetchApplicants();
   }, []);
 
-  // ✅ Filter applicants based on button selection
+  // ✅ Filter applicants
   const filteredApplicants =
-    filter === "pending"
-      ? applicants.filter(
-          (a) => a.TREASURERS !== "Approved" && a.TREASURERS !== "Declined"
-        )
-      : filter === "approved"
-      ? applicants.filter((a) => a.TREASURERS === "Approved")
-      : applicants.filter((a) => a.TREASURERS === "Declined");
+    filter === "all"
+      ? applicants
+      : filter === "new"
+      ? applicants.filter((a) => a.applicationType === "New")
+      : applicants.filter((a) => a.applicationType === "Renew");
 
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
@@ -64,59 +60,33 @@ function BusinessProfile() {
     indexOfLastRecord
   );
 
-  const handleApprove = async (id, csmwoFee) => {
-    try {
-      const res = await axios.post(
-        `http://localhost:5000/treasurer/treasurerOffice/approve/${id}`,
-        { csmwoFee } // ✅ must match backend & DB field
-      );
-
-      setApplicants((prev) =>
-        prev.map((applicant) =>
-          applicant.id === id
-            ? { ...applicant, CSMWO: "Approved", csmwoFee }
-            : applicant
-        )
-      );
-
-      // alert("Applicant approved");
-      // closeModal();
-    } catch (error) {
-      console.error("Error approving applicant:", error);
-    }
-  };
-
-  const handleDecline = async (id) => {
-    try {
-      const res = await axios.post(
-        `http://localhost:5000/backroom/csmwo/decline/${id}`
-      );
-
-      setApplicants((prev) =>
-        prev.map((applicant) =>
-          applicant.id === id ? { ...applicant, CSMWO: "Declined" } : applicant
-        )
-      );
-
-      // alert("Applicant declined");
-      // closeModal();
-    } catch (error) {
-      console.error("Error approving applicant:", error);
-    }
-  };
-
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
 
-  const openModal = (applicant) => {
-    setSelectedApplicant(applicant);
-    setIsModalOpen(true);
-  };
+  // ✅ Export CSV function
+  const handleExportCSV = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/businessProfile/businessProfiles/export"
+      );
 
-  const closeModal = () => {
-    setSelectedApplicant(null);
-    setIsModalOpen(false);
+      if (res.data.success) {
+        console.log(res.data.message); // ✅ "CSV exported and email sent successfully"
+
+        // ✅ Download CSV
+        const blob = new Blob([res.data.csv], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", res.data.filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (err) {
+      console.error("❌ Error downloading CSV or sending email:", err);
+    }
   };
 
   return (
@@ -128,70 +98,78 @@ function BusinessProfile() {
           p: 3,
           minHeight: "100vh",
           background: "linear-gradient(to bottom, #FFFFFF, #e6ffe6)",
-          marginLeft: { xs: 0, sm: "250px" }, // 0 on mobile, 250px on larger screens
-          width: { xs: "100%", sm: "calc(100% - 250px)" }, // full width on mobile
+          marginLeft: { xs: 0, sm: "250px" },
+          width: { xs: "100%", sm: "calc(100% - 250px)" },
         }}
       >
         <Typography
           variant="h4"
           gutterBottom
-          sx={{
-            color: "darkgreen",
-            fontWeight: "bold",
-          }}
+          sx={{ color: "darkgreen", fontWeight: "bold" }}
         >
           Business Profile
         </Typography>
 
-        {/* ✅ Button Group Filter */}
-        <Box mb={2}>
+        {/* ✅ Filter & Export */}
+        <Box
+          mb={2}
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          {/* Left side: filter buttons */}
           <ButtonGroup variant="contained">
             <Button
               sx={{
-                bgcolor: filter === "pending" ? "darkgreen" : "white",
-                color: filter === "pending" ? "white" : "darkgreen",
+                bgcolor: filter === "all" ? "darkgreen" : "white",
+                color: filter === "all" ? "white" : "darkgreen",
                 "&:hover": {
-                  bgcolor: filter === "pending" ? "#004d00" : "#f0f0f0",
+                  bgcolor: filter === "all" ? "#004d00" : "#f0f0f0",
                 },
               }}
               onClick={() => {
-                setFilter("pending");
+                setFilter("all");
                 setCurrentPage(1);
               }}
             >
-              Pending
+              All
             </Button>
             <Button
               sx={{
-                bgcolor: filter === "approved" ? "darkgreen" : "white",
-                color: filter === "approved" ? "white" : "darkgreen",
+                bgcolor: filter === "new" ? "darkgreen" : "white",
+                color: filter === "new" ? "white" : "darkgreen",
                 "&:hover": {
-                  bgcolor: filter === "approved" ? "#004d00" : "#f0f0f0",
+                  bgcolor: filter === "new" ? "#004d00" : "#f0f0f0",
                 },
               }}
               onClick={() => {
-                setFilter("approved");
+                setFilter("new");
                 setCurrentPage(1);
               }}
             >
-              Approved
+              New
             </Button>
             <Button
               sx={{
-                bgcolor: filter === "declined" ? "darkgreen" : "white",
-                color: filter === "declined" ? "white" : "darkgreen",
+                bgcolor: filter === "renew" ? "darkgreen" : "white",
+                color: filter === "renew" ? "white" : "darkgreen",
                 "&:hover": {
-                  bgcolor: filter === "declined" ? "#004d00" : "#f0f0f0",
+                  bgcolor: filter === "renew" ? "#004d00" : "#f0f0f0",
                 },
               }}
               onClick={() => {
-                setFilter("declined");
+                setFilter("renew");
                 setCurrentPage(1);
               }}
             >
-              Declined
+              Renew
             </Button>
           </ButtonGroup>
+
+          {/* Right side: Export button */}
+          <Button variant="outlined" color="success" onClick={handleExportCSV}>
+            Export to CSV
+          </Button>
         </Box>
 
         {/* ✅ Table */}
