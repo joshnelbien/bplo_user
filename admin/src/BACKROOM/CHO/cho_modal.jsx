@@ -254,6 +254,10 @@ function ChoApplicantModal({
   const [choFee, setChoFee] = useState(applicant.choFee || "");
   const [declineReason, setDeclineReason] = useState("");
   const [selectedFiles, setSelectedFiles] = useState({});
+  const [validationErrors, setValidationErrors] = useState({
+    choFee: false,
+    choCert: false,
+  });
 
   // Dialog state management
   const [approveConfirmOpen, setApproveConfirmOpen] = useState(false);
@@ -275,6 +279,28 @@ function ChoApplicantModal({
         [name]: files[0],
       }));
       handleFileChange(name, files[0]);
+      setValidationErrors((prev) => ({ ...prev, choCert: false }));
+    }
+  };
+
+  const handleApproveClick = () => {
+    let hasError = false;
+    const newErrors = { choFee: false, choCert: false };
+
+    if (choFee.trim() === "") {
+      newErrors.choFee = true;
+      hasError = true;
+    }
+
+    if (!selectedFiles.choCert) {
+      newErrors.choCert = true;
+      hasError = true;
+    }
+
+    setValidationErrors(newErrors);
+
+    if (!hasError) {
+      setApproveConfirmOpen(true);
     }
   };
 
@@ -286,7 +312,6 @@ function ChoApplicantModal({
 
   const handleDeclineConfirm = () => {
     if (declineReason.trim() === "") {
-      // Reason is required, the button will be disabled
       return;
     }
     setDeclineConfirmOpen(false);
@@ -444,10 +469,17 @@ function ChoApplicantModal({
           <TextField
             label="Sanitary Fee"
             value={choFee}
-            onChange={(e) => setChoFee(e.target.value)}
+            onChange={(e) => {
+              setChoFee(e.target.value);
+              setValidationErrors((prev) => ({ ...prev, choFee: false }));
+            }}
             fullWidth
             size="small"
             sx={{ mt: 2 }}
+            error={validationErrors.choFee}
+            helperText={
+              validationErrors.choFee && "Sanitary Fee is required for approval."
+            }
           />
           <Grid container spacing={1} sx={{ mt: 1 }}>
             <Grid item>
@@ -474,6 +506,10 @@ function ChoApplicantModal({
                 size="small"
                 fullWidth
                 InputProps={{ readOnly: true }}
+                error={validationErrors.choCert}
+                helperText={
+                  validationErrors.choCert && "A file is required for approval."
+                }
               />
             </Grid>
           </Grid>
@@ -494,7 +530,7 @@ function ChoApplicantModal({
             Close
           </Button>
           <Button
-            onClick={() => setApproveConfirmOpen(true)}
+            onClick={handleApproveClick}
             variant="contained"
             color="success"
           >

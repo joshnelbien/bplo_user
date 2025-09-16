@@ -145,6 +145,10 @@ function CenroApplicantModal({
   const [successOpen, setSuccessOpen] = useState(false);
   const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState({});
+  const [validationErrors, setValidationErrors] = useState({
+    cenroFee: false,
+    cenroCert: false,
+  });
 
   useEffect(() => {
     if (applicant) {
@@ -156,6 +160,7 @@ function CenroApplicantModal({
 
   const handleChange = (field, value) => {
     setcenroField((prev) => ({ ...prev, [field]: value }));
+    setValidationErrors((prev) => ({ ...prev, [field]: false }));
   };
 
   const files = [{ label: "cenro Certificate", name: "cenroCert" }];
@@ -168,11 +173,29 @@ function CenroApplicantModal({
         [name]: files[0], // store the actual File object
       }));
       handleFileChange(name, files[0]); // send file up to parent
+      setValidationErrors((prev) => ({ ...prev, cenroCert: false }));
     }
   };
 
   const handleApproveClick = () => {
-    setConfirmOpen(true);
+    let hasError = false;
+    const newErrors = { cenroFee: false, cenroCert: false };
+
+    if (cenroField.cenroFee.trim() === "") {
+      newErrors.cenroFee = true;
+      hasError = true;
+    }
+
+    if (!selectedFiles.cenroCert) {
+      newErrors.cenroCert = true;
+      hasError = true;
+    }
+
+    setValidationErrors(newErrors);
+
+    if (!hasError) {
+      setConfirmOpen(true);
+    }
   };
 
   const handleDeclineClick = () => {
@@ -420,6 +443,11 @@ function CenroApplicantModal({
             fullWidth
             size="small"
             sx={{ mt: 2 }}
+            error={validationErrors.cenroFee}
+            helperText={
+              validationErrors.cenroFee &&
+              "Environmental Fee is required for approval."
+            }
           />
 
           {/* File Upload */}
@@ -449,6 +477,10 @@ function CenroApplicantModal({
                   size="small"
                   fullWidth
                   InputProps={{ readOnly: true }}
+                  error={validationErrors.cenroCert}
+                  helperText={
+                    validationErrors.cenroCert && "A file is required for approval."
+                  }
                 />
               </Grid>
             </Grid>
@@ -593,6 +625,7 @@ function CenroApplicantModal({
             onClick={handleDeclineConfirm}
             color="error"
             variant="contained"
+            disabled={!declineReason.trim()}
           >
             Decline
           </Button>
