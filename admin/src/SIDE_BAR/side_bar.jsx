@@ -36,6 +36,7 @@ import CampaignIcon from "@mui/icons-material/Campaign";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import CalculateIcon from "@mui/icons-material/Calculate";
+import AccountBoxRoundedIcon from '@mui/icons-material/AccountBoxRounded';
 
 // Common style
 const listItemStyle = {
@@ -72,7 +73,7 @@ const menuItems = [
   {
     text: "Business Profile",
     path: "/businessProfile",
-    icon: <AutorenewIcon />,
+    icon: <AccountBoxRoundedIcon />,
   },
   {
     text: "Announcement",
