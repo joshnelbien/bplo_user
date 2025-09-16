@@ -88,7 +88,7 @@ router.get("/businessProfiles/export", async (req, res) => {
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: "amandyjoshnel@gmail.com",
+      to: "miso@sanpablocity.gov.ph",
       subject: "Business Profiles CSV Export",
       text: "Attached is the latest Business Profiles export.",
       attachments: [{ filename, content: csv }],

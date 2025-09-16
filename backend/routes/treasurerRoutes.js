@@ -49,12 +49,15 @@ router.post("/treasurerOffice/approve/:id", async (req, res) => {
     // 2. Convert to plain object
     const applicantData = applicant.toJSON();
 
-    applicantData.TreasurersOffice = "pending";
-    applicantData.TreasurersOfficetimeStamp = moment().format(
-      "DD/MM/YYYY HH:mm:ss"
-    );
+    applicantData.TREASURER = "Approved";
+    applicantData.TREASURERtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
     const created = await BusinessProfile.create(applicantData);
+
+    await applicant.update({
+      TREASURER: "Approved",
+      TREASURERtimeStamp: applicant.CHOtimeStamp,
+    });
 
     res.status(201).json({
       message:
