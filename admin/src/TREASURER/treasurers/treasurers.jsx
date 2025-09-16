@@ -51,11 +51,11 @@ function Treasurers() {
   const filteredApplicants =
     filter === "pending"
       ? applicants.filter(
-          (a) => a.TREASURERS !== "Approved" && a.TREASURERS !== "Declined"
+          (a) => a.TREASURER !== "Approved" && a.TREASURER !== "Declined"
         )
       : filter === "approved"
-      ? applicants.filter((a) => a.TREASURERS === "Approved")
-      : applicants.filter((a) => a.TREASURERS === "Declined");
+      ? applicants.filter((a) => a.TREASURER === "Approved")
+      : applicants.filter((a) => a.TREASURER === "Declined");
 
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
