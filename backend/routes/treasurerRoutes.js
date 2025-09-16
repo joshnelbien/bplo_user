@@ -5,6 +5,7 @@ const router = express.Router();
 const moment = require("moment");
 const AppStatus = require("../db/model/applicantStatusDB");
 const TreasurersOffice = require("../db/model/treasurersOfficeDB");
+const BusinessProfile = require("../db/model/businessProfile");
 
 router.post("/businessTax/approve/:id", async (req, res) => {
   try {
@@ -27,6 +28,37 @@ router.post("/businessTax/approve/:id", async (req, res) => {
     res.status(201).json({
       message:
         "Applicant approved, archived in Files, and moved to businessTax",
+      created,
+    });
+  } catch (err) {
+    console.error("Approve error:", err);
+    res.status(500).json({ error: "Failed to approve applicant" });
+  }
+});
+
+router.post("/treasurerOffice/approve/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1. Get applicant from Files table
+    const applicant = await TreasurersOffice.findByPk(id);
+    if (!applicant) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
+    // 2. Convert to plain object
+    const applicantData = applicant.toJSON();
+
+    applicantData.TreasurersOffice = "pending";
+    applicantData.TreasurersOfficetimeStamp = moment().format(
+      "DD/MM/YYYY HH:mm:ss"
+    );
+
+    const created = await BusinessProfile.create(applicantData);
+
+    res.status(201).json({
+      message:
+        "Applicant approved, archived in Files, and moved to Business Profile",
       created,
     });
   } catch (err) {

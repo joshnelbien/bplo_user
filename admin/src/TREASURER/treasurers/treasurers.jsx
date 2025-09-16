@@ -68,7 +68,7 @@ function Treasurers() {
   const handleApprove = async (id, csmwoFee) => {
     try {
       const res = await axios.post(
-        `http://localhost:5000/backroom/csmwo/approve/${id}`,
+        `http://localhost:5000/treasurer/treasurerOffice/approve/${id}`,
         { csmwoFee } // ✅ must match backend & DB field
       );
 
@@ -129,6 +129,8 @@ function Treasurers() {
           p: 3,
           minHeight: "100vh",
           background: "linear-gradient(to bottom, #FFFFFF, #e6ffe6)",
+          marginLeft: "250px", // push content right of sidebar
+          width: `calc(100% - 250px)`, // prevent overflow
         }}
       >
         <Typography

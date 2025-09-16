@@ -13,7 +13,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  Typography,
 } from "@mui/material";
 
 function New_records() {
@@ -72,21 +72,43 @@ function New_records() {
   return (
     <>
       <Side_bar />
-      <Box id="main_content" sx={{ p: 3 }}>
+      <Box
+        id="main_content"
+        sx={{
+          p: 3,
+          minHeight: "100vh",
+          background: "linear-gradient(to bottom, #FFFFFF, #e6ffe6)",
+          marginLeft: "250px", // push content right of sidebar
+          width: `calc(100% - 250px)`, // prevent overflow
+        }}
+      >
         <Typography variant="h4" gutterBottom>
           RENEW
         </Typography>
 
         {/* ✅ Table */}
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
+        <TableContainer
+          component={Paper}
+          sx={{ borderRadius: 2, boxShadow: 3 }}
+        >
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell><strong>Applicant ID</strong></TableCell>
-                <TableCell><strong>Business Name</strong></TableCell>
-                <TableCell><strong>First Name</strong></TableCell>
-                <TableCell><strong>Last Name</strong></TableCell>
-                <TableCell><strong>Status</strong></TableCell>
+                <TableCell>
+                  <strong>Applicant ID</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Business Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>First Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Last Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Status</strong>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

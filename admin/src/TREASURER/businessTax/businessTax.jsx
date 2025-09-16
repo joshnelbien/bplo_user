@@ -119,6 +119,8 @@ function BusinessTax() {
           p: 3,
           minHeight: "100vh",
           background: "linear-gradient(to bottom, #FFFFFF, #e6ffe6)",
+          marginLeft: "250px", // push content right of sidebar
+          width: `calc(100% - 250px)`, // prevent overflow
         }}
       >
         <Typography
