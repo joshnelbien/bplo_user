@@ -7,9 +7,9 @@ import {
   Fade,
   Backdrop,
   IconButton,
+  Paper,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CampaignIcon from "@mui/icons-material/Campaign";
 
 const modalStyle = {
@@ -17,7 +17,7 @@ const modalStyle = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: { xs: "90%", sm: 600 },
+  width: { xs: "95%", sm: 600 },
   maxHeight: "85vh",
   overflowY: "auto",
   bgcolor: "background.paper",
@@ -52,7 +52,7 @@ const AnnouncementModal = ({ open, onClose, announcements }) => {
               sx={{ display: "flex", alignItems: "center", color: "primary.main" }}
             >
               <CampaignIcon sx={{ mr: 1 }} />
-              Special Announcements
+              Official Announcements
             </Typography>
             <IconButton onClick={onClose} color="error">
               <CloseIcon />
@@ -70,68 +70,104 @@ const AnnouncementModal = ({ open, onClose, announcements }) => {
             </Typography>
           ) : (
             announcements.map((ann, index) =>
-              ann && (ann.text || ann.title) ? (
-                <Box
+              ann && ann.text ? (
+                <Paper
                   key={ann.id || index}
+                  elevation={3}
                   sx={{
-                    p: 2.5,
-                    mb: 2,
+                    p: 3,
+                    mb: 3,
                     borderRadius: "12px",
-                    bgcolor: "#f9fff9",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                    transition: "transform 0.2s, box-shadow 0.2s",
-                    "&:hover": {
-                      transform: "translateY(-4px)",
-                      boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
-                    },
+                    backgroundColor: "#fff",
                   }}
                 >
-                  {/* Title/Text */}
+                  {/* Date */}
                   <Typography
-                    variant="subtitle1"
-                    fontWeight="bold"
-                    gutterBottom
-                    color="text.primary"
-                  >
-                    {ann.title || ann.text}
-                  </Typography>
-
-                  {/* Dates */}
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
+                    variant="body2"
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      mb: ann.attachedImageBlob ? 1.5 : 0.5,
+                      textAlign: "right",
+                      mb: 2,
+                      fontStyle: "italic",
                     }}
                   >
-                    <AccessTimeIcon fontSize="inherit" sx={{ mr: 0.5 }} />
                     {ann.startDate
-                      ? new Date(ann.startDate).toLocaleDateString()
-                      : "N/A"}{" "}
-                    –{" "}
-                    {ann.endDate
-                      ? new Date(ann.endDate).toLocaleDateString()
-                      : "N/A"}
+                      ? new Date(ann.startDate).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : "Date"}
+                  </Typography>
+
+                  {/* Subject */}
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      mb: 2,
+                      fontWeight: "bold",
+                      textDecoration: "underline",
+                    }}
+                  >
+                    Subject: Official Announcement
+                  </Typography>
+
+                  {/* Body */}
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      textAlign: "justify",
+                      mb: 3,
+                      whiteSpace: "pre-line",
+                    }}
+                  >
+                    {ann.text}
                   </Typography>
 
                   {/* Image if attached */}
                   {ann.attachedImageBlob && (
-                    <Box sx={{ textAlign: "center" }}>
+                    <Box sx={{ my: 2, textAlign: "center" }}>
                       <img
                         src={`data:image/jpeg;base64,${ann.attachedImageBlob}`}
                         alt="Announcement Attachment"
                         style={{
-                          maxWidth: "100%",
-                          height: "auto",
+                          maxWidth: "80%",
                           borderRadius: "8px",
-                          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                          boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
                         }}
                       />
                     </Box>
                   )}
-                </Box>
+
+                  {/* Active Dates */}
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      mt: 2,
+                      fontStyle: "italic",
+                      color: "text.secondary",
+                    }}
+                  >
+                    Active:{" "}
+                    {ann.startDate
+                      ? new Date(ann.startDate).toLocaleDateString()
+                      : "Start"}{" "}
+                    -{" "}
+                    {ann.endDate
+                      ? new Date(ann.endDate).toLocaleDateString()
+                      : "End"}
+                  </Typography>
+
+                  {/* Signature */}
+                  <Typography variant="body1" sx={{ mt: 4, fontWeight: "medium" }}>
+                    Sincerely,
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{ fontWeight: "bold", color: "#1a7322" }}
+                  >
+                    {ann.createdBy || "Admin"}
+                  </Typography>
+                </Paper>
               ) : null
             )
           )}

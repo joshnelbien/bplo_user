@@ -1,3 +1,4 @@
+// src/pages/Announcement.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -8,27 +9,33 @@ import {
   Paper,
   List,
   ListItem,
-  ListItemText,
   Divider,
   TextField,
   Modal,
   CircularProgress,
   Snackbar,
   Alert,
-  InputAdornment
+  InputAdornment,
+  Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import Side_bar from '../SIDE_BAR/side_bar';
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import Side_bar from "../SIDE_BAR/side_bar";
 
 const modalStyle = {
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: { xs: "90%", sm: 400 },
+  width: { xs: "95%", sm: 600 },
   bgcolor: "background.paper",
   borderRadius: "12px",
   boxShadow: 24,
@@ -36,6 +43,8 @@ const modalStyle = {
   display: "flex",
   flexDirection: "column",
   gap: 2,
+  maxHeight: "90vh",
+  overflowY: "auto",
 };
 
 const Announcement = () => {
@@ -49,9 +58,16 @@ const Announcement = () => {
     attachedImageBlob: null,
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentId, setCurrentId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  // Confirmation dialog state
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
+  const [confirmMessage, setConfirmMessage] = useState("");
 
   const fetchAnnouncements = async () => {
     setIsLoading(true);
@@ -81,60 +97,122 @@ const Announcement = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
-        const base64String = reader.result.split(',')[1];
-        setNewAnnouncement({ ...newAnnouncement, attachedImageBlob: base64String });
+        const base64String = reader.result.split(",")[1];
+        setNewAnnouncement({
+          ...newAnnouncement,
+          attachedImageBlob: base64String,
+        });
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleAddAnnouncement = async (e) => {
+  // Ask for confirmation
+  const confirmActionHandler = (message, action) => {
+    setConfirmMessage(message);
+    setConfirmAction(() => action);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirm = async () => {
+    if (confirmAction) await confirmAction();
+    setConfirmOpen(false);
+  };
+
+  const handleCancel = () => {
+    setConfirmOpen(false);
+  };
+
+  const handleAddOrEditAnnouncement = async (e) => {
     e.preventDefault();
-    if (newAnnouncement.text.trim() !== "" && newAnnouncement.startDate && newAnnouncement.endDate) {
-      const announcementData = {
-        text: newAnnouncement.text,
-        startDate: newAnnouncement.startDate,
-        endDate: newAnnouncement.endDate,
-        createdBy: newAnnouncement.createdBy,
-        attachedImageBlob: newAnnouncement.attachedImageBlob,
-      };
+    if (
+      newAnnouncement.text.trim() !== "" &&
+      newAnnouncement.startDate &&
+      newAnnouncement.endDate
+    ) {
+      confirmActionHandler(
+        isEditing
+          ? "Are you sure you want to update this announcement?"
+          : "Are you sure you want to post this announcement?",
+        async () => {
+          const announcementData = {
+            text: newAnnouncement.text,
+            startDate: newAnnouncement.startDate,
+            endDate: newAnnouncement.endDate,
+            createdBy: newAnnouncement.createdBy,
+            attachedImageBlob: newAnnouncement.attachedImageBlob,
+          };
 
-      try {
-        const response = await fetch("/api/announcements", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(announcementData),
-        });
+          try {
+            const response = await fetch(
+              isEditing
+                ? `/api/announcements/${currentId}`
+                : "/api/announcements",
+              {
+                method: isEditing ? "PUT" : "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(announcementData),
+              }
+            );
 
-        if (!response.ok) {
-          throw new Error("Failed to add announcement.");
+            if (!response.ok) {
+              throw new Error("Failed to save announcement.");
+            }
+            setNewAnnouncement({
+              text: "",
+              startDate: "",
+              endDate: "",
+              createdBy: "Admin",
+              attachedImageBlob: null,
+            });
+            setIsModalOpen(false);
+            setIsEditing(false);
+            setCurrentId(null);
+            await fetchAnnouncements();
+          } catch (e) {
+            console.error("Failed to save announcement:", e);
+            setError("Failed to save announcement. Please try again.");
+            setSnackbarOpen(true);
+          }
         }
-        setNewAnnouncement({ text: "", startDate: "", endDate: "", createdBy: "Admin", attachedImageBlob: null });
-        setIsModalOpen(false);
-        await fetchAnnouncements();
-      } catch (e) {
-        console.error("Failed to add announcement:", e);
-        setError("Failed to create announcement. Please try again.");
-        setSnackbarOpen(true);
-      }
+      );
     }
   };
 
-  const handleDeleteAnnouncement = async (id) => {
-    try {
-      const response = await fetch(`/api/announcements/${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) {
-        throw new Error("Failed to delete announcement.");
+  const handleDeleteAnnouncement = (id) => {
+    confirmActionHandler(
+      "Are you sure you want to delete this announcement?",
+      async () => {
+        try {
+          const response = await fetch(`/api/announcements/${id}`, {
+            method: "DELETE",
+          });
+          if (!response.ok) {
+            throw new Error("Failed to delete announcement.");
+          }
+          await fetchAnnouncements();
+        } catch (e) {
+          console.error("Failed to delete announcement:", e);
+          setError("Failed to delete announcement. Please try again.");
+          setSnackbarOpen(true);
+        }
       }
-      await fetchAnnouncements();
-    } catch (e) {
-      console.error("Failed to delete announcement:", e);
-      setError("Failed to delete announcement. Please try again.");
-      setSnackbarOpen(true);
-    }
+    );
+  };
+
+  const handleEditAnnouncement = (ann) => {
+    confirmActionHandler("Do you want to edit this announcement?", () => {
+      setNewAnnouncement({
+        text: ann.text,
+        startDate: ann.startDate,
+        endDate: ann.endDate,
+        createdBy: ann.createdBy,
+        attachedImageBlob: ann.attachedImageBlob,
+      });
+      setCurrentId(ann.id);
+      setIsEditing(true);
+      setIsModalOpen(true);
+    });
   };
 
   const handleSnackbarClose = (_, reason) => {
@@ -143,14 +221,22 @@ const Announcement = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', background: 'linear-gradient(to bottom, #ffffff, #e6ffe6)', minHeight: '100vh' }}>
+    <Box
+      sx={{
+        display: "flex",
+        background: "linear-gradient(to bottom, #ffffff, #e6ffe6)",
+        minHeight: "100vh",
+      }}
+    >
       <Side_bar />
-      <Box sx={{
-        flexGrow: 1,
-        p: { xs: 2, sm: 4 },
-        maxWidth: "800px",
-        mx: "auto",
-      }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          p: { xs: 2, sm: 4 },
+          maxWidth: "900px",
+          mx: "auto",
+        }}
+      >
         {/* Add New Announcement Button */}
         <Box sx={{ mb: 4, textAlign: "left" }}>
           <Button
@@ -161,15 +247,42 @@ const Announcement = () => {
               borderRadius: "8px",
             }}
             startIcon={<AddIcon />}
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              confirmActionHandler(
+                "Do you want to create a new announcement?",
+                () => {
+                  setIsEditing(false);
+                  setCurrentId(null);
+                  setNewAnnouncement({
+                    text: "",
+                    startDate: "",
+                    endDate: "",
+                    createdBy: "Admin",
+                    attachedImageBlob: null,
+                  });
+                  setIsModalOpen(true);
+                }
+              );
+            }}
           >
             New Announcement
           </Button>
         </Box>
 
         {/* Announcement History */}
-        <Paper elevation={5} sx={{ p: { xs: 2, sm: 4 }, borderRadius: "12px", bgcolor: "#fafafa" }}>
-          <Typography variant="h5" component="h2" sx={{ mb: 2, fontWeight: "bold", color: "#333" }}>
+        <Paper
+          elevation={5}
+          sx={{
+            p: { xs: 2, sm: 4 },
+            borderRadius: "12px",
+            bgcolor: "#fafafa",
+          }}
+        >
+          <Typography
+            variant="h5"
+            component="h2"
+            sx={{ mb: 2, fontWeight: "bold", color: "#333" }}
+          >
             Announcement History
           </Typography>
           <Divider sx={{ mb: 2 }} />
@@ -178,7 +291,11 @@ const Announcement = () => {
               <CircularProgress color="success" />
             </Box>
           ) : announcements.length === 0 ? (
-            <Typography variant="body1" color="text.secondary" sx={{ textAlign: "center", py: 4 }}>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{ textAlign: "center", py: 4 }}
+            >
               No announcements found.
             </Typography>
           ) : (
@@ -187,40 +304,127 @@ const Announcement = () => {
                 <React.Fragment key={ann.id}>
                   <ListItem
                     disableGutters
-                    secondaryAction={
+                    sx={{
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      py: 3,
+                    }}
+                  >
+                    {/* Letter-style Paper */}
+                    <Paper
+                      elevation={3}
+                      sx={{
+                        p: { xs: 2, sm: 3, md: 4 }, // smaller padding on phones, bigger on desktop
+                        width: { xs: "100%", sm: "90%", md: "80%" }, // shrink width on bigger screens
+                        mx: "auto", // center horizontally
+                        borderRadius: "12px",
+                        backgroundColor: "#fff",
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          textAlign: "right",
+                          mb: 2,
+                          fontStyle: "italic",
+                        }}
+                      >
+                        {new Date(ann.startDate).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </Typography>
+
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          mb: 2,
+                          fontWeight: "bold",
+                          textDecoration: "underline",
+                        }}
+                      >
+                        Subject: Official Announcement
+                      </Typography>
+
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          textAlign: "justify",
+                          mb: 3,
+                          whiteSpace: "pre-line",
+                        }}
+                      >
+                        {ann.text}
+                      </Typography>
+
+                      {ann.attachedImageBlob && (
+                        <Box sx={{ my: 2, textAlign: "center" }}>
+                          <img
+                            src={`data:image/jpeg;base64,${ann.attachedImageBlob}`}
+                            alt="Announcement"
+                            style={{
+                              maxWidth: "80%",
+                              borderRadius: "8px",
+                              boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                            }}
+                          />
+                        </Box>
+                      )}
+
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          mt: 2,
+                          fontStyle: "italic",
+                          color: "text.secondary",
+                        }}
+                      >
+                        Active: {new Date(ann.startDate).toLocaleDateString()} -{" "}
+                        {new Date(ann.endDate).toLocaleDateString()}
+                      </Typography>
+
+                      <Typography
+                        variant="body1"
+                        sx={{ mt: 4, fontWeight: "medium" }}
+                      >
+                        Sincerely,
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{ fontWeight: "bold", color: "#1a7322" }}
+                      >
+                        {ann.createdBy}
+                      </Typography>
+                    </Paper>
+
+                    {/* Action buttons (outside letter) */}
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      sx={{ mt: 2, alignSelf: "flex-end" }}
+                    >
                       <IconButton
-                        edge="end"
+                        aria-label="edit"
+                        onClick={() => handleEditAnnouncement(ann)}
+                        sx={{
+                          color: "#1976d2",
+                          "&:hover": { transform: "scale(1.2)" },
+                        }}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
                         aria-label="delete"
                         onClick={() => handleDeleteAnnouncement(ann.id)}
                         sx={{
                           color: "#d32f2f",
-                          transition: "transform 0.3s",
                           "&:hover": { transform: "scale(1.2)" },
                         }}
                       >
                         <DeleteIcon />
                       </IconButton>
-                    }
-                  >
-                    <ListItemText
-                      primary={ann.text}
-                      secondary={
-                        <Box component="span" sx={{ display: "flex", flexDirection: "column", mt: 1 }}>
-                          <Typography component="span" variant="body2" color="text.secondary">
-                            **Created by:** {ann.createdBy}
-                          </Typography>
-                          <Typography component="span" variant="body2" color="text.secondary">
-                            **Active:** {new Date(ann.startDate).toLocaleDateString()} to {new Date(ann.endDate).toLocaleDateString()}
-                          </Typography>
-                          {ann.attachedImageBlob && (
-                            <Box component="span" sx={{ mt: 1 }}>
-                              <img src={`data:image/jpeg;base64,${ann.attachedImageBlob}`} alt="Announcement" style={{ maxWidth: '100%', height: 'auto' }} />
-                            </Box>
-                          )}
-                        </Box>
-                      }
-                      primaryTypographyProps={{ fontWeight: "medium" }}
-                    />
+                    </Stack>
                   </ListItem>
                   {index < announcements.length - 1 && <Divider />}
                 </React.Fragment>
@@ -229,9 +433,13 @@ const Announcement = () => {
           )}
         </Paper>
 
-        {/* Add Announcement Modal */}
+        {/* Add/Edit Announcement Modal */}
         <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
-          <Box sx={modalStyle} component="form" onSubmit={handleAddAnnouncement}>
+          <Box
+            sx={modalStyle}
+            component="form"
+            onSubmit={handleAddOrEditAnnouncement}
+          >
             <IconButton
               onClick={() => setIsModalOpen(false)}
               sx={{
@@ -245,8 +453,9 @@ const Announcement = () => {
               <CloseIcon />
             </IconButton>
             <Typography variant="h6" component="h2" fontWeight="bold">
-              Create New Announcement
+              {isEditing ? "Edit Announcement" : "Create New Announcement"}
             </Typography>
+
             <TextField
               fullWidth
               multiline
@@ -254,7 +463,9 @@ const Announcement = () => {
               variant="outlined"
               label="Announcement Message"
               value={newAnnouncement.text}
-              onChange={(e) => setNewAnnouncement({ ...newAnnouncement, text: e.target.value })}
+              onChange={(e) =>
+                setNewAnnouncement({ ...newAnnouncement, text: e.target.value })
+              }
               required
             />
             <TextField
@@ -262,7 +473,12 @@ const Announcement = () => {
               variant="outlined"
               label="Created By"
               value={newAnnouncement.createdBy}
-              onChange={(e) => setNewAnnouncement({ ...newAnnouncement, createdBy: e.target.value })}
+              onChange={(e) =>
+                setNewAnnouncement({
+                  ...newAnnouncement,
+                  createdBy: e.target.value,
+                })
+              }
               sx={{ mt: 1 }}
               required
             />
@@ -272,7 +488,12 @@ const Announcement = () => {
               label="Start Date"
               type="date"
               value={newAnnouncement.startDate}
-              onChange={(e) => setNewAnnouncement({ ...newAnnouncement, startDate: e.target.value })}
+              onChange={(e) =>
+                setNewAnnouncement({
+                  ...newAnnouncement,
+                  startDate: e.target.value,
+                })
+              }
               InputLabelProps={{ shrink: true }}
               sx={{ mt: 1 }}
               required
@@ -283,7 +504,12 @@ const Announcement = () => {
               label="End Date"
               type="date"
               value={newAnnouncement.endDate}
-              onChange={(e) => setNewAnnouncement({ ...newAnnouncement, endDate: e.target.value })}
+              onChange={(e) =>
+                setNewAnnouncement({
+                  ...newAnnouncement,
+                  endDate: e.target.value,
+                })
+              }
               InputLabelProps={{ shrink: true }}
               sx={{ mt: 1 }}
               required
@@ -304,20 +530,127 @@ const Announcement = () => {
                 ),
               }}
             />
+
             <Button
               type="submit"
               variant="contained"
               fullWidth
-              sx={{ mt: 2, bgcolor: "#1a7322", "&:hover": { bgcolor: "#155a1b" } }}
+              sx={{
+                mt: 2,
+                bgcolor: "#1a7322",
+                "&:hover": { bgcolor: "#155a1b" },
+              }}
             >
-              Submit
+              {isEditing ? "Update" : "Submit"}
             </Button>
+
+            {/* Preview as Letter */}
+            <Typography
+              variant="h6"
+              sx={{ mt: 4, mb: 2, fontWeight: "bold", color: "#333" }}
+            >
+              Preview
+            </Typography>
+            <Paper elevation={2} sx={{ p: 3, borderRadius: "12px" }}>
+              <Typography
+                variant="body2"
+                sx={{ textAlign: "right", mb: 2, fontStyle: "italic" }}
+              >
+                {newAnnouncement.startDate
+                  ? new Date(newAnnouncement.startDate).toLocaleDateString(
+                      "en-US",
+                      {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      }
+                    )
+                  : "Date here"}
+              </Typography>
+
+              <Typography
+                variant="h6"
+                sx={{ mb: 2, fontWeight: "bold", textDecoration: "underline" }}
+              >
+                Subject: Official Announcement
+              </Typography>
+
+              <Typography
+                variant="body1"
+                sx={{ textAlign: "justify", mb: 3, whiteSpace: "pre-line" }}
+              >
+                {newAnnouncement.text ||
+                  "Your announcement will appear here..."}
+              </Typography>
+
+              {newAnnouncement.attachedImageBlob && (
+                <Box sx={{ my: 2, textAlign: "center" }}>
+                  <img
+                    src={`data:image/jpeg;base64,${newAnnouncement.attachedImageBlob}`}
+                    alt="Preview"
+                    style={{
+                      maxWidth: "80%",
+                      borderRadius: "8px",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                    }}
+                  />
+                </Box>
+              )}
+
+              <Typography
+                variant="body2"
+                sx={{ mt: 2, fontStyle: "italic", color: "text.secondary" }}
+              >
+                Active:{" "}
+                {newAnnouncement.startDate
+                  ? new Date(newAnnouncement.startDate).toLocaleDateString()
+                  : "Start"}{" "}
+                -{" "}
+                {newAnnouncement.endDate
+                  ? new Date(newAnnouncement.endDate).toLocaleDateString()
+                  : "End"}
+              </Typography>
+
+              <Typography variant="body1" sx={{ mt: 4, fontWeight: "medium" }}>
+                Sincerely,
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", color: "#1a7322" }}
+              >
+                {newAnnouncement.createdBy}
+              </Typography>
+            </Paper>
           </Box>
         </Modal>
 
+        {/* Confirmation Dialog */}
+        <Dialog open={confirmOpen} onClose={handleCancel}>
+          <DialogTitle>Confirm Action</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{confirmMessage}</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCancel} color="secondary">
+              Cancel
+            </Button>
+            <Button onClick={handleConfirm} color="primary" autoFocus>
+              Yes
+            </Button>
+          </DialogActions>
+        </Dialog>
+
         {/* Snackbar for error messages */}
-        <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
-          <Alert onClose={handleSnackbarClose} severity="error" sx={{ width: "100%" }}>
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
+          onClose={handleSnackbarClose}
+        >
+          <Alert
+            onClose={handleSnackbarClose}
+            severity="error"
+            sx={{ width: "100%" }}
+          >
             {error}
           </Alert>
         </Snackbar>
