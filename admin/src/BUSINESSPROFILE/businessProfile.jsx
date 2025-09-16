@@ -192,6 +192,9 @@ function BusinessProfile() {
                 <TableCell>
                   <strong>Last Name</strong>
                 </TableCell>
+                <TableCell>
+                  <strong>Application</strong>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -206,6 +209,7 @@ function BusinessProfile() {
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
+                  <TableCell>{applicant.application}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
