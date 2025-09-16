@@ -25,6 +25,7 @@ function Cho() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filter, setFilter] = useState("pending"); // pending by default
   const recordsPerPage = 20;
+  const API = import.meta.env.VITE_API_BASE;
   const [selectedFiles, setSelectedFiles] = useState({});
 
   const handleFileChange = (name, file) => {
@@ -37,7 +38,7 @@ function Cho() {
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/backroom/backrooms");
+        const res = await axios.get(`${API}/backroom/backrooms`);
 
         // Sort by createdAt ascending (oldest first, newest at bottom)
         const sortedData = res.data.sort(
@@ -81,7 +82,7 @@ function Cho() {
       }
 
       await axios.post(
-        `http://localhost:5000/backroom/cho/approve/${id}`,
+        `${API}/backroom/cho/approve/${id}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -101,7 +102,7 @@ function Cho() {
   // ✅ Decline logic (fixed)
   const handleDecline = async (id, reason) => {
     try {
-      await axios.post(`http://localhost:5000/backroom/cho/decline/${id}`, {
+      await axios.post(`${API}/backroom/cho/decline/${id}`, {
         reason, // pass decline reason to backend
       });
 

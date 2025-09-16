@@ -93,6 +93,7 @@ function Zoning() {
   const [filter, setFilter] = useState("pending"); // ✅ now supports pending/approved/declined
   const recordsPerPage = 20;
   const [selectedFiles, setSelectedFiles] = useState({});
+  const API = import.meta.env.VITE_API_BASE;
 
   // ✅ Confirmation & Success state
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -102,7 +103,7 @@ function Zoning() {
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/backroom/backrooms");
+        const res = await axios.get(`${API}/backroom/backrooms`);
 
         // Sort by createdAt ascending (oldest first, newest at bottom)
         const sortedData = res.data.sort(
@@ -144,7 +145,7 @@ function Zoning() {
 
   const handleDecline = async (id, reason) => {
     try {
-      await axios.post(`http://localhost:5000/backroom/zoning/decline/${id}`, {
+      await axios.post(`${API}/backroom/zoning/decline/${id}`, {
         reason, // send body correctly
       });
 
@@ -193,7 +194,7 @@ function Zoning() {
       }
 
       await axios.post(
-        `http://localhost:5000/backroom/zoning/approve/${id}`,
+        `${API}/backroom/zoning/approve/${id}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

@@ -20,6 +20,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
+const API = import.meta.env.VITE_API_BASE;
 // Component to display a normal text field
 const Field = ({ label, value }) => (
   <Grid item xs={12} sm={6}>
@@ -91,6 +92,7 @@ const FileField = ({ label, fileKey, fileData }) => (
     />
 
     {fileData[fileKey] && (
+      
       <Typography
         component="span"
         sx={{ mt: 0.5, display: "flex", gap: 1, alignItems: "center" }}
@@ -99,7 +101,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`http://localhost:5000/examiners/examiners/${fileData.id}/${fileKey}`}
+            href={`${API}/examiners/examiners/${fileData.id}/${fileKey}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -112,7 +114,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`http://localhost:5000/examiners/examiners/${fileData.id}/${fileKey}/download`}
+            href={`${API}/examiners/examiners/${fileData.id}/${fileKey}/download`}
             target="_blank"
             rel="noreferrer"
           >
@@ -128,6 +130,7 @@ const FileField = ({ label, fileKey, fileData }) => (
 function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  
 
   if (!isOpen || !applicant) return null;
 

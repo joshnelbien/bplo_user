@@ -58,7 +58,7 @@ const Field = ({ label, value }) => (
     />
   </Grid>
 );
-
+const API = import.meta.env.VITE_API_BASE;
 // Component to display files as links
 const FileField = ({ label, fileKey, fileData }) => (
   <Grid item xs={12} sm={6}>
@@ -102,7 +102,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}`}
+            href={`${API}/backroom/backroom/${fileData.id}/${fileKey}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -115,7 +115,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}/download`}
+            href={`${API}/backroom/backroom/${fileData.id}/${fileKey}/download`}
             target="_blank"
             rel="noreferrer"
           >

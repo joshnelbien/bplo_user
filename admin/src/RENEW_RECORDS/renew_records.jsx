@@ -22,6 +22,7 @@ function New_records() {
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const recordsPerPage = 20;
+  
 
   useEffect(() => {
     const fetchApplicants = async () => {

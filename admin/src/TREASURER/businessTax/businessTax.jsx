@@ -25,6 +25,7 @@ function BusinessTax() {
   const [filter, setFilter] = useState("pending"); // ✅ pending by default
   const recordsPerPage = 20;
   const [selectedFiles, setSelectedFiles] = useState({});
+  const API = import.meta.env.VITE_API_BASE;
 
   const handleFileChange = (name, file) => {
     setSelectedFiles((prev) => ({
@@ -37,7 +38,7 @@ function BusinessTax() {
     const fetchApplicants = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/businessTax/businessTax"
+          `${API}/businessTax/businessTax`
         );
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
@@ -78,7 +79,7 @@ function BusinessTax() {
       }
 
       await axios.post(
-        `http://localhost:5000/businessTax/business/approve/${id}`,
+        `${API}/businessTax/business/approve/${id}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

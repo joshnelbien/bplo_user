@@ -25,12 +25,13 @@ function Treasurers() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filter, setFilter] = useState("pending"); // ✅ pending by default
   const recordsPerPage = 20;
+  const API = import.meta.env.VITE_API_BASE;
 
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/treasurer/treasurer"
+          `${API}/treasurer/treasurer`
         );
 
         // Sort by createdAt ascending (oldest first, newest at bottom)
@@ -68,7 +69,7 @@ function Treasurers() {
   const handleApprove = async (id, csmwoFee) => {
     try {
       const res = await axios.post(
-        `http://localhost:5000/treasurer/treasurerOffice/approve/${id}`,
+        `${API}/treasurer/treasurerOffice/approve/${id}`,
         { csmwoFee } // ✅ must match backend & DB field
       );
 
@@ -90,7 +91,7 @@ function Treasurers() {
   const handleDecline = async (id) => {
     try {
       const res = await axios.post(
-        `http://localhost:5000/backroom/csmwo/decline/${id}`
+        `${API}/backroom/csmwo/decline/${id}`
       );
 
       setApplicants((prev) =>

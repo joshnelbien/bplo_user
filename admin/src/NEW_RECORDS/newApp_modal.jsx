@@ -166,6 +166,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
     { key: "CSMWO", label: "CSWMO", timeKey: "CSMWOtimeStamp" },
     { key: "OBO", label: "OBO", timeKey: "OBOtimeStamp" },
   ];
+  const API = import.meta.env.VITE_API_BASE;
 
   // ✅ Check if all statuses are approved
   const allApproved = steps.every((step) => applicant[step.key] === "Approved");
@@ -194,7 +195,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
   const handlePassToBusinessTax = async () => {
     try {
       const res = await axios.post(
-        `http://localhost:5000/businessTax/businessTax/approve/${applicant.id}`
+        `${API}/businessTax/businessTax/approve/${applicant.id}`
       );
 
       if (res.status === 201) {

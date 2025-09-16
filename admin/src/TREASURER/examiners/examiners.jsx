@@ -25,13 +25,14 @@ function Examiners() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filter, setFilter] = useState("pending"); // ✅ pending by default
   const recordsPerPage = 20;
+  const API = import.meta.env.VITE_API_BASE;
   const [selectedFiles, setSelectedFiles] = useState({});
 
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/examiners/examiners"
+          `${API}/examiners/examiners`
         );
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
@@ -64,7 +65,7 @@ function Examiners() {
   const handleApprove = async (id) => {
     try {
       await axios.post(
-        `http://localhost:5000/examiners/examiners/approve/${id}`,
+        `${API}/examiners/examiners/approve/${id}`,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 

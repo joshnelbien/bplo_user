@@ -22,7 +22,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel"; // New icon for decline
-
+const API = import.meta.env.VITE_API_BASE;
 // Component to display a normal text field
 const Field = ({ label, value }) => (
   <Grid item xs={12} sm={6}>
@@ -102,7 +102,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}`}
+            href={`${API}/backroom/backroom/${fileData.id}/${fileKey}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -115,7 +115,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`http://localhost:5000/backroom/backroom/${fileData.id}/${fileKey}/download`}
+            href={`${API}/backroom/backroom/${fileData.id}/${fileKey}/download`}
             target="_blank"
             rel="noreferrer"
           >

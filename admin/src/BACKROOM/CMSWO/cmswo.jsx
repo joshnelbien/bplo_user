@@ -25,11 +25,12 @@ function Cmswo() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filter, setFilter] = useState("pending"); // ✅ pending by default
   const recordsPerPage = 20;
+  const API = import.meta.env.VITE_API_BASE;
 
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/backroom/backrooms");
+        const res = await axios.get(`${API}/backroom/backrooms`);
 
         // Sort by createdAt ascending (oldest first, newest at bottom)
         const sortedData = res.data.sort(
@@ -66,7 +67,7 @@ function Cmswo() {
   const handleApprove = async (id, csmwoFee) => {
     try {
       const res = await axios.post(
-        `http://localhost:5000/backroom/csmwo/approve/${id}`,
+        `${API}/backroom/csmwo/approve/${id}`,
         { csmwoFee } // ✅ must match backend & DB field
       );
 
@@ -87,7 +88,7 @@ function Cmswo() {
   const handleDecline = async (id, reason) => {
     try {
       const res = await axios.post(
-        `http://localhost:5000/backroom/csmwo/decline/${id}`,
+        `${API}/backroom/csmwo/decline/${id}`,
         { reason } // ⬅️ send reason to backend
       );
 

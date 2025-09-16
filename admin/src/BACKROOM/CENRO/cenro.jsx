@@ -26,6 +26,7 @@ function Cenro() {
   const [filter, setFilter] = useState("pending"); // ✅ Default: pending
   const recordsPerPage = 20;
   const [selectedFiles, setSelectedFiles] = useState({});
+  const API = import.meta.env.VITE_API_BASE;
 
   const handleFileChange = (name, file) => {
     setSelectedFiles((prev) => ({
@@ -37,7 +38,7 @@ function Cenro() {
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/backroom/backrooms");
+        const res = await axios.get(`${API}/backroom/backrooms`);
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
@@ -79,7 +80,7 @@ function Cenro() {
       }
 
       await axios.post(
-        `http://localhost:5000/backroom/cenro/approve/${id}`,
+        `${API}/backroom/cenro/approve/${id}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -98,7 +99,7 @@ function Cenro() {
   const handleDecline = async (id, reason) => {
     try {
       const res = await fetch(
-        `http://localhost:5000/backroom/cenro/decline/${id}`,
+        `${API}/backroom/cenro/decline/${id}`,
         {
           method: "POST",
           headers: {

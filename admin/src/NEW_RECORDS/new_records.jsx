@@ -97,6 +97,7 @@ const SuccessModal = ({ isOpen, onClose, message }) => {
 };
 
 function New_records() {
+  const API = import.meta.env.VITE_API_BASE;
   const [pendingApplicants, setPendingApplicants] = useState([]);
   const [approvedApplicants, setApprovedApplicants] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -130,7 +131,7 @@ function New_records() {
       try {
         // ✅ Pending applicants (filter only pending)
         const pendingRes = await axios.get(
-          "http://localhost:5000/newApplication/files"
+          `${API}/newApplication/files`
         );
         const onlyPending = pendingRes.data
           .filter((a) => a.status?.toLowerCase() === "pending")
@@ -139,7 +140,7 @@ function New_records() {
 
         // ✅ Approved applicants
         const approvedRes = await axios.get(
-          "http://localhost:5000/backroom/backrooms"
+          `${API}/backroom/backrooms`
         );
         const sortedApproved = approvedRes.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt) // oldest first, newest last
@@ -181,7 +182,7 @@ function New_records() {
     try {
       if (action === "approve") {
         await axios.post(
-          `http://localhost:5000/examiners/bplo/approve/${applicant.id}`
+          `${API}/examiners/bplo/approve/${applicant.id}`
         );
         setPendingApplicants((prev) =>
           prev.filter((a) => a.id !== applicant.id)
@@ -462,8 +463,8 @@ function New_records() {
         }}
         baseUrl={
           filter === "pending"
-            ? "http://localhost:5000/newApplication/files"
-            : "http://localhost:5000/backroom/backroom"
+            ? `${API}/newApplication/files`
+            : `${API}/backroom/backroom`
         }
       />
 
@@ -488,8 +489,8 @@ function New_records() {
         onClose={closeUpdateModal}
         baseUrl={
           filter === "pending"
-            ? "http://localhost:5000/newApplication/files"
-            : "http://localhost:5000/backroom/backroom"
+            ? `${API}/newApplication/files`
+            : `${API}/backroom/backroom`
         }
       />
     </>

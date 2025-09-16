@@ -25,11 +25,12 @@ function Obo() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filter, setFilter] = useState("pending"); // ✅ pending by default
   const recordsPerPage = 20;
+  const API = import.meta.env.VITE_API_BASE;
 
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/backroom/backrooms");
+        const res = await axios.get(`${API}/backroom/backrooms`);
 
         // Sort by createdAt ascending (oldest first, newest at bottom)
         const sortedData = res.data.sort(
@@ -63,7 +64,7 @@ function Obo() {
   const handleApprove = async (id, oboFields) => {
     try {
       await axios.post(
-        `http://localhost:5000/backroom/obo/approve/${id}`,
+        `${API}/backroom/obo/approve/${id}`,
         oboFields
       );
       setApplicants((prev) =>
@@ -83,7 +84,7 @@ function Obo() {
 
   const handleDeclined = async (id, reason) => {
     try {
-      await axios.post(`http://localhost:5000/backroom/obo/decline/${id}`, {
+      await axios.post(`${API}/backroom/obo/decline/${id}`, {
         reason, // send decline reason in request body
       });
 

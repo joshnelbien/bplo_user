@@ -51,6 +51,7 @@ function UpdateModal({ applicant, isOpen, onClose, baseUrl }) {
 
   // ✅ Local editable state
   const [formData, setFormData] = useState({});
+  const API = import.meta.env.VITE_API_BASE;
 
   // ✅ Initialize only when applicant changes
   useEffect(() => {
@@ -580,7 +581,7 @@ function UpdateModal({ applicant, isOpen, onClose, baseUrl }) {
             try {
               // Send PUT request to update applicant
               const res = await axios.put(
-                `http://localhost:5000/newApplication/files/${formData.id}`,
+                `${API}/newApplication/files/${formData.id}`,
                 formData
               );
 

@@ -22,12 +22,13 @@ function BusinessProfile() {
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState("all"); // ✅ default to all
   const recordsPerPage = 20;
+  const API = import.meta.env.VITE_API_BASE;
 
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/businessProfile/businessProfiles"
+          `${API}/businessProfile/businessProfiles`
         );
 
         // Sort by createdAt ascending (oldest first)
@@ -68,7 +69,7 @@ function BusinessProfile() {
   const handleExportCSV = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5000/businessProfile/businessProfiles/export"
+        `${API}/businessProfile/businessProfiles/export`
       );
 
       if (res.data.success) {
