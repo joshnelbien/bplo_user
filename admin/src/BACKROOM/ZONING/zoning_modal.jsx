@@ -15,11 +15,16 @@ import {
   Stack,
   IconButton,
   Tooltip,
+  Snackbar,
+  Fade,
 } from "@mui/material";
 import { useState } from "react";
-import ZoningCert from "./zoningCert";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
+import ZoningCert from "./zoningCert";
+import { useEffect } from "react";
 
 // ✅ Normal text field
 const Field = ({ label, value }) => (
@@ -91,7 +96,7 @@ const FileField = ({ label, fileKey, fileData }) => (
 
     {fileData[fileKey] && (
       <Typography
-        component="span" // ✅ prevent nested <p>
+        component="span"
         sx={{ mt: 0.5, display: "flex", gap: 1, alignItems: "center" }}
       >
         <Tooltip title="View File">
@@ -135,10 +140,21 @@ function ZoningApplicantModal({
   const [showCert, setShowCert] = useState(false);
   const [declineOpen, setDeclineOpen] = useState(false);
   const [declineReason, setDeclineReason] = useState("");
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false);
 
   const files = [{ label: "Zoning Certificate", name: "zoningCert" }];
 
   const [selectedFiles, setSelectedFiles] = useState({});
+  const [validationError, setValidationError] = useState(false);
+
+  // Reset state when the modal opens with a new applicant
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedFiles({});
+      setValidationError(false);
+    }
+  }, [isOpen]);
 
   const handleFileSelect = (e) => {
     const { name, files } = e.target;
@@ -146,7 +162,23 @@ function ZoningApplicantModal({
       ...prev,
       [name]: files[0] ? files[0].name : "",
     }));
+    setValidationError(false); // Clear the error when a file is selected
     handleFileChange(e); // call parent handler
+  };
+
+  const handleApproveClick = () => {
+    // Check if a file has been selected for zoningCert
+    if (!selectedFiles.zoningCert) {
+      setValidationError(true);
+      return;
+    }
+    onApprove(applicant.id);
+    setSuccessOpen(true);
+  };
+
+  const handleSuccessClose = () => {
+    setSuccessOpen(false);
+    onClose();
   };
 
   const handleDeclineClick = () => {
@@ -156,6 +188,11 @@ function ZoningApplicantModal({
   const handleDeclineConfirm = () => {
     onDecline(applicant.id, declineReason);
     setDeclineOpen(false);
+    setDeclineSuccessOpen(true);
+  };
+
+  const handleDeclineSuccessClose = () => {
+    setDeclineSuccessOpen(false);
     onClose();
   };
 
@@ -298,7 +335,7 @@ function ZoningApplicantModal({
                     label="Tax Incentives From Government"
                     fileData={applicant}
                   />
-                )}  
+                )}
 
                 <Field label="Office Type" value={applicant.officeType} />
 
@@ -332,7 +369,10 @@ function ZoningApplicantModal({
                           <Field label="Line of Business" value={lob.trim()} />
                         </Grid>
                         <Grid item xs={12}>
-                          <Field label="Product/Service" value={product.trim()} />
+                          <Field
+                            label="Product/Service"
+                            value={product.trim()}
+                          />
                         </Grid>
                         <Grid item xs={12}>
                           <Field label="Units" value={unit.trim()} />
@@ -392,7 +432,6 @@ function ZoningApplicantModal({
               </Section>
 
               {/* Zoning Attachments */}
-
               <Typography variant="subtitle1" sx={{ mb: 3 }}>
                 ZONING FEE:{" "}
                 <b>{zoningFee === "Exempted" ? zoningFee : `₱${zoningFee}`}</b>
@@ -425,6 +464,10 @@ function ZoningApplicantModal({
                           placeholder="No file selected"
                           size="small"
                           fullWidth
+                          error={validationError}
+                          helperText={
+                            validationError && "A file must be uploaded to approve."
+                          }
                           InputProps={{
                             readOnly: true,
                           }}
@@ -460,13 +503,13 @@ function ZoningApplicantModal({
                   "&:hover": {
                     borderColor: "#1c541eff",
                   },
-                  width: "100px", // Set a specific width
+                  width: "100px",
                 }}
               >
                 Close
               </Button>
               <Button
-                onClick={() => onApprove(applicant.id)}
+                onClick={handleApproveClick}
                 variant="contained"
                 color="success"
               >
@@ -536,6 +579,78 @@ function ZoningApplicantModal({
             Submit Decline
           </Button>
         </DialogActions>
+      </Dialog>
+      {/* Success Pop-up for Approve */}
+      <Dialog
+        open={successOpen}
+        onClose={handleSuccessClose}
+        TransitionComponent={Fade}
+        maxWidth="xs"
+      >
+        <Paper
+          elevation={6}
+          sx={{
+            p: 4,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            backgroundColor: "white",
+            color: "#4caf50",
+            borderRadius: 2,
+          }}
+        >
+          <CheckCircleIcon
+            fontSize="large"
+            sx={{ fontSize: "5rem", color: "#4caf50" }}
+          />
+          <Typography variant="h5" fontWeight="bold">
+            Successfully Approved!
+          </Typography>
+          <Button
+            onClick={handleSuccessClose}
+            variant="contained"
+            color="success"
+          >
+            OK
+          </Button>
+        </Paper>
+      </Dialog>
+      {/* Success Pop-up for Decline - NEW */}
+      <Dialog
+        open={declineSuccessOpen}
+        onClose={handleDeclineSuccessClose}
+        TransitionComponent={Fade}
+        maxWidth="xs"
+      >
+        <Paper
+          elevation={6}
+          sx={{
+            p: 4,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            backgroundColor: "white",
+            color: "#d32f2f",
+            borderRadius: 2,
+          }}
+        >
+          <CancelIcon
+            fontSize="large"
+            sx={{ fontSize: "5rem", color: "#d32f2f" }}
+          />
+          <Typography variant="h5" fontWeight="bold">
+            Successfully Declined!
+          </Typography>
+          <Button
+            onClick={handleDeclineSuccessClose}
+            variant="contained"
+            color="error"
+          >
+            OK
+          </Button>
+        </Paper>
       </Dialog>
     </>
   );

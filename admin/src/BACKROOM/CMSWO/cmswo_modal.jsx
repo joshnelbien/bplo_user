@@ -15,6 +15,7 @@ import {
   IconButton,
   Tooltip,
   Fade,
+  Snackbar,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -142,6 +143,7 @@ function CmswoApplicantModal({
   const [confirmDeclineOpen, setConfirmDeclineOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false);
+  const [feeError, setFeeError] = useState(false); // New state for validation error
 
   useEffect(() => {
     if (applicant) {
@@ -151,9 +153,16 @@ function CmswoApplicantModal({
 
   const handleChange = (field, value) => {
     setCsmwoFee(value);
+    if (value.trim() !== "") {
+      setFeeError(false); // Clear the error when the user types
+    }
   };
 
   const handleApproveClick = () => {
+    if (csmwoFee.trim() === "") {
+      setFeeError(true);
+      return;
+    }
     setConfirmApproveOpen(true);
   };
 
@@ -393,6 +402,7 @@ function CmswoApplicantModal({
             />
           </Section>
 
+          {/* Solid Waste Fee Input */}
           <TextField
             label="Solid waste Fee"
             value={csmwoFee || ""}
@@ -400,6 +410,9 @@ function CmswoApplicantModal({
             fullWidth
             size="small"
             sx={{ mt: 2 }}
+            required
+            error={feeError}
+            helperText={feeError && "Solid Waste Fee is required for approval."}
           />
         </DialogContent>
 
@@ -541,6 +554,7 @@ function CmswoApplicantModal({
             onClick={handleDeclineConfirm}
             color="error"
             variant="contained"
+            disabled={!declineReason.trim()}
           >
             Decline
           </Button>
