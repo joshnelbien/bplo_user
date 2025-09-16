@@ -182,6 +182,7 @@ const BusinessProfile = sequelize.define(
 
     TREASURER: { type: DataTypes.STRING, defaultValue: "Pending" },
     TREASURERtimeStamp: { type: DataTypes.STRING },
+    application: { type: DataTypes.STRING },
   },
 
   {

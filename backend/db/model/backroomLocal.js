@@ -181,6 +181,7 @@ const Backroom = sequelize.define(
       allowNull: true,
     },
     businesstaxComputation_size: { type: DataTypes.INTEGER, allowNull: true },
+    application: { type: DataTypes.STRING },
   },
 
   {

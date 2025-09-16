@@ -53,7 +53,7 @@ function ColorStepIcon(props) {
 
 // ✅ Component to display a normal text field
 const Field = ({ label, value }) => (
-  <Grid item xs={15} sm={8}>
+  <Grid item xs={12} sm={6}>
     <TextField
       label={label}
       value={value || "—"}

@@ -49,8 +49,8 @@ function BusinessProfile() {
     filter === "all"
       ? applicants
       : filter === "new"
-      ? applicants.filter((a) => a.applicationType === "New")
-      : applicants.filter((a) => a.applicationType === "Renew");
+      ? applicants.filter((a) => a.application === "New")
+      : applicants.filter((a) => a.application === "Renew");
 
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
@@ -192,9 +192,6 @@ function BusinessProfile() {
                 <TableCell>
                   <strong>Last Name</strong>
                 </TableCell>
-                <TableCell>
-                  <strong>Status</strong>
-                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -209,7 +206,6 @@ function BusinessProfile() {
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.TREASURER}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
