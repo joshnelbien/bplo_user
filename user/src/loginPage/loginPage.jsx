@@ -180,9 +180,10 @@ const LoginPage = () => {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "100vh",
+          width: "100%", // ensure full width
           padding: { xs: 2, sm: 4 },
           backgroundImage: `url(${mainBackground})`,
-          backgroundSize: "cover",
+          backgroundSize: "cover", // ✅ always cover entire viewport
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
         }}
@@ -193,11 +194,10 @@ const LoginPage = () => {
             padding: { xs: 4, sm: 6 },
             borderRadius: "16px",
             width: "100%",
-            maxWidth: 400,
+            maxWidth: 400, // ✅ ensures nice scaling
             textAlign: "center",
             backgroundColor: "#ffffff",
             boxShadow: "0 10px 40px rgba(0, 0, 0, 0.2)",
-            mr: { xs: 0, sm: 10 },
           }}
         >
           <Box sx={{ mb: 3 }}>
@@ -311,7 +311,7 @@ const LoginPage = () => {
               variant="contained"
               fullWidth
               disabled={loading}
-              sx={{ py: 1.5, mt: 1 }}
+              sx={{ py: 1.5, mt: 1, fontSize: { xs: "0.9rem", sm: "1rem" } }}
             >
               {loading ? (
                 <CircularProgress size={24} sx={{ color: "#fff" }} />
