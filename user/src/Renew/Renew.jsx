@@ -108,7 +108,7 @@ function Renewal() {
   return (
     <Box sx={{ p: 4, maxWidth: 900, mx: "auto" }}>
       <Button
-        onClick={() => navigate(`/homePage/me`)}
+        onClick={() => navigate(`/homePage/${id}`)}
         variant="contained"
         color="success"
         sx={{ maxWidth: 180, mb: 3, borderRadius: 2 }}

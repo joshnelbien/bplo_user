@@ -143,7 +143,7 @@ const LoginPage = () => {
 
       setTimeout(() => {
         setOpenSuccessDialog(false);
-        navigate(`/homePage/me`);
+        navigate(`/homePage/${user.id}`);
       }, 1500);
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);
