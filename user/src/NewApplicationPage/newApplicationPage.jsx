@@ -562,7 +562,7 @@ function NewApplicationPage() {
 
       {/* Next Step Confirmation */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-        <DialogTitle>Confirm Navigation</DialogTitle>
+        <DialogTitle></DialogTitle>
         <DialogContent>
           <Typography>
             Are you sure you want to proceed to the next step?
