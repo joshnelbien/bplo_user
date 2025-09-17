@@ -41,8 +41,8 @@ const modalStyle = {
 
 // Card style
 const cardStyle = {
-  width: { xs: "90%", sm: 300 },
-  height: { xs: 180, sm: 200 },
+  width: { xs: "100%", sm: 300 },
+  minHeight: { xs: 200, sm: 220 }, // ✅ force same min height
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
@@ -231,7 +231,16 @@ const HomePage = () => {
             return (
               <Box key={type} onClick={() => handleOpen(type)} sx={cardStyle}>
                 {icons[type]}
-                <Typography fontWeight="bold" mt={1}>
+                <Typography
+                  fontWeight="bold"
+                  mt={1}
+                  sx={{
+                    textAlign: "center",
+                    px: 1,
+                    wordWrap: "break-word",
+                    fontSize: { xs: "0.9rem", sm: "1rem" }, // ✅ auto adjust font
+                  }}
+                >
                   {titles[type]}
                 </Typography>
               </Box>
@@ -252,7 +261,15 @@ const HomePage = () => {
             return (
               <Box key={type} onClick={() => handleOpen(type)} sx={cardStyle}>
                 {icons[type]}
-                <Typography fontWeight="bold" mt={1}>
+                <Typography
+                  fontWeight="bold"
+                  mt={1}
+                  sx={{
+                    textAlign: "center",
+                    px: 1,
+                    wordWrap: "break-word",
+                  }}
+                >
                   {titles[type]}
                 </Typography>
               </Box>
@@ -261,7 +278,7 @@ const HomePage = () => {
         </Stack>
       </Box>
 
-      {/* Modal */}
+      {/* Enhanced Modal */}
       <Modal
         open={open}
         onClose={handleClose}
@@ -270,13 +287,29 @@ const HomePage = () => {
         slotProps={{ backdrop: { timeout: 500 } }}
       >
         <Fade in={open}>
-          <Box sx={modalStyle}>
+          <Box
+            sx={{
+              ...modalStyle,
+              bgcolor: "background.paper",
+              borderRadius: 3,
+              boxShadow: 24,
+              p: { xs: 2, sm: 3, md: 4 },
+              width: { xs: "90%", sm: "70%", md: "50%" },
+              maxHeight: "80vh",
+              overflowY: "auto",
+              transition: "all 0.3s ease-in-out",
+            }}
+          >
+            {/* Header */}
             <Box
               sx={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
                 mb: 2,
+                pb: 1,
+                borderBottom: "1px solid",
+                borderColor: "divider",
               }}
             >
               <Typography variant="h6" fontWeight="bold">
@@ -285,24 +318,48 @@ const HomePage = () => {
               <Button
                 onClick={handleClose}
                 color="error"
-                sx={{ minWidth: 0, p: 0 }}
+                sx={{
+                  minWidth: 0,
+                  p: 0.5,
+                  borderRadius: "50%",
+                  "&:hover": { bgcolor: "error.light", color: "#fff" },
+                }}
               >
                 <CloseIcon />
               </Button>
             </Box>
+
+            {/* Content */}
             <List dense>
               {modalItems.map((item, i) => (
-                <ListItem key={i}>
+                <ListItem
+                  key={i}
+                  sx={{
+                    px: 1,
+                    borderRadius: 2,
+                    mb: 1,
+                    "&:hover": {
+                      bgcolor: "action.hover",
+                      transform: "scale(1.02)",
+                      transition: "0.2s ease",
+                    },
+                  }}
+                >
                   <Checkbox
                     defaultChecked
                     disabled
                     sx={{
                       "&.Mui-disabled": {
-                        color: "#2e7d32", // success green instead of gray
+                        color: "success.main", // success green
                       },
                     }}
                   />
-                  <ListItemText primary={item.text} />
+                  <ListItemText
+                    primary={item.text}
+                    primaryTypographyProps={{
+                      sx: { fontSize: { xs: "0.9rem", sm: "1rem" } },
+                    }}
+                  />
                 </ListItem>
               ))}
             </List>
