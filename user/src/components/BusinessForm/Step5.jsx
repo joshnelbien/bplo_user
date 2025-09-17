@@ -86,39 +86,15 @@ export default function Step5BusinessDetails({
         />
 
         <TextField
-          label="Vehicle (Van)"
-          name="numVehicleVan"
-          value={formData.numVehicleVan || ""}
+          label="Total Delivery Vehicle"
+          name="totalDeliveryVehicle"
+          value={formData.totalDeliveryVehicle || ""}
           onInput={handleNumberInput}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
-          error={!!errors.numVehicleVan}
-          helperText={errors.numVehicleVan}
-        />
-
-        <TextField
-          label="Vehicle (Truck)"
-          name="numVehicleTruck"
-          value={formData.numVehicleTruck || ""}
-          onInput={handleNumberInput}
-          fullWidth
-          variant="outlined"
-          sx={{ minWidth: 300 }}
-          error={!!errors.numVehicleTruck}
-          helperText={errors.numVehicleTruck}
-        />
-
-        <TextField
-          label="Vehicle (Motorcycle)"
-          name="numVehicleMotor"
-          value={formData.numVehicleMotor || ""}
-          onInput={handleNumberInput}
-          fullWidth
-          variant="outlined"
-          sx={{ minWidth: 300 }}
-          error={!!errors.numVehicleMotor}
-          helperText={errors.numVehicleMotor}
+          error={!!errors.totalDeliveryVehicle}
+          helperText={errors.totalDeliveryVehicle}
         />
 
         <TextField

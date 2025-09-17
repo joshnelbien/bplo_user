@@ -37,9 +37,6 @@ const Examiners = sequelize.define(
     numberOfEmployee: DataTypes.STRING,
     maleEmployee: DataTypes.STRING,
     femaleEmployee: DataTypes.STRING,
-    numVehicleVan: DataTypes.STRING,
-    numVehicleTruck: DataTypes.STRING,
-    numVehicleMotor: DataTypes.STRING,
     numNozzle: DataTypes.STRING,
     weighScale: DataTypes.STRING,
     Taxregion: DataTypes.STRING,
@@ -67,6 +64,8 @@ const Examiners = sequelize.define(
     Units: DataTypes.STRING,
     capital: DataTypes.STRING,
     totalCapital: DataTypes.STRING,
+    Modeofpayment: DataTypes.STRING,
+    totalDeliveryVehicle: DataTypes.STRING,
 
     // Files
     proofOfReg: { type: DataTypes.BLOB("long"), allowNull: true },
