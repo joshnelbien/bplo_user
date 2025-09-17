@@ -122,7 +122,7 @@ function AppTracker() {
   return (
     <Box sx={{ p: 4, maxWidth: 900, mx: "auto" }}>
       <Button
-        onClick={() => navigate(`/homePage/${userId}`)}
+        onClick={() => navigate(`/homePage/me`)}
         variant="contained"
         color="success"
         sx={{ maxWidth: 150, mb: 3 }}

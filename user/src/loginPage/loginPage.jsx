@@ -143,7 +143,7 @@ const LoginPage = () => {
 
       setTimeout(() => {
         setOpenSuccessDialog(false);
-        navigate(`/homePage/${user.id}`);
+        navigate(`/homePage/me`);
       }, 1500);
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);
@@ -179,11 +179,11 @@ const LoginPage = () => {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          height: "100dvh", // ✅ modern unit that accounts for mobile browser UI
-          width: "100%",
-          overflow: "hidden", // ✅ prevents scrollbars
+          minHeight: "100vh",
+          width: "100%", // ensure full width
+          padding: { xs: 2, sm: 4 },
           backgroundImage: `url(${mainBackground})`,
-          backgroundSize: "cover",
+          backgroundSize: "cover", // ✅ always cover entire viewport
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
         }}
@@ -194,7 +194,7 @@ const LoginPage = () => {
             padding: { xs: 4, sm: 6 },
             borderRadius: "16px",
             width: "100%",
-            maxWidth: 320, // ✅ ensures nice scaling
+            maxWidth: 400, // ✅ ensures nice scaling
             textAlign: "center",
             backgroundColor: "#ffffff",
             boxShadow: "0 10px 40px rgba(0, 0, 0, 0.2)",
@@ -206,7 +206,6 @@ const LoginPage = () => {
               src={logo}
               alt="SPC Logo"
               sx={{
-                overflow: "hidden",
                 height: 100,
                 width: 100,
                 mb: 2,
