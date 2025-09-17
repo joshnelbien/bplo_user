@@ -17,6 +17,7 @@ import {
     useTheme,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import CoconutImage from './coconut.png'; // Assuming coconut.png is in the same directory
 
 function App() {
     const navigate = useNavigate();
@@ -31,6 +32,7 @@ function App() {
     const navItems = [
         { label: "About", path: "/about" },
         { label: "Projects", path: "/projects" },
+        { label: "News", path: "/projects" },
     ];
 
     const drawer = (
@@ -77,6 +79,8 @@ function App() {
     );
 
     useEffect(() => {
+        // These styles are generally better handled by MUI's CssBaseline or global styles
+        // but keeping them for consistency with your original code.
         document.body.style.overflow = "hidden";
         document.body.style.margin = "0";
         document.body.style.padding = "0";
@@ -89,7 +93,7 @@ function App() {
     }, []);
 
     return (
-        <Box>
+        <Box sx={{ position: 'relative', minHeight: '100vh', overflowX: 'hidden' }}> {/* Added relative positioning and overflow */}
             <AppBar
                 position="static"
                 sx={{
@@ -174,6 +178,8 @@ function App() {
                     p: { xs: 2, md: 4 },
                     mt: { xs: 0, md: 30 },
                     ml: { xs: 0, md: 25 },
+                    position: 'relative', // To position the image relative to this grid
+                    zIndex: 1, // Ensure text is above image if they overlap
                 }}
             >
                 <Grid item sx={{ textAlign: { xs: "center", md: "left" } }}>
@@ -195,18 +201,77 @@ function App() {
                         sx={{
                             mb: 4,
                             typography: { xs: "body1", sm: "h6" },
-                            whiteSpace: 'pre-line', // This is the new, responsive CSS rule
+                            whiteSpace: 'pre-line',
+                            maxWidth: { xs: '90%', sm: '70%', md: '50%' }, // Constrain width for better readability
                         }}
                     >
-                        {`A streamlined platform designed to simplify the process of applying for, renewing,
-and managing business permits. Our system reduces bureaucracy, saves
-time, and provides a transparent and efficient experience for
-businesses and government agencies alike.`}
+                        {`A streamlined platform designed to simplify the process of applying for, renewing,and managing business permits. Our system reduces bureaucracy, savestime, and provides a transparent and efficient experience forbusinesses and government agencies alike.`}
                     </Typography>
+                    
+                    {/* Images under description */}
+                    <Box sx={{ display: 'flex', gap: 4, mb: 2, flexWrap: 'wrap' }}>
+                        <Box
+                            component="img"
+                            src="/dict.png"
+                            alt="DICT Logo"
+                            sx={{
+                                height: '100px', // Increased fixed height
+                                width: 'auto',
+                                objectFit: 'contain',
+                            }}
+                        />
+                        <Box
+                            component="img"
+                            src="/spclogo.png"
+                            alt="SPC Logo"
+                            sx={{
+                                height: '75px', // Increased fixed height, same as DICT
+                                width: 'auto',
+                                objectFit: 'contain',
+                            }}
+                        />
+                    </Box>
                 </Grid>
             </Grid>
+
+            {/* Coconut Image */}
+            <Box
+                component="img"
+                src={CoconutImage}
+                alt="Bonsai Coconut Tree"
+                sx={{
+                    position: 'absolute',
+                    right: { xs: '250px', sm: '270px', md: '340px' }, // Move to the left
+                    top: { xs: 'calc(50% - 100px)', md: 'calc(50% - 120px)' }, // Move up
+                    transform: { xs: 'translateX(0%) translateY(-50%)', md: 'translateX(0%) translateY(-50%)' },
+                    height: { xs: '200px', sm: '300px', md: '400px' }, // Responsive height
+                    width: 'auto',
+                    objectFit: 'contain',
+                    zIndex: 0, // Ensure image is behind text content
+                    display: { xs: 'none', sm: 'block' }, // Hide on extra small screens, show on small and up
+                }}
+            />
+             {/* Coconut Image for mobile when drawer is open - scaled down, centered (optional, consider if needed) */}
+             {isMobile && mobileOpen && (
+                <Box
+                    component="img"
+                    src={CoconutImage}
+                    alt="Bonsai Coconut Tree"
+                    sx={{
+                        position: 'fixed', // Fixed to stay even if scrolled
+                        bottom: 0,
+                        right: '50%',
+                        transform: 'translateX(50%)',
+                        height: '150px', // Smaller for mobile drawer view
+                        width: 'auto',
+                        objectFit: 'contain',
+                        zIndex: theme.zIndex.drawer + 1, // Ensure it's above the drawer
+                        display: 'block', // Only show on mobile when drawer is open
+                    }}
+                />
+            )}
         </Box>
     );
 }
 
-export default App;
+export default App; 
