@@ -6,94 +6,47 @@ import {
   Stack,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMapEvents,
+  useMap,
+} from "react-leaflet";
 import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 export default function Step3AddressInfo({ formData, handleChange, errors }) {
   const barangays = [
-    "ATISAN",
-    "BAGONG POOK VI-C (POB.)",
-    "BARANGAY I-A (POB.)",
-    "BARANGAY I-B (POB.)",
-    "BAGONG BAYAN I-C (POB.)",
-    "BARANGAY II-A (POB.)",
-    "BARANGAY II-B (POB.)",
-    "BARANGAY II-C (POB.)",
-    "BARANGAY II-D (POB.)",
-    "BARANGAY II-E (POB.)",
-    "BARANGAY II-F (POB.)",
-    "BARANGAY III-A (POB.)",
-    "BARANGAY III-B (POB.)",
-    "BARANGAY III-C (POB.)",
-    "BARANGAY III-D (POB.)",
-    "BARANGAY III-E (POB.)",
-    "BARANGAY III-F (POB.)",
-    "BARANGAY IV-A (POB.)",
-    "BARANGAY IV-B (POB.)",
-    "BARANGAY IV-C (POB.)",
-    "BARANGAY V-A (POB.)",
-    "BARANGAY V-B (POB.)",
-    "BARANGAY V-C (POB.)",
-    "BARANGAY V-D (POB.)",
-    "BARANGAY VI-A (POB.)",
-    "BARANGAY VI-B (POB.)",
-    "BARANGAY VI-D (POB.)",
-    "BARANGAY VI-E (POB.)",
-    "BARANGAY VII-A (POB.)",
-    "BARANGAY VII-B (POB.)",
-    "BARANGAY VII-C (POB.)",
-    "BARANGAY VII-D (POB.)",
-    "BARANGAY VII-E (POB.)",
-    "BAUTISTA",
-    "CONCEPCION",
-    "DEL REMEDIO",
-    "DOLORES",
-    "SAN ANTONIO 1",
-    "SAN ANTONIO 2",
-    "SAN BARTOLOME",
-    "SAN BUENAVENTURA",
-    "SAN CRISPIN",
-    "SAN CRISTOBAL",
-    "SAN DIEGO",
-    "SAN FRANCISCO",
-    "SAN GABRIEL",
-    "SAN GREGORIO",
-    "SAN IGNACIO",
-    "SAN ISIDRO",
-    "SAN JOAQUIN",
-    "SAN JOSE",
-    "SAN JUAN",
-    "SAN LORENZO",
-    "SAN LUCAS 1",
-    "SAN LUCAS 2",
-    "SAN MARCOS",
-    "SAN MATEO",
-    "SAN MIGUEL",
-    "SAN NICOLAS",
-    "SAN PEDRO",
-    "SAN RAFAEL",
-    "SAN ROQUE",
-    "SAN VICENTE",
-    "SANTA ANA",
-    "SANTA CATALINA",
-    "SANTA CRUZ",
-    "SANTA ELENA",
-    "SANTA FELOMINA",
-    "SANTA ISABEL",
-    "SANTA MARIA",
-    "SANTA MARIA MAGDALENA",
-    "SANTA MONICA",
-    "SANTA VERONICA",
-    "SANTIAGO I",
-    "SANTIAGO II",
-    "SANTISIMO ROSARIO",
-    "SANTO ANGEL",
-    "SANTO CRISTO",
-    "SANTO NIÑO",
-    "SOLEDAD",
+    "ATISAN", "BAGONG POOK VI-C (POB.)", "BARANGAY I-A (POB.)",
+    "BARANGAY I-B (POB.)", "BAGONG BAYAN I-C (POB.)", "BARANGAY II-A (POB.)",
+    "BARANGAY II-B (POB.)", "BARANGAY II-C (POB.)", "BARANGAY II-D (POB.)",
+    "BARANGAY II-E (POB.)", "BARANGAY II-F (POB.)", "BARANGAY III-A (POB.)",
+    "BARANGAY III-B (POB.)", "BARANGAY III-C (POB.)", "BARANGAY III-D (POB.)",
+    "BARANGAY III-E (POB.)", "BARANGAY III-F (POB.)", "BARANGAY IV-A (POB.)",
+    "BARANGAY IV-B (POB.)", "BARANGAY IV-C (POB.)", "BARANGAY V-A (POB.)",
+    "BARANGAY V-B (POB.)", "BARANGAY V-C (POB.)", "BARANGAY V-D (POB.)",
+    "BARANGAY VI-A (POB.)", "BARANGAY VI-B (POB.)", "BARANGAY VI-D (POB.)",
+    "BARANGAY VI-E (POB.)", "BARANGAY VII-A (POB.)", "BARANGAY VII-B (POB.)",
+    "BARANGAY VII-C (POB.)", "BARANGAY VII-D (POB.)", "BARANGAY VII-E (POB.)",
+    "BAUTISTA", "CONCEPCION", "DEL REMEDIO", "DOLORES", "SAN ANTONIO 1",
+    "SAN ANTONIO 2", "SAN BARTOLOME", "SAN BUENAVENTURA", "SAN CRISPIN",
+    "SAN CRISTOBAL", "SAN DIEGO", "SAN FRANCISCO", "SAN GABRIEL", "SAN GREGORIO",
+    "SAN IGNACIO", "SAN ISIDRO", "SAN JOAQUIN", "SAN JOSE", "SAN JUAN",
+    "SAN LORENZO", "SAN LUCAS 1", "SAN LUCAS 2", "SAN MARCOS", "SAN MATEO",
+    "SAN MIGUEL", "SAN NICOLAS", "SAN PEDRO", "SAN RAFAEL", "SAN ROQUE",
+    "SAN VICENTE", "SANTA ANA", "SANTA CATALINA", "SANTA CRUZ", "SANTA ELENA",
+    "SANTA FELOMINA", "SANTA ISABEL", "SANTA MARIA", "SANTA MARIA MAGDALENA",
+    "SANTA MONICA", "SANTA VERONICA", "SANTIAGO I", "SANTIAGO II",
+    "SANTISIMO ROSARIO", "SANTO ANGEL", "SANTO CRISTO", "SANTO NIÑO", "SOLEDAD",
   ];
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   // ✅ Uppercase handler
   const handleUppercaseChange = (e) => {
@@ -102,16 +55,17 @@ export default function Step3AddressInfo({ formData, handleChange, errors }) {
   };
 
   // Default coordinates (San Pablo City center)
-  const defaultPosition = [14.0697, 121.3259]; // lat, lng
+  const defaultPosition = [14.0697, 121.3259];
 
-  // Leaflet Marker icon fix
+  // ✅ Fix Leaflet default marker
   const defaultIcon = new L.Icon({
     iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
     iconSize: [25, 41],
     iconAnchor: [12, 41],
   });
 
-  // Custom component for handling clicks
+  // ✅ Custom component for handling clicks
   function LocationMarker() {
     useMapEvents({
       click(e) {
@@ -129,7 +83,18 @@ export default function Step3AddressInfo({ formData, handleChange, errors }) {
     return null;
   }
 
-  // Auto-set fixed values if not set
+  // ✅ Force map to refresh after load (fixes blank/grey tiles)
+  function ResizeHandler() {
+    const map = useMap();
+    useEffect(() => {
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
+    }, [map]);
+    return null;
+  }
+
+  // ✅ Auto-set fixed values
   useEffect(() => {
     if (
       !formData.region ||
@@ -144,13 +109,7 @@ export default function Step3AddressInfo({ formData, handleChange, errors }) {
       });
       handleChange({ target: { name: "zipCode", value: "4000" } });
     }
-  }, [
-    formData.region,
-    formData.province,
-    formData.cityOrMunicipality,
-    formData.zipCode,
-    handleChange,
-  ]);
+  }, [formData, handleChange]);
 
   return (
     <div style={{ marginBottom: 20 }}>
@@ -159,13 +118,8 @@ export default function Step3AddressInfo({ formData, handleChange, errors }) {
       </Typography>
 
       <Stack spacing={3}>
-        {/* Fixed Region - Not required, no error needed */}
         <TextField label="Region" value="REGION IV-A" disabled fullWidth />
-
-        {/* Fixed Province - Not required, no error needed */}
         <TextField label="Province" value="LAGUNA" disabled fullWidth />
-
-        {/* Fixed City - Not required, no error needed */}
         <TextField
           label="City / Municipality"
           value="SAN PABLO CITY"
@@ -173,7 +127,6 @@ export default function Step3AddressInfo({ formData, handleChange, errors }) {
           fullWidth
         />
 
-        {/* Barangay Dropdown - ADDED VALIDATION */}
         <FormControl fullWidth error={!!errors.barangay}>
           <InputLabel id="barangay-label">Barangay</InputLabel>
           <Select
@@ -197,7 +150,6 @@ export default function Step3AddressInfo({ formData, handleChange, errors }) {
           )}
         </FormControl>
 
-        {/* Address Line 1 - ADDED VALIDATION */}
         <TextField
           label="Address Line 1"
           name="addressLine1"
@@ -208,10 +160,9 @@ export default function Step3AddressInfo({ formData, handleChange, errors }) {
           helperText={errors.addressLine1}
         />
 
-        {/* Fixed Zip Code - Not required, no error needed */}
         <TextField label="Zip Code" value="4000" disabled fullWidth />
 
-        {/* Pin Address with Map - Not required, no error needed */}
+        {/* ✅ Fixed Map for mobile responsiveness */}
         <div>
           <Typography variant="subtitle1" gutterBottom>
             Pin Address (Click on the map)
@@ -219,12 +170,17 @@ export default function Step3AddressInfo({ formData, handleChange, errors }) {
           <MapContainer
             center={defaultPosition}
             zoom={13}
-            style={{ height: "400px", width: "100%", borderRadius: "10px" }}
+            style={{
+              height: isMobile ? "250px" : "400px",
+              width: "100%",
+              borderRadius: "10px",
+            }}
           >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
             />
+            <ResizeHandler />
             <LocationMarker />
           </MapContainer>
           <TextField
