@@ -479,7 +479,8 @@ function CenroApplicantModal({
                   InputProps={{ readOnly: true }}
                   error={validationErrors.cenroCert}
                   helperText={
-                    validationErrors.cenroCert && "A file is required for approval."
+                    validationErrors.cenroCert &&
+                    "A file is required for approval."
                   }
                 />
               </Grid>
