@@ -6,6 +6,8 @@ import Button from "@mui/material/Button";
 import Fade from "@mui/material/Fade";
 import List from "@mui/material/List";
 import ListItemText from "@mui/material/ListItemText";
+import ListItem from "@mui/material/ListItem";
+import Checkbox from "@mui/material/Checkbox";
 import Modal from "@mui/material/Modal";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -18,7 +20,7 @@ import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import DescriptionIcon from "@mui/icons-material/Description";
-import AnnouncementModal from "../homePage/announcement";
+import AnnouncementModal from "./news";
 
 // Modal styles
 const modalStyle = {
@@ -35,7 +37,6 @@ const modalStyle = {
   borderRadius: "20px",
   border: "2px solid",
   borderImageSlice: 1,
-  borderImageSource: "linear-gradient(135deg, #2A8238, #34d399)",
 };
 
 // Card style
@@ -76,45 +77,43 @@ const modalContents = {
   newApplication: {
     title: "REQUIREMENTS FOR NEW BUSINESS REGISTRATION",
     items: [
-      { text: "- Filled-up Unified Business Permit Application Form" },
+      { text: "Filled-up Unified Business Permit Application Form" },
       {
-        text: "- 1 photocopy of DTI/SEC/CDA Registration and Articles of Incorporation",
+        text: "1 photocopy of DTI/SEC/CDA Registration and Articles of Incorporation",
       },
-      { text: "- Contract of Lease and Lessor Mayor's Permit (if rented)" },
-      {
-        text: "- Photocopy of Occupancy Permit (if newly constructed building)",
-      },
-      { text: "- Location of Business (Sketch/Map)" },
-      { text: "- Land Tax Clearance/Certificate of Payment" },
-      { text: "- Market Clearance (if stallholder)" },
+      { text: "Contract of Lease and Lessor Mayor's Permit (if rented)" },
+      { text: "Photocopy of Occupancy Permit (if newly constructed building)" },
+      { text: "Location of Business (Sketch/Map)" },
+      { text: "Land Tax Clearance/Certificate of Payment" },
+      { text: "Market Clearance (if stallholder)" },
     ],
   },
   renewal: {
     title: "REQUIREMENTS FOR BUSINESS PERMIT RENEWAL",
     items: [
-      { text: "- Filled-up Unified Business Permit Application Form" },
-      { text: "- Previous year's Mayor's Permit" },
-      { text: "- Financial Statement/Income Tax Return of previous year" },
-      { text: "- Barangay Business Clearance (Window 1-BPLD)" },
-      { text: "- Land Tax Clearance/ Certificate of Payment" },
-      { text: "- Market Clearance (if market stall holder)" },
+      { text: "Filled-up Unified Business Permit Application Form" },
+      { text: "Previous year's Mayor's Permit" },
+      { text: "Financial Statement/Income Tax Return of previous year" },
+      { text: "Barangay Business Clearance (Window 1-BPLD)" },
+      { text: "Land Tax Clearance/ Certificate of Payment" },
+      { text: "Market Clearance (if market stall holder)" },
     ],
   },
   Holidays: {
     title: "HOLIDAY SCHEDULE INFORMATION",
     items: [
-      { text: "- Offices are closed on national holidays." },
-      { text: "- Local government declared holidays may also apply." },
-      { text: "- Please check official announcements for updates." },
-      { text: "- Applications will be processed on the next business day." },
+      { text: "Offices are closed on national holidays." },
+      { text: "Local government declared holidays may also apply." },
+      { text: "Please check official announcements for updates." },
+      { text: "Applications will be processed on the next business day." },
     ],
   },
   Officehrs: {
     title: "OFFICE HOURS INFORMATION",
     items: [
-      { text: "- Monday to Friday: 8:00 AM - 5:00 PM" },
-      { text: "- No Noon break." },
-      { text: "- Closed on Saturdays, Sundays, and Holidays." },
+      { text: "Monday to Friday: 8:00 AM - 5:00 PM" },
+      { text: "No Noon break." },
+      { text: "Closed on Saturdays, Sundays, and Holidays." },
     ],
   },
 };
@@ -210,10 +209,7 @@ const HomePage = () => {
           }}
         >
           <Button sx={buttonStyle} onClick={handleAnnouncementClick}>
-            <CampaignIcon sx={{ mr: 1 }} /> PUBLIC STATEMENT
-          </Button>
-          <Button sx={buttonStyle}>
-            <DescriptionIcon sx={{ mr: 1 }} /> NEWS
+            <CampaignIcon sx={{ mr: 1 }} /> News
           </Button>
         </Stack>
 
@@ -296,9 +292,18 @@ const HomePage = () => {
             </Box>
             <List dense>
               {modalItems.map((item, i) => (
-                <Box key={i} sx={{ py: 0.5 }}>
+                <ListItem key={i}>
+                  <Checkbox
+                    defaultChecked
+                    disabled
+                    sx={{
+                      "&.Mui-disabled": {
+                        color: "#2e7d32", // success green instead of gray
+                      },
+                    }}
+                  />
                   <ListItemText primary={item.text} />
-                </Box>
+                </ListItem>
               ))}
             </List>
           </Box>
