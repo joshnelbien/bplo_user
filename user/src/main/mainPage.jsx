@@ -44,7 +44,10 @@ function App() {
 
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: "center", p: 2 }}>
-      <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold", color: "#09360D" }}>
+      <Typography
+        variant="h6"
+        sx={{ mb: 2, fontWeight: "bold", color: "#09360D" }}
+      >
         BPLO
       </Typography>
       <List>
@@ -208,9 +211,12 @@ function App() {
           height: "100vh",
           px: { xs: 2, md: 6 },
           textAlign: "center",
-          background: "linear-gradient(135deg, #e9f5ee 0%, #ffffff 100%)",
+          backgroundImage: `url('/path/to/your/image.jpg')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
         }}
-      >
+        >
         <Slide in={animate} direction="down" timeout={1000}>
           <Typography
             variant="h3"
@@ -237,15 +243,19 @@ function App() {
               whiteSpace: "pre-line",
             }}
           >
-            {`A streamlined platform designed to simplify the process of applying for, renewing,
-and managing business permits. Our system reduces bureaucracy, saves
-time, and provides a transparent and efficient experience for
-businesses and government agencies alike.`}
+            {``}
           </Typography>
         </Fade>
 
         <Fade in={animate} timeout={2500}>
-          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center" }}>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+              flexWrap: "wrap",
+              justifyContent: "center",
+            }}
+          >
             <Button
               variant="contained"
               sx={{
@@ -279,9 +289,7 @@ businesses and government agencies alike.`}
 
         {/* Scroll hint */}
         <Fade in={animate} timeout={3000}>
-          <Box sx={{ mt: 6, animation: "bounce 2s infinite" }}>
-            <ArrowDownwardIcon sx={{ fontSize: 40, color: "#09360D" }} />
-          </Box>
+          <Box sx={{ mt: 6, animation: "bounce 2s infinite" }}></Box>
         </Fade>
       </Grid>
 
@@ -304,8 +312,15 @@ businesses and government agencies alike.`}
               title: "Secure & Transparent",
               desc: "Trustworthy transactions for both businesses and government agencies.",
             },
+            {
+              icon: <MenuIcon sx={{ fontSize: 50, color: "#09360D" }} />, // ✅ New feature icon
+              title: "User Friendly Interface",
+              desc: "An intuitive design that makes it easy for both citizens and staff to navigate.",
+            },
           ].map((feature, index) => (
-            <Grid item xs={12} md={4} key={index}>
+            <Grid item xs={12} md={3} key={index}>
+              {" "}
+              {/* ✅ Adjusted to 4 columns on md+ */}
               <Fade in={animate} timeout={1500 + index * 500}>
                 <Box
                   sx={{
@@ -321,7 +336,11 @@ businesses and government agencies alike.`}
                   <Typography variant="h6" sx={{ fontWeight: "bold", mt: 2 }}>
                     {feature.title}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: 1 }}
+                  >
                     {feature.desc}
                   </Typography>
                 </Box>
@@ -336,7 +355,8 @@ businesses and government agencies alike.`}
       {/* Footer */}
       <Box sx={{ py: 4, textAlign: "center", bgcolor: "#f9f9f9", mt: 4 }}>
         <Typography variant="body2" color="text.secondary">
-          © {new Date().getFullYear()} BPLO Software Solutions. All rights reserved.
+          © {new Date().getFullYear()} BPLO Software Solutions. All rights
+          reserved.
         </Typography>
       </Box>
     </Box>
