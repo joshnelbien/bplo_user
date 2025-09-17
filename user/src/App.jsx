@@ -6,13 +6,14 @@ import NewApplicationPage from "./NewApplicationPage/newApplicationPage";
 import RegisterPage from "./registerPage/registerPage";
 import AppTracker from "./appTracker/appTracker";
 import Renew from "./Renew/Renew";
-
+import Main from "./main/mainPage";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LoginPage />} />
+        <Route path="/" element={<Main />} />
+        <Route path="/loginPage" element={<LoginPage />} />
         <Route path="/homePage/me" element={<HomePage />} />
         <Route path="/newApplicationPage/me" element={<NewApplicationPage />} />
         <Route path="/registerPage" element={<RegisterPage />} />
