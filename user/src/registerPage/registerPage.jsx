@@ -145,13 +145,14 @@ function RegisterPage() {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          minHeight: "100vh",
-          // The background image and blur are applied here
-          backgroundImage: "url(mainbg.png)",
+          height: "100dvh", // ✅ modern viewport height
+          width: "100%",
+          overflow: "hidden", // ✅ prevent scrollbars
+          backgroundImage: "url(mainbg.png)", // use your mainBackground variable if you want
           backgroundSize: "cover",
           backgroundPosition: "center",
-          position: "relative", // Required for the pseudo-element
-          padding: { xs: 2, sm: 4 },
+          backgroundRepeat: "no-repeat",
+          position: "relative",
           "&::before": {
             content: '""',
             position: "absolute",
@@ -159,9 +160,9 @@ function RegisterPage() {
             left: 0,
             width: "100%",
             height: "100%",
-            backdropFilter: "blur(5px)", // Blurs the background image
-            backgroundColor: "rgba(249, 249, 249, 0.7)", // Semi-transparent overlay
-            zIndex: -1, // Pushes the overlay behind the content
+            backdropFilter: "blur(5px)",
+            backgroundColor: "rgba(249, 249, 249, 0.7)",
+            zIndex: -1,
           },
         }}
       >
@@ -171,7 +172,7 @@ function RegisterPage() {
             padding: { xs: 4, sm: 6 },
             borderRadius: "16px",
             width: "100%",
-            maxWidth: 400,
+            maxWidth: 320,
             textAlign: "center",
             backgroundColor: "#fff",
           }}
