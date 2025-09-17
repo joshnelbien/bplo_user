@@ -35,21 +35,18 @@ function App() {
 
     const drawer = (
         <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
-            <Typography variant="h6" sx={{ my: 2 }}>
-                BPS
-            </Typography>
             <List>
                 {navItems.map((item) => (
                     <ListItem key={item.label} disablePadding>
                         <ListItemButton sx={{ textAlign: "center" }} onClick={() => navigate(item.path)}>
-                            <ListItemText primary={item.label} />
+                            <ListItemText primary={item.label} sx={{ '& .MuiListItemText-primary': { fontWeight: 'bold', color: '#09360D' } }} />
                         </ListItemButton>
                     </ListItem>
                 ))}
                 <Button
                     fullWidth
                     variant="text"
-                    sx={{ my: 1, color: '#09360D' }}
+                    sx={{ my: 1, color: '#09360D', fontWeight: 'bold' }}
                     onClick={() => {
                         navigate("/loginPage");
                         setMobileOpen(false);
@@ -60,7 +57,14 @@ function App() {
                 <Button
                     fullWidth
                     variant="contained"
-                    sx={{ my: 1 }}
+                    sx={{
+                        fontWeight: 'bold',
+                        backgroundColor: '#09360D',
+                        color: 'white',
+                        '&:hover': {
+                            backgroundColor: '#07270a',
+                        },
+                    }}
                     onClick={() => {
                         navigate("/register");
                         setMobileOpen(false);
@@ -101,14 +105,14 @@ function App() {
                             aria-label="open drawer"
                             edge="start"
                             onClick={handleDrawerToggle}
-                            sx={{ mr: 2 }}
+                            sx={{ mr: 2, color: '#09360D' }}
                         >
                             <MenuIcon />
                         </IconButton>
                     ) : (
                         <Box sx={{ display: "flex", gap: 2 }}>
                             {navItems.map((item) => (
-                                <Button key={item.label} color="inherit" onClick={() => navigate(item.path)}>
+                                <Button key={item.label} color="inherit" onClick={() => navigate(item.path)} sx={{ fontWeight: 'bold', color: '#09360D' }}>
                                     {item.label}
                                 </Button>
                             ))}
@@ -119,7 +123,7 @@ function App() {
                         <Box sx={{ ml: "auto", display: "flex", gap: 2 }}>
                             <Button
                                 variant="text"
-                                sx={{ color: "text.secondary" }}
+                                sx={{ my: 1, color: '#09360D', fontWeight: 'bold' }}
                                 onClick={() => navigate("/loginPage")}
                             >
                                 Login
@@ -127,6 +131,14 @@ function App() {
                             <Button
                                 variant="contained"
                                 color="primary"
+                                sx={{
+                                    fontWeight: 'bold',
+                                    backgroundColor: '#09360D',
+                                    color: 'white',
+                                    '&:hover': {
+                                        backgroundColor: '#07270a',
+                                    },
+                                }}
                                 onClick={() => navigate("/registerPage")}
                             >
                                 Register Account
@@ -155,28 +167,41 @@ function App() {
             <Grid
                 container
                 direction="column"
-                justifyContent="center"
-                alignItems="center"
+                justifyContent={{ xs: "center", md: "flex-start" }}
+                alignItems={{ xs: "center", md: "flex-start" }}
                 sx={{
                     height: "calc(100vh - 64px)",
-                    textAlign: "center",
-                    p: 4,
+                    p: { xs: 2, md: 4 },
+                    mt: { xs: 0, md: 30 },
+                    ml: { xs: 0, md: 25 },
                 }}
             >
-                <Grid item>
+                <Grid item sx={{ textAlign: { xs: "center", md: "left" } }}>
                     <Typography
                         variant="h3"
                         component="h1"
                         gutterBottom
-                        sx={{ fontWeight: "bold", mb: 2 }}
+                        sx={{
+                            fontWeight: "bold",
+                            mb: 2,
+                            typography: { xs: "h4", sm: "h3" },
+                        }}
                     >
-                        BPLO System
+                        BPLO SOFTWARE SOLUTIONS
                     </Typography>
-                    <Typography variant="h6" color="text.secondary" sx={{ mb: 4 }}>
-                        A streamlined platform designed to simplify the process of applying
-                        for, renewing, and managing business permits. Our system reduces
-                        bureaucracy, saves time, and provides a transparent and efficient
-                        experience for businesses and government agencies alike.
+                    <Typography
+                        variant="h6"
+                        color="text.secondary"
+                        sx={{
+                            mb: 4,
+                            typography: { xs: "body1", sm: "h6" },
+                            whiteSpace: 'pre-line', // This is the new, responsive CSS rule
+                        }}
+                    >
+                        {`A streamlined platform designed to simplify the process of applying for, renewing,
+and managing business permits. Our system reduces bureaucracy, saves
+time, and provides a transparent and efficient experience for
+businesses and government agencies alike.`}
                     </Typography>
                 </Grid>
             </Grid>
