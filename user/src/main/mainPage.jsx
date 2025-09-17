@@ -51,7 +51,7 @@ function App() {
                     variant="text"
                     sx={{ my: 1, color: '#09360D' }}
                     onClick={() => {
-                        navigate("/login");
+                        navigate("/loginPage");
                         setMobileOpen(false);
                     }}
                 >

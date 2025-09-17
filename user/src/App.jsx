@@ -6,7 +6,7 @@ import NewApplicationPage from "./NewApplicationPage/newApplicationPage";
 import RegisterPage from "./registerPage/registerPage";
 import AppTracker from "./appTracker/appTracker";
 import Renew from "./Renew/Renew";
-import Main from "./mainPage/mainPage";
+import Main from "./main/mainPage";
 
 function App() {
   return (
