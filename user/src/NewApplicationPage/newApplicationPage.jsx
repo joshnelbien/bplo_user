@@ -96,9 +96,6 @@ function NewApplicationPage() {
       numberOfEmployee: "",
       maleEmployee: "",
       femaleEmployee: "",
-      numVehicleVan: "",
-      numVehicleTruck: "",
-      numVehicleMotor: "",
       numNozzle: "",
       weighScale: "",
       Taxregion: "",
@@ -120,6 +117,8 @@ function NewApplicationPage() {
       Units: "",
       capital: "",
       totalCapital: "",
+      totalDeliveryVehicle: "",
+      Modeofpayment: "",
       application: "New",
     }
   );

@@ -207,6 +207,7 @@ function BusinessTaxApplicantModal({
           {/* Business Info */}
           <Section title="Business Information">
             <Field label="Status" value={applicant.BusinessTax} />
+            <Field label="Mode of Payment" value={applicant.Modeofpayment} />
             <Field label="BIN" value={applicant.BIN} />
             <Field label="Business Type" value={applicant.BusinessType} />
             <Field label="DSC Registration No" value={applicant.dscRegNo} />
@@ -243,6 +244,19 @@ function BusinessTaxApplicantModal({
             <Field label="Address Line 1" value={applicant.addressLine1} />
             <Field label="Zip Code" value={applicant.zipCode} />
             <Field label="Pin Address" value={applicant.pinAddress} />
+            <Field label="Own Place" value={applicant.ownPlace} />
+
+            {applicant.ownPlace === "YES" ? (
+              <>
+                <Field label="Tax Dec. No." value={applicant.taxdec} />
+              </>
+            ) : (
+              <>
+                <Field label="Lessor's Name" value={applicant.lessorName} />
+                <Field label="Monthly Rent" value={applicant.monthlyRent} />
+                <Field label="Tax Dec. No." value={applicant.taxdec} />
+              </>
+            )}
           </Section>
 
           {/* Operations */}
@@ -251,44 +265,26 @@ function BusinessTaxApplicantModal({
             <Field label="Employees" value={applicant.numberOfEmployee} />
             <Field label="Male Employees" value={applicant.maleEmployee} />
             <Field label="Female Employees" value={applicant.femaleEmployee} />
-            <Field label="Vans" value={applicant.numVehicleVan} />
-            <Field label="Trucks" value={applicant.numVehicleTruck} />
-            <Field label="Motorcycles" value={applicant.numVehicleMotor} />
+            <Field
+              label="Total Delivery Vehicle"
+              value={applicant.totalDeliveryVehicle}
+            />
             <Field label="No. of Nozzles" value={applicant.numNozzle} />
             <Field label="Weigh Scale" value={applicant.weighScale} />
           </Section>
 
           {/* Tax Address */}
           <Section title="Taxpayer Address">
-            <Field label="Tax Region" value={applicant.Taxregion} />
-            <Field label="Tax Province" value={applicant.Taxprovince} />
+            <Field label="Region" value={applicant.Taxregion} />
+            <Field label="Province" value={applicant.Taxprovince} />
             <Field
-              label="Tax City/Municipality"
+              label="City/Municipality"
               value={applicant.TaxcityOrMunicipality}
             />
-            <Field label="Tax Barangay" value={applicant.Taxbarangay} />
-            <Field
-              label="Tax Address Line 1"
-              value={applicant.TaxaddressLine1}
-            />
-            <Field label="Tax Zip Code" value={applicant.TaxzipCode} />
-            <Field label="Tax Pin Address" value={applicant.TaxpinAddress} />
-            <Field label="Own Place" value={applicant.ownPlace} />
-            {applicant.ownPlace === "Yes" ? (
-              <Field label="Tax Dec. No." value={applicant.taxdec} />
-            ) : (
-              <>
-                <Grid item xs={12} sm={6}>
-                  <Field label="Lessor's Name" value={applicant.lessorName} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Field label="Monthly Rent" value={applicant.monthlyRent} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Field label="Tax Dec. No." value={applicant.taxdec} />
-                </Grid>
-              </>
-            )}
+            <Field label="Barangay" value={applicant.Taxbarangay} />
+            <Field label="Address Line 1" value={applicant.TaxaddressLine1} />
+            <Field label="Zip Code" value={applicant.TaxzipCode} />
+            <Field label="Pin Address" value={applicant.TaxpinAddress} />
           </Section>
 
           {/* Business Activity */}

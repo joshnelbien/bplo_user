@@ -415,6 +415,37 @@ export default function Step6BusinessActivity({
         )}
       </Stack>
 
+      <FormControl
+        fullWidth
+        sx={{ minWidth: 300 }}
+        error={!!errors.Modeofpayment}
+      >
+        <InputLabel id="Modeofpayment-label">Mode of Payment</InputLabel>
+        <Select
+          labelId="Modeofpayment-label"
+          name="Modeofpayment"
+          value={formData.Modeofpayment || ""}
+          onChange={(e) =>
+            handleChange({
+              target: {
+                name: e.target.name,
+                value: e.target.value.toUpperCase(),
+              },
+            })
+          }
+          label="Office Type"
+        >
+          <MenuItem value="">-- SELECT MODE OF PAYMENT --</MenuItem>
+          <MenuItem value="ANNUALLY">ANNUALLY</MenuItem>
+          <MenuItem value="QUARTERLY">QUARTERLY</MenuItem>
+        </Select>
+        {!!errors.Modeofpayment && (
+          <Typography variant="caption" color="error">
+            {errors.Modeofpayment}
+          </Typography>
+        )}
+      </FormControl>
+
       {/* Delete Confirmation Modal */}
       <Dialog
         open={openConfirm}
