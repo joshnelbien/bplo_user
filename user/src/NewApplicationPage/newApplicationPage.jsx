@@ -344,7 +344,7 @@ function NewApplicationPage() {
       setSuccessDialogOpen(true);
 
       setTimeout(() => {
-        navigate(`/homePage/me`);
+        navigate(`/homePage/${userId}`);
       }, 2000);
     } catch (err) {
       console.error(err);
@@ -441,7 +441,7 @@ function NewApplicationPage() {
     >
       <Box sx={{ width: "100%", maxWidth: 900, mx: "auto", mb: 2 }}>
         <GreenButton
-          onClick={() => navigate(`/homePage/me`)}
+          onClick={() => navigate(`/homePage/${userId}`)}
           variant="contained"
         >
           BACK TO DASHBOARD

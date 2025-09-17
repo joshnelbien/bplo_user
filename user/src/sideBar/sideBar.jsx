@@ -24,6 +24,7 @@ import {
 import { alpha } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const logo = "/spclogo.png";
 
@@ -43,7 +44,7 @@ const Sidebar = ({ id }) => {
         const userId = localStorage.getItem("userId");
         if (!userId) return;
 
-        const response = await fetch(`${API}/userAccounts/me/${userId}`);
+        const response = await fetch(`${API}/userAccounts/${userId}`);
         if (!response.ok) throw new Error("Failed to fetch user");
 
         const data = await response.json();
@@ -130,7 +131,7 @@ const Sidebar = ({ id }) => {
         <List component="nav">
           {/* New Application */}
           <ListItemButton
-            onClick={() => navigate(`/newApplicationPage/me`)}
+            onClick={() => navigate(`/newApplicationPage/${id}`)}
             sx={{
               borderRadius: "8px",
               mb: 1,
@@ -149,7 +150,7 @@ const Sidebar = ({ id }) => {
 
           {/* Renew Application */}
           <ListItemButton
-            onClick={() => navigate(`/renew/me`)}
+            onClick={() => navigate(`/renew/${id}`)}
             sx={{
               borderRadius: "8px",
               mb: 1,
@@ -168,7 +169,7 @@ const Sidebar = ({ id }) => {
 
           {/* Application Tracker */}
           <ListItemButton
-            onClick={() => navigate(`/appTracker/me`)}
+            onClick={() => navigate(`/appTracker/${id}`)}
             sx={{
               borderRadius: "8px",
               mb: 1,
@@ -186,8 +187,6 @@ const Sidebar = ({ id }) => {
           </ListItemButton>
         </List>
       </Box>
-
-      
 
       {/* Logout */}
       <Box sx={{ p: 2, borderTop: "1px solid #E0E0E0" }}>
