@@ -439,77 +439,84 @@ function NewApplicationPage() {
         py: { xs: 2, sm: 4 },
       }}
     >
-      <Box sx={{ width: "100%", maxWidth: 900, mx: "auto", mb: 2 }}>
+      {/* Back Button Wrapper */}
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: { xs: 320, md: 900 },
+          mx: "auto",
+          mb: 2,
+        }}
+      >
         <GreenButton
           onClick={() => navigate(`/homePage/${userId}`)}
           variant="contained"
+          fullWidth={{ xs: true, md: false }} // full width on mobile
         >
           BACK TO DASHBOARD
         </GreenButton>
       </Box>
 
+      {/* Paper Wrapper */}
       <Paper
         elevation={6}
         sx={{
           p: { xs: 2, sm: 4 },
           width: "100%",
-          maxWidth: 900,
+          maxWidth: { xs: 320, md: 900 }, // ✅ mobile 320px, desktop 900px
           mx: "auto",
           borderRadius: "16px",
         }}
       >
         <Typography
-          variant="h4"
+          variant="h5"
           align="center"
           gutterBottom
           sx={{
             fontWeight: "bold",
             color: "#333",
-            mt: 2,
+            mt: 1,
+            fontSize: { xs: "1.2rem", md: "1.5rem" }, // ✅ smaller heading on mobile
           }}
         >
           Business Application Form
         </Typography>
 
+        {/* Stepper */}
         <Stepper
           activeStep={step - 1}
-          alternativeLabel
+          alternativeLabel={false}
           sx={{
-            mb: 4,
-            flexWrap: "wrap",
-            justifyContent: "center",
-            "& .MuiStepIcon-root": {
-              color: "#4caf50",
-              "&.Mui-active": {
-                color: "#388e3c",
-              },
-              "&.Mui-completed": {
-                color: "#4caf50",
-              },
+            mb: 3,
+            width: "100%",
+            overflowX: { xs: "auto", md: "visible" }, // scroll on mobile, normal on desktop
+            "& .MuiStep-root": {
+              padding: 0,
+              minWidth: { xs: "30px", md: "70px" }, // compact on mobile
             },
-            "& .MuiStepConnector-line": {
-              borderColor: "#4caf50",
+            "& .MuiStepIcon-root": {
+              fontSize: { xs: 20, md: 28 },
+              color: "#4caf50",
+              "&.Mui-active": { color: "#388e3c" },
+              "&.Mui-completed": { color: "#4caf50" },
+            },
+            "& .MuiStepLabel-label": {
+              fontSize: { xs: "0.55rem", md: "0.9rem" },
+              maxWidth: { xs: "40px", md: "120px" },
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             },
           }}
         >
           {steps.map((label, index) => (
             <Step key={label} completed={step - 1 > index}>
-              <StepLabel
-                StepIconProps={{ sx: { fontSize: 32 } }}
-                sx={{
-                  "& .MuiStepLabel-label": {
-                    fontSize: { xs: "0.6rem", sm: "0.75rem", md: "0.9rem" },
-                    textAlign: "center",
-                    color: step - 1 >= index ? "#4caf50" : "#333",
-                  },
-                }}
-              >
-                {label}
-              </StepLabel>
+              <StepLabel>{label}</StepLabel>
             </Step>
           ))}
         </Stepper>
 
+        {/* Form Content */}
         <form style={{ width: "100%" }}>
           {renderStepContent(step)}
 
