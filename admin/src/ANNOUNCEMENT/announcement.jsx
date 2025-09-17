@@ -146,7 +146,7 @@ const Announcement = () => {
           try {
             const response = await fetch(
               isEditing
-                ? `/api/anouncements/${currentId}`
+                ? `/api/announcements/${currentId}`
                 : "/api/announcements",
               {
                 method: isEditing ? "PUT" : "POST",
@@ -201,19 +201,18 @@ const Announcement = () => {
   };
 
   const handleEditAnnouncement = (ann) => {
-    confirmActionHandler("Do you want to edit this announcement?", () => {
-      setNewAnnouncement({
-        text: ann.text,
-        startDate: ann.startDate,
-        endDate: ann.endDate,
-        createdBy: ann.createdBy,
-        attachedImageBlob: ann.attachedImageBlob,
-      });
-      setCurrentId(ann.id);
-      setIsEditing(true);
-      setIsModalOpen(true);
-    });
-  };
+  setNewAnnouncement({
+    text: ann.text,
+    startDate: ann.startDate,
+    endDate: ann.endDate,
+    createdBy: ann.createdBy,
+    attachedImageBlob: ann.attachedImageBlob,
+  });
+  setCurrentId(ann.id);
+  setIsEditing(true);
+  setIsModalOpen(true);
+};
+
 
   const handleSnackbarClose = (_, reason) => {
     if (reason === "clickaway") return;

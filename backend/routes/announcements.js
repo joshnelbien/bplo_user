@@ -1,18 +1,25 @@
+// routes/announcements.js
 const express = require("express");
 const Announcements = require("../db/model/announcements");
 const router = express.Router();
 
+// ==========================
 // GET all announcements
+// ==========================
 router.get("/", async (req, res) => {
   try {
     const announcements = await Announcements.findAll({
       order: [["createdAt", "DESC"]],
     });
-    // Convert BLOB to base64 for frontend compatibility
-    const response = announcements.map(ann => ({
+
+    // Convert BLOB to base64 for frontend
+    const response = announcements.map((ann) => ({
       ...ann.toJSON(),
-      attachedImageBlob: ann.attachedImageBlob ? ann.attachedImageBlob.toString('base64') : null,
+      attachedImageBlob: ann.attachedImageBlob
+        ? ann.attachedImageBlob.toString("base64")
+        : null,
     }));
+
     res.json(response);
   } catch (error) {
     console.error(error);
@@ -20,7 +27,9 @@ router.get("/", async (req, res) => {
   }
 });
 
+// ==========================
 // POST a new announcement
+// ==========================
 router.post("/", async (req, res) => {
   const { text, startDate, endDate, createdBy, attachedImageBlob } = req.body;
 
@@ -29,8 +38,9 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    // Convert base64 string to Buffer for BLOB storage
-    const imageBuffer = attachedImageBlob ? Buffer.from(attachedImageBlob, 'base64') : null;
+    const imageBuffer = attachedImageBlob
+      ? Buffer.from(attachedImageBlob, "base64")
+      : null;
 
     const newAnnouncement = await Announcements.create({
       text,
@@ -39,9 +49,12 @@ router.post("/", async (req, res) => {
       createdBy,
       attachedImageBlob: imageBuffer,
     });
+
     res.status(201).json({
       ...newAnnouncement.toJSON(),
-      attachedImageBlob: newAnnouncement.attachedImageBlob ? newAnnouncement.attachedImageBlob.toString('base64') : null,
+      attachedImageBlob: newAnnouncement.attachedImageBlob
+        ? newAnnouncement.attachedImageBlob.toString("base64")
+        : null,
     });
   } catch (error) {
     console.error(error);
@@ -49,16 +62,41 @@ router.post("/", async (req, res) => {
   }
 });
 
-// DELETE an announcement by ID
-router.delete("/:id", async (req, res) => {
+// ==========================
+// PUT update announcement by ID
+// ==========================
+router.put("/:id", async (req, res) => {
   const { id } = req.params;
+  const { text, startDate, endDate, createdBy, attachedImageBlob } = req.body;
+
   try {
-    const deleted = await Announcements.destroy({
-      where: { id },
-    });
-    if (deleted) {
-      return res.status(204).json({ message: "Announcement deleted" });
+    const imageBuffer = attachedImageBlob
+      ? Buffer.from(attachedImageBlob, "base64")
+      : null;
+
+    const [updated] = await Announcements.update(
+      {
+        text,
+        startDate,
+        endDate,
+        createdBy,
+        attachedImageBlob: imageBuffer,
+      },
+      {
+        where: { id },
+      }
+    );
+
+    if (updated) {
+      const updatedAnnouncement = await Announcements.findByPk(id);
+      return res.status(200).json({
+        ...updatedAnnouncement.toJSON(),
+        attachedImageBlob: updatedAnnouncement.attachedImageBlob
+          ? updatedAnnouncement.attachedImageBlob.toString("base64")
+          : null,
+      });
     }
+
     res.status(404).json({ error: "Announcement not found" });
   } catch (error) {
     console.error(error);
@@ -66,15 +104,20 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-router.put("/anouncements/:id", async (req, res) => {
+// ==========================
+// DELETE announcement by ID
+// ==========================
+router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const updated = await Announcements.update({
+    const deleted = await Announcements.destroy({
       where: { id },
     });
-    if (updated) {
-      return res.status(204).json({ message: "Announcement updated" });
+
+    if (deleted) {
+      return res.status(200).json({ message: "Announcement deleted" });
     }
+
     res.status(404).json({ error: "Announcement not found" });
   } catch (error) {
     console.error(error);

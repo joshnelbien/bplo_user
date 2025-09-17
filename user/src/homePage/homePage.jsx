@@ -93,7 +93,7 @@ const modalContents = {
     items: [
       { text: "Filled-up Unified Business Permit Application Form" },
       { text: "Previous year's Mayor's Permit" },
-      { text: "Financial Statement/Income Tax Return of previous year" },
+      { text: "Financial Statement/Income Tax Return of previous year/Statement of Gross" },
       { text: "Barangay Business Clearance (Window 1-BPLD)" },
       { text: "Land Tax Clearance/ Certificate of Payment" },
       { text: "Market Clearance (if market stall holder)" },
