@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Side_bar from "../SIDE_BAR/side_bar";
+import BusinessProfileModal from "./businessProfile_modal";
 
 import {
   Box,
@@ -20,18 +21,21 @@ import {
 function BusinessProfile() {
   const [applicants, setApplicants] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [filter, setFilter] = useState("all"); // ✅ default to all
+
+  // ✅ Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedApplicant, setSelectedApplicant] = useState(null);
+
+  const [filter, setFilter] = useState("all");
   const recordsPerPage = 20;
   const API = import.meta.env.VITE_API_BASE;
 
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get(
-          `${API}/businessProfile/businessProfiles`
-        );
+        const res = await axios.get(`${API}/businessProfile/businessProfiles`);
 
-        // Sort by createdAt ascending (oldest first)
+        // Sort by createdAt ascending
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
@@ -65,7 +69,7 @@ function BusinessProfile() {
     setCurrentPage(value);
   };
 
-  // ✅ Export CSV function
+  // ✅ Export CSV
   const handleExportCSV = async () => {
     try {
       const res = await axios.get(
@@ -73,9 +77,6 @@ function BusinessProfile() {
       );
 
       if (res.data.success) {
-        console.log(res.data.message); // ✅ "CSV exported and email sent successfully"
-
-        // ✅ Download CSV
         const blob = new Blob([res.data.csv], { type: "text/csv" });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
@@ -88,6 +89,17 @@ function BusinessProfile() {
     } catch (err) {
       console.error("❌ Error downloading CSV or sending email:", err);
     }
+  };
+
+  // ✅ Handle row click
+  const handleRowClick = (applicant) => {
+    setSelectedApplicant(applicant);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedApplicant(null);
   };
 
   return (
@@ -118,7 +130,6 @@ function BusinessProfile() {
           justifyContent="space-between"
           alignItems="center"
         >
-          {/* Left side: filter buttons */}
           <ButtonGroup variant="contained">
             <Button
               sx={{
@@ -167,7 +178,6 @@ function BusinessProfile() {
             </Button>
           </ButtonGroup>
 
-          {/* Right side: Export button */}
           <Button variant="outlined" color="success" onClick={handleExportCSV}>
             Export to CSV
           </Button>
@@ -204,7 +214,7 @@ function BusinessProfile() {
                   key={applicant.id}
                   hover
                   sx={{ cursor: "pointer" }}
-                  onClick={() => openModal(applicant)}
+                  onClick={() => handleRowClick(applicant)} // ✅ opens modal
                 >
                   <TableCell>{applicant.BIN}</TableCell>
                   <TableCell>{applicant.businessName}</TableCell>
@@ -228,6 +238,15 @@ function BusinessProfile() {
           />
         </Box>
       </Box>
+
+      {/* ✅ Modal */}
+      {selectedApplicant && (
+        <BusinessProfileModal
+          applicant={selectedApplicant}
+          isOpen={isModalOpen}
+          onClose={closeModal}
+        />
+      )}
     </>
   );
 }
