@@ -99,23 +99,6 @@ const modalContents = {
       { text: "Market Clearance (if market stall holder)" },
     ],
   },
-  Holidays: {
-    title: "HOLIDAY SCHEDULE INFORMATION",
-    items: [
-      { text: "Offices are closed on national holidays." },
-      { text: "Local government declared holidays may also apply." },
-      { text: "Please check official announcements for updates." },
-      { text: "Applications will be processed on the next business day." },
-    ],
-  },
-  Officehrs: {
-    title: "OFFICE HOURS INFORMATION",
-    items: [
-      { text: "Monday to Friday: 8:00 AM - 5:00 PM" },
-      { text: "No Noon break." },
-      { text: "Closed on Saturdays, Sundays, and Holidays." },
-    ],
-  },
 };
 
 const HomePage = () => {
