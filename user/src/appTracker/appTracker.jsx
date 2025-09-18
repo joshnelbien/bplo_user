@@ -70,6 +70,7 @@ function AppTracker() {
     const fetchData = async () => {
       try {
         const trackerRes = await axios.get(`${API}/appStatus/status/${id}`);
+
         if (trackerRes.data) {
           setTrackers(trackerRes.data); // already an array
         }

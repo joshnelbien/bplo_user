@@ -344,7 +344,7 @@ function NewApplicationPage() {
       setSuccessDialogOpen(true);
 
       setTimeout(() => {
-        navigate(`/homePage/me/${id}`);
+        navigate(`/homePage/${id}`);
       }, 2000);
     } catch (err) {
       console.error(err);

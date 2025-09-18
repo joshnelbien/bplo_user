@@ -21,25 +21,34 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 router.get("/status/:userId", async (req, res) => {
+  const { userId } = req.params; // from useParams
+
   try {
-    const { userId } = req.params;
-    const statuses = await AppStatus.findAll({ where: { userId } }); // <-- findAll
+    // Fetch all statuses for this userId
+    const statuses = await AppStatus.findAll({
+      where: {
+        userId: userId, // filter by userId
+      },
+    });
+
     if (!statuses || statuses.length === 0) {
+      console.log("No statuses found for this userId");
       return res.status(404).json({ error: "No applications found" });
     }
+
     res.json(statuses);
   } catch (error) {
+    console.error("Error fetching tracker:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
 // ✅ Update status (PUT)
-router.put("/:userId", async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
-    const { userId } = req.params;
-    const status = await AppStatus.findByPk(userId);
+    const { id } = req.params;
+    const status = await AppStatus.findByPk(id);
     if (!status) return res.status(404).json({ error: "Not found" });
 
     await status.update(req.body);
@@ -50,10 +59,10 @@ router.put("/:userId", async (req, res) => {
 });
 
 // ✅ Delete status (DELETE)
-router.delete("/:userId", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
-    const { userId } = req.params;
-    const deleted = await AppStatus.destroy({ where: { userId } });
+    const { id } = req.params;
+    const deleted = await AppStatus.destroy({ where: { id } });
     if (!deleted) return res.status(404).json({ error: "Not found" });
     res.json({ message: "Deleted successfully" });
   } catch (error) {
