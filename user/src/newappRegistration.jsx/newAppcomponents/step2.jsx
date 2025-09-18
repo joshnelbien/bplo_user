@@ -42,34 +42,6 @@ export default function Step2PersonalInfo({
   };
 
   // ✅ Email handler: validates and automatically adds @gmail.com
-  const handleEmailChange = (e) => {
-    let value = e.target.value;
-
-    // Check if the input contains '@' and if it ends with '@gmail.com'
-    if (value.includes("@")) {
-      // If the user types a full email, just update the value
-      handleChange({ target: { name: e.target.name, value } });
-    } else {
-      // If the user hasn't typed '@', append '@gmail.com'
-      value = `${value}@gmail.com`;
-      handleChange({ target: { name: e.target.name, value } });
-    }
-
-    // Regex for basic email validation
-    const emailRegex = /^[^\s@]+@gmail\.com$/i;
-    if (value && !emailRegex.test(value)) {
-      setErrors((prev) => ({
-        ...prev,
-        eMailAdd: "Email must be a valid @gmail.com address",
-      }));
-    } else {
-      setErrors((prev) => ({
-        ...prev,
-        eMailAdd: "",
-      }));
-    }
-  };
-
   return (
     <div style={{ marginBottom: 20 }}>
       <Typography variant="h6" gutterBottom>
@@ -154,14 +126,12 @@ export default function Step2PersonalInfo({
         <TextField
           label="Email"
           type="email"
-          name="eMailAdd"
-          value={formData.eMailAdd || ""}
-          onChange={handleEmailChange} // ✅ validate email
+          name="email"
+          value={formData.email || ""}
+          onChange={handleChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
-          error={!!errors.eMailAdd}
-          helperText={errors.eMailAdd}
         />
 
         {/* Telephone No. */}

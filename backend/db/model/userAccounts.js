@@ -7,27 +7,19 @@ const UserAccounts = sequelize.define("UserAccounts", {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
-  lastname: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  firstname: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  mobile: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
+  business_type: { type: DataTypes.STRING, allowNull: false },
+  dsc_reg_no: { type: DataTypes.STRING, allowNull: false },
+  business_name: { type: DataTypes.STRING, allowNull: false },
+  tin_no: { type: DataTypes.STRING, allowNull: false },
+  trade_name: { type: DataTypes.STRING },
+  firstName: { type: DataTypes.STRING, allowNull: false },
+  middleName: { type: DataTypes.STRING },
+  lastName: { type: DataTypes.STRING, allowNull: false },
+  extName: { type: DataTypes.STRING },
+  sex: { type: DataTypes.STRING, allowNull: false },
+  email: { type: DataTypes.STRING, allowNull: false },
+  tel: { type: DataTypes.STRING },
+  mobile: { type: DataTypes.STRING, allowNull: false },
 });
 
 module.exports = UserAccounts;

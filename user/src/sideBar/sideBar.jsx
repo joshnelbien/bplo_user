@@ -43,12 +43,12 @@ const Sidebar = ({ id }) => {
         const userId = localStorage.getItem("userId");
         if (!userId) return;
 
-        const response = await fetch(`${API}/userAccounts/me/${userId}`);
+        const response = await fetch(`${API}/userAccounts/${userId}`);
         if (!response.ok) throw new Error("Failed to fetch user");
 
         const data = await response.json();
         setUser({
-          firstName: data.firstname,
+          firstName: data.firstName,
           lastName: data.lastname,
           email: data.email,
         });

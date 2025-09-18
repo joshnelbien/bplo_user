@@ -50,6 +50,7 @@ const Alert = forwardRef(function Alert(props, ref) {
 function NewApplicationRegisterPage() {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const API = import.meta.env.VITE_API_BASE;
   const navigate = useNavigate();
 
   const [formDataState, setFormDataState] = useState({
@@ -63,7 +64,7 @@ function NewApplicationRegisterPage() {
     lastName: "",
     extName: "",
     sex: "",
-    eMailAdd: "",
+    email: "",
     telNo: "",
     mobileNo: "",
   });
@@ -88,9 +89,10 @@ function NewApplicationRegisterPage() {
 
   const validateStep = () => {
     const newErrors = {};
+
     const requiredFields = {
       1: ["BusinessType", "businessName", "tinNo", "TradeName"],
-      2: ["firstName", "lastName", "sex", "eMailAdd", "mobileNo"],
+      2: ["firstName", "lastName", "sex", "email", "mobileNo"], // ✅ correct
     };
 
     requiredFields[step]?.forEach((field) => {
@@ -161,6 +163,7 @@ function NewApplicationRegisterPage() {
   };
 
   const handleSubmit = async () => {
+    console.log("Submitting formDataState:", formDataState);
     if (!validateStep()) {
       setSnackbarState({
         open: true,
@@ -172,12 +175,9 @@ function NewApplicationRegisterPage() {
 
     setIsSubmitting(true);
 
-    const formData = new FormData();
-
     try {
-      await axios.post(`${API}/newApplication/files`, formData, {
-        userId,
-        headers: { "Content-Type": "multipart/form-data" },
+      await axios.post(`${API}/userAccounts/register`, formDataState, {
+        headers: { "Content-Type": "application/json" },
       });
 
       localStorage.removeItem("formDataState");
@@ -186,10 +186,7 @@ function NewApplicationRegisterPage() {
       localStorage.removeItem("formStep");
 
       setSuccessDialogOpen(true);
-
-      setTimeout(() => {
-        navigate(`/homePage/me/${userId}`);
-      }, 2000);
+      setTimeout(() => navigate(`/`), 2000);
     } catch (err) {
       console.error(err);
       setSnackbarState({
