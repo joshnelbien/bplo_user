@@ -280,7 +280,7 @@ function RegisterPage() {
               Already have an account?{" "}
               <Link
                 component="button"
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/loginPage")}
                 sx={{ color: "#1d541fff", fontWeight: "bold" }}
               >
                 Login

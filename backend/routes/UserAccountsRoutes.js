@@ -75,7 +75,7 @@ router.post("/login", async (req, res) => {
 });
 
 // /me
-router.get("/:id", async (req, res) => {
+router.get("/me/:id", async (req, res) => {
   try {
     const user = await UserAccounts.findByPk(req.params.id, {
       attributes: ["id", "lastname", "firstname", "email", "mobile"],
