@@ -14,11 +14,22 @@ function App() {
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/loginPage" element={<LoginPage />} />
+<<<<<<< HEAD
         <Route path="/homePage/me" element={<HomePage />} />
         <Route path="/newApplicationPage" element={<NewApplicationPage />} />
         <Route path="/registerPage" element={<RegisterPage />} />
         <Route path="/appTracker/me" element={<AppTracker />} />
         <Route path="/renew" element={<Renew />} />
+=======
+        <Route path="/homePage/me/:id" element={<HomePage />} />
+        <Route
+          path="/newApplicationPage/me/:id"
+          element={<NewApplicationPage />}
+        />
+        <Route path="/registerPage" element={<RegisterPage />} />
+        <Route path="/appTracker/me/:id" element={<AppTracker />} />
+        <Route path="/renew/me" element={<Renew />} />
+>>>>>>> 2912fc6e8789450b62af845652b0a1cedbc27637
       </Routes>
     </BrowserRouter>
   );
