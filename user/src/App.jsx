@@ -20,7 +20,6 @@ function App() {
           path="/newApplicationPage/:id"
           element={<NewApplicationPage />}
         />
-        <Route path="/appTracker/me" element={<AppTracker />} />
         <Route path="/renew" element={<Renew />} />
         <Route path="/registerPage" element={<RegisterPage />} />
         <Route path="/appTracker/:id" element={<AppTracker />} />

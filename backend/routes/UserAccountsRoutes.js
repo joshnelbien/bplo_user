@@ -4,7 +4,7 @@ const nodemailer = require("nodemailer");
 const UserAccounts = require("../db/model/userAccounts");
 
 const router = express.Router();
-
+const API = process.env.VITE_API_BASE;
 // ✅ setup nodemailer
 const transporter = nodemailer.createTransport({
   service: "gmail", // or use "smtp" if you have another provider
@@ -73,7 +73,7 @@ router.post("/register", async (req, res) => {
         <p>Hello <b>${firstName} ${lastName}</b>,</p>
         <p>Thank you for registering your business application.</p>
         <p>You can view your application details by clicking the link below:</p>
-        <a href="http://localhost:5173/homePage/${user.id}">
+        <a href="${API}/homePage/${user.id}">
           View Application
         </a>
         <br/><br/>
