@@ -17,14 +17,8 @@ import {
   useTheme,
   Fade,
   Slide,
-  Divider,
-  Container,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import BusinessIcon from "@mui/icons-material/Business";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import SecurityIcon from "@mui/icons-material/Security";
 
 function App() {
   const navigate = useNavigate();
@@ -84,19 +78,27 @@ function App() {
       <AppBar
         position="sticky"
         sx={{
-          backgroundColor: "#fff",
+          backgroundColor: "#1d5236",
           color: "text.primary",
           boxShadow: "0px 2px 8px rgba(0,0,0,0.1)",
-          px: { xs: -1, md: 4 },
+          px: { xs: 2, md: 4 },
         }}
       >
-        <Toolbar>
+        <Toolbar
+          sx={{
+            minHeight: { xs: 70, md: 85 },
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          {/* Left: Menu (mobile) or Nav Items (desktop) */}
           {isMobile ? (
             <IconButton
               aria-label="open drawer"
               edge="start"
               onClick={handleDrawerToggle}
-              sx={{ mr: 2, color: "#09360D" }}
+              sx={{ mr: 2, color: "#ffffffff" }}
             >
               <MenuIcon />
             </IconButton>
@@ -115,32 +117,17 @@ function App() {
             </Box>
           )}
 
-          {/* Brand / Logo */}
-          <Box
-            sx={{
-              flexGrow: 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: { xs: "center", sm: "flex-start" },
-            }}
-          >
-            <img
-              src="/spc.png" // your logo in the public folder
-              alt="BPLO Logo"
-              style={{ height: 55, width: "auto" }}
-            />
-          </Box>
-
+          {/* Right: Optional text */}
           <Typography
             variant="h6"
             sx={{
-              flexGrow: 1,
-              textAlign: "center",
               fontWeight: "bold",
               color: "#09360D",
               display: { xs: "none", sm: "block" },
             }}
-          ></Typography>
+          >
+            {/* BPLO System */}
+          </Typography>
         </Toolbar>
       </AppBar>
 
@@ -158,37 +145,50 @@ function App() {
         {drawer}
       </Drawer>
 
-      {/* Hero Section */}
+      {/* Main Content */}
       <Grid
         container
         direction="column"
-        justifyContent="center"
+        justifyContent="flex-start"
         alignItems="center"
         sx={{
-          height: "25vh",
+          minHeight: "85vh",
           px: { xs: 2, md: 6 },
           textAlign: "center",
-          backgroundImage: `url('/path/to/your/image.jpg')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
+          background: "#fff",
+          pt: 8,
         }}
       >
+        {/* ✅ Logo */}
+        <Slide in={animate} direction="down" timeout={800}>
+          <Box
+            component="img"
+            src="/spc.png"
+            alt="Logo"
+            sx={{
+              width: { xs: 150, sm: 120 },
+              mb: 2,
+            }}
+          />
+        </Slide>
+
+        {/* ✅ Heading */}
         <Slide in={animate} direction="down" timeout={1000}>
           <Typography
             variant="h3"
             component="h1"
             gutterBottom
             sx={{
-              fontWeight: "bold",
+              fontWeight: 900,
               color: "#09360D",
-              typography: { xs: "h4", sm: "h3" },
+              typography: { xs: "1", sm: "5" },
             }}
           >
             BUSINESS REGISTRATION
           </Typography>
         </Slide>
 
+        {/* ✅ Subtitle */}
         <Fade in={animate} timeout={2000}>
           <Typography
             variant="h6"
@@ -204,7 +204,7 @@ function App() {
           </Typography>
         </Fade>
 
-        {/* ✅ New & Renewal Buttons */}
+        {/* ✅ Buttons */}
         <Fade in={animate} timeout={2500}>
           <Box
             sx={{
@@ -246,6 +246,25 @@ function App() {
           </Box>
         </Fade>
       </Grid>
+
+      {/* ✅ Footer */}
+      <Box
+        component="footer"
+        sx={{
+          mt: "auto",
+          py: 3,
+          borderTop: "2px solid #09360D",
+          textAlign: "center",
+          backgroundColor: "#f9f9f9",
+        }}
+      >
+        <Typography
+          variant="body2"
+          sx={{ color: "#746a6aff"}}
+        >
+          © {new Date().getFullYear()} Business Permit and Licensing Office | v2.
+        </Typography>
+      </Box>
     </Box>
   );
 }
