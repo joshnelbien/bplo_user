@@ -88,6 +88,8 @@ function App() {
           color: "text.primary",
           boxShadow: "0px 2px 8px rgba(0,0,0,0.1)",
           px: { xs: 2, md: 4 }, // ✅ fixed padding
+          px: { xs: -1, md: 4 },
+
         }}
       >
         <Toolbar
@@ -232,7 +234,7 @@ function App() {
                 color: "white",
                 "&:hover": { backgroundColor: "#07270a" },
               }}
-              onClick={() => navigate("/newApplicationPage")}
+              onClick={() => navigate("/newApplicationRegister")}
             >
               New
             </Button>
