@@ -87,7 +87,7 @@ function App() {
           backgroundColor: "#fff",
           color: "text.primary",
           boxShadow: "0px 2px 8px rgba(0,0,0,0.1)",
-          px: { xs:-1, md: 4 },
+          px: { xs: -1, md: 4 },
         }}
       >
         <Toolbar>
@@ -204,51 +204,50 @@ function App() {
           </Typography>
         </Fade>
 
-     {/* ✅ New & Renewal Buttons */}
-<Fade in={animate} timeout={2500}>
-  <Box
-    sx={{
-      display: "flex",
-      gap: 2,
-      flexWrap: "wrap",
-      justifyContent: "center",
-    }}
-  >
-    <Button
-      variant="contained"
-      sx={{
-        px: 4,
-        py: 1,
-        fontWeight: "bold",
-        backgroundColor: "#09360D",
-        color: "white",
-        "&:hover": { backgroundColor: "#07270a" },
-      }}
-      onClick={() => navigate("/newApplicationPage")}
-    >
-      New
-    </Button>
+        {/* ✅ New & Renewal Buttons */}
+        <Fade in={animate} timeout={2500}>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+              flexWrap: "wrap",
+              justifyContent: "center",
+            }}
+          >
+            <Button
+              variant="contained"
+              sx={{
+                px: 4,
+                py: 1,
+                fontWeight: "bold",
+                backgroundColor: "#09360D",
+                color: "white",
+                "&:hover": { backgroundColor: "#07270a" },
+              }}
+              onClick={() => navigate("/newApplicationRegister")}
+            >
+              New
+            </Button>
 
-    <Button
-      variant="outlined"
-      sx={{
-        px: 4,
-        py: 1,
-        fontWeight: "bold",
-        borderColor: "#09360D",
-        color: "#09360D",
-        "&:hover": { borderColor: "#07270a", color: "#07270a" },
-      }}
-      onClick={() => navigate("/renew")}
-    >
-      Renewal
-    </Button>
-  </Box>
-</Fade>
-</Grid>
-
-</Box>
-);
+            <Button
+              variant="outlined"
+              sx={{
+                px: 4,
+                py: 1,
+                fontWeight: "bold",
+                borderColor: "#09360D",
+                color: "#09360D",
+                "&:hover": { borderColor: "#07270a", color: "#07270a" },
+              }}
+              onClick={() => navigate("/renew")}
+            >
+              Renewal
+            </Button>
+          </Box>
+        </Fade>
+      </Grid>
+    </Box>
+  );
 }
 
 export default App;
