@@ -130,7 +130,7 @@ const Sidebar = ({ id }) => {
         <List component="nav">
           {/* New Application */}
           <ListItemButton
-            onClick={() => navigate(`/newApplicationPage/me`)}
+            onClick={() => navigate(`/newApplicationPage/me/${id}`)}
             sx={{
               borderRadius: "8px",
               mb: 1,
@@ -168,7 +168,7 @@ const Sidebar = ({ id }) => {
 
           {/* Application Tracker */}
           <ListItemButton
-            onClick={() => navigate(`/appTracker/me`)}
+            onClick={() => navigate(`/appTracker/me/${id}`)}
             sx={{
               borderRadius: "8px",
               mb: 1,

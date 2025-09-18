@@ -17,14 +17,8 @@ import {
   useTheme,
   Fade,
   Slide,
-  Divider,
-  Container,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import BusinessIcon from "@mui/icons-material/Business";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import SecurityIcon from "@mui/icons-material/Security";
 
 function App() {
   const navigate = useNavigate();
@@ -38,8 +32,9 @@ function App() {
   };
 
   const navItems = [
-    { label: "About", path: "/" },
-    { label: "Projects", path: "/" },
+    { label: "Account", path: "/" },
+    { label: "Settings", path: "/" },
+    { label: "Privacy Notice", path: "/" },
   ];
 
   const drawer = (
@@ -48,7 +43,7 @@ function App() {
         variant="h6"
         sx={{ mb: 2, fontWeight: "bold", color: "#09360D" }}
       >
-        BPLO
+        ONLINE BUSINESS PROCESSING
       </Typography>
       <List>
         {navItems.map((item) => (
@@ -70,37 +65,6 @@ function App() {
           </ListItem>
         ))}
       </List>
-      <Box sx={{ mt: 2 }}>
-        <Button
-          fullWidth
-          variant="text"
-          sx={{ my: 1, color: "#09360D", fontWeight: "bold" }}
-          onClick={() => {
-            navigate("/loginPage");
-            setMobileOpen(false);
-          }}
-        >
-          Login
-        </Button>
-        <Button
-          fullWidth
-          variant="contained"
-          sx={{
-            fontWeight: "bold",
-            backgroundColor: "#09360D",
-            color: "white",
-            "&:hover": {
-              backgroundColor: "#07270a",
-            },
-          }}
-          onClick={() => {
-            navigate("/registerPage");
-            setMobileOpen(false);
-          }}
-        >
-          Register Account
-        </Button>
-      </Box>
     </Box>
   );
 
@@ -114,19 +78,27 @@ function App() {
       <AppBar
         position="sticky"
         sx={{
-          backgroundColor: "#fff",
+          backgroundColor: "#1d5236",
           color: "text.primary",
           boxShadow: "0px 2px 8px rgba(0,0,0,0.1)",
-          px: { xs: 1, md: 4 },
+          px: { xs: 2, md: 4 },
         }}
       >
-        <Toolbar>
+        <Toolbar
+          sx={{
+            minHeight: { xs: 70, md: 85 },
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          {/* Left: Menu (mobile) or Nav Items (desktop) */}
           {isMobile ? (
             <IconButton
               aria-label="open drawer"
               edge="start"
               onClick={handleDrawerToggle}
-              sx={{ mr: 2, color: "#09360D" }}
+              sx={{ mr: 2, color: "#ffffffff" }}
             >
               <MenuIcon />
             </IconButton>
@@ -145,45 +117,17 @@ function App() {
             </Box>
           )}
 
-          {/* Brand / Logo */}
+          {/* Right: Optional text */}
           <Typography
             variant="h6"
             sx={{
-              flexGrow: 1,
-              textAlign: "center",
               fontWeight: "bold",
               color: "#09360D",
               display: { xs: "none", sm: "block" },
             }}
           >
-            BPLO
+            {/* BPLO System */}
           </Typography>
-
-          {!isMobile && (
-            <Box sx={{ ml: "auto", display: "flex", gap: 2 }}>
-              <Button
-                variant="text"
-                sx={{ color: "#09360D", fontWeight: "bold" }}
-                onClick={() => navigate("/loginPage")}
-              >
-                Login
-              </Button>
-              <Button
-                variant="contained"
-                sx={{
-                  fontWeight: "bold",
-                  backgroundColor: "#09360D",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#07270a",
-                  },
-                }}
-                onClick={() => navigate("/registerPage")}
-              >
-                Register Account
-              </Button>
-            </Box>
-          )}
         </Toolbar>
       </AppBar>
 
@@ -201,37 +145,50 @@ function App() {
         {drawer}
       </Drawer>
 
-      {/* Hero Section */}
+      {/* Main Content */}
       <Grid
         container
         direction="column"
-        justifyContent="center"
+        justifyContent="flex-start"
         alignItems="center"
         sx={{
-          height: "100vh",
+          minHeight: "85vh",
           px: { xs: 2, md: 6 },
           textAlign: "center",
-          backgroundImage: `url('/path/to/your/image.jpg')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
+          background: "#fff",
+          pt: 8,
         }}
-        >
+      >
+        {/* ✅ Logo */}
+        <Slide in={animate} direction="down" timeout={800}>
+          <Box
+            component="img"
+            src="/spc.png"
+            alt="Logo"
+            sx={{
+              width: { xs: 150, sm: 120 },
+              mb: 2,
+            }}
+          />
+        </Slide>
+
+        {/* ✅ Heading */}
         <Slide in={animate} direction="down" timeout={1000}>
           <Typography
             variant="h3"
             component="h1"
             gutterBottom
             sx={{
-              fontWeight: "bold",
+              fontWeight: 900,
               color: "#09360D",
-              typography: { xs: "h4", sm: "h3" },
+              typography: { xs: "1", sm: "5" },
             }}
           >
-            BUSINESS PERMIT LICENSING OFFICE
+            BUSINESS REGISTRATION
           </Typography>
         </Slide>
 
+        {/* ✅ Subtitle */}
         <Fade in={animate} timeout={2000}>
           <Typography
             variant="h6"
@@ -247,6 +204,7 @@ function App() {
           </Typography>
         </Fade>
 
+        {/* ✅ Buttons */}
         <Fade in={animate} timeout={2500}>
           <Box
             sx={{
@@ -266,10 +224,11 @@ function App() {
                 color: "white",
                 "&:hover": { backgroundColor: "#07270a" },
               }}
-              onClick={() => navigate("/registerPage")}
+              onClick={() => navigate("/newApplicationRegister")}
             >
-              Get Started
+              New
             </Button>
+
             <Button
               variant="outlined"
               sx={{
@@ -280,83 +239,30 @@ function App() {
                 color: "#09360D",
                 "&:hover": { borderColor: "#07270a", color: "#07270a" },
               }}
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/renew")}
             >
-              Learn More
+              Renewal
             </Button>
           </Box>
         </Fade>
-
-        {/* Scroll hint */}
-        <Fade in={animate} timeout={3000}>
-          <Box sx={{ mt: 6, animation: "bounce 2s infinite" }}></Box>
-        </Fade>
       </Grid>
 
-      {/* Features Section */}
-      <Container maxWidth="lg" sx={{ py: 10 }}>
-        <Grid container spacing={4}>
-          {[
-            {
-              icon: <BusinessIcon sx={{ fontSize: 50, color: "#09360D" }} />,
-              title: "Business Friendly",
-              desc: "A seamless experience for businesses applying and renewing permits.",
-            },
-            {
-              icon: <AccessTimeIcon sx={{ fontSize: 50, color: "#09360D" }} />,
-              title: "Time Efficient",
-              desc: "Save time with automated processes and reduced bureaucracy.",
-            },
-            {
-              icon: <SecurityIcon sx={{ fontSize: 50, color: "#09360D" }} />,
-              title: "Secure & Transparent",
-              desc: "Trustworthy transactions for both businesses and government agencies.",
-            },
-            {
-              icon: <MenuIcon sx={{ fontSize: 50, color: "#09360D" }} />, // ✅ New feature icon
-              title: "User Friendly Interface",
-              desc: "An intuitive design that makes it easy for both citizens and staff to navigate.",
-            },
-          ].map((feature, index) => (
-            <Grid item xs={12} md={3} key={index}>
-              {" "}
-              {/* ✅ Adjusted to 4 columns on md+ */}
-              <Fade in={animate} timeout={1500 + index * 500}>
-                <Box
-                  sx={{
-                    textAlign: "center",
-                    p: 4,
-                    borderRadius: 3,
-                    boxShadow: "0px 4px 20px rgba(0,0,0,0.05)",
-                    transition: "transform 0.3s",
-                    "&:hover": { transform: "translateY(-8px)" },
-                  }}
-                >
-                  {feature.icon}
-                  <Typography variant="h6" sx={{ fontWeight: "bold", mt: 2 }}>
-                    {feature.title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mt: 1 }}
-                  >
-                    {feature.desc}
-                  </Typography>
-                </Box>
-              </Fade>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
-
-      <Divider />
-
-      {/* Footer */}
-      <Box sx={{ py: 4, textAlign: "center", bgcolor: "#f9f9f9", mt: 4 }}>
-        <Typography variant="body2" color="text.secondary">
-          © {new Date().getFullYear()} BPLO Software Solutions. All rights
-          reserved.
+      {/* ✅ Footer */}
+      <Box
+        component="footer"
+        sx={{
+          mt: "auto",
+          py: 3,
+          borderTop: "2px solid #09360D",
+          textAlign: "center",
+          backgroundColor: "#f9f9f9",
+        }}
+      >
+        <Typography
+          variant="body2"
+          sx={{ color: "#746a6aff"}}
+        >
+          © {new Date().getFullYear()} Business Permit and Licensing Office | v2.
         </Typography>
       </Box>
     </Box>

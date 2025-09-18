@@ -18,16 +18,10 @@ import MuiAlert from "@mui/material/Alert";
 import { styled } from "@mui/system";
 import axios from "axios";
 import { forwardRef, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-
-import Step1BusinessInfo from "../components/BusinessForm/Step1";
-import Step2PersonalInfo from "../components/BusinessForm/Step2";
-import Step3AddressInfo from "../components/BusinessForm/Step3";
-import Step4TaxInfo from "../components/BusinessForm/Step4";
-import Step5BusinessDetails from "../components/BusinessForm/Step5";
-import Step6BusinessActivity from "../components/BusinessForm/Step6";
-import Section7FileUploads from "../components/BusinessForm/Step7";
+import { useNavigate } from "react-router-dom";
+import Step1BusinessInfo from "./newAppcomponents/step1";
+import Step2PersonalInfo from "./newAppcomponents/step2";
 
 const GreenButton = styled(Button)(({ variant }) => ({
   borderRadius: "8px",
@@ -53,90 +47,26 @@ const Alert = forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-function NewApplicationPage() {
-  const userId = localStorage.getItem("userId");
-  const API = import.meta.env.VITE_API_BASE;
+function NewApplicationRegisterPage() {
+  const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  const savedFormData =
-    JSON.parse(localStorage.getItem("formDataState")) || null;
-  const savedFiles = JSON.parse(localStorage.getItem("filesState")) || null;
-  const savedBusinessLines =
-    JSON.parse(localStorage.getItem("businessLines")) || [];
-  const savedStep = parseInt(localStorage.getItem("formStep")) || 1;
-
-  const [step, setStep] = useState(savedStep);
-  const [businessLines, setBusinessLines] = useState(savedBusinessLines);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [formDataState, setFormDataState] = useState(
-    savedFormData || {
-      userId: userId,
-      BusinessType: "",
-      dscRegNo: "",
-      businessName: "",
-      tinNo: "",
-      TradeName: "",
-      firstName: "",
-      middleName: "",
-      lastName: "",
-      extName: "",
-      sex: "",
-      eMailAdd: "",
-      telNo: "",
-      mobileNo: "",
-      region: "",
-      province: "",
-      cityOrMunicipality: "",
-      barangay: "",
-      addressLine1: "",
-      zipCode: "",
-      pinAddress: "",
-      totalFloorArea: "",
-      numberOfEmployee: "",
-      maleEmployee: "",
-      femaleEmployee: "",
-      numNozzle: "",
-      weighScale: "",
-      Taxregion: "",
-      Taxprovince: "",
-      TaxcityOrMunicipality: "",
-      Taxbarangay: "",
-      TaxaddressLine1: "",
-      TaxzipCode: "",
-      TaxpinAddress: "",
-      ownPlace: "",
-      taxdec: "",
-      lessorName: "",
-      monthlyRent: "",
-      tIGE: "",
-      officeType: "",
-      officeTypeOther: "",
-      lineOfBusiness: "",
-      productService: "",
-      Units: "",
-      capital: "",
-      totalCapital: "",
-      totalDeliveryVehicle: "",
-      Modeofpayment: "",
-      application: "New",
-    }
-  );
-
-  const [filesState, setFilesState] = useState(
-    savedFiles || {
-      proofOfReg: null,
-      proofOfRightToUseLoc: null,
-      locationPlan: null,
-      brgyClearance: null,
-      marketClearance: null,
-      occupancyPermit: null,
-      cedula: null,
-      photoOfBusinessEstInt: null,
-      photoOfBusinessEstExt: null,
-      tIGEfiles: null,
-    }
-  );
+  const [formDataState, setFormDataState] = useState({
+    BusinessType: "",
+    dscRegNo: "",
+    businessName: "",
+    tinNo: "",
+    TradeName: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    extName: "",
+    sex: "",
+    eMailAdd: "",
+    telNo: "",
+    mobileNo: "",
+  });
 
   const [snackbarState, setSnackbarState] = useState({
     open: false,
@@ -149,31 +79,7 @@ function NewApplicationPage() {
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const steps = [
-    "Business Info",
-    "Owner Info",
-    "Business Address",
-    "Tax Payer's Address",
-    "Business Operation",
-    "Business Activities",
-    "Business Requirements",
-  ];
-
-  useEffect(() => {
-    localStorage.setItem("formDataState", JSON.stringify(formDataState));
-  }, [formDataState]);
-
-  useEffect(() => {
-    localStorage.setItem("filesState", JSON.stringify(filesState));
-  }, [filesState]);
-
-  useEffect(() => {
-    localStorage.setItem("businessLines", JSON.stringify(businessLines));
-  }, [businessLines]);
-
-  useEffect(() => {
-    localStorage.setItem("formStep", step);
-  }, [step]);
+  const steps = ["Business Info", "Owner Info"];
 
   const validateTIN = (tin) => {
     const tinRegex = /^9[0-9]{2}-[0-9]{2}-[0-9]{4}$/;
@@ -185,54 +91,21 @@ function NewApplicationPage() {
     const requiredFields = {
       1: ["BusinessType", "businessName", "tinNo", "TradeName"],
       2: ["firstName", "lastName", "sex", "eMailAdd", "mobileNo"],
-      3: [
-        "region",
-        "province",
-        "cityOrMunicipality",
-        "barangay",
-        "addressLine1",
-        "zipCode",
-      ],
-      4: [
-        "Taxregion",
-        "Taxprovince",
-        "TaxcityOrMunicipality",
-        "Taxbarangay",
-        "TaxaddressLine1",
-        "TaxzipCode",
-      ],
-      5: [
-        "totalFloorArea",
-        "numberOfEmployee",
-        "maleEmployee",
-        "femaleEmployee",
-      ],
-      // 6: ["lineOfBusiness", "productService", "Units", "capital"],
-      7: ["proofOfReg", "brgyClearance", "cedula"],
     };
 
     requiredFields[step]?.forEach((field) => {
-      if (step === 7) {
-        if (!filesState[field]) {
-          newErrors[field] = "Please fill out this field";
-        }
-      } else {
-        if (!formDataState[field]) {
-          newErrors[field] = "Please fill out this field";
-        }
+      if (!formDataState[field]) {
+        newErrors[field] = "Please fill out this field";
       }
     });
 
-    if (step === 6 && businessLines.length === 0) {
-      newErrors.businessLines = "At least one line of business is required.";
-    }
-
+    // ✅ Align regex with formatter (drop "15")
     if (
       step === 1 &&
       formDataState.tinNo &&
-      !validateTIN(formDataState.tinNo)
+      !/^9[0-9]{2}-[0-9]{2}-[0-9]{4}$/.test(formDataState.tinNo)
     ) {
-      newErrors.tinNo = "TIN must be in format NNN-NN-NNNN starting with 9";
+      newErrors.tinNo = "TIN must be in format 9NN-NN-NNNN";
     }
 
     setErrors(newErrors);
@@ -244,9 +117,6 @@ function NewApplicationPage() {
 
     if (name === "tinNo") {
       let formattedValue = value.replace(/[^0-9]/g, "");
-      if (formattedValue.length > 0 && formattedValue[0] !== "9") {
-        formattedValue = "9" + formattedValue.slice(1);
-      }
       if (formattedValue.length > 3) {
         formattedValue =
           formattedValue.slice(0, 3) + "-" + formattedValue.slice(3);
@@ -257,16 +127,11 @@ function NewApplicationPage() {
       }
       setFormDataState((prev) => ({
         ...prev,
-        [name]: formattedValue.slice(0, 11),
+        [name]: formattedValue.slice(0, 11), // keep NNN-NN-NNNN
       }));
     } else {
       setFormDataState((prev) => ({ ...prev, [name]: value }));
     }
-  };
-
-  const handleFileChange = (e) => {
-    const { name, files } = e.target;
-    setFilesState((prev) => ({ ...prev, [name]: files[0] }));
   };
 
   const handleSnackbarClose = () => {
@@ -308,27 +173,6 @@ function NewApplicationPage() {
     setIsSubmitting(true);
 
     const formData = new FormData();
-
-    if (businessLines.length > 0) {
-      formData.append(
-        "lineOfBusiness",
-        businessLines.map((b) => b.lineOfBusiness).join(",")
-      );
-      formData.append(
-        "productService",
-        businessLines.map((b) => b.productService).join(",")
-      );
-      formData.append("Units", businessLines.map((b) => b.Units).join(","));
-      formData.append("capital", businessLines.map((b) => b.capital).join(","));
-    }
-
-    Object.keys(formDataState).forEach((key) => {
-      if (formDataState[key]) formData.append(key, formDataState[key]);
-    });
-
-    Object.keys(filesState).forEach((key) => {
-      if (filesState[key]) formData.append(key, filesState[key]);
-    });
 
     try {
       await axios.post(`${API}/newApplication/files`, formData, {
@@ -375,55 +219,6 @@ function NewApplicationPage() {
             errors={errors}
           />
         );
-      case 3:
-        return (
-          <Step3AddressInfo
-            formData={formDataState}
-            handleChange={handleChange}
-            errors={errors}
-          />
-        );
-      case 4:
-        return (
-          <Step4TaxInfo
-            formData={formDataState}
-            handleChange={handleChange}
-            errors={errors}
-          />
-        );
-      case 5:
-        return (
-          <Step5BusinessDetails
-            formData={formDataState}
-            handleChange={handleChange}
-            errors={errors}
-          />
-        );
-      case 6:
-        return (
-          <>
-            <Step6BusinessActivity
-              formData={formDataState}
-              handleChange={handleChange}
-              handleFileChange={handleFileChange}
-              businessLines={businessLines}
-              setBusinessLines={setBusinessLines}
-              errors={errors}
-            />
-            {errors.businessLines && (
-              <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-                {errors.businessLines}
-              </Typography>
-            )}
-          </>
-        );
-      case 7:
-        return (
-          <Section7FileUploads
-            handleFileChange={handleFileChange}
-            errors={errors}
-          />
-        );
       default:
         return "Unknown step";
     }
@@ -440,10 +235,7 @@ function NewApplicationPage() {
       }}
     >
       <Box sx={{ width: "100%", maxWidth: 900, mx: "auto", mb: 2 }}>
-        <GreenButton
-          onClick={() => navigate(`/homePage/me/${userId}`)}
-          variant="contained"
-        >
+        <GreenButton onClick={() => navigate(`/`)} variant="contained">
           BACK TO DASHBOARD
         </GreenButton>
       </Box>
@@ -529,7 +321,7 @@ function NewApplicationPage() {
                 Back
               </GreenButton>
             )}
-            {step < 7 && (
+            {step < 2 && (
               <GreenButton
                 type="button"
                 variant="contained"
@@ -538,7 +330,7 @@ function NewApplicationPage() {
                 Next
               </GreenButton>
             )}
-            {step === 7 && (
+            {step === 2 && (
               <GreenButton
                 type="button"
                 variant="contained"
@@ -667,4 +459,4 @@ function NewApplicationPage() {
   );
 }
 
-export default NewApplicationPage;
+export default NewApplicationRegisterPage;

@@ -7,6 +7,7 @@ import RegisterPage from "./registerPage/registerPage";
 import AppTracker from "./appTracker/appTracker";
 import Renew from "./Renew/Renew";
 import Main from "./main/mainPage";
+import NewApplicationRegisterPage from "./newappRegistration.jsx/newappRegistration";
 
 function App() {
   return (
@@ -14,11 +15,28 @@ function App() {
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/loginPage" element={<LoginPage />} />
+
+
+
         <Route path="/homePage/me" element={<HomePage />} />
-        <Route path="/newApplicationPage/me" element={<NewApplicationPage />} />
+        <Route path="/newApplicationPage" element={<NewApplicationPage />} />
         <Route path="/registerPage" element={<RegisterPage />} />
         <Route path="/appTracker/me" element={<AppTracker />} />
+        <Route path="/renew" element={<Renew />} />
+
+
+        <Route path="/homePage/me/:id" element={<HomePage />} />
+        <Route
+          path="/newApplicationPage/me/:id"
+          element={<NewApplicationPage />}
+        />
+        <Route path="/registerPage" element={<RegisterPage />} />
+        <Route path="/appTracker/me/:id" element={<AppTracker />} />
         <Route path="/renew/me" element={<Renew />} />
+        <Route
+          path="/newApplicationRegister"
+          element={<NewApplicationRegisterPage />}
+        />
       </Routes>
     </BrowserRouter>
   );
