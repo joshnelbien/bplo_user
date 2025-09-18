@@ -38,8 +38,9 @@ function App() {
   };
 
   const navItems = [
-    { label: "About", path: "/" },
-    { label: "Projects", path: "/" },
+    { label: "Account", path: "/" },
+    { label: "Settings", path: "/" },
+    { label: "Privacy Notice", path: "/" },
   ];
 
   const drawer = (
@@ -48,7 +49,7 @@ function App() {
         variant="h6"
         sx={{ mb: 2, fontWeight: "bold", color: "#09360D" }}
       >
-        BPLO
+        ONLINE BUSINESS PROCESSING
       </Typography>
       <List>
         {navItems.map((item) => (
@@ -70,37 +71,6 @@ function App() {
           </ListItem>
         ))}
       </List>
-      <Box sx={{ mt: 2 }}>
-        <Button
-          fullWidth
-          variant="text"
-          sx={{ my: 1, color: "#09360D", fontWeight: "bold" }}
-          onClick={() => {
-            navigate("/loginPage");
-            setMobileOpen(false);
-          }}
-        >
-          Login
-        </Button>
-        <Button
-          fullWidth
-          variant="contained"
-          sx={{
-            fontWeight: "bold",
-            backgroundColor: "#09360D",
-            color: "white",
-            "&:hover": {
-              backgroundColor: "#07270a",
-            },
-          }}
-          onClick={() => {
-            navigate("/registerPage");
-            setMobileOpen(false);
-          }}
-        >
-          Register Account
-        </Button>
-      </Box>
     </Box>
   );
 
@@ -117,7 +87,7 @@ function App() {
           backgroundColor: "#fff",
           color: "text.primary",
           boxShadow: "0px 2px 8px rgba(0,0,0,0.1)",
-          px: { xs: 1, md: 4 },
+          px: { xs:-1, md: 4 },
         }}
       >
         <Toolbar>
@@ -146,6 +116,21 @@ function App() {
           )}
 
           {/* Brand / Logo */}
+          <Box
+            sx={{
+              flexGrow: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: { xs: "center", sm: "flex-start" },
+            }}
+          >
+            <img
+              src="/spc.png" // your logo in the public folder
+              alt="BPLO Logo"
+              style={{ height: 55, width: "auto" }}
+            />
+          </Box>
+
           <Typography
             variant="h6"
             sx={{
@@ -155,35 +140,7 @@ function App() {
               color: "#09360D",
               display: { xs: "none", sm: "block" },
             }}
-          >
-            BPLO
-          </Typography>
-
-          {!isMobile && (
-            <Box sx={{ ml: "auto", display: "flex", gap: 2 }}>
-              <Button
-                variant="text"
-                sx={{ color: "#09360D", fontWeight: "bold" }}
-                onClick={() => navigate("/loginPage")}
-              >
-                Login
-              </Button>
-              <Button
-                variant="contained"
-                sx={{
-                  fontWeight: "bold",
-                  backgroundColor: "#09360D",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#07270a",
-                  },
-                }}
-                onClick={() => navigate("/registerPage")}
-              >
-                Register Account
-              </Button>
-            </Box>
-          )}
+          ></Typography>
         </Toolbar>
       </AppBar>
 
@@ -208,7 +165,7 @@ function App() {
         justifyContent="center"
         alignItems="center"
         sx={{
-          height: "100vh",
+          height: "25vh",
           px: { xs: 2, md: 6 },
           textAlign: "center",
           backgroundImage: `url('/path/to/your/image.jpg')`,
@@ -216,7 +173,7 @@ function App() {
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
         }}
-        >
+      >
         <Slide in={animate} direction="down" timeout={1000}>
           <Typography
             variant="h3"
@@ -228,7 +185,7 @@ function App() {
               typography: { xs: "h4", sm: "h3" },
             }}
           >
-            BUSINESS PERMIT LICENSING OFFICE
+            BUSINESS REGISTRATION
           </Typography>
         </Slide>
 
@@ -247,120 +204,51 @@ function App() {
           </Typography>
         </Fade>
 
-        <Fade in={animate} timeout={2500}>
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              flexWrap: "wrap",
-              justifyContent: "center",
-            }}
-          >
-            <Button
-              variant="contained"
-              sx={{
-                px: 4,
-                py: 1,
-                fontWeight: "bold",
-                backgroundColor: "#09360D",
-                color: "white",
-                "&:hover": { backgroundColor: "#07270a" },
-              }}
-              onClick={() => navigate("/registerPage")}
-            >
-              Get Started
-            </Button>
-            <Button
-              variant="outlined"
-              sx={{
-                px: 4,
-                py: 1,
-                fontWeight: "bold",
-                borderColor: "#09360D",
-                color: "#09360D",
-                "&:hover": { borderColor: "#07270a", color: "#07270a" },
-              }}
-              onClick={() => navigate("/")}
-            >
-              Learn More
-            </Button>
-          </Box>
-        </Fade>
+     {/* ✅ New & Renewal Buttons */}
+<Fade in={animate} timeout={2500}>
+  <Box
+    sx={{
+      display: "flex",
+      gap: 2,
+      flexWrap: "wrap",
+      justifyContent: "center",
+    }}
+  >
+    <Button
+      variant="contained"
+      sx={{
+        px: 4,
+        py: 1,
+        fontWeight: "bold",
+        backgroundColor: "#09360D",
+        color: "white",
+        "&:hover": { backgroundColor: "#07270a" },
+      }}
+      onClick={() => navigate("/newApplicationPage")}
+    >
+      New
+    </Button>
 
-        {/* Scroll hint */}
-        <Fade in={animate} timeout={3000}>
-          <Box sx={{ mt: 6, animation: "bounce 2s infinite" }}></Box>
-        </Fade>
-      </Grid>
+    <Button
+      variant="outlined"
+      sx={{
+        px: 4,
+        py: 1,
+        fontWeight: "bold",
+        borderColor: "#09360D",
+        color: "#09360D",
+        "&:hover": { borderColor: "#07270a", color: "#07270a" },
+      }}
+      onClick={() => navigate("/renew")}
+    >
+      Renewal
+    </Button>
+  </Box>
+</Fade>
+</Grid>
 
-      {/* Features Section */}
-      <Container maxWidth="lg" sx={{ py: 10 }}>
-        <Grid container spacing={4}>
-          {[
-            {
-              icon: <BusinessIcon sx={{ fontSize: 50, color: "#09360D" }} />,
-              title: "Business Friendly",
-              desc: "A seamless experience for businesses applying and renewing permits.",
-            },
-            {
-              icon: <AccessTimeIcon sx={{ fontSize: 50, color: "#09360D" }} />,
-              title: "Time Efficient",
-              desc: "Save time with automated processes and reduced bureaucracy.",
-            },
-            {
-              icon: <SecurityIcon sx={{ fontSize: 50, color: "#09360D" }} />,
-              title: "Secure & Transparent",
-              desc: "Trustworthy transactions for both businesses and government agencies.",
-            },
-            {
-              icon: <MenuIcon sx={{ fontSize: 50, color: "#09360D" }} />, // ✅ New feature icon
-              title: "User Friendly Interface",
-              desc: "An intuitive design that makes it easy for both citizens and staff to navigate.",
-            },
-          ].map((feature, index) => (
-            <Grid item xs={12} md={3} key={index}>
-              {" "}
-              {/* ✅ Adjusted to 4 columns on md+ */}
-              <Fade in={animate} timeout={1500 + index * 500}>
-                <Box
-                  sx={{
-                    textAlign: "center",
-                    p: 4,
-                    borderRadius: 3,
-                    boxShadow: "0px 4px 20px rgba(0,0,0,0.05)",
-                    transition: "transform 0.3s",
-                    "&:hover": { transform: "translateY(-8px)" },
-                  }}
-                >
-                  {feature.icon}
-                  <Typography variant="h6" sx={{ fontWeight: "bold", mt: 2 }}>
-                    {feature.title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mt: 1 }}
-                  >
-                    {feature.desc}
-                  </Typography>
-                </Box>
-              </Fade>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
-
-      <Divider />
-
-      {/* Footer */}
-      <Box sx={{ py: 4, textAlign: "center", bgcolor: "#f9f9f9", mt: 4 }}>
-        <Typography variant="body2" color="text.secondary">
-          © {new Date().getFullYear()} BPLO Software Solutions. All rights
-          reserved.
-        </Typography>
-      </Box>
-    </Box>
-  );
+</Box>
+);
 }
 
 export default App;
