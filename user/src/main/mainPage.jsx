@@ -87,10 +87,18 @@ function App() {
           backgroundColor: "#fff",
           color: "text.primary",
           boxShadow: "0px 2px 8px rgba(0,0,0,0.1)",
-          px: { xs:-1, md: 4 },
+          px: { xs: 2, md: 4 }, // ✅ fixed padding
         }}
       >
-        <Toolbar>
+        <Toolbar
+          sx={{
+            minHeight: { xs: 70, md: 85 }, // control navbar height
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          {/* Left: Menu (mobile) or Nav Items (desktop) */}
           {isMobile ? (
             <IconButton
               aria-label="open drawer"
@@ -115,32 +123,32 @@ function App() {
             </Box>
           )}
 
-          {/* Brand / Logo */}
+          {/* Center: Logo */}
           <Box
             sx={{
               flexGrow: 1,
               display: "flex",
-              alignItems: "center",
-              justifyContent: { xs: "center", sm: "flex-start" },
+              justifyContent: "center",
             }}
           >
             <img
-              src="/spc.png" // your logo in the public folder
+              src="/spc.png"
               alt="BPLO Logo"
               style={{ height: 55, width: "auto" }}
             />
           </Box>
 
+          {/* Right: Optional text or empty placeholder */}
           <Typography
             variant="h6"
             sx={{
-              flexGrow: 1,
-              textAlign: "center",
               fontWeight: "bold",
               color: "#09360D",
               display: { xs: "none", sm: "block" },
             }}
-          ></Typography>
+          >
+            {/* Example: "BPLO System" */}
+          </Typography>
         </Toolbar>
       </AppBar>
 
@@ -168,7 +176,7 @@ function App() {
           height: "25vh",
           px: { xs: 2, md: 6 },
           textAlign: "center",
-          backgroundImage: `url('/path/to/your/image.jpg')`,
+          backgroundImage: `url(spc.png')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -204,51 +212,50 @@ function App() {
           </Typography>
         </Fade>
 
-     {/* ✅ New & Renewal Buttons */}
-<Fade in={animate} timeout={2500}>
-  <Box
-    sx={{
-      display: "flex",
-      gap: 2,
-      flexWrap: "wrap",
-      justifyContent: "center",
-    }}
-  >
-    <Button
-      variant="contained"
-      sx={{
-        px: 4,
-        py: 1,
-        fontWeight: "bold",
-        backgroundColor: "#09360D",
-        color: "white",
-        "&:hover": { backgroundColor: "#07270a" },
-      }}
-      onClick={() => navigate("/newApplicationPage")}
-    >
-      New
-    </Button>
+        {/* ✅ New & Renewal Buttons */}
+        <Fade in={animate} timeout={2500}>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+              flexWrap: "wrap",
+              justifyContent: "center",
+            }}
+          >
+            <Button
+              variant="contained"
+              sx={{
+                px: 4,
+                py: 1,
+                fontWeight: "bold",
+                backgroundColor: "#09360D",
+                color: "white",
+                "&:hover": { backgroundColor: "#07270a" },
+              }}
+              onClick={() => navigate("/newApplicationPage")}
+            >
+              New
+            </Button>
 
-    <Button
-      variant="outlined"
-      sx={{
-        px: 4,
-        py: 1,
-        fontWeight: "bold",
-        borderColor: "#09360D",
-        color: "#09360D",
-        "&:hover": { borderColor: "#07270a", color: "#07270a" },
-      }}
-      onClick={() => navigate("/renew")}
-    >
-      Renewal
-    </Button>
-  </Box>
-</Fade>
-</Grid>
-
-</Box>
-);
+            <Button
+              variant="outlined"
+              sx={{
+                px: 4,
+                py: 1,
+                fontWeight: "bold",
+                borderColor: "#09360D",
+                color: "#09360D",
+                "&:hover": { borderColor: "#07270a", color: "#07270a" },
+              }}
+              onClick={() => navigate("/renew")}
+            >
+              Renewal
+            </Button>
+          </Box>
+        </Fade>
+      </Grid>
+    </Box>
+  );
 }
 
 export default App;
