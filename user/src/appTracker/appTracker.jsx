@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 // ✅ Custom Step Icon
 function ColoredStepIcon(props) {
@@ -44,7 +44,7 @@ function ColoredStepIcon(props) {
 }
 
 function AppTracker() {
-  const userId = localStorage.getItem("userId");
+  const { id } = useParams();
   const [trackers, setTrackers] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -69,7 +69,7 @@ function AppTracker() {
 
     const fetchData = async () => {
       try {
-        const trackerRes = await axios.get(`${API}/appStatus/status/${userId}`);
+        const trackerRes = await axios.get(`${API}/appStatus/status/${id}`);
         if (trackerRes.data) {
           setTrackers(trackerRes.data); // already an array
         }
@@ -84,7 +84,7 @@ function AppTracker() {
     intervalId = setInterval(fetchData, 5000);
 
     return () => clearInterval(intervalId);
-  }, [userId, API]);
+  }, [id, API]);
 
   if (loading)
     return (
@@ -122,7 +122,7 @@ function AppTracker() {
   return (
     <Box sx={{ p: 4, maxWidth: 900, mx: "auto" }}>
       <Button
-        onClick={() => navigate(`/homePage/me/${userId}`)}
+        onClick={() => navigate(`/homePage/${id}`)}
         variant="contained"
         color="success"
         sx={{ maxWidth: 150, mb: 3 }}

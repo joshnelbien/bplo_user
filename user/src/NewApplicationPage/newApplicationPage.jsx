@@ -18,7 +18,7 @@ import MuiAlert from "@mui/material/Alert";
 import { styled } from "@mui/system";
 import axios from "axios";
 import { forwardRef, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
 import Step1BusinessInfo from "../components/BusinessForm/Step1";
@@ -54,7 +54,7 @@ const Alert = forwardRef(function Alert(props, ref) {
 });
 
 function NewApplicationPage() {
-  const userId = localStorage.getItem("userId");
+  const { id } = useParams();
   const API = import.meta.env.VITE_API_BASE;
   const navigate = useNavigate();
 
@@ -71,7 +71,7 @@ function NewApplicationPage() {
 
   const [formDataState, setFormDataState] = useState(
     savedFormData || {
-      userId: userId,
+      userId: id,
       BusinessType: "",
       dscRegNo: "",
       businessName: "",
@@ -332,7 +332,7 @@ function NewApplicationPage() {
 
     try {
       await axios.post(`${API}/newApplication/files`, formData, {
-        userId,
+        id,
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -344,7 +344,7 @@ function NewApplicationPage() {
       setSuccessDialogOpen(true);
 
       setTimeout(() => {
-        navigate(`/homePage/me/${userId}`);
+        navigate(`/homePage/me/${id}`);
       }, 2000);
     } catch (err) {
       console.error(err);
@@ -441,7 +441,7 @@ function NewApplicationPage() {
     >
       <Box sx={{ width: "100%", maxWidth: 900, mx: "auto", mb: 2 }}>
         <GreenButton
-          onClick={() => navigate(`/homePage/me/${userId}`)}
+          onClick={() => navigate(`/homePage/${id}`)}
           variant="contained"
         >
           BACK TO DASHBOARD

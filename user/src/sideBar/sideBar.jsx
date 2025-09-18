@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
@@ -23,12 +22,13 @@ import {
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom"; // ✅ correct import
 
 const logo = "/spclogo.png";
 
-const Sidebar = ({ id }) => {
+const Sidebar = () => {
   const navigate = useNavigate();
+  const { id } = useParams(); // ✅ get id from URL
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState({ firstName: "", lastName: "", email: "" });
   const [openLogoutModal, setOpenLogoutModal] = useState(false);
@@ -40,10 +40,9 @@ const Sidebar = ({ id }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const userId = localStorage.getItem("userId");
-        if (!userId) return;
+        if (!id) return;
 
-        const response = await fetch(`${API}/userAccounts/${userId}`);
+        const response = await fetch(`${API}/userAccounts/${id}`);
         if (!response.ok) throw new Error("Failed to fetch user");
 
         const data = await response.json();
@@ -58,7 +57,7 @@ const Sidebar = ({ id }) => {
     };
 
     fetchUser();
-  }, []);
+  }, [id, API]); // ✅ depend on id
 
   // Logout modal handlers
   const handleLogoutOpen = () => setOpenLogoutModal(true);
@@ -128,61 +127,25 @@ const Sidebar = ({ id }) => {
 
         {/* Navigation */}
         <List component="nav">
-          {/* New Application */}
-          <ListItemButton
-            onClick={() => navigate(`/newApplicationPage/me/${id}`)}
-            sx={{
-              borderRadius: "8px",
-              mb: 1,
-              bgcolor: alpha("#076e0cff", 0.1),
-              "&:hover": { bgcolor: alpha("#085f0cff", 0.2) },
-            }}
-          >
+          <ListItemButton onClick={() => navigate(`/newApplicationPage/${id}`)}>
             <ListItemIcon>
               <AddCircleOutlineIcon sx={{ color: "#2E8B57" }} />
             </ListItemIcon>
-            <ListItemText
-              primary="New Application"
-              sx={{ fontWeight: "bold" }}
-            />
+            <ListItemText primary="New Application" />
           </ListItemButton>
 
-          {/* Renew Application */}
-          <ListItemButton
-            onClick={() => navigate(`/renew/me`)}
-            sx={{
-              borderRadius: "8px",
-              mb: 1,
-              bgcolor: alpha("#076e0cff", 0.1),
-              "&:hover": { bgcolor: alpha("#085f0cff", 0.2) },
-            }}
-          >
+          <ListItemButton onClick={() => navigate(`/renew/${id}`)}>
             <ListItemIcon>
               <AutorenewIcon sx={{ color: "#2E8B57" }} />
             </ListItemIcon>
-            <ListItemText
-              primary="Renew Application"
-              sx={{ fontWeight: "bold" }}
-            />
+            <ListItemText primary="Renew Application" />
           </ListItemButton>
 
-          {/* Application Tracker */}
-          <ListItemButton
-            onClick={() => navigate(`/appTracker/me/${id}`)}
-            sx={{
-              borderRadius: "8px",
-              mb: 1,
-              bgcolor: alpha("#2E8B57", 0.1),
-              "&:hover": { bgcolor: alpha("#2E8B57", 0.2) },
-            }}
-          >
+          <ListItemButton onClick={() => navigate(`/appTracker/${id}`)}>
             <ListItemIcon>
               <AssignmentTurnedInIcon sx={{ color: "#2E8B57" }} />
             </ListItemIcon>
-            <ListItemText
-              primary="Application Status"
-              sx={{ fontWeight: "bold" }}
-            />
+            <ListItemText primary="Application Status" />
           </ListItemButton>
         </List>
       </Box>
@@ -191,11 +154,7 @@ const Sidebar = ({ id }) => {
       <Box sx={{ p: 2, borderTop: "1px solid #E0E0E0" }}>
         <ListItemButton
           onClick={handleLogoutOpen}
-          sx={{
-            borderRadius: "8px",
-            bgcolor: "#be0606ff",
-            "&:hover": { bgcolor: "#ce0000ff" },
-          }}
+          sx={{ bgcolor: "#be0606ff", "&:hover": { bgcolor: "#ce0000ff" } }}
         >
           <ListItemIcon>
             <LogoutIcon sx={{ color: "white" }} />
@@ -206,48 +165,6 @@ const Sidebar = ({ id }) => {
           />
         </ListItemButton>
       </Box>
-
-      {/* Logout Confirmation Modal */}
-      <Modal
-        open={openLogoutModal}
-        onClose={handleLogoutClose}
-        closeAfterTransition
-        slots={{ backdrop: Backdrop }}
-        slotProps={{ backdrop: { timeout: 500 } }}
-      >
-        <Fade in={openLogoutModal}>
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: { xs: "80%", sm: 400 },
-              bgcolor: "background.paper",
-              boxShadow: 24,
-              p: 4,
-              borderRadius: "12px",
-              textAlign: "center",
-            }}
-          >
-            <Typography variant="h6" mb={2}>
-              Are you sure you want to log out?
-            </Typography>
-            <Stack direction="row" spacing={2} justifyContent="center">
-              <Button
-                variant="contained"
-                color="error"
-                onClick={handleConfirmLogout}
-              >
-                Yes
-              </Button>
-              <Button variant="outlined" onClick={handleLogoutClose}>
-                No
-              </Button>
-            </Stack>
-          </Box>
-        </Fade>
-      </Modal>
     </Paper>
   );
 
