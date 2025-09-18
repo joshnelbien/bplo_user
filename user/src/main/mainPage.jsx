@@ -17,14 +17,8 @@ import {
   useTheme,
   Fade,
   Slide,
-  Divider,
-  Container,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import BusinessIcon from "@mui/icons-material/Business";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import SecurityIcon from "@mui/icons-material/Security";
 
 function App() {
   const navigate = useNavigate();
@@ -84,17 +78,15 @@ function App() {
       <AppBar
         position="sticky"
         sx={{
-          backgroundColor: "#fff",
+          backgroundColor: "#1d5236",
           color: "text.primary",
           boxShadow: "0px 2px 8px rgba(0,0,0,0.1)",
-          px: { xs: 2, md: 4 }, // ✅ fixed padding
-          px: { xs: -1, md: 4 },
-
+          px: { xs: 2, md: 4 },
         }}
       >
         <Toolbar
           sx={{
-            minHeight: { xs: 70, md: 85 }, // control navbar height
+            minHeight: { xs: 70, md: 85 },
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -106,7 +98,7 @@ function App() {
               aria-label="open drawer"
               edge="start"
               onClick={handleDrawerToggle}
-              sx={{ mr: 2, color: "#09360D" }}
+              sx={{ mr: 2, color: "#ffffffff" }}
             >
               <MenuIcon />
             </IconButton>
@@ -125,22 +117,7 @@ function App() {
             </Box>
           )}
 
-          {/* Center: Logo */}
-          <Box
-            sx={{
-              flexGrow: 1,
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <img
-              src="/spc.png"
-              alt="BPLO Logo"
-              style={{ height: 55, width: "auto" }}
-            />
-          </Box>
-
-          {/* Right: Optional text or empty placeholder */}
+          {/* Right: Optional text */}
           <Typography
             variant="h6"
             sx={{
@@ -149,7 +126,7 @@ function App() {
               display: { xs: "none", sm: "block" },
             }}
           >
-            {/* Example: "BPLO System" */}
+            {/* BPLO System */}
           </Typography>
         </Toolbar>
       </AppBar>
@@ -168,29 +145,41 @@ function App() {
         {drawer}
       </Drawer>
 
-      {/* Hero Section */}
+      {/* Main Content */}
       <Grid
         container
         direction="column"
-        justifyContent="center"
+        justifyContent="flex-start"
         alignItems="center"
         sx={{
-          height: "25vh",
+          minHeight: "85vh",
           px: { xs: 2, md: 6 },
           textAlign: "center",
-          backgroundImage: `url(spc.png')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
+          background: "#fff",
+          pt: 8,
         }}
       >
+        {/* ✅ Logo */}
+        <Slide in={animate} direction="down" timeout={800}>
+          <Box
+            component="img"
+            src="/spc.png"
+            alt="Logo"
+            sx={{
+              width: { xs: 150, sm: 120 },
+              mb: 2,
+            }}
+          />
+        </Slide>
+
+        {/* ✅ Heading */}
         <Slide in={animate} direction="down" timeout={1000}>
           <Typography
             variant="h3"
             component="h1"
             gutterBottom
             sx={{
-              fontWeight: "bold",
+              fontWeight: 900,
               color: "#09360D",
               typography: { xs: "h4", sm: "h3" },
             }}
@@ -199,6 +188,7 @@ function App() {
           </Typography>
         </Slide>
 
+        {/* ✅ Subtitle */}
         <Fade in={animate} timeout={2000}>
           <Typography
             variant="h6"
@@ -214,7 +204,7 @@ function App() {
           </Typography>
         </Fade>
 
-        {/* ✅ New & Renewal Buttons */}
+        {/* ✅ Buttons */}
         <Fade in={animate} timeout={2500}>
           <Box
             sx={{
@@ -256,6 +246,25 @@ function App() {
           </Box>
         </Fade>
       </Grid>
+
+      {/* ✅ Footer */}
+      <Box
+        component="footer"
+        sx={{
+          mt: "auto",
+          py: 3,
+          borderTop: "2px solid #09360D",
+          textAlign: "center",
+          backgroundColor: "#f9f9f9",
+        }}
+      >
+        <Typography
+          variant="body2"
+          sx={{ color: "#746a6aff"}}
+        >
+          © {new Date().getFullYear()} Business Processing and Licensing Office | v2.
+        </Typography>
+      </Box>
     </Box>
   );
 }
