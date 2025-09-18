@@ -17,8 +17,11 @@ import {
   useTheme,
   Fade,
   Slide,
+  Collapse,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 function App() {
   const navigate = useNavigate();
@@ -26,19 +29,34 @@ function App() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [animate, setAnimate] = useState(false);
+  const [openRequirements, setOpenRequirements] = useState(false);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
+  const handleToggleRequirements = () => {
+    setOpenRequirements(!openRequirements);
+  };
+
   const navItems = [
-    { label: "Account", path: "/" },
-    { label: "Settings", path: "/" },
-    { label: "Privacy Notice", path: "/" },
+    { label: "Application Status", path: "/" },
+    { label: "New Business Requirements", path: "/newApplicationRegister" },
+    { label: "Renewal Business Requirements", path: "/renew" },
+    { label: "Privacy Notice", path: "/privacy" },
   ];
 
+  // Drawer (Mobile)
+  // Drawer (Mobile)
   const drawer = (
-    <Box onClick={handleDrawerToggle} sx={{ textAlign: "center", p: 2 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-start",
+        p: 1,
+      }}
+    >
       <Typography
         variant="h6"
         sx={{ mb: 2, fontWeight: "bold", color: "#09360D" }}
@@ -46,24 +64,122 @@ function App() {
         ONLINE BUSINESS PROCESSING
       </Typography>
       <List>
-        {navItems.map((item) => (
-          <ListItem key={item.label} disablePadding>
-            <ListItemButton
-              sx={{ textAlign: "center" }}
-              onClick={() => navigate(item.path)}
-            >
-              <ListItemText
-                primary={item.label}
+        {navItems.map((item) => {
+          if (
+            item.label === "New Business Requirements" ||
+            item.label === "Renewal Business Requirements"
+          )
+            return null;
+
+          return (
+            <ListItem key={item.label} disablePadding>
+              <ListItemButton
                 sx={{
-                  "& .MuiListItemText-primary": {
-                    fontWeight: "bold",
-                    color: "#09360D",
+                  justifyContent: "flex-start",
+                  transition: "background-color 0.3s, color 0.3s",
+                  "&:hover": {
+                    backgroundColor: "#e6f2e6",
+                    "& .MuiListItemText-primary": { color: "#07270a" },
                   },
                 }}
-              />
-            </ListItemButton>
-          </ListItem>
-        ))}
+                onClick={() => {
+                  navigate(item.path);
+                  // optionally close drawer: setMobileOpen(false);
+                }}
+              >
+                <ListItemText
+                  primary={item.label}
+                  sx={{
+                    "& .MuiListItemText-primary": {
+                      fontWeight: "normal",
+                      color: "#09360D",
+                      transition: "color 0.3s",
+                    },
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
+
+        {/* Requirements Dropdown */}
+        <ListItem disablePadding>
+          <ListItemButton
+            sx={{
+              justifyContent: "flex-start",
+              transition: "background-color 0.3s, color 0.3s",
+              "&:hover": {
+                backgroundColor: "#e6f2e6",
+                "& .MuiListItemText-primary": { color: "#07270a" },
+              },
+            }}
+            onClick={handleToggleRequirements}
+          >
+            <ListItemText
+              primary="Requirements"
+              sx={{
+                "& .MuiListItemText-primary": {
+                  fontWeight: "bold",
+                  color: "#09360D",
+                  transition: "color 0.3s",
+                },
+              }}
+            />
+            {openRequirements ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          </ListItemButton>
+        </ListItem>
+
+        <Collapse in={openRequirements} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding sx={{ pl: 4 }}>
+            <ListItem disablePadding>
+              <ListItemButton
+                sx={{
+                  justifyContent: "flex-start",
+                  transition: "background-color 0.3s, color 0.3s",
+                  "&:hover": {
+                    backgroundColor: "#e6f2e6",
+                    "& .MuiListItemText-primary": { color: "#07270a" },
+                  },
+                }}
+                onClick={() => navigate("/newApplicationRegister")}
+              >
+                <ListItemText
+                  primary="New Business Requirements"
+                  sx={{
+                    "& .MuiListItemText-primary": {
+                      fontWeight: "normal",
+                      color: "#09360D",
+                    },
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+
+            <ListItem disablePadding>
+              <ListItemButton
+                sx={{
+                  justifyContent: "flex-start",
+                  transition: "background-color 0.3s, color 0.3s",
+                  "&:hover": {
+                    backgroundColor: "#e6f2e6",
+                    "& .MuiListItemText-primary": { color: "#07270a" },
+                  },
+                }}
+                onClick={() => navigate("/renew")}
+              >
+                <ListItemText
+                  primary="Renewal Business Requirements"
+                  sx={{
+                    "& .MuiListItemText-primary": {
+                      fontWeight: "normal",
+                      color: "#09360D",
+                    },
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          </List>
+        </Collapse>
       </List>
     </Box>
   );
@@ -92,42 +208,90 @@ function App() {
             alignItems: "center",
           }}
         >
-          {/* Left: Menu (mobile) or Nav Items (desktop) */}
           {isMobile ? (
             <IconButton
               aria-label="open drawer"
               edge="start"
               onClick={handleDrawerToggle}
-              sx={{ mr: 2, color: "#ffffffff" }}
+              sx={{ mr: 2, color: "#ffffff" }}
             >
               <MenuIcon />
             </IconButton>
           ) : (
-            <Box sx={{ display: "flex", gap: 3 }}>
-              {navItems.map((item) => (
+            <Box sx={{ display: "flex", gap: 3, flexGrow: 1 }}>
+              {/* Desktop nav */}
+              <Button
+                onClick={() => navigate("/")}
+                sx={{
+                  color: "#09360D",
+                  fontWeight: "bold",
+                  textTransform: "none",
+                }}
+              >
+                Application Status
+              </Button>
+
+              {/* Requirements Dropdown Desktop */}
+              <Box>
                 <Button
-                  key={item.label}
-                  color="inherit"
-                  onClick={() => navigate(item.path)}
-                  sx={{ fontWeight: "bold", color: "#09360D" }}
+                  onClick={handleToggleRequirements}
+                  sx={{
+                    color: "#09360D",
+                    fontWeight: "bold",
+                    textTransform: "none",
+                  }}
+                  endIcon={
+                    openRequirements ? <ExpandLessIcon /> : <ExpandMoreIcon />
+                  }
                 >
-                  {item.label}
+                  Requirements
                 </Button>
-              ))}
+                <Collapse in={openRequirements} timeout="auto" unmountOnExit>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      pl: 1,
+                    }}
+                  >
+                    <Button
+                      onClick={() => navigate("/newApplicationRegister")}
+                      sx={{
+                        color: "#09360D",
+                        fontWeight: "normal",
+                        textTransform: "none",
+                        justifyContent: "flex-start",
+                      }}
+                    >
+                      New Business Requirements
+                    </Button>
+                    <Button
+                      onClick={() => navigate("")}
+                      sx={{
+                        color: "#09360D",
+                        fontWeight: "normal",
+                        textTransform: "none",
+                        justifyContent: "flex-start",
+                      }}
+                    >
+                      Renewal Business Requirements
+                    </Button>
+                  </Box>
+                </Collapse>
+              </Box>
+
+              <Button
+                onClick={() => navigate("")}
+                sx={{
+                  color: "#09360D",
+                  fontWeight: "bold",
+                  textTransform: "none",
+                }}
+              >
+                Privacy Notice
+              </Button>
             </Box>
           )}
-
-          {/* Right: Optional text */}
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: "bold",
-              color: "#09360D",
-              display: { xs: "none", sm: "block" },
-            }}
-          >
-            {/* BPLO System */}
-          </Typography>
         </Toolbar>
       </AppBar>
 
@@ -159,20 +323,15 @@ function App() {
           pt: 8,
         }}
       >
-        {/* ✅ Logo */}
         <Slide in={animate} direction="down" timeout={800}>
           <Box
             component="img"
             src="/spc.png"
             alt="Logo"
-            sx={{
-              width: { xs: 150, sm: 120 },
-              mb: 2,
-            }}
+            sx={{ width: { xs: 150, sm: 120 }, mb: 2 }}
           />
         </Slide>
 
-        {/* ✅ Heading */}
         <Slide in={animate} direction="down" timeout={1000}>
           <Typography
             variant="h3"
@@ -188,7 +347,6 @@ function App() {
           </Typography>
         </Slide>
 
-        {/* ✅ Subtitle */}
         <Fade in={animate} timeout={2000}>
           <Typography
             variant="h6"
@@ -204,7 +362,6 @@ function App() {
           </Typography>
         </Fade>
 
-        {/* ✅ Buttons */}
         <Fade in={animate} timeout={2500}>
           <Box
             sx={{
@@ -247,7 +404,7 @@ function App() {
         </Fade>
       </Grid>
 
-      {/* ✅ Footer */}
+      {/* Footer */}
       <Box
         component="footer"
         sx={{
@@ -258,11 +415,9 @@ function App() {
           backgroundColor: "#f9f9f9",
         }}
       >
-        <Typography
-          variant="body2"
-          sx={{ color: "#746a6aff"}}
-        >
-          © {new Date().getFullYear()} Business Permit and Licensing Office | v2.
+        <Typography variant="body2" sx={{ color: "#746a6aff" }}>
+          © {new Date().getFullYear()} Business Permit and Licensing Office |
+          v2.
         </Typography>
       </Box>
     </Box>
