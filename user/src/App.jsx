@@ -15,23 +15,14 @@ function App() {
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/loginPage" element={<LoginPage />} />
-
-
-
-        <Route path="/homePage/me" element={<HomePage />} />
-        <Route path="/newApplicationPage" element={<NewApplicationPage />} />
-        <Route path="/registerPage" element={<RegisterPage />} />
-        <Route path="/appTracker/me" element={<AppTracker />} />
-        <Route path="/renew" element={<Renew />} />
-
-
-        <Route path="/homePage/me/:id" element={<HomePage />} />
+        <Route path="/homePage/:id" element={<HomePage />} />
         <Route
-          path="/newApplicationPage/me/:id"
+          path="/newApplicationPage/:id"
           element={<NewApplicationPage />}
         />
+        <Route path="/renew" element={<Renew />} />
         <Route path="/registerPage" element={<RegisterPage />} />
-        <Route path="/appTracker/me/:id" element={<AppTracker />} />
+        <Route path="/appTracker/:id" element={<AppTracker />} />
         <Route path="/renew/me" element={<Renew />} />
         <Route
           path="/newApplicationRegister"

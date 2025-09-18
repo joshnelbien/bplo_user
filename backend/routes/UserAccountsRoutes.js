@@ -1,41 +1,91 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
+const nodemailer = require("nodemailer");
 const UserAccounts = require("../db/model/userAccounts");
 
 const router = express.Router();
+const API = process.env.VITE_API_BASE;
+// ✅ setup nodemailer
+const transporter = nodemailer.createTransport({
+  service: "gmail", // or use "smtp" if you have another provider
+  auth: {
+    user: process.env.EMAIL_USER, // your Gmail or SMTP email
+    pass: process.env.EMAIL_PASS, // your Gmail App Password
+  },
+});
 
 router.post("/register", async (req, res) => {
   try {
-    const { lastname, firstname, email, mobile, password } = req.body;
+    const {
+      firstName,
+      middleName,
+      lastName,
+      extName,
+      sex,
+      email, // frontend field
+      mobileNo, // frontend field
+      BusinessType,
+      dscRegNo,
+      businessName,
+      tinNo,
+      TradeName,
+      telNo,
+    } = req.body;
 
-    if (!lastname || !firstname || !email || !mobile || !password) {
-      return res.status(400).json({ error: "All fields are required" });
+    // validate required fields
+    if (!lastName || !firstName || !email || !mobileNo) {
+      return res
+        .status(400)
+        .json({ error: "All required fields must be filled" });
     }
 
-    const existingUser = await UserAccounts.findOne({ where: { email } });
+    // check if email already exists
+    const existingUser = await UserAccounts.findOne({
+      where: { email: email },
+    });
     if (existingUser) {
       return res.status(400).json({ error: "Email already in use" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
+    // create user
     const user = await UserAccounts.create({
-      lastname,
-      firstname,
-      email,
-      mobile,
-      password: hashedPassword,
+      firstName,
+      middleName: middleName || null,
+      lastName,
+      extName: extName || null,
+      sex,
+      email: email,
+      tel: telNo || null,
+      mobile: mobileNo,
+      business_type: BusinessType || null,
+      dsc_reg_no: dscRegNo || null,
+      business_name: businessName || null,
+      tin_no: tinNo || null,
+      trade_name: TradeName || null,
     });
 
+    // ✅ send confirmation email
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Business Application Registered",
+      html: `
+        <p>Hello <b>${firstName} ${lastName}</b>,</p>
+        <p>Thank you for registering your business application.</p>
+        <p>You can view your application details by clicking the link below:</p>
+        <a href="${API}/homePage/${user.id}">
+          View Application
+        </a>
+        <br/><br/>
+        <p>Best regards,<br/>Business Portal</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
     res.status(201).json({
-      message: "User registered successfully",
-      user: {
-        id: user.id,
-        lastname: user.lastname,
-        firstname: user.firstname,
-        email: user.email,
-        mobile: user.mobile,
-      },
+      message: "User registered successfully, email sent",
+      user,
     });
   } catch (error) {
     console.error("❌ Register error:", error);
@@ -57,17 +107,6 @@ router.post("/login", async (req, res) => {
     if (!validPassword) {
       return res.status(400).json({ error: "Invalid password" });
     }
-
-    res.json({
-      message: "Login successful",
-      user: {
-        id: user.id,
-        lastname: user.lastname,
-        firstname: user.firstname,
-        email: user.email,
-        mobile: user.mobile,
-      },
-    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
@@ -75,10 +114,10 @@ router.post("/login", async (req, res) => {
 });
 
 // /me
-router.get("/me/:id", async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const user = await UserAccounts.findByPk(req.params.id, {
-      attributes: ["id", "lastname", "firstname", "email", "mobile"],
+      attributes: ["id", "lastName", "firstName", "email", "mobile"],
     });
 
     if (!user) {
