@@ -181,7 +181,7 @@ function App() {
             sx={{
               fontWeight: 900,
               color: "#09360D",
-              typography: { xs: "h4", sm: "h3" },
+              typography: { xs: "1", sm: "5" },
             }}
           >
             BUSINESS REGISTRATION
@@ -262,7 +262,7 @@ function App() {
           variant="body2"
           sx={{ color: "#746a6aff"}}
         >
-          © {new Date().getFullYear()} Business Processing and Licensing Office | v2.
+          © {new Date().getFullYear()} Business Permit and Licensing Office | v2.
         </Typography>
       </Box>
     </Box>
