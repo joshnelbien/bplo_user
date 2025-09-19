@@ -101,7 +101,7 @@ function App() {
     >
       <Typography
         variant="h6"
-        sx={{ mb: 2, fontWeight: "bold", color: "#09360D" }}
+        sx={{ mb: 1, fontWeight: "bold", color: "#09360D" }}
       >
         ONLINE BUSINESS PROCESSING
       </Typography>
@@ -294,7 +294,7 @@ function App() {
             component="img"
             src="/spc.png"
             alt="Logo"
-            sx={{ width: { xs: 150, sm: 120 }, mb: 2 }}
+            sx={{ width: { xs: 150, sm: 120 }, mb: 5 }}
           />
         </Slide>
 
@@ -306,53 +306,62 @@ function App() {
             sx={{
               fontWeight: 900,
               color: "#09360D",
-              typography: { xs: "1", sm: "5" },
+              fontSize: { xs: "3.5rem", sm: "2.8rem" }, // responsive font size
             }}
           >
             BUSINESS REGISTRATION
           </Typography>
         </Slide>
 
+        <Fade in={animate} timeout={1500}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              color: "text.secondary",
+              fontStyle: "italic",
+              maxWidth: 1000,
+              mb: 5,
+            }}
+          >
+            Start Fresh or Keep Growing – Apply or Renew Today!
+          </Typography>
+        </Fade>
+
         <Fade in={animate} timeout={2500}>
           <Box
             sx={{
               display: "flex",
-              flexDirection: { xs: "column", sm: "row" }, // Stack on mobile, row on larger screens
-              gap: { xs: 2, sm: 3 },
+              gap: 2,
+              flexWrap: "wrap",
               justifyContent: "center",
-              alignItems: "center",
-              width: "100%",
-              px: { xs: 2, sm: 0 }, // Padding on mobile
             }}
           >
             <Button
               variant="contained"
-              fullWidth={{ xs: true, sm: false }} // Full width on mobile
               sx={{
-                px: { xs: 0, sm: 4 },
-                py: 1.5,
+                px: 4,
+                py: 1,
                 fontWeight: "bold",
                 backgroundColor: "#09360D",
                 color: "white",
                 "&:hover": { backgroundColor: "#07270a" },
               }}
-              onClick={() => navigate("/newApplicationRegister")}
+              onClick={() => navigate("/newApplicationRegister")} // Navigate to New Business Form
             >
-              New
+              New Application
             </Button>
 
             <Button
               variant="outlined"
-              fullWidth={{ xs: true, sm: false }} // Full width on mobile
               sx={{
-                px: { xs: 0, sm: 4 },
-                py: 1.5,
+                px: 4,
+                py: 1,
                 fontWeight: "bold",
                 borderColor: "#09360D",
                 color: "#09360D",
                 "&:hover": { borderColor: "#07270a", color: "#07270a" },
               }}
-              onClick={() => navigate("/renew")}
+              onClick={() => navigate("/renew")} // Navigate to Renewal Business Form
             >
               Renewal
             </Button>
@@ -363,7 +372,20 @@ function App() {
       {/* Requirements Modal */}
       <Modal open={modalOpen} onClose={handleCloseModal} closeAfterTransition>
         <Fade in={modalOpen}>
-          <Box sx={modalStyle}>
+          <Box
+            sx={{
+              ...modalStyle,
+              maxWidth: 500, // Prevents it from being too wide
+              width: "80%", // Responsive on mobile
+              mx: "auto", // Centers horizontally
+              my: "1vh", // Adds top/bottom spacing
+              p: 3, // Padding inside modal
+              borderRadius: 2,
+              bgcolor: "background.paper",
+              boxShadow: 24,
+            }}
+          >
+            {/* Header */}
             <Box
               sx={{
                 display: "flex",
@@ -371,6 +393,7 @@ function App() {
                 mb: 2,
                 borderBottom: "1px solid",
                 borderColor: "divider",
+                pb: 1,
               }}
             >
               <Typography variant="h6" fontWeight="bold">
@@ -378,13 +401,15 @@ function App() {
                   ? "New Business Requirements"
                   : "Renewal Business Requirements"}
               </Typography>
-              <Button onClick={handleCloseModal} sx={{ minWidth: 0, p: 0.5 }}>
+              <Button onClick={handleCloseModal} sx={{ minWidth: 0, p: 1 }}>
                 <CloseIcon />
               </Button>
             </Box>
+
+            {/* Requirements List */}
             <List>
               {requirementsData[modalType]?.map((item, index) => (
-                <ListItem key={index} sx={{ px: 1, mb: 1 }}>
+                <ListItem key={index} sx={{ px: 0, mb: 1 }}>
                   <Checkbox
                     defaultChecked
                     disabled
