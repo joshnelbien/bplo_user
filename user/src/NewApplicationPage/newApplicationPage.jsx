@@ -256,14 +256,6 @@ function NewApplicationPage() {
       newErrors.businessLines = "At least one line of business is required.";
     }
 
-    if (
-      step === 1 &&
-      formDataState.tinNo &&
-      !validateTIN(formDataState.tinNo)
-    ) {
-      newErrors.tinNo = "TIN must be in format NNN-NN-NNNN starting with 9";
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
