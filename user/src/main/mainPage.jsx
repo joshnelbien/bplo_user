@@ -19,7 +19,6 @@ import {
   Slide,
   Collapse,
   Modal,
-  ListItemIcon,
   Checkbox,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -62,6 +61,14 @@ const requirementsData = {
   ],
 };
 
+const privacyNotice = `
+We value your privacy. The information you provide in this system will be collected,
+stored, and processed solely for the purpose of business permit registration and renewal.
+Your data will not be shared with third parties except as required by law or with your consent.
+By continuing to use this service, you acknowledge and agree to the data privacy practices
+of the Business Permit and Licensing Office.
+`;
+
 function App() {
   const navigate = useNavigate();
   const theme = useTheme();
@@ -87,7 +94,7 @@ function App() {
     { label: "Application Status", path: "/" },
     { label: "New Business Requirements", type: "newApplication" },
     { label: "Renewal Business Requirements", type: "renewal" },
-    { label: "Privacy Notice", path: "/privacy" },
+    { label: "Privacy Notice", type: "privacy" },
   ];
 
   const drawer = (
@@ -181,6 +188,16 @@ function App() {
             </ListItem>
           </List>
         </Collapse>
+
+        {/* Privacy Notice in Drawer */}
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => handleOpenModal("privacy")}>
+            <ListItemText
+              primary="Privacy Notice"
+              sx={{ "& .MuiListItemText-primary": { color: "#09360D" } }}
+            />
+          </ListItemButton>
+        </ListItem>
       </List>
     </Box>
   );
@@ -254,7 +271,7 @@ function App() {
                 </Collapse>
               </Box>
               <Button
-                onClick={() => navigate("/privacy")}
+                onClick={() => handleOpenModal("privacy")}
                 sx={{ color: "#09360D", fontWeight: "bold" }}
               >
                 Privacy Notice
@@ -306,7 +323,7 @@ function App() {
             sx={{
               fontWeight: 900,
               color: "#09360D",
-              fontSize: { xs: "3.5rem", sm: "2.8rem" }, // responsive font size
+              fontSize: { xs: "3.5rem", sm: "2.8rem" },
             }}
           >
             BUSINESS REGISTRATION
@@ -346,7 +363,7 @@ function App() {
                 color: "white",
                 "&:hover": { backgroundColor: "#07270a" },
               }}
-              onClick={() => navigate("/newApplicationRegister")} // Navigate to New Business Form
+              onClick={() => navigate("/newApplicationRegister")}
             >
               New Application
             </Button>
@@ -361,7 +378,7 @@ function App() {
                 color: "#09360D",
                 "&:hover": { borderColor: "#07270a", color: "#07270a" },
               }}
-              onClick={() => navigate("/renew")} // Navigate to Renewal Business Form
+              onClick={() => navigate("/renew")}
             >
               Renewal
             </Button>
@@ -369,17 +386,17 @@ function App() {
         </Fade>
       </Grid>
 
-      {/* Requirements Modal */}
+      {/* Requirements & Privacy Modal */}
       <Modal open={modalOpen} onClose={handleCloseModal} closeAfterTransition>
         <Fade in={modalOpen}>
           <Box
             sx={{
               ...modalStyle,
-              maxWidth: 500, // Prevents it from being too wide
-              width: "80%", // Responsive on mobile
-              mx: "auto", // Centers horizontally
-              my: "1vh", // Adds top/bottom spacing
-              p: 3, // Padding inside modal
+              maxWidth: 500,
+              width: "80%",
+              mx: "auto",
+              my: "1vh",
+              p: 3,
               borderRadius: 2,
               bgcolor: "background.paper",
               boxShadow: 24,
@@ -399,26 +416,34 @@ function App() {
               <Typography variant="h6" fontWeight="bold">
                 {modalType === "newApplication"
                   ? "New Business Requirements"
-                  : "Renewal Business Requirements"}
+                  : modalType === "renewal"
+                  ? "Renewal Business Requirements"
+                  : "Privacy Notice"}
               </Typography>
               <Button onClick={handleCloseModal} sx={{ minWidth: 0, p: 1 }}>
                 <CloseIcon />
               </Button>
             </Box>
 
-            {/* Requirements List */}
-            <List>
-              {requirementsData[modalType]?.map((item, index) => (
-                <ListItem key={index} sx={{ px: 0, mb: 1 }}>
-                  <Checkbox
-                    defaultChecked
-                    disabled
-                    sx={{ "&.Mui-disabled": { color: "success.main" } }}
-                  />
-                  <ListItemText primary={item} />
-                </ListItem>
-              ))}
-            </List>
+            {/* Content */}
+            {modalType === "privacy" ? (
+              <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}>
+                {privacyNotice}
+              </Typography>
+            ) : (
+              <List>
+                {requirementsData[modalType]?.map((item, index) => (
+                  <ListItem key={index} sx={{ px: 0, mb: 1 }}>
+                    <Checkbox
+                      defaultChecked
+                      disabled
+                      sx={{ "&.Mui-disabled": { color: "success.main" } }}
+                    />
+                    <ListItemText primary={item} />
+                  </ListItem>
+                ))}
+              </List>
+            )}
           </Box>
         </Fade>
       </Modal>
@@ -435,8 +460,7 @@ function App() {
         }}
       >
         <Typography variant="body2" sx={{ color: "#746a6aff" }}>
-          © {new Date().getFullYear()} Business Permit and Licensing Office |
-          v2.
+          © {new Date().getFullYear()} Business Permit and Licensing Office | v2.
         </Typography>
       </Box>
     </Box>
