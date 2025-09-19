@@ -123,7 +123,7 @@ export default function Step1BusinessInfo({ formData, handleChange, errors, setE
           variant="outlined"
           sx={{ minWidth: 300 }}
           error={!!errors.tinNo}
-          helperText={errors.tinNo || "Format: XXX-XXX-XXX or XXX-XXX-XXX-XX (9-12 digits)"}
+          helperText={errors.tinNo}
         />
 
         {/* Trade Name */}

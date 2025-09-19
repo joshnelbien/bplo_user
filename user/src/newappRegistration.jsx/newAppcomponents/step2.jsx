@@ -201,7 +201,7 @@ export default function Step2PersonalInfo({
           variant="outlined"
           sx={{ minWidth: 300 }}
           error={!!errors.mobileNo}
-          helperText={errors.mobileNo || "Must start with +63"}
+          helperText={errors.mobileNo || "Philippine mobile numbers"}
           placeholder="+63123456789"
         />
       </Stack>
