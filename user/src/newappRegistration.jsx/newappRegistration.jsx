@@ -22,6 +22,7 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { useNavigate } from "react-router-dom";
 import Step1BusinessInfo from "./newAppcomponents/step1";
 import Step2PersonalInfo from "./newAppcomponents/step2";
+import { useMediaQuery, useTheme } from "@mui/material";
 
 const GreenButton = styled(Button)(({ variant }) => ({
   borderRadius: "8px",
@@ -52,6 +53,8 @@ function NewApplicationRegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const API = import.meta.env.VITE_API_BASE;
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [formDataState, setFormDataState] = useState({
     BusinessType: "",
@@ -84,7 +87,11 @@ function NewApplicationRegisterPage() {
 
   const validateTIN = (tin) => {
     const tinRegex = /^(?:\d{3}-\d{3}-\d{3}|\d{3}-\d{3}-\d{3}-\d{2,3})$/;
-    return tinRegex.test(tin) && tin.replace(/-/g, "").length >= 9 && tin.replace(/-/g, "").length <= 12;
+    return (
+      tinRegex.test(tin) &&
+      tin.replace(/-/g, "").length >= 9 &&
+      tin.replace(/-/g, "").length <= 12
+    );
   };
 
   const validateStep = () => {
@@ -106,43 +113,66 @@ function NewApplicationRegisterPage() {
       formDataState.tinNo &&
       !validateTIN(formDataState.tinNo)
     ) {
-      newErrors.tinNo = "TIN must be in format XXX-XXX-XXX or XXX-XXX-XXX-XX (9-12 digits)";
+      newErrors.tinNo =
+        "TIN must be in format XXX-XXX-XXX or XXX-XXX-XXX-XX (9-12 digits)";
     }
 
     // Additional validation for minimum 3 letters in TradeName and businessName
-    const letterCountBusinessName = (formDataState.businessName.replace(/[^A-Za-z]/g, "") || "").length;
-    if (step === 1 && formDataState.businessName && letterCountBusinessName < 3) {
+    const letterCountBusinessName = (
+      formDataState.businessName.replace(/[^A-Za-z]/g, "") || ""
+    ).length;
+    if (
+      step === 1 &&
+      formDataState.businessName &&
+      letterCountBusinessName < 3
+    ) {
       newErrors.businessName = "Minimum of 3 letters required";
     }
 
-    const letterCountTradeName = (formDataState.TradeName.replace(/[^A-Za-z]/g, "") || "").length;
+    const letterCountTradeName = (
+      formDataState.TradeName.replace(/[^A-Za-z]/g, "") || ""
+    ).length;
     if (step === 1 && formDataState.TradeName && letterCountTradeName < 3) {
       newErrors.TradeName = "Minimum of 3 letters required";
     }
 
     // Validation for Step 2
-    const letterCountFirstName = (formDataState.firstName.replace(/[^A-Za-z]/g, "") || "").length;
+    const letterCountFirstName = (
+      formDataState.firstName.replace(/[^A-Za-z]/g, "") || ""
+    ).length;
     if (step === 2 && formDataState.firstName && letterCountFirstName < 3) {
       newErrors.firstName = "Minimum of 3 letters required";
     }
 
-    const letterCountMiddleName = (formDataState.middleName.replace(/[^A-Za-z]/g, "") || "").length;
+    const letterCountMiddleName = (
+      formDataState.middleName.replace(/[^A-Za-z]/g, "") || ""
+    ).length;
     if (step === 2 && formDataState.middleName && letterCountMiddleName < 3) {
       newErrors.middleName = "Minimum of 3 letters required";
     }
 
-    const letterCountLastName = (formDataState.lastName.replace(/[^A-Za-z]/g, "") || "").length;
+    const letterCountLastName = (
+      formDataState.lastName.replace(/[^A-Za-z]/g, "") || ""
+    ).length;
     if (step === 2 && formDataState.lastName && letterCountLastName < 3) {
       newErrors.lastName = "Minimum of 3 letters required";
     }
 
     // Email validation: must end with @gmail.com
-    if (step === 2 && formDataState.email && !formDataState.email.endsWith("@gmail.com")) {
+    if (
+      step === 2 &&
+      formDataState.email &&
+      !formDataState.email.endsWith("@gmail.com")
+    ) {
       newErrors.email = "Email must end with @gmail.com";
     }
 
     // Mobile number validation: must start with +63
-    if (step === 2 && formDataState.mobileNo && !formDataState.mobileNo.startsWith("+63")) {
+    if (
+      step === 2 &&
+      formDataState.mobileNo &&
+      !formDataState.mobileNo.startsWith("+63")
+    ) {
       newErrors.mobileNo = "Mobile number must start with +63";
     }
 
@@ -252,7 +282,14 @@ function NewApplicationRegisterPage() {
         py: { xs: 2, sm: 4 },
       }}
     >
-      <Box sx={{ width: "100%", maxWidth: 900, mx: "auto", mb: 2 }}>
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: isMobile ? 350 : 900,
+          mx: "auto",
+          mb: 2,
+        }}
+      >
         <GreenButton onClick={() => navigate(`/`)} variant="contained">
           BACK TO DASHBOARD
         </GreenButton>
@@ -263,7 +300,7 @@ function NewApplicationRegisterPage() {
         sx={{
           p: { xs: 2, sm: 4 },
           width: "100%",
-          maxWidth: 900,
+          maxWidth: isMobile ? 350 : 900, // ✅ Responsive maxWidth
           mx: "auto",
           borderRadius: "16px",
         }}
@@ -378,22 +415,44 @@ function NewApplicationRegisterPage() {
             Are you sure you want to proceed to the next step? <br />
             {step === 1 ? (
               <>
-                <strong>Business Type:</strong> {formDataState.BusinessType || "Not specified"}<br />
-                <strong>Registration No:</strong> {formDataState.dscRegNo || "Not specified"}<br />
-                <strong>Business Name:</strong> {formDataState.businessName || "Not specified"}<br />
-                <strong>TIN No:</strong> {formDataState.tinNo || "Not specified"}<br />
-                <strong>Trade Name:</strong> {formDataState.TradeName || "Not specified"}
+                <strong>Business Type:</strong>{" "}
+                {formDataState.BusinessType || "Not specified"}
+                <br />
+                <strong>Registration No:</strong>{" "}
+                {formDataState.dscRegNo || "Not specified"}
+                <br />
+                <strong>Business Name:</strong>{" "}
+                {formDataState.businessName || "Not specified"}
+                <br />
+                <strong>TIN No:</strong>{" "}
+                {formDataState.tinNo || "Not specified"}
+                <br />
+                <strong>Trade Name:</strong>{" "}
+                {formDataState.TradeName || "Not specified"}
               </>
             ) : (
               <>
-                <strong>First Name:</strong> {formDataState.firstName || "Not specified"}<br />
-                <strong>Middle Name:</strong> {formDataState.middleName || "Not specified"}<br />
-                <strong>Last Name:</strong> {formDataState.lastName || "Not specified"}<br />
-                <strong>Ext. Name:</strong> {formDataState.extName || "Not specified"}<br />
-                <strong>Gender:</strong> {formDataState.sex || "Not specified"}<br />
-                <strong>Email:</strong> {formDataState.email || "Not specified"}<br />
-                <strong>Telephone No:</strong> {formDataState.telNo || "Not specified"}<br />
-                <strong>Mobile No:</strong> {formDataState.mobileNo || "Not specified"}
+                <strong>First Name:</strong>{" "}
+                {formDataState.firstName || "Not specified"}
+                <br />
+                <strong>Middle Name:</strong>{" "}
+                {formDataState.middleName || "Not specified"}
+                <br />
+                <strong>Last Name:</strong>{" "}
+                {formDataState.lastName || "Not specified"}
+                <br />
+                <strong>Ext. Name:</strong>{" "}
+                {formDataState.extName || "Not specified"}
+                <br />
+                <strong>Gender:</strong> {formDataState.sex || "Not specified"}
+                <br />
+                <strong>Email:</strong> {formDataState.email || "Not specified"}
+                <br />
+                <strong>Telephone No:</strong>{" "}
+                {formDataState.telNo || "Not specified"}
+                <br />
+                <strong>Mobile No:</strong>{" "}
+                {formDataState.mobileNo || "Not specified"}
               </>
             )}
           </Typography>
@@ -425,19 +484,41 @@ function NewApplicationRegisterPage() {
         <DialogContent>
           <Typography>
             Are you sure you want to submit? <br />
-            <strong>Business Type:</strong> {formDataState.BusinessType || "Not specified"}<br />
-            <strong>Registration No:</strong> {formDataState.dscRegNo || "Not specified"}<br />
-            <strong>Business Name:</strong> {formDataState.businessName || "Not specified"}<br />
-            <strong>TIN No:</strong> {formDataState.tinNo || "Not specified"}<br />
-            <strong>Trade Name:</strong> {formDataState.TradeName || "Not specified"}<br />
-            <strong>First Name:</strong> {formDataState.firstName || "Not specified"}<br />
-            <strong>Middle Name:</strong> {formDataState.middleName || "Not specified"}<br />
-            <strong>Last Name:</strong> {formDataState.lastName || "Not specified"}<br />
-            <strong>Ext. Name:</strong> {formDataState.extName || "Not specified"}<br />
-            <strong>Gender:</strong> {formDataState.sex || "Not specified"}<br />
-            <strong>Email:</strong> {formDataState.email || "Not specified"}<br />
-            <strong>Telephone No:</strong> {formDataState.telNo || "Not specified"}<br />
-            <strong>Mobile No:</strong> {formDataState.mobileNo || "Not specified"}
+            <strong>Business Type:</strong>{" "}
+            {formDataState.BusinessType || "Not specified"}
+            <br />
+            <strong>Registration No:</strong>{" "}
+            {formDataState.dscRegNo || "Not specified"}
+            <br />
+            <strong>Business Name:</strong>{" "}
+            {formDataState.businessName || "Not specified"}
+            <br />
+            <strong>TIN No:</strong> {formDataState.tinNo || "Not specified"}
+            <br />
+            <strong>Trade Name:</strong>{" "}
+            {formDataState.TradeName || "Not specified"}
+            <br />
+            <strong>First Name:</strong>{" "}
+            {formDataState.firstName || "Not specified"}
+            <br />
+            <strong>Middle Name:</strong>{" "}
+            {formDataState.middleName || "Not specified"}
+            <br />
+            <strong>Last Name:</strong>{" "}
+            {formDataState.lastName || "Not specified"}
+            <br />
+            <strong>Ext. Name:</strong>{" "}
+            {formDataState.extName || "Not specified"}
+            <br />
+            <strong>Gender:</strong> {formDataState.sex || "Not specified"}
+            <br />
+            <strong>Email:</strong> {formDataState.email || "Not specified"}
+            <br />
+            <strong>Telephone No:</strong>{" "}
+            {formDataState.telNo || "Not specified"}
+            <br />
+            <strong>Mobile No:</strong>{" "}
+            {formDataState.mobileNo || "Not specified"}
           </Typography>
         </DialogContent>
         <DialogActions>
