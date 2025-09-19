@@ -123,6 +123,39 @@ function NewApplicationPage() {
     }
   );
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const res = await axios.get(`${API}/newApplication/${id}`);
+        const userData = res.data;
+
+        setFormDataState((prev) => ({
+          ...prev,
+          // Step 1
+          BusinessType: userData.business_type || prev.BusinessType,
+          dscRegNo: userData.dsc_reg_no || prev.dscRegNo,
+          businessName: userData.business_name || prev.businessName,
+          tinNo: userData.tin_no || prev.tinNo,
+          TradeName: userData.trade_name || prev.TradeName,
+
+          // Step 2
+          firstName: userData.firstName || prev.firstName,
+          middleName: userData.middleName || prev.middleName,
+          lastName: userData.lastName || prev.lastName,
+          extName: userData.extName || prev.extName,
+          sex: userData.sex || prev.sex,
+          eMailAdd: userData.email || prev.eMailAdd,
+          telNo: userData.tel || prev.telNo,
+          mobileNo: userData.mobile || prev.mobileNo,
+        }));
+      } catch (err) {
+        console.error("Failed to fetch user data:", err);
+      }
+    };
+
+    fetchUserData();
+  }, [id, API]);
+
   const [filesState, setFilesState] = useState(
     savedFiles || {
       proofOfReg: null,

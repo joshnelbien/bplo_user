@@ -86,7 +86,11 @@ export default function Step4TaxInfo({ formData, handleChange, errors }) {
 
       <Stack spacing={3}>
         {/* Region */}
-        <FormControl fullWidth sx={{ minWidth: 300 }} error={!!errors.Taxregion}>
+        <FormControl
+          fullWidth
+          sx={{ minWidth: 300 }}
+          error={!!errors.Taxregion}
+        >
           <InputLabel id="tax-region-label">Region</InputLabel>
           <Select
             labelId="tax-region-label"
@@ -111,7 +115,11 @@ export default function Step4TaxInfo({ formData, handleChange, errors }) {
         </FormControl>
 
         {/* Province */}
-        <FormControl fullWidth sx={{ minWidth: 300 }} error={!!errors.Taxprovince}>
+        <FormControl
+          fullWidth
+          sx={{ minWidth: 300 }}
+          error={!!errors.Taxprovince}
+        >
           <InputLabel id="tax-province-label">Province</InputLabel>
           <Select
             labelId="tax-province-label"
@@ -136,7 +144,11 @@ export default function Step4TaxInfo({ formData, handleChange, errors }) {
         </FormControl>
 
         {/* City / Municipality */}
-        <FormControl fullWidth sx={{ minWidth: 300 }} error={!!errors.TaxcityOrMunicipality}>
+        <FormControl
+          fullWidth
+          sx={{ minWidth: 300 }}
+          error={!!errors.TaxcityOrMunicipality}
+        >
           <InputLabel id="tax-city-label">City / Municipality</InputLabel>
           <Select
             labelId="tax-city-label"
@@ -161,7 +173,11 @@ export default function Step4TaxInfo({ formData, handleChange, errors }) {
         </FormControl>
 
         {/* Barangay */}
-        <FormControl fullWidth sx={{ minWidth: 300 }} error={!!errors.Taxbarangay}>
+        <FormControl
+          fullWidth
+          sx={{ minWidth: 300 }}
+          error={!!errors.Taxbarangay}
+        >
           <InputLabel id="tax-barangay-label">Barangay</InputLabel>
           <Select
             labelId="tax-barangay-label"
@@ -234,78 +250,6 @@ export default function Step4TaxInfo({ formData, handleChange, errors }) {
             sx={{ marginTop: 2 }}
           />
         </div>
-
-        {/* Own Place */}
-        <FormControl fullWidth sx={{ minWidth: 300 }} error={!!errors.ownPlace}>
-          <InputLabel id="own-place-label">Own Place</InputLabel>
-          <Select
-            labelId="own-place-label"
-            name="ownPlace"
-            value={formData.ownPlace || ""}
-            onChange={handleUppercaseChange}
-            label="Own Place"
-          >
-            <MenuItem value="">Select</MenuItem>
-            <MenuItem value="YES">YES</MenuItem>
-            <MenuItem value="NO">NO</MenuItem>
-          </Select>
-          {!!errors.ownPlace && (
-            <Typography variant="caption" color="error">
-              {errors.ownPlace}
-            </Typography>
-          )}
-        </FormControl>
-
-        {/* Conditional: Own Place = YES */}
-        {formData.ownPlace === "YES" && (
-          <TextField
-            label="Tax Declaration No."
-            name="taxdec"
-            value={formData.taxdec || ""}
-            onChange={handleUppercaseChange}
-            fullWidth
-            variant="outlined"
-            error={!!errors.taxdec}
-            helperText={errors.taxdec}
-          />
-        )}
-
-        {/* Conditional: Own Place = NO */}
-        {formData.ownPlace === "NO" && (
-          <Stack spacing={3}>
-            <Typography variant="subtitle1">Owner’s Address</Typography>
-            <TextField
-              label="Lessor's Name"
-              name="lessorName"
-              value={formData.lessorName || ""}
-              onChange={handleUppercaseChange}
-              fullWidth
-              variant="outlined"
-              error={!!errors.lessorName}
-              helperText={errors.lessorName}
-            />
-            <TextField
-              label="Monthly Rental"
-              name="monthlyRent"
-              value={formData.monthlyRent || ""}
-              onChange={handleUppercaseChange}
-              fullWidth
-              variant="outlined"
-              error={!!errors.monthlyRent}
-              helperText={errors.monthlyRent}
-            />
-            <TextField
-              label="Tax Declaration No."
-              name="taxdec"
-              value={formData.taxdec || ""}
-              onChange={handleUppercaseChange}
-              fullWidth
-              variant="outlined"
-              error={!!errors.taxdec}
-              helperText={errors.taxdec}
-            />
-          </Stack>
-        )}
       </Stack>
     </div>
   );
