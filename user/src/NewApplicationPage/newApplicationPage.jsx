@@ -471,7 +471,7 @@ function NewApplicationPage() {
       <Box
         sx={{
           width: "100%",
-          maxWidth: isMobile ? 350 : 900,
+          maxWidth: isMobile ? 320 : 900,
           mx: "auto",
           mb: 2,
         }}
@@ -486,7 +486,7 @@ function NewApplicationPage() {
         sx={{
           p: { xs: 2, sm: 4 },
           width: "100%",
-          maxWidth: isMobile ? 350 : 900, // ✅ Responsive maxWidth
+          maxWidth: isMobile ? 320 : 900, // ✅ Responsive maxWidth
           mx: "auto",
           borderRadius: "16px",
         }}
