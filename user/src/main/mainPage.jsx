@@ -91,8 +91,18 @@ function App() {
   ];
 
   const drawer = (
-    <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "flex-start", p: 1 }}>
-      <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold", color: "#09360D" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-start",
+        p: 1,
+      }}
+    >
+      <Typography
+        variant="h6"
+        sx={{ mb: 2, fontWeight: "bold", color: "#09360D" }}
+      >
         ONLINE BUSINESS PROCESSING
       </Typography>
       <List>
@@ -113,7 +123,12 @@ function App() {
               >
                 <ListItemText
                   primary={item.label}
-                  sx={{ "& .MuiListItemText-primary": { fontWeight: "normal", color: "#09360D" } }}
+                  sx={{
+                    "& .MuiListItemText-primary": {
+                      fontWeight: "normal",
+                      color: "#09360D",
+                    },
+                  }}
                 />
               </ListItemButton>
             </ListItem>
@@ -126,13 +141,21 @@ function App() {
             sx={{
               justifyContent: "flex-start",
               transition: "background-color 0.3s, color 0.3s",
-              "&:hover": { backgroundColor: "#e6f2e6", "& .MuiListItemText-primary": { color: "#07270a" } },
+              "&:hover": {
+                backgroundColor: "#e6f2e6",
+                "& .MuiListItemText-primary": { color: "#07270a" },
+              },
             }}
             onClick={handleToggleRequirements}
           >
             <ListItemText
               primary="Requirements"
-              sx={{ "& .MuiListItemText-primary": { fontWeight: "bold", color: "#09360D" } }}
+              sx={{
+                "& .MuiListItemText-primary": {
+                  fontWeight: "bold",
+                  color: "#09360D",
+                },
+              }}
             />
             {openRequirements ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </ListItemButton>
@@ -142,12 +165,18 @@ function App() {
           <List component="div" disablePadding sx={{ pl: 4 }}>
             <ListItem disablePadding>
               <ListItemButton onClick={() => handleOpenModal("newApplication")}>
-                <ListItemText primary="New Business Requirements" sx={{ "& .MuiListItemText-primary": { color: "#09360D" } }} />
+                <ListItemText
+                  primary="New Business Requirements"
+                  sx={{ "& .MuiListItemText-primary": { color: "#09360D" } }}
+                />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding>
               <ListItemButton onClick={() => handleOpenModal("renewal")}>
-                <ListItemText primary="Renewal Business Requirements" sx={{ "& .MuiListItemText-primary": { color: "#09360D" } }} />
+                <ListItemText
+                  primary="Renewal Business Requirements"
+                  sx={{ "& .MuiListItemText-primary": { color: "#09360D" } }}
+                />
               </ListItemButton>
             </ListItem>
           </List>
@@ -161,55 +190,170 @@ function App() {
   return (
     <Box>
       {/* Navbar */}
-      <AppBar position="sticky" sx={{ backgroundColor: "#1d5236", px: { xs: 2, md: 4 } }}>
-        <Toolbar sx={{ minHeight: { xs: 70, md: 85 }, display: "flex", justifyContent: "space-between" }}>
+      <AppBar
+        position="sticky"
+        sx={{ backgroundColor: "#1d5236", px: { xs: 2, md: 4 } }}
+      >
+        <Toolbar
+          sx={{
+            minHeight: { xs: 70, md: 85 },
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
           {isMobile ? (
-            <IconButton aria-label="open drawer" edge="start" onClick={handleDrawerToggle} sx={{ color: "#ffffff" }}>
+            <IconButton
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ color: "#ffffff" }}
+            >
               <MenuIcon />
             </IconButton>
           ) : (
             <Box sx={{ display: "flex", gap: 3, flexGrow: 1 }}>
-              <Button onClick={() => navigate("/")} sx={{ color: "#09360D", fontWeight: "bold" }}>Application Status</Button>
+              <Button
+                onClick={() => navigate("/")}
+                sx={{ color: "#09360D", fontWeight: "bold" }}
+              >
+                Application Status
+              </Button>
               <Box>
-                <Button onClick={handleToggleRequirements} sx={{ color: "#09360D", fontWeight: "bold" }} endIcon={openRequirements ? <ExpandLessIcon /> : <ExpandMoreIcon />}>
+                <Button
+                  onClick={handleToggleRequirements}
+                  sx={{ color: "#09360D", fontWeight: "bold" }}
+                  endIcon={
+                    openRequirements ? <ExpandLessIcon /> : <ExpandMoreIcon />
+                  }
+                >
                   Requirements
                 </Button>
                 <Collapse in={openRequirements} timeout="auto" unmountOnExit>
                   <Box sx={{ display: "flex", flexDirection: "column", pl: 1 }}>
-                    <Button onClick={() => handleOpenModal("newApplication")} sx={{ color: "#09360D", fontWeight: "normal", justifyContent: "flex-start" }}>New Business Requirements</Button>
-                    <Button onClick={() => handleOpenModal("renewal")} sx={{ color: "#09360D", fontWeight: "normal", justifyContent: "flex-start" }}>Renewal Business Requirements</Button>
+                    <Button
+                      onClick={() => handleOpenModal("newApplication")}
+                      sx={{
+                        color: "#09360D",
+                        fontWeight: "normal",
+                        justifyContent: "flex-start",
+                      }}
+                    >
+                      New Business Requirements
+                    </Button>
+                    <Button
+                      onClick={() => handleOpenModal("renewal")}
+                      sx={{
+                        color: "#09360D",
+                        fontWeight: "normal",
+                        justifyContent: "flex-start",
+                      }}
+                    >
+                      Renewal Business Requirements
+                    </Button>
                   </Box>
                 </Collapse>
               </Box>
-              <Button onClick={() => navigate("/privacy")} sx={{ color: "#09360D", fontWeight: "bold" }}>Privacy Notice</Button>
+              <Button
+                onClick={() => navigate("/privacy")}
+                sx={{ color: "#09360D", fontWeight: "bold" }}
+              >
+                Privacy Notice
+              </Button>
             </Box>
           )}
         </Toolbar>
       </AppBar>
 
       {/* Mobile Drawer */}
-      <Drawer variant="temporary" open={mobileOpen} onClose={handleDrawerToggle} ModalProps={{ keepMounted: true }} sx={{ "& .MuiDrawer-paper": { width: 260 } }}>
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{ keepMounted: true }}
+        sx={{ "& .MuiDrawer-paper": { width: 260 } }}
+      >
         {drawer}
       </Drawer>
 
       {/* Main Content */}
-      <Grid container direction="column" justifyContent="flex-start" alignItems="center" sx={{ minHeight: "85vh", px: { xs: 2, md: 6 }, textAlign: "center", background: "#fff", pt: 8 }}>
+      <Grid
+        container
+        direction="column"
+        justifyContent="flex-start"
+        alignItems="center"
+        sx={{
+          minHeight: "85vh",
+          px: { xs: 2, md: 6 },
+          textAlign: "center",
+          background: "#fff",
+          pt: 8,
+        }}
+      >
         <Slide in={animate} direction="down" timeout={800}>
-          <Box component="img" src="/spc.png" alt="Logo" sx={{ width: { xs: 150, sm: 120 }, mb: 2 }} />
+          <Box
+            component="img"
+            src="/spc.png"
+            alt="Logo"
+            sx={{ width: { xs: 150, sm: 120 }, mb: 2 }}
+          />
         </Slide>
 
         <Slide in={animate} direction="down" timeout={1000}>
-          <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 900, color: "#09360D", typography: { xs: "1", sm: "5" } }}>
+          <Typography
+            variant="h3"
+            component="h1"
+            gutterBottom
+            sx={{
+              fontWeight: 900,
+              color: "#09360D",
+              typography: { xs: "1", sm: "5" },
+            }}
+          >
             BUSINESS REGISTRATION
           </Typography>
         </Slide>
 
         <Fade in={animate} timeout={2500}>
-          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center" }}>
-            <Button variant="contained" sx={{ px: 4, py: 1, fontWeight: "bold", backgroundColor: "#09360D", color: "white" }} onClick={() => handleOpenModal("newApplication")}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" }, // Stack on mobile, row on larger screens
+              gap: { xs: 2, sm: 3 },
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+              px: { xs: 2, sm: 0 }, // Padding on mobile
+            }}
+          >
+            <Button
+              variant="contained"
+              fullWidth={{ xs: true, sm: false }} // Full width on mobile
+              sx={{
+                px: { xs: 0, sm: 4 },
+                py: 1.5,
+                fontWeight: "bold",
+                backgroundColor: "#09360D",
+                color: "white",
+                "&:hover": { backgroundColor: "#07270a" },
+              }}
+              onClick={() => navigate("/newApplicationRegister")}
+            >
               New
             </Button>
-            <Button variant="outlined" sx={{ px: 4, py: 1, fontWeight: "bold", borderColor: "#09360D", color: "#09360D" }} onClick={() => handleOpenModal("renewal")}>
+
+            <Button
+              variant="outlined"
+              fullWidth={{ xs: true, sm: false }} // Full width on mobile
+              sx={{
+                px: { xs: 0, sm: 4 },
+                py: 1.5,
+                fontWeight: "bold",
+                borderColor: "#09360D",
+                color: "#09360D",
+                "&:hover": { borderColor: "#07270a", color: "#07270a" },
+              }}
+              onClick={() => navigate("/renew")}
+            >
               Renewal
             </Button>
           </Box>
@@ -220,14 +364,32 @@ function App() {
       <Modal open={modalOpen} onClose={handleCloseModal} closeAfterTransition>
         <Fade in={modalOpen}>
           <Box sx={modalStyle}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, borderBottom: "1px solid", borderColor: "divider" }}>
-              <Typography variant="h6" fontWeight="bold">{modalType === "newApplication" ? "New Business Requirements" : "Renewal Business Requirements"}</Typography>
-              <Button onClick={handleCloseModal} sx={{ minWidth: 0, p: 0.5 }}><CloseIcon /></Button>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                mb: 2,
+                borderBottom: "1px solid",
+                borderColor: "divider",
+              }}
+            >
+              <Typography variant="h6" fontWeight="bold">
+                {modalType === "newApplication"
+                  ? "New Business Requirements"
+                  : "Renewal Business Requirements"}
+              </Typography>
+              <Button onClick={handleCloseModal} sx={{ minWidth: 0, p: 0.5 }}>
+                <CloseIcon />
+              </Button>
             </Box>
             <List>
               {requirementsData[modalType]?.map((item, index) => (
                 <ListItem key={index} sx={{ px: 1, mb: 1 }}>
-                  <Checkbox defaultChecked disabled sx={{ "&.Mui-disabled": { color: "success.main" } }} />
+                  <Checkbox
+                    defaultChecked
+                    disabled
+                    sx={{ "&.Mui-disabled": { color: "success.main" } }}
+                  />
                   <ListItemText primary={item} />
                 </ListItem>
               ))}
@@ -237,9 +399,19 @@ function App() {
       </Modal>
 
       {/* Footer */}
-      <Box component="footer" sx={{ mt: "auto", py: 3, borderTop: "2px solid #09360D", textAlign: "center", backgroundColor: "#f9f9f9" }}>
+      <Box
+        component="footer"
+        sx={{
+          mt: "auto",
+          py: 3,
+          borderTop: "2px solid #09360D",
+          textAlign: "center",
+          backgroundColor: "#f9f9f9",
+        }}
+      >
         <Typography variant="body2" sx={{ color: "#746a6aff" }}>
-          © {new Date().getFullYear()} Business Permit and Licensing Office | v2.
+          © {new Date().getFullYear()} Business Permit and Licensing Office |
+          v2.
         </Typography>
       </Box>
     </Box>
