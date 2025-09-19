@@ -51,6 +51,16 @@ function ColorStepIcon(props) {
   );
 }
 
+const formatCurrency = (value) => {
+  if (value == null || value === "") return "—";
+  const num = parseFloat(value);
+  if (isNaN(num)) return value; // return as is if not a number
+  return num.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
 // ✅ Component to display a normal text field
 const Field = ({ label, value }) => (
   <Grid item xs={12} sm={6}>
@@ -401,7 +411,10 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
                     <Field label="Units" value={unit.trim()} />
                   </Grid>
                   <Grid item xs={12}>
-                    <Field label="Capital" value={capital.trim()} />
+                    <Field
+                      label="Capital"
+                      value={formatCurrency(capital.trim())}
+                    />
                   </Grid>
                 </Grid>
               </Paper>

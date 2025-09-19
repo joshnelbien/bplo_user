@@ -59,6 +59,13 @@ const Field = ({ label, value }) => (
   </Grid>
 );
 
+const formatCurrency = (value) => {
+  if (!value) return "";
+  const num = parseFloat(value.toString().replace(/,/g, ""));
+  if (isNaN(num)) return value;
+  return num.toLocaleString("en-US");
+};
+
 // Component to display files as links
 const FileField = ({ label, fileKey, fileData }) => (
   <Grid item xs={12} sm={6}>
@@ -177,10 +184,26 @@ function OboApplicantModal({
 
   // Function to handle changes and clear the error for the changed field
   const handleChange = (field, value) => {
-    setOboFields((prev) => ({ ...prev, [field]: value }));
-    setFieldErrors((prev) => ({ ...prev, [field]: false })); // Clear error on change
-  };
+    const numericFields = [
+      "BSAP",
+      "SR",
+      "Mechanical",
+      "Electrical",
+      "Signage",
+      "Electronics",
+    ];
 
+    let newValue = value;
+
+    if (numericFields.includes(field)) {
+      // strip commas, keep only digits
+      const raw = value.replace(/,/g, "").replace(/\D/g, "");
+      newValue = raw ? parseInt(raw, 10).toLocaleString("en-US") : "";
+    }
+
+    setOboFields((prev) => ({ ...prev, [field]: newValue }));
+    setFieldErrors((prev) => ({ ...prev, [field]: false }));
+  };
   // Validation function to check if all fields are filled
   const validateFields = () => {
     const newErrors = {};
@@ -314,7 +337,10 @@ function OboApplicantModal({
             ) : (
               <>
                 <Field label="Lessor's Name" value={applicant.lessorName} />
-                <Field label="Monthly Rent" value={applicant.monthlyRent} />
+                <Field
+                  label="Monthly Rent"
+                  value={formatCurrency(applicant.monthlyRent)}
+                />
                 <Field label="Tax Dec. No." value={applicant.taxdec} />
               </>
             )}
@@ -396,7 +422,10 @@ function OboApplicantModal({
                       <Field label="Units" value={unit.trim()} />
                     </Grid>
                     <Grid item xs={12}>
-                      <Field label="Capital" value={capital.trim()} />
+                      <Field
+                        label="Capital"
+                        value={formatCurrency(capital.trim())}
+                      />
                     </Grid>
                   </Grid>
                 </Paper>

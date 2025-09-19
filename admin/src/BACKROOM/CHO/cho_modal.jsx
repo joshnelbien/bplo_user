@@ -60,6 +60,12 @@ const Field = ({ label, value }) => (
   </Grid>
 );
 
+const formatCurrency = (value) => {
+  if (!value) return "";
+  const num = parseFloat(value.toString().replace(/,/g, ""));
+  if (isNaN(num)) return value;
+  return num.toLocaleString("en-US");
+};
 // A reusable component for displaying a read-only text field for a file, with view/download links.
 const FileField = ({ label, fileKey, fileData }) => (
   <Grid item xs={12} sm={6}>
@@ -380,7 +386,10 @@ function ChoApplicantModal({
             ) : (
               <>
                 <Field label="Lessor's Name" value={applicant.lessorName} />
-                <Field label="Monthly Rent" value={applicant.monthlyRent} />
+                <Field
+                  label="Monthly Rent"
+                  value={formatCurrency(applicant.monthlyRent)}
+                />
                 <Field label="Tax Dec. No." value={applicant.taxdec} />
               </>
             )}
@@ -455,7 +464,10 @@ function ChoApplicantModal({
                       <Field label="Units" value={unit.trim()} />
                     </Grid>
                     <Grid item xs={12}>
-                      <Field label="Capital" value={capital.trim()} />
+                      <Field
+                        label="Capital"
+                        value={formatCurrency(capital.trim())}
+                      />
                     </Grid>
                   </Grid>
                 </Paper>
@@ -465,9 +477,10 @@ function ChoApplicantModal({
 
           <TextField
             label="Sanitary Fee"
-            value={choFee}
+            value={formatCurrency(choFee)}
             onChange={(e) => {
-              setChoFee(e.target.value);
+              const cleanValue = e.target.value.replace(/,/g, "");
+              setChoFee(cleanValue);
               setValidationErrors((prev) => ({ ...prev, choFee: false }));
             }}
             fullWidth

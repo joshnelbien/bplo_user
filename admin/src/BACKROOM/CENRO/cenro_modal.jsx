@@ -157,9 +157,20 @@ function CenroApplicantModal({
       });
     }
   }, [applicant]);
-
+  const formatCurrency = (value) => {
+    if (value == null || value === "") return "";
+    const num = parseFloat(value.toString().replace(/,/g, ""));
+    if (isNaN(num)) return value; // keep raw input if not valid number yet
+    return num.toLocaleString("en-US"); // ✅ commas only, no .00
+  };
   const handleChange = (field, value) => {
-    setcenroField((prev) => ({ ...prev, [field]: value }));
+    // Strip commas for numeric fields
+    const numericFields = ["cenroFee"];
+    const cleanValue = numericFields.includes(field)
+      ? value.replace(/,/g, "")
+      : value;
+
+    setcenroField((prev) => ({ ...prev, [field]: cleanValue }));
     setValidationErrors((prev) => ({ ...prev, [field]: false }));
   };
 
@@ -302,7 +313,10 @@ function CenroApplicantModal({
             ) : (
               <>
                 <Field label="Lessor's Name" value={applicant.lessorName} />
-                <Field label="Monthly Rent" value={applicant.monthlyRent} />
+                <Field
+                  label="Monthly Rent"
+                  value={formatCurrency(applicant.monthlyRent)}
+                />
                 <Field label="Tax Dec. No." value={applicant.taxdec} />
               </>
             )}
@@ -384,7 +398,12 @@ function CenroApplicantModal({
                       <Field label="Units" value={unit.trim()} />
                     </Grid>
                     <Grid item xs={12}>
-                      <Field label="Capital" value={capital.trim()} />
+                      <Field
+                        label="Capital"
+                        value={formatCurrency(
+                          cenroField.capital || capital.trim()
+                        )}
+                      />
                     </Grid>
                   </Grid>
                 </Paper>
@@ -440,7 +459,7 @@ function CenroApplicantModal({
           {/* CENRO Fee input */}
           <TextField
             label="Environmental Fee"
-            value={cenroField.cenroFee || ""}
+            value={formatCurrency(cenroField.cenroFee)}
             onChange={(e) => handleChange("cenroFee", e.target.value)}
             fullWidth
             size="small"

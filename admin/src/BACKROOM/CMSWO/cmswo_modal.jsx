@@ -61,6 +61,13 @@ const Field = ({ label, value }) => (
   </Grid>
 );
 
+const formatCurrency = (value) => {
+  if (!value) return "";
+  const num = parseFloat(value.toString().replace(/,/g, ""));
+  if (isNaN(num)) return value;
+  return num.toLocaleString("en-US"); // commas only
+};
+
 // Component to display files as links
 const FileField = ({ label, fileKey, fileData }) => (
   <Grid item xs={12} sm={6}>
@@ -271,7 +278,10 @@ function CmswoApplicantModal({
             ) : (
               <>
                 <Field label="Lessor's Name" value={applicant.lessorName} />
-                <Field label="Monthly Rent" value={applicant.monthlyRent} />
+                <Field
+                  label="Monthly Rent"
+                  value={formatCurrency(applicant.monthlyRent)}
+                />
                 <Field label="Tax Dec. No." value={applicant.taxdec} />
               </>
             )}
@@ -353,7 +363,10 @@ function CmswoApplicantModal({
                       <Field label="Units" value={unit.trim()} />
                     </Grid>
                     <Grid item xs={12}>
-                      <Field label="Capital" value={capital.trim()} />
+                      <Field
+                        label="Capital"
+                        value={formatCurrency(capital.trim())}
+                      />
                     </Grid>
                   </Grid>
                 </Paper>
@@ -408,9 +421,13 @@ function CmswoApplicantModal({
 
           {/* Solid Waste Fee Input */}
           <TextField
-            label="Solid waste Fee"
-            value={csmwoFee || ""}
-            onChange={(e) => handleChange("csmwoFee", e.target.value)}
+            label="Solid Waste Fee"
+            value={formatCurrency(csmwoFee)} // ✅ formatted with commas only
+            onChange={(e) => {
+              // remove commas before saving to state
+              const rawValue = e.target.value.replace(/,/g, "");
+              handleChange("csmwoFee", rawValue);
+            }}
             fullWidth
             size="small"
             sx={{ mt: 2 }}

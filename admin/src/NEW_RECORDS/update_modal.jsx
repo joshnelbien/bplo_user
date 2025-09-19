@@ -31,6 +31,16 @@ const Field = ({ label, value, onChange, name }) => (
   </Grid>
 );
 
+const formatCurrency = (value) => {
+  if (value == null || value === "") return "";
+  const num = parseFloat(value);
+  if (isNaN(num)) return value;
+  return num.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
 // ✅ Section Container
 const Section = ({ title, children }) => (
   <Paper
@@ -63,9 +73,13 @@ function UpdateModal({ applicant, isOpen, onClose, baseUrl }) {
   // ✅ Update handler
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    // Remove commas for numeric fields
+    const cleanValue = value.replace(/,/g, "");
+
     setFormData((prev) => ({
       ...prev,
-      [name]: value.toUpperCase(), // Convert input to uppercase
+      [name]: cleanValue.toUpperCase(), // keep uppercase for text
     }));
   };
 
@@ -494,7 +508,7 @@ function UpdateModal({ applicant, isOpen, onClose, baseUrl }) {
                     <Field
                       label="Capital"
                       name={`capital-${index}`}
-                      value={capital.trim()}
+                      value={formatCurrency(capital.trim())}
                       onChange={handleChange}
                     />
                   </Grid>
