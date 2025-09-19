@@ -326,7 +326,7 @@ function App() {
             sx={{
               fontWeight: 900,
               color: "#09360D",
-              fontSize: { xs: "3.5rem", sm: "2.8rem" },
+              fontSize: { xs: "1rem", sm: "1rem" },
             }}
           >
             BUSINESS REGISTRATION
@@ -345,7 +345,7 @@ function App() {
             <Button
               variant="contained"
               sx={{
-                px: 4,
+                px: 1,
                 py: 1,
                 fontWeight: "bold",
                 backgroundColor: "#09360D",
@@ -360,7 +360,7 @@ function App() {
             <Button
               variant="outlined"
               sx={{
-                px: 4,
+                px: 1,
                 py: 1,
                 fontWeight: "bold",
                 borderColor: "#09360D",
