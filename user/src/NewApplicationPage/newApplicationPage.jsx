@@ -512,16 +512,16 @@ function NewApplicationPage() {
             flexWrap: "wrap",
             justifyContent: "center",
             "& .MuiStepIcon-root": {
-              color: "#4caf50",
+              color: "gray", // default
               "&.Mui-active": {
-                color: "#388e3c",
+                color: "green", // live/going
               },
               "&.Mui-completed": {
-                color: "#4caf50",
+                color: "blue", // done
               },
             },
             "& .MuiStepConnector-line": {
-              borderColor: "#4caf50",
+              borderColor: "gray",
             },
           }}
         >
@@ -533,7 +533,13 @@ function NewApplicationPage() {
                   "& .MuiStepLabel-label": {
                     fontSize: { xs: "0.6rem", sm: "0.75rem", md: "0.9rem" },
                     textAlign: "center",
-                    color: step - 1 >= index ? "#4caf50" : "#333",
+                    // label colors follow the same logic
+                    color:
+                      step - 1 > index
+                        ? "blue" // done
+                        : step - 1 === index
+                        ? "green" // live
+                        : "gray", // default
                   },
                 }}
               >

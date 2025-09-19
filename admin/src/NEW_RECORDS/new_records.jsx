@@ -130,20 +130,16 @@ function New_records() {
     const fetchApplicants = async () => {
       try {
         // ✅ Pending applicants (filter only pending)
-        const pendingRes = await axios.get(
-          `${API}/newApplication/files`
-        );
+        const pendingRes = await axios.get(`${API}/newApplication/files`);
         const onlyPending = pendingRes.data
           .filter((a) => a.status?.toLowerCase() === "pending")
-          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); // oldest first, newest last
+          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
         setPendingApplicants(onlyPending);
 
         // ✅ Approved applicants
-        const approvedRes = await axios.get(
-          `${API}/backroom/backrooms`
-        );
+        const approvedRes = await axios.get(`${API}/examiners/examiners`);
         const sortedApproved = approvedRes.data.sort(
-          (a, b) => new Date(a.createdAt) - new Date(b.createdAt) // oldest first, newest last
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
         setApprovedApplicants(sortedApproved);
       } catch (error) {
@@ -155,15 +151,20 @@ function New_records() {
   }, []);
 
   const applicants =
-    filter === "pending" ? pendingApplicants : approvedApplicants;
-
-  const totalPages = Math.ceil(applicants.length / recordsPerPage);
+    filter === "pending"
+      ? pendingApplicants
+      : filter === "approved"
+      ? approvedApplicants.filter((a) => a.passtoBusinessTax === "No")
+      : filter === "businessTax"
+      ? approvedApplicants.filter((a) => a.passtoBusinessTax === "Yes")
+      : [];
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentRecords = applicants.slice(
     indexOfFirstRecord,
     indexOfLastRecord
   );
+  const totalPages = Math.ceil(applicants.length / recordsPerPage);
 
   const handleApprove = (applicant) => {
     setConfirmationData({ action: "approve", applicant });
@@ -181,9 +182,7 @@ function New_records() {
 
     try {
       if (action === "approve") {
-        await axios.post(
-          `${API}/examiners/bplo/approve/${applicant.id}`
-        );
+        await axios.post(`${API}/examiners/bplo/approve/${applicant.id}`);
         setPendingApplicants((prev) =>
           prev.filter((a) => a.id !== applicant.id)
         );
@@ -261,7 +260,24 @@ function New_records() {
                 },
               }}
             >
-              Approved
+              On Going
+            </Button>
+
+            {/* ✅ New Business Tax button */}
+            <Button
+              color={filter === "businessTax" ? "success" : "inherit"}
+              onClick={() => {
+                setFilter("businessTax");
+                setCurrentPage(1);
+              }}
+              sx={{
+                bgcolor: filter === "businessTax" ? "#1c541eff" : undefined,
+                "&:hover": {
+                  bgcolor: filter === "businessTax" ? "#1c541eff" : undefined,
+                },
+              }}
+            >
+              Business Tax
             </Button>
           </ButtonGroup>
         </Box>
@@ -419,12 +435,6 @@ function New_records() {
                         onClick={() => openUpdateModal(applicant)}
                       >
                         <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-
-                    <Tooltip title="Delete">
-                      <IconButton color="error">
-                        <DeleteIcon />
                       </IconButton>
                     </Tooltip>
                   </TableCell>

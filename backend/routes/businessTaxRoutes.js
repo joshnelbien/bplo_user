@@ -5,7 +5,7 @@ const Backroom = require("../db/model/backroomLocal");
 const BusinessTax = require("../db/model/businessTax");
 const AppStatus = require("../db/model/applicantStatusDB");
 const TreasurersOffice = require("../db/model/treasurersOfficeDB");
-
+const Examiners = require("../db/model/examiners");
 const router = express.Router();
 
 // Multer setup - store files in memory
@@ -17,6 +17,7 @@ router.post("/businessTax/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const applicant = await Backroom.findByPk(id);
+    const examinersApplicant = await Examiners.findByPk(id);
     if (!applicant)
       return res.status(404).json({ error: "Applicant not found" });
 
@@ -25,7 +26,7 @@ router.post("/businessTax/approve/:id", async (req, res) => {
     applicantData.BUSINESSTAXtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
     const created = await BusinessTax.create(applicantData);
-
+    await examinersApplicant.update({ passtoBusinessTax: "Yes" });
     res.status(201).json({
       message:
         "Applicant approved, archived in Backroom, and moved to BusinessTax",
