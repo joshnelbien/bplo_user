@@ -91,7 +91,6 @@ function App() {
   const handleCloseModal = () => setModalOpen(false);
 
   const navItems = [
-    { label: "Application Status", path: "/" },
     { label: "New Business Requirements", type: "newApplication" },
     { label: "Renewal Business Requirements", type: "renewal" },
     { label: "Privacy Notice", type: "privacy" },
