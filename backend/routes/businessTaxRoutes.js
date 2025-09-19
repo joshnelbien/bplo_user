@@ -64,6 +64,10 @@ router.post(
       if (!applicantStatus)
         return res.status(404).json({ error: "Applicant status not found" });
 
+      const applicantExaminers = await AppStatus.findByPk(id);
+      if (!applicantStatus)
+        return res.status(404).json({ error: "Applicant status not found" });
+
       const timestamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
       // Update statuses
@@ -88,6 +92,11 @@ router.post(
         }),
       });
       await applicantStatus.update({
+        BUSINESSTAX: "Approved",
+        BUSINESSTAXtimeStamp: timestamp,
+      });
+
+      await applicantExaminers.update({
         BUSINESSTAX: "Approved",
         BUSINESSTAXtimeStamp: timestamp,
       });
