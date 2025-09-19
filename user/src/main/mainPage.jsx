@@ -94,6 +94,8 @@ function App() {
     { label: "New Business Requirements", type: "newApplication" },
     { label: "Renewal Business Requirements", type: "renewal" },
     { label: "Privacy Notice", type: "privacy" },
+    { label: "News", type: "news" },
+    
   ];
 
   const drawer = (
@@ -111,6 +113,7 @@ function App() {
       >
         ONLINE BUSINESS PROCESSING
       </Typography>
+      
       <List>
         {navItems.map((item) => {
           if (item.type) return null;
@@ -140,7 +143,6 @@ function App() {
             </ListItem>
           );
         })}
-
         {/* Requirements Dropdown */}
         <ListItem disablePadding>
           <ListItemButton
@@ -166,7 +168,6 @@ function App() {
             {openRequirements ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </ListItemButton>
         </ListItem>
-
         <Collapse in={openRequirements} timeout="auto" unmountOnExit>
           <List component="div" disablePadding sx={{ pl: 4 }}>
             <ListItem disablePadding>
@@ -188,6 +189,14 @@ function App() {
           </List>
         </Collapse>
 
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => handleOpenModal("news")}>
+            <ListItemText
+              primary="News"
+              sx={{ "& .MuiListItemText-primary": { color: "#09360D" } }}
+            />
+          </ListItemButton>
+        </ListItem>
         {/* Privacy Notice in Drawer */}
         <ListItem disablePadding>
           <ListItemButton onClick={() => handleOpenModal("privacy")}>
@@ -228,12 +237,7 @@ function App() {
             </IconButton>
           ) : (
             <Box sx={{ display: "flex", gap: 3, flexGrow: 1 }}>
-              <Button
-                onClick={() => navigate("/")}
-                sx={{ color: "#09360D", fontWeight: "bold" }}
-              >
-                Application Status
-              </Button>
+        
               <Box>
                 <Button
                   onClick={handleToggleRequirements}
@@ -329,20 +333,6 @@ function App() {
           </Typography>
         </Slide>
 
-        <Fade in={animate} timeout={1500}>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              color: "text.secondary",
-              fontStyle: "italic",
-              maxWidth: 1000,
-              mb: 5,
-            }}
-          >
-            Start Fresh or Keep Growing – Apply or Renew Today!
-          </Typography>
-        </Fade>
-
         <Fade in={animate} timeout={2500}>
           <Box
             sx={{
@@ -423,35 +413,32 @@ function App() {
                 <CloseIcon />
               </Button>
             </Box>
-
             {/* Content */}
+            {/* Modal Content */}
             {modalType === "privacy" ? (
+              // Privacy Notice Modal
               <Box>
                 <Typography variant="body1" paragraph>
                   <strong>
                     San Pablo City Business Permit and Licensing Office (BPLO)
-                  </strong>
-                  is committed to protecting your privacy in compliance with the
-                  <strong> Data Privacy Act of 2012 (RA 10173)</strong>.
+                  </strong>{" "}
+                  is committed to protecting your privacy in compliance with the{" "}
+                  <strong>Data Privacy Act of 2012 (RA 10173)</strong>.
                 </Typography>
-
                 <Typography variant="body1" paragraph>
                   We collect, use, and process your personal information solely
                   for the purpose of evaluating and processing your business
                   registration and renewal applications. Rest assured that your
                   information will not be shared with unauthorized parties.
                 </Typography>
-
                 <Typography variant="body1" paragraph>
                   By submitting your application, you consent to the collection
                   and processing of your data for legitimate and legal purposes.
                 </Typography>
-
                 <Typography variant="body1" paragraph>
                   If you have questions or concerns, you may contact us at the
                   BPLO, San Pablo City Hall.
                 </Typography>
-
                 <Box sx={{ mt: 4 }}>
                   <Typography variant="body1" fontWeight="bold">
                     Sincerely,
@@ -462,7 +449,33 @@ function App() {
                   <Typography variant="body1">San Pablo City</Typography>
                 </Box>
               </Box>
+            ) : modalType === "news" ? (
+              // News Modal
+              <Box>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+                  Latest News & Updates
+                </Typography>
+
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  📢 <strong>New Business One-Stop Shop</strong> will open on{" "}
+                  <strong>October 15, 2025</strong>. All business owners are
+                  invited to process their applications in the new facility.
+                </Typography>
+
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  📰 <strong>Extended Renewal Deadline:</strong> Business permit
+                  renewals have been extended until{" "}
+                  <strong>January 31, 2026</strong>. Avoid penalties by applying
+                  early.
+                </Typography>
+
+                <Typography variant="body2">
+                  💡 Stay tuned for more updates on city ordinances and new
+                  digital services from the BPLO.
+                </Typography>
+              </Box>
             ) : (
+              // Requirements Modal
               <List>
                 {requirementsData[modalType]?.map((item, index) => (
                   <ListItem key={index} sx={{ px: 0, mb: 1 }}>
@@ -493,7 +506,7 @@ function App() {
       >
         <Typography variant="body2" sx={{ color: "#746a6aff" }}>
           © {new Date().getFullYear()} Business Permit and Licensing Office |
-          v2.
+          v3.0.1
         </Typography>
       </Box>
     </Box>
