@@ -20,7 +20,7 @@ import axios from "axios";
 import { forwardRef, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-
+import { useMediaQuery, useTheme } from "@mui/material";
 import Step1BusinessInfo from "../components/BusinessForm/Step1";
 import Step2PersonalInfo from "../components/BusinessForm/Step2";
 import Step3AddressInfo from "../components/BusinessForm/Step3";
@@ -57,7 +57,8 @@ function NewApplicationPage() {
   const { id } = useParams();
   const API = import.meta.env.VITE_API_BASE;
   const navigate = useNavigate();
-
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const savedFormData =
     JSON.parse(localStorage.getItem("formDataState")) || null;
   const savedFiles = JSON.parse(localStorage.getItem("filesState")) || null;
@@ -208,11 +209,6 @@ function NewApplicationPage() {
     localStorage.setItem("formStep", step);
   }, [step]);
 
-  const validateTIN = (tin) => {
-    const tinRegex = /^9[0-9]{2}-[0-9]{2}-[0-9]{4}$/;
-    return tinRegex.test(tin);
-  };
-
   const validateStep = () => {
     const newErrors = {};
     const requiredFields = {
@@ -258,14 +254,6 @@ function NewApplicationPage() {
 
     if (step === 6 && businessLines.length === 0) {
       newErrors.businessLines = "At least one line of business is required.";
-    }
-
-    if (
-      step === 1 &&
-      formDataState.tinNo &&
-      !validateTIN(formDataState.tinNo)
-    ) {
-      newErrors.tinNo = "TIN must be in format NNN-NN-NNNN starting with 9";
     }
 
     setErrors(newErrors);
@@ -472,11 +460,15 @@ function NewApplicationPage() {
         py: { xs: 2, sm: 4 },
       }}
     >
-      <Box sx={{ width: "100%", maxWidth: 900, mx: "auto", mb: 2 }}>
-        <GreenButton
-          onClick={() => navigate(`/homePage/${id}`)}
-          variant="contained"
-        >
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: isMobile ? 320 : 900,
+          mx: "auto",
+          mb: 2,
+        }}
+      >
+        <GreenButton onClick={() => navigate(`/`)} variant="contained">
           BACK TO DASHBOARD
         </GreenButton>
       </Box>
@@ -486,7 +478,7 @@ function NewApplicationPage() {
         sx={{
           p: { xs: 2, sm: 4 },
           width: "100%",
-          maxWidth: 900,
+          maxWidth: isMobile ? 320 : 900, // ✅ Responsive maxWidth
           mx: "auto",
           borderRadius: "16px",
         }}
