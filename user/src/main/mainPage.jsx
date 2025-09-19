@@ -19,7 +19,6 @@ import {
   Slide,
   Collapse,
   Modal,
-  ListItemIcon,
   Checkbox,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -62,6 +61,14 @@ const requirementsData = {
   ],
 };
 
+const privacyNotice = `
+We value your privacy. The information you provide in this system will be collected,
+stored, and processed solely for the purpose of business permit registration and renewal.
+Your data will not be shared with third parties except as required by law or with your consent.
+By continuing to use this service, you acknowledge and agree to the data privacy practices
+of the Business Permit and Licensing Office.
+`;
+
 function App() {
   const navigate = useNavigate();
   const theme = useTheme();
@@ -84,10 +91,9 @@ function App() {
   const handleCloseModal = () => setModalOpen(false);
 
   const navItems = [
-    { label: "Application Status", path: "/" },
     { label: "New Business Requirements", type: "newApplication" },
     { label: "Renewal Business Requirements", type: "renewal" },
-    { label: "Privacy Notice", path: "/privacy" },
+    { label: "Privacy Notice", type: "privacy" },
   ];
 
   const drawer = (
@@ -181,6 +187,16 @@ function App() {
             </ListItem>
           </List>
         </Collapse>
+
+        {/* Privacy Notice in Drawer */}
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => handleOpenModal("privacy")}>
+            <ListItemText
+              primary="Privacy Notice"
+              sx={{ "& .MuiListItemText-primary": { color: "#09360D" } }}
+            />
+          </ListItemButton>
+        </ListItem>
       </List>
     </Box>
   );
@@ -254,7 +270,7 @@ function App() {
                 </Collapse>
               </Box>
               <Button
-                onClick={() => navigate("/privacy")}
+                onClick={() => handleOpenModal("privacy")}
                 sx={{ color: "#09360D", fontWeight: "bold" }}
               >
                 Privacy Notice
@@ -306,7 +322,7 @@ function App() {
             sx={{
               fontWeight: 900,
               color: "#09360D",
-              fontSize: { xs: "3.5rem", sm: "2.8rem" }, // responsive font size
+              fontSize: { xs: "3.5rem", sm: "2.8rem" },
             }}
           >
             BUSINESS REGISTRATION
@@ -346,7 +362,7 @@ function App() {
                 color: "white",
                 "&:hover": { backgroundColor: "#07270a" },
               }}
-              onClick={() => navigate("/newApplicationRegister")} // Navigate to New Business Form
+              onClick={() => navigate("/newApplicationRegister")}
             >
               New Application
             </Button>
@@ -361,7 +377,7 @@ function App() {
                 color: "#09360D",
                 "&:hover": { borderColor: "#07270a", color: "#07270a" },
               }}
-              onClick={() => navigate("/renew")} // Navigate to Renewal Business Form
+              onClick={() => navigate("/renew")}
             >
               Renewal
             </Button>
@@ -369,18 +385,18 @@ function App() {
         </Fade>
       </Grid>
 
-      {/* Requirements Modal */}
+      {/* Requirements & Privacy Modal */}
       <Modal open={modalOpen} onClose={handleCloseModal} closeAfterTransition>
         <Fade in={modalOpen}>
           <Box
             sx={{
               ...modalStyle,
-              maxWidth: 500, // Prevents it from being too wide
-              width: "80%", // Responsive on mobile
-              mx: "auto", // Centers horizontally
-              my: "1vh", // Adds top/bottom spacing
-              p: 3, // Padding inside modal
-              borderRadius: 2,
+              maxWidth: 600,
+              width: "70%",
+              mx: "auto",
+              my: "2vh",
+              p: 4,
+              borderRadius: 4,
               bgcolor: "background.paper",
               boxShadow: 24,
             }}
@@ -390,35 +406,76 @@ function App() {
               sx={{
                 display: "flex",
                 justifyContent: "space-between",
-                mb: 2,
-                borderBottom: "1px solid",
+                mb: 1,
+                borderBottom: "3px solid",
                 borderColor: "divider",
-                pb: 1,
+                pb: 2,
               }}
             >
               <Typography variant="h6" fontWeight="bold">
                 {modalType === "newApplication"
                   ? "New Business Requirements"
-                  : "Renewal Business Requirements"}
+                  : modalType === "renewal"
+                  ? "Renewal Business Requirements"
+                  : "Privacy Notice"}
               </Typography>
               <Button onClick={handleCloseModal} sx={{ minWidth: 0, p: 1 }}>
                 <CloseIcon />
               </Button>
             </Box>
 
-            {/* Requirements List */}
-            <List>
-              {requirementsData[modalType]?.map((item, index) => (
-                <ListItem key={index} sx={{ px: 0, mb: 1 }}>
-                  <Checkbox
-                    defaultChecked
-                    disabled
-                    sx={{ "&.Mui-disabled": { color: "success.main" } }}
-                  />
-                  <ListItemText primary={item} />
-                </ListItem>
-              ))}
-            </List>
+            {/* Content */}
+            {modalType === "privacy" ? (
+              <Box>
+                <Typography variant="body1" paragraph>
+                  <strong>
+                    San Pablo City Business Permit and Licensing Office (BPLO)
+                  </strong>
+                  is committed to protecting your privacy in compliance with the
+                  <strong> Data Privacy Act of 2012 (RA 10173)</strong>.
+                </Typography>
+
+                <Typography variant="body1" paragraph>
+                  We collect, use, and process your personal information solely
+                  for the purpose of evaluating and processing your business
+                  registration and renewal applications. Rest assured that your
+                  information will not be shared with unauthorized parties.
+                </Typography>
+
+                <Typography variant="body1" paragraph>
+                  By submitting your application, you consent to the collection
+                  and processing of your data for legitimate and legal purposes.
+                </Typography>
+
+                <Typography variant="body1" paragraph>
+                  If you have questions or concerns, you may contact us at the
+                  BPLO, San Pablo City Hall.
+                </Typography>
+
+                <Box sx={{ mt: 4 }}>
+                  <Typography variant="body1" fontWeight="bold">
+                    Sincerely,
+                  </Typography>
+                  <Typography variant="body1">
+                    Business Permit and Licensing Office
+                  </Typography>
+                  <Typography variant="body1">San Pablo City</Typography>
+                </Box>
+              </Box>
+            ) : (
+              <List>
+                {requirementsData[modalType]?.map((item, index) => (
+                  <ListItem key={index} sx={{ px: 0, mb: 1 }}>
+                    <Checkbox
+                      defaultChecked
+                      disabled
+                      sx={{ "&.Mui-disabled": { color: "success.main" } }}
+                    />
+                    <ListItemText primary={item} />
+                  </ListItem>
+                ))}
+              </List>
+            )}
           </Box>
         </Fade>
       </Modal>
