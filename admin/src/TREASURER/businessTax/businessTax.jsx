@@ -37,9 +37,7 @@ function BusinessTax() {
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get(
-          `${API}/businessTax/businessTax`
-        );
+        const res = await axios.get(`${API}/examiners/examiners`);
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
@@ -78,11 +76,9 @@ function BusinessTax() {
         );
       }
 
-      await axios.post(
-        `${API}/businessTax/business/approve/${id}`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      await axios.post(`${API}/businessTax/business/approve/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       setApplicants((prev) =>
         prev.map((applicant) =>
