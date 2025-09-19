@@ -8,7 +8,12 @@ import {
   Typography,
 } from "@mui/material";
 
-export default function Step2PersonalInfo({ formData, handleChange, errors, setErrors }) {
+export default function Step2PersonalInfo({
+  formData,
+  handleChange,
+  errors,
+  setErrors,
+}) {
   // ✅ Uppercase handler for text fields
   const handleUppercaseChange = (e) => {
     const value = (e.target.value || "").toUpperCase();
@@ -24,32 +29,32 @@ export default function Step2PersonalInfo({ formData, handleChange, errors, setE
   // ✅ Mobile number: digits only, automatic +63 prefix
   const handlePhoneNumberInput = (e) => {
     let value = e.target.value.replace(/\D/g, "");
-    
+
     // Automatically add +63 prefix if not present
     if (!value.startsWith("63") && value.length > 0) {
       value = `63${value}`;
     }
-    
+
     // Limit to a total of 12 digits (63 + 9 digits)
     value = value.slice(0, 12);
 
     handleChange({ target: { name: e.target.name, value: `+${value}` } });
   };
-  
+
   // ✅ Email handler: validates and automatically adds @gmail.com
   const handleEmailChange = (e) => {
     let value = e.target.value;
-    
+
     // Check if the input contains '@' and if it ends with '@gmail.com'
     if (value.includes("@")) {
-        // If the user types a full email, just update the value
-        handleChange({ target: { name: e.target.name, value } });
+      // If the user types a full email, just update the value
+      handleChange({ target: { name: e.target.name, value } });
     } else {
-        // If the user hasn't typed '@', append '@gmail.com'
-        value = `${value}@gmail.com`;
-        handleChange({ target: { name: e.target.name, value } });
+      // If the user hasn't typed '@', append '@gmail.com'
+      value = `${value}@gmail.com`;
+      handleChange({ target: { name: e.target.name, value } });
     }
-    
+
     // Regex for basic email validation
     const emailRegex = /^[^\s@]+@gmail\.com$/i;
     if (value && !emailRegex.test(value)) {
@@ -153,6 +158,7 @@ export default function Step2PersonalInfo({ formData, handleChange, errors, setE
           value={formData.eMailAdd || ""}
           onChange={handleEmailChange} // ✅ validate email
           fullWidth
+          disabled
           variant="outlined"
           sx={{ minWidth: 300 }}
           error={!!errors.eMailAdd}

@@ -22,27 +22,86 @@ import "leaflet/dist/leaflet.css";
 
 export default function Step3AddressInfo({ formData, handleChange, errors }) {
   const barangays = [
-    "ATISAN", "BAGONG POOK VI-C (POB.)", "BARANGAY I-A (POB.)",
-    "BARANGAY I-B (POB.)", "BAGONG BAYAN I-C (POB.)", "BARANGAY II-A (POB.)",
-    "BARANGAY II-B (POB.)", "BARANGAY II-C (POB.)", "BARANGAY II-D (POB.)",
-    "BARANGAY II-E (POB.)", "BARANGAY II-F (POB.)", "BARANGAY III-A (POB.)",
-    "BARANGAY III-B (POB.)", "BARANGAY III-C (POB.)", "BARANGAY III-D (POB.)",
-    "BARANGAY III-E (POB.)", "BARANGAY III-F (POB.)", "BARANGAY IV-A (POB.)",
-    "BARANGAY IV-B (POB.)", "BARANGAY IV-C (POB.)", "BARANGAY V-A (POB.)",
-    "BARANGAY V-B (POB.)", "BARANGAY V-C (POB.)", "BARANGAY V-D (POB.)",
-    "BARANGAY VI-A (POB.)", "BARANGAY VI-B (POB.)", "BARANGAY VI-D (POB.)",
-    "BARANGAY VI-E (POB.)", "BARANGAY VII-A (POB.)", "BARANGAY VII-B (POB.)",
-    "BARANGAY VII-C (POB.)", "BARANGAY VII-D (POB.)", "BARANGAY VII-E (POB.)",
-    "BAUTISTA", "CONCEPCION", "DEL REMEDIO", "DOLORES", "SAN ANTONIO 1",
-    "SAN ANTONIO 2", "SAN BARTOLOME", "SAN BUENAVENTURA", "SAN CRISPIN",
-    "SAN CRISTOBAL", "SAN DIEGO", "SAN FRANCISCO", "SAN GABRIEL", "SAN GREGORIO",
-    "SAN IGNACIO", "SAN ISIDRO", "SAN JOAQUIN", "SAN JOSE", "SAN JUAN",
-    "SAN LORENZO", "SAN LUCAS 1", "SAN LUCAS 2", "SAN MARCOS", "SAN MATEO",
-    "SAN MIGUEL", "SAN NICOLAS", "SAN PEDRO", "SAN RAFAEL", "SAN ROQUE",
-    "SAN VICENTE", "SANTA ANA", "SANTA CATALINA", "SANTA CRUZ", "SANTA ELENA",
-    "SANTA FELOMINA", "SANTA ISABEL", "SANTA MARIA", "SANTA MARIA MAGDALENA",
-    "SANTA MONICA", "SANTA VERONICA", "SANTIAGO I", "SANTIAGO II",
-    "SANTISIMO ROSARIO", "SANTO ANGEL", "SANTO CRISTO", "SANTO NIÑO", "SOLEDAD",
+    "ATISAN",
+    "BAGONG POOK VI-C (POB.)",
+    "BARANGAY I-A (POB.)",
+    "BARANGAY I-B (POB.)",
+    "BAGONG BAYAN I-C (POB.)",
+    "BARANGAY II-A (POB.)",
+    "BARANGAY II-B (POB.)",
+    "BARANGAY II-C (POB.)",
+    "BARANGAY II-D (POB.)",
+    "BARANGAY II-E (POB.)",
+    "BARANGAY II-F (POB.)",
+    "BARANGAY III-A (POB.)",
+    "BARANGAY III-B (POB.)",
+    "BARANGAY III-C (POB.)",
+    "BARANGAY III-D (POB.)",
+    "BARANGAY III-E (POB.)",
+    "BARANGAY III-F (POB.)",
+    "BARANGAY IV-A (POB.)",
+    "BARANGAY IV-B (POB.)",
+    "BARANGAY IV-C (POB.)",
+    "BARANGAY V-A (POB.)",
+    "BARANGAY V-B (POB.)",
+    "BARANGAY V-C (POB.)",
+    "BARANGAY V-D (POB.)",
+    "BARANGAY VI-A (POB.)",
+    "BARANGAY VI-B (POB.)",
+    "BARANGAY VI-D (POB.)",
+    "BARANGAY VI-E (POB.)",
+    "BARANGAY VII-A (POB.)",
+    "BARANGAY VII-B (POB.)",
+    "BARANGAY VII-C (POB.)",
+    "BARANGAY VII-D (POB.)",
+    "BARANGAY VII-E (POB.)",
+    "BAUTISTA",
+    "CONCEPCION",
+    "DEL REMEDIO",
+    "DOLORES",
+    "SAN ANTONIO 1",
+    "SAN ANTONIO 2",
+    "SAN BARTOLOME",
+    "SAN BUENAVENTURA",
+    "SAN CRISPIN",
+    "SAN CRISTOBAL",
+    "SAN DIEGO",
+    "SAN FRANCISCO",
+    "SAN GABRIEL",
+    "SAN GREGORIO",
+    "SAN IGNACIO",
+    "SAN ISIDRO",
+    "SAN JOAQUIN",
+    "SAN JOSE",
+    "SAN JUAN",
+    "SAN LORENZO",
+    "SAN LUCAS 1",
+    "SAN LUCAS 2",
+    "SAN MARCOS",
+    "SAN MATEO",
+    "SAN MIGUEL",
+    "SAN NICOLAS",
+    "SAN PEDRO",
+    "SAN RAFAEL",
+    "SAN ROQUE",
+    "SAN VICENTE",
+    "SANTA ANA",
+    "SANTA CATALINA",
+    "SANTA CRUZ",
+    "SANTA ELENA",
+    "SANTA FELOMINA",
+    "SANTA ISABEL",
+    "SANTA MARIA",
+    "SANTA MARIA MAGDALENA",
+    "SANTA MONICA",
+    "SANTA VERONICA",
+    "SANTIAGO I",
+    "SANTIAGO II",
+    "SANTISIMO ROSARIO",
+    "SANTO ANGEL",
+    "SANTO CRISTO",
+    "SANTO NIÑO",
+    "SOLEDAD",
   ];
 
   const theme = useTheme();
@@ -192,6 +251,77 @@ export default function Step3AddressInfo({ formData, handleChange, errors }) {
             sx={{ marginTop: 2 }}
           />
         </div>
+        {/* Own Place */}
+        <FormControl fullWidth sx={{ minWidth: 300 }} error={!!errors.ownPlace}>
+          <InputLabel id="own-place-label">Own Place</InputLabel>
+          <Select
+            labelId="own-place-label"
+            name="ownPlace"
+            value={formData.ownPlace || ""}
+            onChange={handleUppercaseChange}
+            label="Own Place"
+          >
+            <MenuItem value="">Select</MenuItem>
+            <MenuItem value="YES">YES</MenuItem>
+            <MenuItem value="NO">NO</MenuItem>
+          </Select>
+          {!!errors.ownPlace && (
+            <Typography variant="caption" color="error">
+              {errors.ownPlace}
+            </Typography>
+          )}
+        </FormControl>
+
+        {/* Conditional: Own Place = YES */}
+        {formData.ownPlace === "YES" && (
+          <TextField
+            label="Tax Declaration No."
+            name="taxdec"
+            value={formData.taxdec || ""}
+            onChange={handleUppercaseChange}
+            fullWidth
+            variant="outlined"
+            error={!!errors.taxdec}
+            helperText={errors.taxdec}
+          />
+        )}
+
+        {/* Conditional: Own Place = NO */}
+        {formData.ownPlace === "NO" && (
+          <Stack spacing={3}>
+            <Typography variant="subtitle1">Owner’s Address</Typography>
+            <TextField
+              label="Lessor's Name"
+              name="lessorName"
+              value={formData.lessorName || ""}
+              onChange={handleUppercaseChange}
+              fullWidth
+              variant="outlined"
+              error={!!errors.lessorName}
+              helperText={errors.lessorName}
+            />
+            <TextField
+              label="Monthly Rental"
+              name="monthlyRent"
+              value={formData.monthlyRent || ""}
+              onChange={handleUppercaseChange}
+              fullWidth
+              variant="outlined"
+              error={!!errors.monthlyRent}
+              helperText={errors.monthlyRent}
+            />
+            <TextField
+              label="Tax Declaration No."
+              name="taxdec"
+              value={formData.taxdec || ""}
+              onChange={handleUppercaseChange}
+              fullWidth
+              variant="outlined"
+              error={!!errors.taxdec}
+              helperText={errors.taxdec}
+            />
+          </Stack>
+        )}
       </Stack>
     </div>
   );

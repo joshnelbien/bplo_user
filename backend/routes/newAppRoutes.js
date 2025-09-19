@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const File = require("../db/model/files");
 const AppStatus = require("../db/model/applicantStatusDB");
+const UserAccounts = require("../db/model/userAccounts");
 const { where } = require("sequelize");
 const { v4: uuidv4 } = require("uuid");
 const { sequelize } = require("../db/sequelize");
@@ -134,6 +135,18 @@ router.get("/files/:id/:key/download", async (req, res) => {
     `attachment; filename="${file[`${key}_filename`]}"`
   );
   res.send(file[key]);
+});
+
+router.get("/:id", async (req, res) => {
+  try {
+    const user = await UserAccounts.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 router.put("/files/:id", async (req, res) => {
