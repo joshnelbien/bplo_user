@@ -14,24 +14,52 @@ export default function Step2PersonalInfo({
   errors,
   setErrors,
 }) {
-  // ✅ Uppercase handler for text fields
+  // ✅ Uppercase handler for text fields with minimum 3 letters validation
   const handleUppercaseChange = (e) => {
-    const value = (e.target.value || "").toUpperCase();
-    handleChange({ target: { name: e.target.name, value } });
+    const { name, value } = e.target;
+    const upperValue = (value || "").toUpperCase();
+    const letterCount = (upperValue.replace(/[^A-Za-z]/g, "") || "").length;
+
+    // Validate minimum 3 letters for firstName, middleName, and lastName
+    if (
+      (name === "firstName" || name === "middleName" || name === "lastName") &&
+      letterCount < 3 &&
+      upperValue.length > 0
+    ) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "Minimum of 3 letters required",
+      }));
+    } else if (
+      (name === "firstName" || name === "middleName" || name === "lastName") &&
+      letterCount >= 3
+    ) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+
+    handleChange({ target: { name, value: upperValue } });
   };
 
-  // ✅ Telephone number: digits only, max 9
+  // ✅ Telephone number: digits only, max 9, optional
   const handleTelNumberInput = (e) => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 9);
     handleChange({ target: { name: e.target.name, value } });
   };
 
-  // ✅ Mobile number: digits only, automatic +63 prefix
+  // ✅ Mobile number: digits only, starts with +63, append user input
   const handlePhoneNumberInput = (e) => {
     let value = e.target.value.replace(/\D/g, "");
 
-    // Automatically add +63 prefix if not present
-    if (!value.startsWith("63") && value.length > 0) {
+    // If value is empty or just +63, reset to +63
+    if (!value || value === "63") {
+      value = "63";
+    } else {
+      // Remove existing +63 and append user input after it
+      value = value.replace("63", "").trim();
       value = `63${value}`;
     }
 
@@ -41,7 +69,20 @@ export default function Step2PersonalInfo({
     handleChange({ target: { name: e.target.name, value: `+${value}` } });
   };
 
-  // ✅ Email handler: validates and automatically adds @gmail.com
+  // ✅ Email handler: allows input before @gmail.com
+  const handleEmailChange = (e) => {
+    let value = e.target.value;
+    // If value is empty or just @gmail.com, reset to @gmail.com
+    if (!value || value === "@gmail.com") {
+      value = "@gmail.com";
+    } else {
+      // Split into part before @gmail.com and append user input before it
+      const [before, after] = value.split("@gmail.com");
+      value = `${before || ""}@gmail.com`;
+    }
+    handleChange({ target: { name: e.target.name, value } });
+  };
+
   return (
     <div style={{ marginBottom: 20 }}>
       <Typography variant="h6" gutterBottom>
@@ -59,7 +100,7 @@ export default function Step2PersonalInfo({
           variant="outlined"
           sx={{ minWidth: 300 }}
           error={!!errors.firstName}
-          helperText={errors.firstName}
+          helperText={errors.firstName || "Minimum of 3 letters required"}
         />
 
         {/* Middle Name */}
@@ -72,7 +113,7 @@ export default function Step2PersonalInfo({
           variant="outlined"
           sx={{ minWidth: 300 }}
           error={!!errors.middleName}
-          helperText={errors.middleName}
+          helperText={errors.middleName || "Minimum of 3 letters required"}
         />
 
         {/* Last Name */}
@@ -85,10 +126,10 @@ export default function Step2PersonalInfo({
           variant="outlined"
           sx={{ minWidth: 300 }}
           error={!!errors.lastName}
-          helperText={errors.lastName}
+          helperText={errors.lastName || "Minimum of 3 letters required"}
         />
 
-        {/* Ext. Name */}
+        {/* Ext. Name (Optional) */}
         <TextField
           label="Ext. Name"
           name="extName"
@@ -127,14 +168,17 @@ export default function Step2PersonalInfo({
           label="Email"
           type="email"
           name="email"
-          value={formData.email || ""}
-          onChange={handleChange}
+          value={formData.email || "@gmail.com"}
+          onChange={handleEmailChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
+          error={!!errors.email}
+          helperText={errors.email || "Enter text before @gmail.com"}
+          placeholder="text@gmail.com"
         />
 
-        {/* Telephone No. */}
+        {/* Telephone No. (Optional) */}
         <TextField
           label="Telephone No."
           name="telNo"
@@ -151,14 +195,14 @@ export default function Step2PersonalInfo({
         <TextField
           label="Mobile No."
           name="mobileNo"
-          value={formData.mobileNo || ""}
+          value={formData.mobileNo || "+63"}
           onChange={handlePhoneNumberInput}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
           error={!!errors.mobileNo}
-          helperText={errors.mobileNo}
-          placeholder="+63"
+          helperText={errors.mobileNo || "Must start with +63"}
+          placeholder="+63123456789"
         />
       </Stack>
     </div>
