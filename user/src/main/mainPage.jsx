@@ -392,12 +392,12 @@ function App() {
           <Box
             sx={{
               ...modalStyle,
-              maxWidth: 500,
-              width: "80%",
+              maxWidth: 600,
+              width: "70%",
               mx: "auto",
-              my: "1vh",
-              p: 3,
-              borderRadius: 2,
+              my: "2vh",
+              p: 4,
+              borderRadius: 4,
               bgcolor: "background.paper",
               boxShadow: 24,
             }}
@@ -407,10 +407,10 @@ function App() {
               sx={{
                 display: "flex",
                 justifyContent: "space-between",
-                mb: 2,
-                borderBottom: "1px solid",
+                mb: 1,
+                borderBottom: "3px solid",
                 borderColor: "divider",
-                pb: 1,
+                pb: 2,
               }}
             >
               <Typography variant="h6" fontWeight="bold">
@@ -427,9 +427,42 @@ function App() {
 
             {/* Content */}
             {modalType === "privacy" ? (
-              <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}>
-                {privacyNotice}
-              </Typography>
+              <Box>
+                <Typography variant="body1" paragraph>
+                  <strong>
+                    San Pablo City Business Permit and Licensing Office (BPLO)
+                  </strong>
+                  is committed to protecting your privacy in compliance with the
+                  <strong> Data Privacy Act of 2012 (RA 10173)</strong>.
+                </Typography>
+
+                <Typography variant="body1" paragraph>
+                  We collect, use, and process your personal information solely
+                  for the purpose of evaluating and processing your business
+                  registration and renewal applications. Rest assured that your
+                  information will not be shared with unauthorized parties.
+                </Typography>
+
+                <Typography variant="body1" paragraph>
+                  By submitting your application, you consent to the collection
+                  and processing of your data for legitimate and legal purposes.
+                </Typography>
+
+                <Typography variant="body1" paragraph>
+                  If you have questions or concerns, you may contact us at the
+                  BPLO, San Pablo City Hall.
+                </Typography>
+
+                <Box sx={{ mt: 4 }}>
+                  <Typography variant="body1" fontWeight="bold">
+                    Sincerely,
+                  </Typography>
+                  <Typography variant="body1">
+                    Business Permit and Licensing Office
+                  </Typography>
+                  <Typography variant="body1">San Pablo City</Typography>
+                </Box>
+              </Box>
             ) : (
               <List>
                 {requirementsData[modalType]?.map((item, index) => (
@@ -460,7 +493,8 @@ function App() {
         }}
       >
         <Typography variant="body2" sx={{ color: "#746a6aff" }}>
-          © {new Date().getFullYear()} Business Permit and Licensing Office | v2.
+          © {new Date().getFullYear()} Business Permit and Licensing Office |
+          v2.
         </Typography>
       </Box>
     </Box>
