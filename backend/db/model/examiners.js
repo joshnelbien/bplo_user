@@ -142,6 +142,7 @@ const Examiners = sequelize.define(
     zoningCert_mimetype: { type: DataTypes.STRING, allowNull: true },
     zoningCert_size: { type: DataTypes.INTEGER, allowNull: true },
 
+    passtoBusinessTax: { type: DataTypes.STRING, defaultValue: "No" },
     BUSINESSTAX: { type: DataTypes.STRING, defaultValue: "Pending" },
     BUSINESSTAXtimeStamp: { type: DataTypes.STRING },
     application: { type: DataTypes.STRING },
