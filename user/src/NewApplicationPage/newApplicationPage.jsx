@@ -468,7 +468,10 @@ function NewApplicationPage() {
           mb: 2,
         }}
       >
-        <GreenButton onClick={() => navigate(`/`)} variant="contained">
+        <GreenButton
+          onClick={() => navigate(`/homePage/${id}`)}
+          variant="contained"
+        >
           BACK TO DASHBOARD
         </GreenButton>
       </Box>
