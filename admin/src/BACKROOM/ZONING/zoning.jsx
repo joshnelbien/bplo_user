@@ -103,7 +103,7 @@ function Zoning() {
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get(`${API}/backroom/backrooms`);
+        const res = await axios.get(`${API}/examiners/examiners`);
 
         // Sort by createdAt ascending (oldest first, newest at bottom)
         const sortedData = res.data.sort(
@@ -193,11 +193,9 @@ function Zoning() {
         formData.append("zoningFee", zoningFee);
       }
 
-      await axios.post(
-        `${API}/backroom/zoning/approve/${id}`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      await axios.post(`${API}/backroom/zoning/approve/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       setApplicants((prev) =>
         prev.map((applicant) =>

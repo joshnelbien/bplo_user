@@ -102,7 +102,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`${API}/backroom/backroom/${fileData.id}/${fileKey}`}
+            href={`${API}/examiners/examiners/${fileData.id}/${fileKey}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -115,7 +115,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`${API}/backroom/backroom/${fileData.id}/${fileKey}/download`}
+            href={`${API}/examiners/examiners/${fileData.id}/${fileKey}/download`}
             target="_blank"
             rel="noreferrer"
           >

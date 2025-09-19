@@ -3,6 +3,7 @@ const multer = require("multer");
 const Backroom = require("../db/model/backroomLocal");
 const File = require("../db/model/files");
 const AppStatus = require("../db/model/applicantStatusDB");
+const Examiners = require("../db/model/examiners");
 const router = express.Router();
 const moment = require("moment");
 
@@ -40,7 +41,7 @@ router.post("/obo/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const applicant = await Backroom.findByPk(id);
+    const applicant = await Examiners.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
@@ -82,7 +83,7 @@ router.post("/obo/decline/:id", async (req, res) => {
     const { id } = req.params;
     const { reason } = req.body; // get reason from frontend
 
-    const applicant = await Backroom.findByPk(id);
+    const applicant = await Examiners.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
@@ -120,7 +121,7 @@ router.post(
       const { id } = req.params;
       const { zoningFee } = req.body;
 
-      const applicant = await Backroom.findByPk(id);
+      const applicant = await Examiners.findByPk(id);
       if (!applicant) {
         return res.status(404).json({ error: "Applicant not found" });
       }
@@ -162,7 +163,7 @@ router.post("/zoning/decline/:id", async (req, res) => {
     const { id } = req.params;
     const { reason } = req.body; // ✅ get reason from frontend
 
-    const applicant = await Backroom.findByPk(id);
+    const applicant = await Examiners.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
@@ -201,7 +202,7 @@ router.post("/cho/approve/:id", upload.single("choCert"), async (req, res) => {
     const { id } = req.params;
     const { choFee } = req.body;
 
-    const applicant = await Backroom.findByPk(id);
+    const applicant = await Examiners.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
@@ -243,7 +244,7 @@ router.post("/cho/decline/:id", async (req, res) => {
     const { id } = req.params;
     const { reason } = req.body;
 
-    const applicant = await Backroom.findByPk(id);
+    const applicant = await Examiners.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
@@ -255,7 +256,7 @@ router.post("/cho/decline/:id", async (req, res) => {
 
     const declineTime = moment().format("DD/MM/YYYY HH:mm:ss");
 
-    // Update Backroom
+    // Update Examiners
     applicant.CHO = "Declined";
     applicant.CHOtimeStamp = declineTime;
     applicant.CHOdecline = reason;
@@ -286,7 +287,7 @@ router.post(
       const { id } = req.params;
       const { cenroFee } = req.body;
 
-      const applicant = await Backroom.findByPk(id);
+      const applicant = await Examiners.findByPk(id);
       if (!applicant) {
         return res.status(404).json({ error: "Applicant not found" });
       }
@@ -331,7 +332,7 @@ router.post("/cenro/decline/:id", async (req, res) => {
     const { id } = req.params;
     const { reason } = req.body;
 
-    const applicant = await Backroom.findByPk(id);
+    const applicant = await Examiners.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
@@ -367,7 +368,7 @@ router.post("/csmwo/approve/:id", async (req, res) => {
     const { id } = req.params;
     const { csmwoFee } = req.body;
 
-    const applicant = await Backroom.findByPk(id);
+    const applicant = await Examiners.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
@@ -397,8 +398,8 @@ router.post("/csmwo/decline/:id", async (req, res) => {
     const { id } = req.params;
     const { reason } = req.body; // ⬅️ get reason from frontend
 
-    // 1. Find applicant in Backroom
-    const applicant = await Backroom.findByPk(id);
+    // 1. Find applicant in Examiners
+    const applicant = await Examiners.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }

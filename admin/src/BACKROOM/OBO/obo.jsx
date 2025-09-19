@@ -30,7 +30,7 @@ function Obo() {
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get(`${API}/backroom/backrooms`);
+        const res = await axios.get(`${API}/examiners/examiners`);
 
         // Sort by createdAt ascending (oldest first, newest at bottom)
         const sortedData = res.data.sort(
@@ -63,10 +63,7 @@ function Obo() {
 
   const handleApprove = async (id, oboFields) => {
     try {
-      await axios.post(
-        `${API}/backroom/obo/approve/${id}`,
-        oboFields
-      );
+      await axios.post(`${API}/backroom/obo/approve/${id}`, oboFields);
       setApplicants((prev) =>
         prev.map((applicant) =>
           applicant.id === id

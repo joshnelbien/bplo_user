@@ -137,7 +137,7 @@ function New_records() {
         setPendingApplicants(onlyPending);
 
         // ✅ Approved applicants
-        const approvedRes = await axios.get(`${API}/backroom/backrooms`);
+        const approvedRes = await axios.get(`${API}/examiners/examiners`);
         const sortedApproved = approvedRes.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
@@ -151,15 +151,20 @@ function New_records() {
   }, []);
 
   const applicants =
-    filter === "pending" ? pendingApplicants : approvedApplicants;
-
-  const totalPages = Math.ceil(applicants.length / recordsPerPage);
+    filter === "pending"
+      ? pendingApplicants
+      : filter === "approved"
+      ? approvedApplicants.filter((a) => a.passtoBusinessTax === "No")
+      : filter === "businessTax"
+      ? approvedApplicants.filter((a) => a.passtoBusinessTax === "Yes")
+      : [];
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentRecords = applicants.slice(
     indexOfFirstRecord,
     indexOfLastRecord
   );
+  const totalPages = Math.ceil(applicants.length / recordsPerPage);
 
   const handleApprove = (applicant) => {
     setConfirmationData({ action: "approve", applicant });
@@ -255,7 +260,24 @@ function New_records() {
                 },
               }}
             >
-              Approved
+              On Going
+            </Button>
+
+            {/* ✅ New Business Tax button */}
+            <Button
+              color={filter === "businessTax" ? "success" : "inherit"}
+              onClick={() => {
+                setFilter("businessTax");
+                setCurrentPage(1);
+              }}
+              sx={{
+                bgcolor: filter === "businessTax" ? "#1c541eff" : undefined,
+                "&:hover": {
+                  bgcolor: filter === "businessTax" ? "#1c541eff" : undefined,
+                },
+              }}
+            >
+              Computation
             </Button>
           </ButtonGroup>
         </Box>
@@ -452,7 +474,7 @@ function New_records() {
         baseUrl={
           filter === "pending"
             ? `${API}/newApplication/files`
-            : `${API}/backroom/backroom`
+            : `${API}/examiners/examiners`
         }
       />
 
@@ -478,7 +500,7 @@ function New_records() {
         baseUrl={
           filter === "pending"
             ? `${API}/newApplication/files`
-            : `${API}/backroom/backroom`
+            : `${API}/examiners/examiners`
         }
       />
     </>

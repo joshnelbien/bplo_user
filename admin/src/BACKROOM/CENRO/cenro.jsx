@@ -38,7 +38,7 @@ function Cenro() {
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get(`${API}/backroom/backrooms`);
+        const res = await axios.get(`${API}/examiners/examiners`);
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
@@ -79,11 +79,9 @@ function Cenro() {
         formData.append("cenroCert", selectedFiles.cenroCert);
       }
 
-      await axios.post(
-        `${API}/backroom/cenro/approve/${id}`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      await axios.post(`${API}/backroom/cenro/approve/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       setApplicants((prev) =>
         prev.map((applicant) =>
           applicant.id === id
@@ -98,16 +96,13 @@ function Cenro() {
 
   const handleDecline = async (id, reason) => {
     try {
-      const res = await fetch(
-        `${API}/backroom/cenro/decline/${id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ reason }),
-        }
-      );
+      const res = await fetch(`${API}/backroom/cenro/decline/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ reason }),
+      });
 
       const data = await res.json();
       console.log("Decline response:", data);

@@ -38,7 +38,7 @@ function Cho() {
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get(`${API}/backroom/backrooms`);
+        const res = await axios.get(`${API}/examiners/examiners`);
 
         // Sort by createdAt ascending (oldest first, newest at bottom)
         const sortedData = res.data.sort(
@@ -81,11 +81,9 @@ function Cho() {
         formData.append("choCert", selectedFiles.choCert);
       }
 
-      await axios.post(
-        `${API}/backroom/cho/approve/${id}`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      await axios.post(`${API}/backroom/cho/approve/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       setApplicants((prev) =>
         prev.map((applicant) =>
