@@ -25,6 +25,7 @@ router.post("/businessTax/approve/:id", async (req, res) => {
     applicantData.BUSINESSTAXtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
     const created = await BusinessTax.create(applicantData);
+    await applicant.update({ passtoBusinessTax: "Yes" });
 
     res.status(201).json({
       message:

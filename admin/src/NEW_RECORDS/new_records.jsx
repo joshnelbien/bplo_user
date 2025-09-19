@@ -130,20 +130,16 @@ function New_records() {
     const fetchApplicants = async () => {
       try {
         // ✅ Pending applicants (filter only pending)
-        const pendingRes = await axios.get(
-          `${API}/newApplication/files`
-        );
+        const pendingRes = await axios.get(`${API}/newApplication/files`);
         const onlyPending = pendingRes.data
           .filter((a) => a.status?.toLowerCase() === "pending")
-          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); // oldest first, newest last
+          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
         setPendingApplicants(onlyPending);
 
         // ✅ Approved applicants
-        const approvedRes = await axios.get(
-          `${API}/backroom/backrooms`
-        );
+        const approvedRes = await axios.get(`${API}/backroom/backrooms`);
         const sortedApproved = approvedRes.data.sort(
-          (a, b) => new Date(a.createdAt) - new Date(b.createdAt) // oldest first, newest last
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
         setApprovedApplicants(sortedApproved);
       } catch (error) {
@@ -181,9 +177,7 @@ function New_records() {
 
     try {
       if (action === "approve") {
-        await axios.post(
-          `${API}/examiners/bplo/approve/${applicant.id}`
-        );
+        await axios.post(`${API}/examiners/bplo/approve/${applicant.id}`);
         setPendingApplicants((prev) =>
           prev.filter((a) => a.id !== applicant.id)
         );
@@ -419,12 +413,6 @@ function New_records() {
                         onClick={() => openUpdateModal(applicant)}
                       >
                         <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-
-                    <Tooltip title="Delete">
-                      <IconButton color="error">
-                        <DeleteIcon />
                       </IconButton>
                     </Tooltip>
                   </TableCell>
