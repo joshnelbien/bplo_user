@@ -1,4 +1,7 @@
 // // supabase db connection
+
+// supabase db connection
+
 // const { Sequelize } = require("sequelize");
 
 // const {
@@ -37,6 +40,9 @@
 // module.exports = { sequelize };
 
 // localhost db connection
+
+// // localhost db connection
+
 const { Sequelize } = require("sequelize");
 
 const { DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS, DB_SSL } = process.env;

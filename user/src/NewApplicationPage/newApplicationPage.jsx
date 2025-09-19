@@ -17,7 +17,7 @@ import {
 import MuiAlert from "@mui/material/Alert";
 import { styled } from "@mui/system";
 import axios from "axios";
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { useMediaQuery, useTheme } from "@mui/material";
@@ -69,6 +69,7 @@ function NewApplicationPage() {
   const [step, setStep] = useState(savedStep);
   const [businessLines, setBusinessLines] = useState(savedBusinessLines);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const paperRef = useRef(null); // Ref for the Paper component
 
   const [formDataState, setFormDataState] = useState(
     savedFormData || {
@@ -123,6 +124,28 @@ function NewApplicationPage() {
       application: "New",
     }
   );
+
+  // Scroll to top on component mount
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth',
+    });
+  }, []);
+
+  // Scroll to top when step changes
+  useEffect(() => {
+    if (paperRef.current) {
+      paperRef.current.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth',
+      });
+    }
+  }, [step]); // Trigger on step change
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -364,6 +387,16 @@ function NewApplicationPage() {
 
       setSuccessDialogOpen(true);
 
+      if (paperRef.current) {
+        paperRef.current.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: 'smooth',
+        });
+      }
+
       setTimeout(() => {
         navigate(`/homePage/${id}`);
       }, 2000);
@@ -478,10 +511,11 @@ function NewApplicationPage() {
 
       <Paper
         elevation={6}
+        ref={paperRef}
         sx={{
           p: { xs: 2, sm: 4 },
           width: "100%",
-          maxWidth: isMobile ? 320 : 900, // ✅ Responsive maxWidth
+          maxWidth: isMobile ? 320 : 900,
           mx: "auto",
           borderRadius: "16px",
         }}
@@ -507,12 +541,12 @@ function NewApplicationPage() {
             flexWrap: "wrap",
             justifyContent: "center",
             "& .MuiStepIcon-root": {
-              color: "gray", // default
+              color: "gray",
               "&.Mui-active": {
-                color: "green", // live/going
+                color: "green",
               },
               "&.Mui-completed": {
-                color: "blue", // done
+                color: "blue",
               },
             },
             "& .MuiStepConnector-line": {
@@ -528,13 +562,12 @@ function NewApplicationPage() {
                   "& .MuiStepLabel-label": {
                     fontSize: { xs: "0.6rem", sm: "0.75rem", md: "0.9rem" },
                     textAlign: "center",
-                    // label colors follow the same logic
                     color:
                       step - 1 > index
-                        ? "blue" // done
+                        ? "blue"
                         : step - 1 === index
-                        ? "green" // live
-                        : "gray", // default
+                        ? "green"
+                        : "gray",
                   },
                 }}
               >
@@ -648,7 +681,7 @@ function NewApplicationPage() {
         </DialogActions>
       </Dialog>
 
-      {/* ✅ Success Popup */}
+      {/* Success Popup */}
       <Dialog
         open={successDialogOpen}
         onClose={() => setSuccessDialogOpen(false)}
