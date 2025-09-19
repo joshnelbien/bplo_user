@@ -115,16 +115,34 @@ const Examiners = sequelize.define(
 
     BPLO: { type: DataTypes.STRING, defaultValue: "Approved" },
     BPLOtimeStamp: { type: DataTypes.STRING },
+
     CSMWO: { type: DataTypes.STRING, defaultValue: "Pending" },
     CSMWOtimeStamp: { type: DataTypes.STRING },
+    CSMWOdecline: { type: DataTypes.STRING },
+    csmwoFee: { type: DataTypes.STRING },
+
     OBO: { type: DataTypes.STRING, defaultValue: "Pending" },
+    OBOdecline: { type: DataTypes.STRING },
     OBOtimeStamp: { type: DataTypes.STRING },
+    //Building Structure Architectural Presentability
+    BSAP: { type: DataTypes.STRING },
+    //Sanitary Requirements
+    SR: { type: DataTypes.STRING },
+    //Mechanical
+    Mechanical: { type: DataTypes.STRING },
+    //Electrical
+    Electrical: { type: DataTypes.STRING },
+    //Signage
+    Signage: { type: DataTypes.STRING },
+    //Electronics
+    Electronics: { type: DataTypes.STRING },
 
     Examiners: { type: DataTypes.STRING, defaultValue: "Pending" },
     ExaminerstimeStamp: { type: DataTypes.STRING },
 
     CHO: { type: DataTypes.STRING, defaultValue: "Pending" },
     CHOtimeStamp: { type: DataTypes.STRING },
+    CHOdecline: { type: DataTypes.STRING },
     choFee: { type: DataTypes.STRING },
     choCert: { type: DataTypes.BLOB("long"), allowNull: true },
     choCert_filename: { type: DataTypes.STRING, allowNull: true },
@@ -132,9 +150,16 @@ const Examiners = sequelize.define(
     choCert_size: { type: DataTypes.INTEGER, allowNull: true },
 
     CENRO: { type: DataTypes.STRING, defaultValue: "Pending" },
+    CENROdecline: { type: DataTypes.STRING },
     CENROtimeStamp: { type: DataTypes.STRING },
+    cenroFee: { type: DataTypes.STRING },
+    cenroCert: { type: DataTypes.BLOB("long"), allowNull: true },
+    cenroCert_filename: { type: DataTypes.STRING, allowNull: true },
+    cenroCert_mimetype: { type: DataTypes.STRING, allowNull: true },
+    cenroCert_size: { type: DataTypes.INTEGER, allowNull: true },
 
     ZONING: { type: DataTypes.STRING, defaultValue: "Pending" },
+    ZONINGdecline: { type: DataTypes.STRING },
     ZONINGtimeStamp: { type: DataTypes.STRING },
     zoningFee: { type: DataTypes.STRING },
     zoningCert: { type: DataTypes.BLOB("long"), allowNull: true },
@@ -142,9 +167,19 @@ const Examiners = sequelize.define(
     zoningCert_mimetype: { type: DataTypes.STRING, allowNull: true },
     zoningCert_size: { type: DataTypes.INTEGER, allowNull: true },
 
-    passtoBusinessTax: { type: DataTypes.STRING, defaultValue: "No" },
     BUSINESSTAX: { type: DataTypes.STRING, defaultValue: "Pending" },
     BUSINESSTAXtimeStamp: { type: DataTypes.STRING },
+    businesstaxComputation: { type: DataTypes.BLOB("long"), allowNull: true },
+    businesstaxComputation_filename: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    passtoBusinessTax: { type: DataTypes.STRING, defaultValue: "No" },
+    businesstaxComputation_mimetype: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    businesstaxComputation_size: { type: DataTypes.INTEGER, allowNull: true },
     application: { type: DataTypes.STRING },
   },
 

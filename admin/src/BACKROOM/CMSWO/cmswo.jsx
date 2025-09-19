@@ -30,7 +30,7 @@ function Cmswo() {
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get(`${API}/backroom/backrooms`);
+        const res = await axios.get(`${API}/examiners/examiners`);
 
         // Sort by createdAt ascending (oldest first, newest at bottom)
         const sortedData = res.data.sort(

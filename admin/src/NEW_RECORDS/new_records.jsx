@@ -277,7 +277,7 @@ function New_records() {
                 },
               }}
             >
-              Business Tax
+              Computation
             </Button>
           </ButtonGroup>
         </Box>
@@ -474,7 +474,7 @@ function New_records() {
         baseUrl={
           filter === "pending"
             ? `${API}/newApplication/files`
-            : `${API}/backroom/backroom`
+            : `${API}/examiners/examiners`
         }
       />
 
@@ -500,7 +500,7 @@ function New_records() {
         baseUrl={
           filter === "pending"
             ? `${API}/newApplication/files`
-            : `${API}/backroom/backroom`
+            : `${API}/examiners/examiners`
         }
       />
     </>
