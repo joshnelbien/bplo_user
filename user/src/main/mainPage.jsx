@@ -326,7 +326,7 @@ function App() {
             sx={{
               fontWeight: 900,
               color: "#09360D",
-              fontSize: { xs: "1rem", sm: "1rem" },
+              fontSize: { xs: "3rem", sm: "1rem" },
             }}
           >
             BUSINESS REGISTRATION
