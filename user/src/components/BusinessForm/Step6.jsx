@@ -438,6 +438,7 @@ export default function Step6BusinessActivity({
           <MenuItem value="">-- SELECT MODE OF PAYMENT --</MenuItem>
           <MenuItem value="ANNUALLY">ANNUALLY</MenuItem>
           <MenuItem value="QUARTERLY">QUARTERLY</MenuItem>
+          <MenuItem value="SEMI ANNUALLY">SEMI ANNUALLY</MenuItem>
         </Select>
         {!!errors.Modeofpayment && (
           <Typography variant="caption" color="error">
