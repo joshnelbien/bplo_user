@@ -219,7 +219,7 @@ function AppTracker() {
                 sx={{ mt: 2 }}
                 onClick={() => handleViewApplication(tracker)}
               >
-                View Full Application
+                View Application
               </Button>
             </Paper>
           );
@@ -230,7 +230,6 @@ function AppTracker() {
         applicant={selectedApp}
         isOpen={openModal}
         onClose={() => setOpenModal(false)}
-        onApprove={(app) => console.log("Approve logic here:", app)}
         baseUrl={`${API}/newApplication/files`}
       />
     </Box>
