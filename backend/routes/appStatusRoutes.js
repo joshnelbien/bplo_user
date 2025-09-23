@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const AppStatus = require("../db/model/applicantStatusDB");
+const File = require("../db/model/files");
 
 router.post("/", async (req, res) => {
   try {
@@ -41,6 +42,21 @@ router.get("/status/:userId", async (req, res) => {
   } catch (error) {
     console.error("Error fetching tracker:", error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+router.get("/files/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const record = await File.findOne({
+      where: { userId },
+    });
+
+    if (!record) return res.status(404).json({ error: "Not found" });
+    res.json(record);
+  } catch (err) {
+    console.error("Error fetching application:", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
