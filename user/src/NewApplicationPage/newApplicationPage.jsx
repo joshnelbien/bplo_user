@@ -398,7 +398,7 @@ function NewApplicationPage() {
       }
 
       setTimeout(() => {
-        navigate(`/homePage/${id}`);
+        navigate(`/appTracker/${id}`);
       }, 2000);
     } catch (err) {
       console.error(err);
