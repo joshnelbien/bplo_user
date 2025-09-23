@@ -2,17 +2,7 @@ import { Button, Stack, TextField, Typography, Dialog, DialogActions, DialogCont
 import { useState } from "react";
 
 export default function Section7FileUploads({ handleFileChange }) {
-  const files = [
-    { label: "Proof of Registration", name: "proofOfReg" },
-    { label: "Proof of Right to Use Location", name: "proofOfRightToUseLoc" },
-    { label: "Location Plan", name: "locationPlan" },
-    { label: "Barangay Clearance (Optional)", name: "brgyClearance" },
-    { label: "Market Clearance (Optional)", name: "marketClearance" },
-    { label: "Occupancy Permit (Optional)", name: "occupancyPermit" },
-    { label: "Cedula", name: "cedula" },
-    { label: "Photo of Business Establishment (Interior)", name: "photoOfBusinessEstInt" },
-    { label: "Photo of Business Establishment (Exterior)", name: "photoOfBusinessEstExt" },
-  ];
+  const files = [];
 
   const [selectedFiles, setSelectedFiles] = useState({});
   const [openConfirm, setOpenConfirm] = useState(false);
@@ -49,6 +39,11 @@ export default function Section7FileUploads({ handleFileChange }) {
       </Typography>
 
       <Stack spacing={3}>
+        {files.length === 0 && (
+          <Typography variant="body1">
+            No documents required at this step.
+          </Typography>
+        )}
         {files.map((file) => (
           <Stack key={file.name} direction="column" spacing={1}>
             <Typography>{file.label}:</Typography>
@@ -82,11 +77,7 @@ export default function Section7FileUploads({ handleFileChange }) {
             </Stack>
           </Stack>
         ))}
-
-       
       </Stack>
-
-   
     </div>
   );
 }
