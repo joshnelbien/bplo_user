@@ -12,10 +12,13 @@ import {
   InputBase,
   Grow,
   Stack,
+  IconButton,
+  Menu,
+  MenuItem,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import { IconButton, Menu, MenuItem } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import { styled } from "@mui/material/styles";
+import CloseIcon from "@mui/icons-material/Close";
 
 const SearchBar = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -44,9 +47,13 @@ function App() {
   const [animate, setAnimate] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [searchValue, setSearchValue] = useState("");
-
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  // New state for modal and selected requirements
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState("");
+  const [selectedRequirement, setSelectedRequirement] = useState("");
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -57,8 +64,23 @@ function App() {
   };
 
   const handleSelect = (value) => {
-    console.log("Selected:", value);
+    setSelectedRequirement(value);
+    setSearchValue(value);
     setAnchorEl(null);
+  };
+
+  const handleTrackClick = () => {
+    if (selectedRequirement) {
+      setModalContent(`Here are the requirements for a ${selectedRequirement} application. This is a sample text.`);
+    } else {
+      setModalContent("Please pop up");
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setModalContent("");
   };
 
   // Update time every second
@@ -97,7 +119,7 @@ function App() {
   useEffect(() => setAnimate(true), []);
 
   return (
-    <Box>
+    <Box className="relative">
       {/* Navbar */}
       <AppBar
         position="sticky"
@@ -142,7 +164,7 @@ function App() {
           <Grow in={animate} timeout={1200}>
             <Box
               component="img"
-              src="/spc.png"
+              src="spclogo.png"
               alt="Logo"
               sx={{ width: { xs: 150, sm: 120 }, mb: 5 }}
             />
@@ -232,11 +254,11 @@ function App() {
                 <ArrowDropDownIcon />
               </IconButton>
               <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-                <MenuItem onClick={() => handleSelect("New")}>
-                  New Application
+                <MenuItem onClick={() => handleSelect("New Application Requirements")}>
+                  New Application Requirements
                 </MenuItem>
-                <MenuItem onClick={() => handleSelect("Renew")}>
-                  Renewal
+                <MenuItem onClick={() => handleSelect("Renewal Requirements")}>
+                  Renewal Requirements
                 </MenuItem>
               </Menu>
             </SearchBar>
@@ -250,12 +272,57 @@ function App() {
                 color: "white",
                 "&:hover": { backgroundColor: "#07270a" },
               }}
+              onClick={handleTrackClick}
             >
               Track
             </Button>
           </Box>
         </Grow>
       </Grid>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <Box
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 1000,
+          }}
+        >
+          <Box
+            className="relative w-80 max-w-sm rounded-lg bg-white p-6 text-center shadow-lg sm:w-96"
+            sx={{
+              position: "relative",
+              maxWidth: 400,
+              p: 4,
+              backgroundColor: "white",
+              borderRadius: "8px",
+              boxShadow: 24,
+            }}
+          >
+            <IconButton
+              onClick={handleModalClose}
+              sx={{
+                position: "absolute",
+                top: 8,
+                right: 8,
+                color: "red",
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+            <Typography variant="body1">{modalContent}</Typography>
+          </Box>
+        </Box>
+      )}
 
       {/* Footer */}
       <Box
