@@ -23,6 +23,27 @@ export default function Step1BusinessInfo({ formData, handleChange, errors }) {
     handleChange({ target: { name: e.target.name, value } });
   };
 
+  // ✅ Corrected TIN input: 9 digits, formatted as XXX-XX-XXXX
+  const handleTINInput = (e) => {
+    // Extract only digits from the input and limit to 9
+    let digits = e.target.value.replace(/[^0-9]/g, "").slice(0, 9);
+
+    // Build the formatted string
+    let formatted = "";
+    if (digits.length > 0) {
+      formatted = digits.slice(0, 3);
+    }
+    if (digits.length > 3) {
+      formatted += "-" + digits.slice(3, 5);
+    }
+    if (digits.length > 5) {
+      formatted += "-" + digits.slice(5, 9);
+    }
+
+    // Update the form data with the new formatted value
+    handleChange({ target: { name: e.target.name, value: formatted } });
+  };
+
   return (
     <div style={{ marginBottom: 20 }}>
       <Typography variant="h6" gutterBottom>
@@ -83,19 +104,20 @@ export default function Step1BusinessInfo({ formData, handleChange, errors }) {
         />
 
         {/* TIN No. (numbers only, no uppercase conversion needed) */}
+        {/* TIN No. (not editable) */}
+        {/* TIN No. (numbers only, not editable) */}
         <TextField
           label="TIN No."
           name="tinNo"
           value={formData.tinNo || ""}
-          onChange={handleNumberInput}
+          onChange={handleTINInput}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
-          // Add error props
           error={!!errors.tinNo}
           helperText={errors.tinNo}
+          disabled // This will gray out the field and make it un-editable
         />
-
         {/* Trade Name */}
         <TextField
           label="Trade Name"

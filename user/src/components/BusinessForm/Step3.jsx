@@ -1,3 +1,4 @@
+
 import {
   FormControl,
   InputLabel,
@@ -8,6 +9,7 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  Button,
 } from "@mui/material";
 import { useEffect, useState, useMemo } from "react";
 import {
@@ -22,7 +24,7 @@ import "leaflet/dist/leaflet.css";
 import axios from "axios";
 import debounce from "lodash.debounce";
 
-export default function Step3AddressInfo({ formData, handleChange, errors }) {
+export default function Step3AddressInfo({ formData, handleChange, errors, handleFileChange }) {
   const barangays = [
     "ATISAN",
     "BAGONG POOK VI-C (POB.)",
@@ -199,10 +201,29 @@ export default function Step3AddressInfo({ formData, handleChange, errors }) {
   // State for map center
   const [mapCenter, setMapCenter] = useState(defaultPosition);
 
+  // State for selected files
+  const [selectedFiles, setSelectedFiles] = useState({});
+
+  const files = [
+    { label: "Proof of Registration", name: "proofOfReg" },
+    { label: "Proof of Right to Use Location", name: "proofOfRightToUseLoc" },
+    { label: "Location Plan", name: "locationPlan" },
+  ];
+
   // Uppercase handler
   const handleUppercaseChange = (e) => {
     const value = (e.target.value || "").toUpperCase();
     handleChange({ target: { name: e.target.name, value } });
+  };
+
+  // File selection handler
+  const handleFileSelect = (e) => {
+    const { name, files } = e.target;
+    setSelectedFiles((prev) => ({
+      ...prev,
+      [name]: files[0] ? files[0].name : "",
+    }));
+    handleFileChange(e); // call parent handler
   };
 
   // Geocode barangay
@@ -477,6 +498,42 @@ export default function Step3AddressInfo({ formData, handleChange, errors }) {
             />
           </Stack>
         )}
+
+        <Typography variant="h6" gutterBottom>
+          Business Documents
+        </Typography>
+        {files.map((file) => (
+          <Stack key={file.name} direction="column" spacing={1}>
+            <Typography>{file.label}:</Typography>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Button
+                variant="contained"
+                component="label"
+                size="small"
+                sx={{
+                  minWidth: 120,
+                  backgroundColor: "#4caf50",
+                  "&:hover": { backgroundColor: "#15400d" },
+                }}
+              >
+                Choose File
+                <input
+                  type="file"
+                  name={file.name}
+                  hidden
+                  onChange={handleFileSelect}
+                />
+              </Button>
+              <TextField
+                value={selectedFiles[file.name] || ""}
+                placeholder="No file selected"
+                size="small"
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+            </Stack>
+          </Stack>
+        ))}
       </Stack>
     </div>
   );
