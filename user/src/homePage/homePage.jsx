@@ -10,24 +10,19 @@ import ListItemText from "@mui/material/ListItemText";
 import Popper from "@mui/material/Popper";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import Button from "@mui/material/Button";
-import { useNavigate } from "react-router-dom";
-import Sidebar from "../sideBar/sideBar";
+import { useNavigate, useParams } from "react-router-dom";
+
 import { useState, useRef } from "react";
 
 const HomePage = () => {
-  const userId = localStorage.getItem("userId");
+  const { id } = useParams();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [openFilter, setOpenFilter] = useState(false);
   const iconRef = useRef(null);
 
   // Filter menu options
-  const filters = [
-    { label: "News", path: `/news/${userId}` },
-    { label: "New Application Requirements", path: `/requirements/new/${userId}` },
-    { label: "Renewal Application Requirements", path: `/requirements/renewal/${userId}` },
-    { label: "Privacy Notice", path: `/privacyNotice/${userId}` },
-  ];
+  const filters = [];
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
@@ -50,7 +45,6 @@ const HomePage = () => {
   return (
     <Box sx={{ display: "flex", height: "30vh", bgcolor: "#f9fafb" }}>
       {/* Sidebar */}
-      <Sidebar id={userId} />
 
       {/* Main Content */}
       <Box
@@ -102,7 +96,10 @@ const HomePage = () => {
             <Paper sx={{ width: 300, mt: 1 }}>
               <List>
                 {filters.map((item, idx) => (
-                  <ListItemButton key={idx} onClick={() => handleSelect(item.path)}>
+                  <ListItemButton
+                    key={idx}
+                    onClick={() => handleSelect(item.path)}
+                  >
                     <ListItemText primary={item.label} />
                   </ListItemButton>
                 ))}
@@ -114,7 +111,7 @@ const HomePage = () => {
         {/* ✅ Application Tracker Button */}
         <Button
           variant="contained"
-          onClick={() => navigate(`/appTracker/${userId}`)}
+          onClick={() => navigate(`/appTracker/${id}`)}
           sx={{
             mt: 2,
             px: 4,
