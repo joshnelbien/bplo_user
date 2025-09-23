@@ -87,7 +87,8 @@ export default function Step2PersonalInfo({
           variant="outlined"
           sx={{ minWidth: 300 }}
           error={!!errors.firstName}
-          helperText={errors.firstName}
+          helperText={errors.firstName} 
+          disabled
         />
 
         {/* Middle Name */}
@@ -101,6 +102,7 @@ export default function Step2PersonalInfo({
           sx={{ minWidth: 300 }}
           error={!!errors.middleName}
           helperText={errors.middleName}
+          disabled
         />
 
         {/* Last Name */}
@@ -114,6 +116,7 @@ export default function Step2PersonalInfo({
           sx={{ minWidth: 300 }}
           error={!!errors.lastName}
           helperText={errors.lastName}
+          disabled
         />
 
         {/* Ext. Name */}
@@ -127,6 +130,7 @@ export default function Step2PersonalInfo({
           sx={{ minWidth: 300 }}
           error={!!errors.extName}
           helperText={errors.extName}
+          disabled
         />
 
         {/* Gender */}
@@ -138,6 +142,7 @@ export default function Step2PersonalInfo({
             value={formData.sex || ""}
             onChange={handleUppercaseChange}
             label="Gender"
+            disabled
           >
             <MenuItem value="">Select</MenuItem>
             <MenuItem value="MALE">Male</MenuItem>
@@ -176,6 +181,7 @@ export default function Step2PersonalInfo({
           sx={{ minWidth: 300 }}
           error={!!errors.telNo}
           helperText={errors.telNo}
+          disabled
         />
 
         {/* Mobile No. */}
@@ -190,6 +196,7 @@ export default function Step2PersonalInfo({
           error={!!errors.mobileNo}
           helperText={errors.mobileNo}
           placeholder="+63"
+          disabled
         />
       </Stack>
     </div>

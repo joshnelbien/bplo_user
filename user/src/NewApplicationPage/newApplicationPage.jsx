@@ -250,7 +250,7 @@ function NewApplicationPage() {
         "Taxprovince",
         "TaxcityOrMunicipality",
         "Taxbarangay",
-        "TaxaddressLine1",
+      "TaxaddressLine1",
         "TaxzipCode",
       ],
       5: [
