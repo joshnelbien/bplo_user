@@ -260,7 +260,7 @@ function NewApplicationPage() {
         "femaleEmployee",
       ],
       // 6: ["lineOfBusiness", "productService", "Units", "capital"],
-      7: ["proofOfReg", "brgyClearance", "cedula"],
+      //7: ["proofOfReg", "brgyClearance", "cedula"],
     };
 
     requiredFields[step]?.forEach((field) => {
@@ -432,6 +432,7 @@ function NewApplicationPage() {
       case 3:
         return (
           <Step3AddressInfo
+            handleFileChange={handleFileChange}
             formData={formDataState}
             handleChange={handleChange}
             errors={errors}
@@ -442,6 +443,7 @@ function NewApplicationPage() {
           <Step4TaxInfo
             formData={formDataState}
             handleChange={handleChange}
+            handleFileChange={handleFileChange}
             errors={errors}
           />
         );
@@ -450,6 +452,7 @@ function NewApplicationPage() {
           <Step5BusinessDetails
             formData={formDataState}
             handleChange={handleChange}
+            handleFileChange={handleFileChange}
             errors={errors}
           />
         );
@@ -566,8 +569,8 @@ function NewApplicationPage() {
                       step - 1 > index
                         ? "blue"
                         : step - 1 === index
-                        ? "green"
-                        : "gray",
+                          ? "green"
+                          : "gray",
                   },
                 }}
               >
