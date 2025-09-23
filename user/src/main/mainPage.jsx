@@ -166,6 +166,8 @@ function App() {
               gap: 2,
               flexWrap: "wrap",
               justifyContent: "center",
+              alignItems: "center", // Center vertically
+              minHeight: "10vh", // Full viewport height to center vertically
               mb: 2,
             }}
           >
@@ -183,7 +185,6 @@ function App() {
             >
               New Application
             </Button>
-
             <Button
               variant="outlined"
               sx={{
@@ -204,17 +205,16 @@ function App() {
         {/* Centered Search Bar */}
         <Box
           sx={{
-            mt: 5,
+            mt: -1, // Increase top margin to move further down
+            ml: 2, // Add left margin to shift right
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: 1, // space between search bar and button
-            flexWrap: "wrap", // responsive wrapping on small screens
+            gap: 1,
+            flexWrap: "wrap",
           }}
         >
-          <SearchBar
-            sx={{ display: "flex", alignItems: "center", maxWidth: 220 }}
-          >
+          <SearchBar sx={{ display: "flex", alignItems: "center", maxWidth: 220 }}>
             <SearchInput
               placeholder="Track your application..."
               value={searchValue}
@@ -224,9 +224,7 @@ function App() {
               <ArrowDropDownIcon />
             </IconButton>
             <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-              <MenuItem onClick={() => handleSelect("New")}>
-                New Application
-              </MenuItem>
+              <MenuItem onClick={() => handleSelect("New")}>New Application</MenuItem>
               <MenuItem onClick={() => handleSelect("Renew")}>Renewal</MenuItem>
             </Menu>
           </SearchBar>
