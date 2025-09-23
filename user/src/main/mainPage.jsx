@@ -61,14 +61,6 @@ const requirementsData = {
   ],
 };
 
-const privacyNotice = `
-We value your privacy. The information you provide in this system will be collected,
-stored, and processed solely for the purpose of business permit registration and renewal.
-Your data will not be shared with third parties except as required by law or with your consent.
-By continuing to use this service, you acknowledge and agree to the data privacy practices
-of the Business Permit and Licensing Office.
-`;
-
 function App() {
   const navigate = useNavigate();
   const theme = useTheme();
@@ -80,22 +72,19 @@ function App() {
   const [modalType, setModalType] = useState("");
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
-
   const handleToggleRequirements = () => setOpenRequirements(!openRequirements);
-
   const handleOpenModal = (type) => {
     setModalType(type);
     setModalOpen(true);
   };
-
   const handleCloseModal = () => setModalOpen(false);
 
+  // Fixed navItems to actually render
   const navItems = [
     { label: "New Business Requirements", type: "newApplication" },
     { label: "Renewal Business Requirements", type: "renewal" },
     { label: "Privacy Notice", type: "privacy" },
     { label: "News", type: "news" },
-    
   ];
 
   const drawer = (
@@ -113,36 +102,8 @@ function App() {
       >
         ONLINE BUSINESS PROCESSING
       </Typography>
-      
+
       <List>
-        {navItems.map((item) => {
-          if (item.type) return null;
-          return (
-            <ListItem key={item.label} disablePadding>
-              <ListItemButton
-                sx={{
-                  justifyContent: "flex-start",
-                  transition: "background-color 0.3s, color 0.3s",
-                  "&:hover": {
-                    backgroundColor: "#e6f2e6",
-                    "& .MuiListItemText-primary": { color: "#07270a" },
-                  },
-                }}
-                onClick={() => navigate(item.path)}
-              >
-                <ListItemText
-                  primary={item.label}
-                  sx={{
-                    "& .MuiListItemText-primary": {
-                      fontWeight: "normal",
-                      color: "#09360D",
-                    },
-                  }}
-                />
-              </ListItemButton>
-            </ListItem>
-          );
-        })}
         {/* Requirements Dropdown */}
         <ListItem disablePadding>
           <ListItemButton
@@ -189,6 +150,7 @@ function App() {
           </List>
         </Collapse>
 
+        {/* News */}
         <ListItem disablePadding>
           <ListItemButton onClick={() => handleOpenModal("news")}>
             <ListItemText
@@ -197,7 +159,8 @@ function App() {
             />
           </ListItemButton>
         </ListItem>
-        {/* Privacy Notice in Drawer */}
+
+        {/* Privacy Notice */}
         <ListItem disablePadding>
           <ListItemButton onClick={() => handleOpenModal("privacy")}>
             <ListItemText
@@ -237,11 +200,10 @@ function App() {
             </IconButton>
           ) : (
             <Box sx={{ display: "flex", gap: 3, flexGrow: 1 }}>
-        
               <Box>
                 <Button
                   onClick={handleToggleRequirements}
-                  sx={{ color: "#09360D", fontWeight: "bold" }}
+                  sx={{ color: "white", fontWeight: "bold" }}
                   endIcon={
                     openRequirements ? <ExpandLessIcon /> : <ExpandMoreIcon />
                   }
@@ -253,7 +215,7 @@ function App() {
                     <Button
                       onClick={() => handleOpenModal("newApplication")}
                       sx={{
-                        color: "#09360D",
+                        color: "white",
                         fontWeight: "normal",
                         justifyContent: "flex-start",
                       }}
@@ -263,7 +225,7 @@ function App() {
                     <Button
                       onClick={() => handleOpenModal("renewal")}
                       sx={{
-                        color: "#09360D",
+                        color: "white",
                         fontWeight: "normal",
                         justifyContent: "flex-start",
                       }}
@@ -274,8 +236,14 @@ function App() {
                 </Collapse>
               </Box>
               <Button
+                onClick={() => handleOpenModal("news")}
+                sx={{ color: "white", fontWeight: "bold" }}
+              >
+                News
+              </Button>
+              <Button
                 onClick={() => handleOpenModal("privacy")}
-                sx={{ color: "#09360D", fontWeight: "bold" }}
+                sx={{ color: "white", fontWeight: "bold" }}
               >
                 Privacy Notice
               </Button>
@@ -290,7 +258,7 @@ function App() {
         open={mobileOpen}
         onClose={handleDrawerToggle}
         ModalProps={{ keepMounted: true }}
-        sx={{ "& .MuiDrawer-paper": { width: 260 } }}
+        sx={{ "& .MuiDrawer-paper": { width: 240 } }}
       >
         {drawer}
       </Drawer>
@@ -326,7 +294,7 @@ function App() {
             sx={{
               fontWeight: 900,
               color: "#09360D",
-              fontSize: { xs: "3rem", sm: "1rem" },
+              fontSize: { xs: "1.8rem", sm: "3rem" }, // fixed sizes
             }}
           >
             BUSINESS REGISTRATION
@@ -345,7 +313,7 @@ function App() {
             <Button
               variant="contained"
               sx={{
-                px: 1,
+                px: 2,
                 py: 1,
                 fontWeight: "bold",
                 backgroundColor: "#09360D",
@@ -360,7 +328,7 @@ function App() {
             <Button
               variant="outlined"
               sx={{
-                px: 1,
+                px: 2,
                 py: 1,
                 fontWeight: "bold",
                 borderColor: "#09360D",
@@ -407,16 +375,24 @@ function App() {
                   ? "New Business Requirements"
                   : modalType === "renewal"
                   ? "Renewal Business Requirements"
-                  : "Privacy Notice"}
+                  : modalType === "privacy"
+                  ? "Privacy Notice"
+                  : modalType === "news"
+                  ? "News"
+                  : ""}
               </Typography>
-              <Button onClick={handleCloseModal} sx={{ minWidth: 0, p: 1 }}>
+
+              <Button
+                onClick={handleCloseModal}
+                aria-label="close modal"
+                sx={{ minWidth: 0, p: 1 }}
+              >
                 <CloseIcon />
               </Button>
             </Box>
-            {/* Content */}
+
             {/* Modal Content */}
             {modalType === "privacy" ? (
-              // Privacy Notice Modal
               <Box>
                 <Typography variant="body1" paragraph>
                   <strong>
@@ -450,7 +426,6 @@ function App() {
                 </Box>
               </Box>
             ) : modalType === "news" ? (
-              // News Modal
               <Box>
                 <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
                   Latest News & Updates
@@ -475,7 +450,6 @@ function App() {
                 </Typography>
               </Box>
             ) : (
-              // Requirements Modal
               <List>
                 {requirementsData[modalType]?.map((item, index) => (
                   <ListItem key={index} sx={{ px: 0, mb: 1 }}>

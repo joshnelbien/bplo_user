@@ -1,3 +1,4 @@
+// AppTracker.jsx
 import {
   Box,
   Button,
@@ -13,11 +14,10 @@ import {
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import ApplicantModal from "./ApplicantModal";
 
-// ✅ Custom Step Icon
 function ColoredStepIcon(props) {
-  const { active, completed, className, icon, status } = props;
-
+  const { active, icon, status } = props;
   let color = "gray";
   if (status === "Approved") color = "green";
   else if (status === "Declined") color = "red";
@@ -25,7 +25,6 @@ function ColoredStepIcon(props) {
 
   return (
     <Box
-      className={className}
       sx={{
         width: 30,
         height: 30,
@@ -47,6 +46,9 @@ function AppTracker() {
   const { id } = useParams();
   const [trackers, setTrackers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedApp, setSelectedApp] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
+
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_BASE;
 
@@ -67,12 +69,12 @@ function AppTracker() {
   useEffect(() => {
     let intervalId;
 
-    const fetchData = async () => {
+    // 🔹 fetch status (with interval)
+    const fetchStatus = async () => {
       try {
         const trackerRes = await axios.get(`${API}/appStatus/status/${id}`);
-
         if (trackerRes.data) {
-          setTrackers(trackerRes.data); // already an array
+          setTrackers(trackerRes.data);
         }
       } catch (err) {
         console.error("Error fetching tracker:", err);
@@ -81,12 +83,26 @@ function AppTracker() {
       }
     };
 
-    fetchData();
-    intervalId = setInterval(fetchData, 5000);
+    // 🔹 fetch files (only once on mount, not in interval)
+    const fetchFiles = async () => {
+      try {
+        const fileRes = await axios.get(`${API}/appStatus/files/${id}`);
+        setSelectedApp(fileRes.data); // preload application details
+      } catch (err) {
+        console.error("Error fetching application files:", err);
+      }
+    };
+
+    fetchStatus();
+    fetchFiles(); // 👈 only once
+
+    intervalId = setInterval(fetchStatus, 5000);
 
     return () => clearInterval(intervalId);
   }, [id, API]);
-
+  const handleViewApplication = () => {
+    setOpenModal(true);
+  };
   if (loading)
     return (
       <Box
@@ -101,22 +117,17 @@ function AppTracker() {
 
   const reorderDepartments = (tracker) => {
     return [...departments].sort((a, b) => {
-      // ✅ Force BPLO always first
       if (a === "BPLO") return -1;
       if (b === "BPLO") return 1;
-
-      // ✅ Force BUSINESS TAX always last
       if (a === "BUSINESS TAX") return 1;
       if (b === "BUSINESS TAX") return -1;
 
-      // ✅ Keep your Pending vs Not Pending logic for the middle ones
       const isANotPending = tracker[a] !== "Pending";
       const isBNotPending = tracker[b] !== "Pending";
 
-      if (isANotPending && !isBNotPending) return -1; // a first
-      if (!isANotPending && isBNotPending) return 1; // b first
-
-      return 0; // keep same order otherwise
+      if (isANotPending && !isBNotPending) return -1;
+      if (!isANotPending && isBNotPending) return 1;
+      return 0;
     });
   };
 
@@ -185,8 +196,7 @@ function AppTracker() {
                           {tracker[`${dept}timeStamp`]
                             ? `(${tracker[`${dept}timeStamp`]})`
                             : ""}
-                          {dept === `${dept}` &&
-                          status === "Declined" &&
+                          {status === "Declined" &&
                           tracker[`${dept}decline`] ? (
                             <Box
                               component="span"
@@ -201,10 +211,28 @@ function AppTracker() {
                   );
                 })}
               </Stepper>
+
+              {/* ✅ Modal trigger without re-fetch */}
+              <Button
+                variant="outlined"
+                color="primary"
+                sx={{ mt: 2 }}
+                onClick={() => handleViewApplication(tracker)}
+              >
+                View Full Application
+              </Button>
             </Paper>
           );
         })
       )}
+
+      <ApplicantModal
+        applicant={selectedApp}
+        isOpen={openModal}
+        onClose={() => setOpenModal(false)}
+        onApprove={(app) => console.log("Approve logic here:", app)}
+        baseUrl={`${API}/newApplication/files`}
+      />
     </Box>
   );
 }
