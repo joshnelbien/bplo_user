@@ -123,6 +123,20 @@ const HomePage = () => {
         >
           Application Tracker
         </Button>
+        <Button
+          variant="contained"
+          onClick={() => navigate(`/newApplicationPage/${id}`)}
+          sx={{
+            mt: 2,
+            px: 4,
+            py: 1.5,
+            fontSize: "1rem",
+            bgcolor: "#2E8B57",
+            "&:hover": { bgcolor: "#246b44" },
+          }}
+        >
+          New Business Application
+        </Button>
       </Box>
     </Box>
   );
