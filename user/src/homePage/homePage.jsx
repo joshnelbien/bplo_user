@@ -51,7 +51,7 @@ const HomePage = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          p: { xs: 2, sm: 4 },
+          p: { xs: 5, sm: 3 },
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -117,6 +117,8 @@ const HomePage = () => {
             px: 4,
             py: 1.5,
             fontSize: "1rem",
+            width: 250,
+            height: 50,
             bgcolor: "#2E8B57",
             "&:hover": { bgcolor: "#246b44" },
           }}
@@ -130,6 +132,8 @@ const HomePage = () => {
             mt: 2,
             px: 4,
             py: 1.5,
+            width: 250,
+            height: 50,
             fontSize: "1rem",
             bgcolor: "#2E8B57",
             "&:hover": { bgcolor: "#246b44" },
