@@ -9,8 +9,7 @@ import {
   Button,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import L from "leaflet";
+// MapContainer, TileLayer, Marker, useMapEvents, and L from leaflet are removed
 import "leaflet/dist/leaflet.css";
 
 export default function Step4TaxInfo({ formData, handleChange, errors, handleFileChange }) {
@@ -53,48 +52,20 @@ export default function Step4TaxInfo({ formData, handleChange, errors, handleFil
   const cityOptions =
     formData.Taxregion && formData.Taxprovince && psgc
       ? Object.keys(
-          psgc[formData.Taxregion]?.province_list[formData.Taxprovince]
-            ?.municipality_list || {}
-        )
+        psgc[formData.Taxregion]?.province_list[formData.Taxprovince]
+          ?.municipality_list || {}
+      )
       : [];
 
   const barangayOptions =
     formData.Taxregion &&
-    formData.Taxprovince &&
-    formData.TaxcityOrMunicipality &&
-    psgc
+      formData.Taxprovince &&
+      formData.TaxcityOrMunicipality &&
+      psgc
       ? psgc[formData.Taxregion]?.province_list[formData.Taxprovince]
-          ?.municipality_list[formData.TaxcityOrMunicipality]?.barangay_list ||
-        []
+        ?.municipality_list[formData.TaxcityOrMunicipality]?.barangay_list ||
+      []
       : [];
-
-  // Default coordinates (San Pablo City center)
-  const defaultPosition = [14.0697, 121.3259];
-
-  // Leaflet marker icon fix
-  const defaultIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-  });
-
-  // Click handler for map
-  function LocationMarker() {
-    useMapEvents({
-      click(e) {
-        const { lat, lng } = e.latlng;
-        handleChange({
-          target: { name: "TaxpinAddress", value: `${lat},${lng}` },
-        });
-      },
-    });
-
-    if (formData.TaxpinAddress) {
-      const [lat, lng] = formData.TaxpinAddress.split(",").map(Number);
-      return <Marker position={[lat, lng]} icon={defaultIcon} />;
-    }
-    return null;
-  }
 
   return (
     <div style={{ marginBottom: 20 }}>
@@ -103,6 +74,8 @@ export default function Step4TaxInfo({ formData, handleChange, errors, handleFil
       </Typography>
 
       <Stack spacing={3}>
+
+
         {/* Region */}
         <FormControl
           fullWidth
@@ -160,6 +133,28 @@ export default function Step4TaxInfo({ formData, handleChange, errors, handleFil
             </Typography>
           )}
         </FormControl>
+
+        {/* Zip Code */}
+        <TextField
+          label="Zip Code"
+          name="TaxzipCode"
+          value={formData.TaxzipCode || ""}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value === "" || /^\d+$/.test(value)) {
+              handleChange({ target: { name: "TaxzipCode", value } });
+            }
+          }}
+          fullWidth
+          variant="outlined"
+          error={!!errors.TaxzipCode}
+          helperText={errors.TaxzipCode}
+          type="text"
+          inputProps={{
+            inputMode: 'numeric',
+            pattern: '[0-9]*',
+          }}
+        />
 
         {/* City / Municipality */}
         <FormControl
@@ -219,9 +214,9 @@ export default function Step4TaxInfo({ formData, handleChange, errors, handleFil
           )}
         </FormControl>
 
-        {/* Address Line 1 */}
+        {/* House/Building No., Street Name */}
         <TextField
-          label="Address Line 1"
+          label="House/Building No., Street Name"
           name="TaxaddressLine1"
           value={formData.TaxaddressLine1 || ""}
           onChange={handleUppercaseChange}
@@ -231,43 +226,6 @@ export default function Step4TaxInfo({ formData, handleChange, errors, handleFil
           helperText={errors.TaxaddressLine1}
         />
 
-        {/* Zip Code */}
-        <TextField
-          label="Zip Code"
-          name="TaxzipCode"
-          value={formData.TaxzipCode || ""}
-          onChange={handleUppercaseChange}
-          fullWidth
-          variant="outlined"
-          error={!!errors.TaxzipCode}
-          helperText={errors.TaxzipCode}
-        />
-
-        {/* Pin Address with Map */}
-        <div>
-          <Typography variant="subtitle1" gutterBottom>
-            Pin Address (Click on the map)
-          </Typography>
-          <MapContainer
-            center={defaultPosition}
-            zoom={13}
-            style={{ height: "400px", width: "100%", borderRadius: "10px" }}
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-            />
-            <LocationMarker />
-          </MapContainer>
-          <TextField
-            label="Coordinates"
-            name="TaxpinAddress"
-            value={formData.TaxpinAddress || ""}
-            fullWidth
-            disabled
-            sx={{ marginTop: 2 }}
-          />
-        </div>
 
         {/* Business Documents */}
         <Typography variant="h6" gutterBottom>

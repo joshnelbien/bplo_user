@@ -64,6 +64,7 @@ export default function Step1BusinessInfo({ formData, handleChange, errors }) {
           // Add error props
           error={!!errors.BusinessType}
           helperText={errors.BusinessType}
+          disabled
         >
           <MenuItem value="">Select Business Type</MenuItem>
           <MenuItem value="SOLE PROPRIETORSHIP">Sole Proprietorship</MenuItem>
@@ -87,6 +88,7 @@ export default function Step1BusinessInfo({ formData, handleChange, errors }) {
           // Add error props (assuming this isn't required by default)
           error={!!errors.dscRegNo}
           helperText={errors.dscRegNo}
+          disabled
         />
 
         {/* Business Name */}
@@ -101,6 +103,7 @@ export default function Step1BusinessInfo({ formData, handleChange, errors }) {
           // Add error props
           error={!!errors.businessName}
           helperText={errors.businessName}
+          disabled
         />
 
         {/* TIN No. (numbers only, no uppercase conversion needed) */}
@@ -130,6 +133,7 @@ export default function Step1BusinessInfo({ formData, handleChange, errors }) {
           // Add error props
           error={!!errors.TradeName}
           helperText={errors.TradeName}
+          disabled
         />
       </Stack>
     </div>
