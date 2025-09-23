@@ -1,37 +1,32 @@
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
+import DescriptionIcon from "@mui/icons-material/Description";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import {
-  Avatar,
-  Backdrop,
   Box,
-  Button,
+  Collapse,
   Drawer,
-  Fade,
   IconButton,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Modal,
   Paper,
-  Stack,
   Typography,
 } from "@mui/material";
-import { alpha } from "@mui/material/styles";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom"; // ✅ correct import
+import { useNavigate, useParams } from "react-router-dom";
 
 const logo = "/spclogo.png";
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // ✅ get id from URL
+  const { id } = useParams();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState({ firstName: "", lastName: "", email: "" });
   const [openLogoutModal, setOpenLogoutModal] = useState(false);
+  const [openRequirements, setOpenRequirements] = useState(false); // ✅ state for dropdown
   const API = import.meta.env.VITE_API_BASE;
 
   const toggleDrawer = () => setMobileOpen(!mobileOpen);
@@ -48,7 +43,7 @@ const Sidebar = () => {
         const data = await response.json();
         setUser({
           firstName: data.firstName,
-          lastName: data.lastname,
+          lastName: data.lastName,
           email: data.email,
         });
       } catch (error) {
@@ -57,11 +52,10 @@ const Sidebar = () => {
     };
 
     fetchUser();
-  }, [id, API]); // ✅ depend on id
+  }, [id, API]);
 
-  // Logout modal handlers
+  // Logout handlers
   const handleLogoutOpen = () => setOpenLogoutModal(true);
-  const handleLogoutClose = () => setOpenLogoutModal(false);
   const handleConfirmLogout = () => {
     localStorage.removeItem("userId");
     navigate("/");
@@ -91,62 +85,51 @@ const Sidebar = () => {
           sx={{
             height: 100,
             width: 100,
-            mb: 3,
+            mb: 1.5,
             borderRadius: "50%",
             boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
             mx: "auto",
             display: "block",
           }}
         />
-        <Stack
-          direction="row"
-          spacing={2}
-          alignItems="center"
-          sx={{
-            mb: 4,
-            p: 2,
-            border: "1px solid #e0e0e0",
-            borderRadius: "8px",
-            bgcolor: "#f5f5f5",
-          }}
-        >
-          <Avatar sx={{ width: 56, height: 56, bgcolor: "#2E8B57" }}>
-            {user?.firstName && user?.lastName
-              ? `${user.firstName[0].toUpperCase()}${user.lastName[0].toUpperCase()}`
-              : "?"}
-          </Avatar>
-          <Box>
-            <Typography variant="body1">
-              {user?.firstName} {user?.lastName}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" noWrap>
-              {user?.email}
-            </Typography>
-          </Box>
-        </Stack>
+
+        {/* User Info */}
+        <Box sx={{ textAlign: "center", mb: 4 }}>
+          <Typography variant="body1" fontWeight="bold">
+            {user?.firstName} {user?.lastName}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" noWrap>
+            {user?.email}
+          </Typography>
+        </Box>
 
         {/* Navigation */}
         <List component="nav">
-          <ListItemButton onClick={() => navigate(`/newApplicationPage/${id}`)}>
+          {/* Requirements Dropdown */}
+          <ListItemButton onClick={() => setOpenRequirements(!openRequirements)}>
             <ListItemIcon>
-              <AddCircleOutlineIcon sx={{ color: "#2E8B57" }} />
+              <DescriptionIcon sx={{ color: "#2E8B57" }} />
             </ListItemIcon>
-            <ListItemText primary="New Application" />
+            <ListItemText primary="Requirements" />
+            {openRequirements ? <ExpandLess /> : <ExpandMore />}
           </ListItemButton>
 
-          <ListItemButton onClick={() => navigate(`/renew/${id}`)}>
-            <ListItemIcon>
-              <AutorenewIcon sx={{ color: "#2E8B57" }} />
-            </ListItemIcon>
-            <ListItemText primary="Renew Application" />
-          </ListItemButton>
-
-          <ListItemButton onClick={() => navigate(`/appTracker/${id}`)}>
-            <ListItemIcon>
-              <AssignmentTurnedInIcon sx={{ color: "#2E8B57" }} />
-            </ListItemIcon>
-            <ListItemText primary="Application Status" />
-          </ListItemButton>
+          <Collapse in={openRequirements} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={() => navigate(`/requirements/new/${id}`)}
+              >
+                <ListItemText primary="New Application Requirements" />
+              </ListItemButton>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                onClick={() => navigate(`/requirements/renewal/${id}`)}
+              >
+                <ListItemText primary="Renewal Application Requirements" />
+              </ListItemButton>
+            </List>
+          </Collapse>
         </List>
       </Box>
 
