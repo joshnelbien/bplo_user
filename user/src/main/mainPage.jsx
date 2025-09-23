@@ -10,6 +10,8 @@ import {
   Fade,
   Slide,
   InputBase,
+  Grow,
+  Stack,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { IconButton, Menu, MenuItem } from "@mui/material";
@@ -135,44 +137,48 @@ function App() {
           pt: 8,
         }}
       >
+        {/* Logo with Slide + Grow */}
         <Slide in={animate} direction="down" timeout={800}>
-          <Box
-            component="img"
-            src="/spc.png"
-            alt="Logo"
-            sx={{ width: { xs: 150, sm: 120 }, mb: 5 }}
-          />
+          <Grow in={animate} timeout={1200}>
+            <Box
+              component="img"
+              src="/spc.png"
+              alt="Logo"
+              sx={{ width: { xs: 150, sm: 120 }, mb: 5 }}
+            />
+          </Grow>
         </Slide>
 
+        {/* Title with Slide + Fade */}
         <Slide in={animate} direction="down" timeout={1000}>
-          <Typography
-            variant="h2"
-            component="h1"
-            gutterBottom
-            sx={{
-              fontWeight: 900,
-              color: "#09360D",
-              fontSize: { xs: "1.8rem", sm: "3rem" },
-            }}
-          >
-            BUSINESS REGISTRATION
-          </Typography>
+          <Fade in={animate} timeout={1500}>
+            <Typography
+              variant="h2"
+              component="h1"
+              gutterBottom
+              sx={{
+                fontWeight: 900,
+                color: "#09360D",
+                fontSize: { xs: "1.8rem", sm: "3rem" },
+                mb: 3,
+              }}
+            >
+              BUSINESS REGISTRATION
+            </Typography>
+          </Fade>
         </Slide>
 
-        <Fade in={animate} timeout={2500}>
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              flexWrap: "wrap",
-              justifyContent: "center",
-              mb: 2,
-            }}
-          >
+        {/* Buttons with staggered Fade */}
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{ mb: 3, flexWrap: "wrap", justifyContent: "center" }}
+        >
+          <Fade in={animate} timeout={1800}>
             <Button
               variant="contained"
               sx={{
-                px: 2,
+                px: 3,
                 py: 1,
                 fontWeight: "bold",
                 backgroundColor: "#09360D",
@@ -183,11 +189,12 @@ function App() {
             >
               New Application
             </Button>
-
+          </Fade>
+          <Fade in={animate} timeout={2000}>
             <Button
               variant="outlined"
               sx={{
-                px: 2,
+                px: 3,
                 py: 1,
                 fontWeight: "bold",
                 borderColor: "#09360D",
@@ -198,52 +205,56 @@ function App() {
             >
               Renewal
             </Button>
-          </Box>
-        </Fade>
+          </Fade>
+        </Stack>
 
-        {/* Centered Search Bar */}
-        <Box
-          sx={{
-            mt: 5,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 1, // space between search bar and button
-            flexWrap: "wrap", // responsive wrapping on small screens
-          }}
-        >
-          <SearchBar
-            sx={{ display: "flex", alignItems: "center", maxWidth: 220 }}
-          >
-            <SearchInput
-              placeholder="Track your application..."
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-            />
-            <IconButton onClick={handleClick}>
-              <ArrowDropDownIcon />
-            </IconButton>
-            <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-              <MenuItem onClick={() => handleSelect("New")}>
-                New Application
-              </MenuItem>
-              <MenuItem onClick={() => handleSelect("Renew")}>Renewal</MenuItem>
-            </Menu>
-          </SearchBar>
-          <Button
-            variant="contained"
+        {/* Search Bar with Grow + Fade */}
+        <Grow in={animate} timeout={2200}>
+          <Box
             sx={{
-              px: 3,
-              py: 1,
-              fontWeight: "bold",
-              backgroundColor: "#09360D",
-              color: "white",
-              "&:hover": { backgroundColor: "#07270a" },
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1,
+              flexWrap: "wrap",
+              mb: 2,
             }}
           >
-            Track
-          </Button>
-        </Box>
+            <SearchBar
+              sx={{ display: "flex", alignItems: "center", maxWidth: 220 }}
+            >
+              <SearchInput
+                placeholder="Track your application..."
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+              />
+              <IconButton onClick={handleClick}>
+                <ArrowDropDownIcon />
+              </IconButton>
+              <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                <MenuItem onClick={() => handleSelect("New")}>
+                  New Application
+                </MenuItem>
+                <MenuItem onClick={() => handleSelect("Renew")}>
+                  Renewal
+                </MenuItem>
+              </Menu>
+            </SearchBar>
+            <Button
+              variant="contained"
+              sx={{
+                px: 3,
+                py: 1,
+                fontWeight: "bold",
+                backgroundColor: "#09360D",
+                color: "white",
+                "&:hover": { backgroundColor: "#07270a" },
+              }}
+            >
+              Track
+            </Button>
+          </Box>
+        </Grow>
       </Grid>
 
       {/* Footer */}
