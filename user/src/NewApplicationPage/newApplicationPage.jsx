@@ -130,19 +130,19 @@ function NewApplicationPage() {
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: 'smooth',
+      behavior: "smooth",
     });
   }, []);
 
   // Scroll to top when step changes
   useEffect(() => {
     if (paperRef.current) {
-      paperRef.current.scrollIntoView({ behavior: 'smooth' });
+      paperRef.current.scrollIntoView({ behavior: "smooth" });
     } else {
       window.scrollTo({
         top: 0,
         left: 0,
-        behavior: 'smooth',
+        behavior: "smooth",
       });
     }
   }, [step]); // Trigger on step change
@@ -250,7 +250,7 @@ function NewApplicationPage() {
         "Taxprovince",
         "TaxcityOrMunicipality",
         "Taxbarangay",
-      "TaxaddressLine1",
+        "TaxaddressLine1",
         "TaxzipCode",
       ],
       5: [
@@ -388,12 +388,12 @@ function NewApplicationPage() {
       setSuccessDialogOpen(true);
 
       if (paperRef.current) {
-        paperRef.current.scrollIntoView({ behavior: 'smooth' });
+        paperRef.current.scrollIntoView({ behavior: "smooth" });
       } else {
         window.scrollTo({
           top: 0,
           left: 0,
-          behavior: 'smooth',
+          behavior: "smooth",
         });
       }
 
@@ -539,39 +539,38 @@ function NewApplicationPage() {
         <Stepper
           activeStep={step - 1}
           alternativeLabel
+          connector={null}
           sx={{
-            mb: 4,
-            flexWrap: "wrap",
-            justifyContent: "center",
-            "& .MuiStepIcon-root": {
-              color: "gray",
-              "&.Mui-active": {
-                color: "green",
-              },
-              "&.Mui-completed": {
-                color: "blue",
-              },
+            mb: 2,
+            flexWrap: "nowrap", // force one line
+            justifyContent: "space-between", // spread evenly
+            "& .MuiStep-root": {
+              p: 0,
+              minWidth: "auto", // remove default spacing
+              flex: "1 1 auto",
             },
-            "& .MuiStepConnector-line": {
-              borderColor: "gray",
+            "& .MuiStepIcon-root": {
+              fontSize: { xs: "1rem", sm: "1.5rem" },
+              color: "gray",
+              "&.Mui-active": { color: "#4caf50" },
+              "&.Mui-completed": { color: "#4caf50" },
+            },
+            "& .MuiStepLabel-label": {
+              fontSize: { xs: "0.55rem", sm: "0.75rem" },
+              marginTop: 1,
+              textAlign: "center",
+              color: "gray",
+              display: "block",
             },
           }}
         >
           {steps.map((label, index) => (
             <Step key={label} completed={step - 1 > index}>
               <StepLabel
-                StepIconProps={{ sx: { fontSize: 32 } }}
                 sx={{
-                  "& .MuiStepLabel-label": {
-                    fontSize: { xs: "0.6rem", sm: "0.75rem", md: "0.9rem" },
-                    textAlign: "center",
-                    color:
-                      step - 1 > index
-                        ? "blue"
-                        : step - 1 === index
-                          ? "green"
-                          : "gray",
-                  },
+                  display: "flex",
+                  flexDirection: "column", // label below icon
+                  alignItems: "center",
                 }}
               >
                 {label}
