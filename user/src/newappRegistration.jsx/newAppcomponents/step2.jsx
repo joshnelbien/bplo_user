@@ -14,7 +14,7 @@ export default function Step2PersonalInfo({
   errors,
   setErrors,
 }) {
-  // Uppercase handler for text fields with minimum 3 letters validation
+  // ✅ Uppercase handler for text fields with minimum 3 letters validation
   const handleUppercaseChange = (e) => {
     const { name, value } = e.target;
     const upperValue = (value || "").toUpperCase();
@@ -44,13 +44,13 @@ export default function Step2PersonalInfo({
     handleChange({ target: { name, value: upperValue } });
   };
 
-  // Telephone number: digits only, max 9, optional
+  // ✅ Telephone number: digits only, max 9, optional
   const handleTelNumberInput = (e) => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 9);
     handleChange({ target: { name: e.target.name, value } });
   };
 
-  // Mobile number: digits only, starts with +63, append user input
+  // ✅ Mobile number: digits only, starts with +63, append user input
   const handlePhoneNumberInput = (e) => {
     let value = e.target.value.replace(/\D/g, "");
 
@@ -69,21 +69,16 @@ export default function Step2PersonalInfo({
     handleChange({ target: { name: e.target.name, value: `+${value}` } });
   };
 
-  // Email handler: requires @gmail.com at the end
+  // ✅ Email handler: allows input before @gmail.com
   const handleEmailChange = (e) => {
-    const value = e.target.value;
-    // Validate that input ends with @gmail.com
-    if (value && !value.endsWith("@gmail.com")) {
-      setErrors((prev) => ({
-        ...prev,
-        email: "Email must end with @gmail.com",
-      }));
-    } else if (value && value.endsWith("@gmail.com")) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors.email;
-        return newErrors;
-      });
+    let value = e.target.value;
+    // If value is empty or just @gmail.com, reset to @gmail.com
+    if (!value || value === "@gmail.com") {
+      value = "@gmail.com";
+    } else {
+      // Split into part before @gmail.com and append user input before it
+      const [before, after] = value.split("@gmail.com");
+      value = `${before || ""}@gmail.com`;
     }
     handleChange({ target: { name: e.target.name, value } });
   };
@@ -173,14 +168,14 @@ export default function Step2PersonalInfo({
           label="Email"
           type="email"
           name="email"
-          value={formData.email || ""}
+          value={formData.email || "@gmail.com"}
           onChange={handleEmailChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
           error={!!errors.email}
-          helperText={errors.email || "Email must end with @gmail.com"}
-          placeholder="example@gmail.com"
+          helperText={errors.email || "Enter text before @gmail.com"}
+          placeholder="text@gmail.com"
         />
 
         {/* Telephone No. (Optional) */}
