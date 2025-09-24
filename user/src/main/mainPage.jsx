@@ -25,6 +25,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { styled } from "@mui/material/styles";
 import CloseIcon from "@mui/icons-material/Close";
 import MuiAlert from "@mui/material/Alert";
+import axios from "axios";
 
 const SearchBar = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -81,9 +82,11 @@ function App() {
   const navigate = useNavigate();
   const [animate, setAnimate] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [results, setResults] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const API = import.meta.env.VITE_API_BASE;
 
   const [modalData, setModalData] = useState(null); // { title, content }
   const [snackbar, setSnackbar] = useState({
@@ -108,62 +111,37 @@ function App() {
 
   // Track button behavior
   const handleTrackClick = async () => {
-    const currentYear = new Date().getFullYear();
-    const binRegex = new RegExp(`^\\d{7}-${currentYear}-\\d{7}$`);
-
-    // 1️⃣ Empty input
     if (!searchValue.trim()) {
       setSnackbar({
         open: true,
-        message: "⚠️ Please enter your BIN number before proceeding.",
+        message: "⚠️ Please enter a BIN or User ID",
         severity: "warning",
       });
       return;
     }
 
-    // 2️⃣ Incorrect or incomplete BIN format
-    if (!binRegex.test(searchValue)) {
-      setSnackbar({
-        open: true,
-        message: "❌ Incorrect format. Please try again.",
-        severity: "error",
-      });
-      return;
-    }
-
-    // 3️⃣ BIN format valid → check DB
     try {
-      const response = await fetch(`/api/check-bin?bin=${searchValue}`);
-      const data = await response.json();
+      const response = await axios.get(
+        `${API}/appStatus/status/${encodeURIComponent(searchValue)}`
+      );
 
-      if (!data.exists) {
+      if (response.data && response.data.length > 0) {
+        setResults(response.data); // 🔹 store results instead of navigate
+      } else {
+        setResults([]); // clear results
         setSnackbar({
           open: true,
-          message: "❌ BIN not found in records. Please try again.",
+          message: "No application found for this BIN/User ID.",
           severity: "error",
         });
-        return;
-      }
-
-      // ✅ BIN found in database
-      setSnackbar({
-        open: true,
-        message: "✅ BIN validated successfully!",
-        severity: "success",
-      });
-
-      // Example usage: direct user based on type
-      if (data.type === "new") {
-        handleSelect("new");
-      } else if (data.type === "renew") {
-        handleSelect("renewal");
       }
     } catch (error) {
-      console.error("Error checking BIN:", error);
+      console.error("Error checking BIN/UserId:", error);
+      setResults([]);
       setSnackbar({
         open: true,
-        message: "⚠️ BIN not found in records. Please try again later.",
-        severity: "warning",
+        message: "❌ Error checking application.",
+        severity: "error",
       });
     }
   };
@@ -324,26 +302,19 @@ function App() {
           >
             <SearchBar>
               <SearchInput
-                placeholder="Enter a valid BIN number"
+                placeholder="Enter BIN or User ID"
                 value={searchValue}
                 onChange={(e) => {
-                  let value = e.target.value.replace(/\D/g, ""); // digits only
+                  let value = e.target.value;
 
-                  // Auto-format: 7 digits - 4 digits - 7 digits
-                  if (value.length > 7 && value.length <= 11) {
-                    value = value.slice(0, 7) + "-" + value.slice(7);
-                  } else if (value.length > 11) {
-                    value =
-                      value.slice(0, 7) +
-                      "-" +
-                      value.slice(7, 11) +
-                      "-" +
-                      value.slice(11, 18);
+                  // ✅ Limit to max 50 characters
+                  if (value.length > 50) {
+                    value = value.slice(0, 50);
                   }
 
                   setSearchValue(value);
                 }}
-                inputProps={{ maxLength: 20 }} // Prevent over-typing
+                inputProps={{ maxLength: 50 }} // safety
               />
 
               {/* Dropdown */}
@@ -384,6 +355,110 @@ function App() {
             >
               Track
             </Button>
+            {/* Results Section */}
+            {results.length > 0 && (
+              <Box
+                sx={{
+                  mt: 4,
+                  px: { xs: 2, md: 6 },
+                  py: 3,
+                  borderTop: "2px solid #09360D",
+                  width: "100%",
+                  backgroundColor: "#fafafa",
+                }}
+              >
+                <Typography
+                  variant="h5"
+                  sx={{ fontWeight: "bold", mb: 2, color: "#09360D" }}
+                >
+                  Application Status
+                </Typography>
+
+                {results.map((status, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      mb: 2,
+                      p: 2,
+                      border: "1px solid #ccc",
+                      borderRadius: 2,
+                      textAlign: "left",
+                      backgroundColor: "white",
+                    }}
+                  >
+                    <Typography>
+                      <strong>Tracking ID:</strong> {status.userId}
+                    </Typography>
+                    <Typography>
+                      <strong>BPLO:</strong> {status.BPLO}
+                    </Typography>
+
+                    <Typography>
+                      <strong>Examiners:</strong> {status.Examiners}
+                    </Typography>
+                    {status.Examiners === "Declined" && (
+                      <Typography color="error">
+                        <strong>Reason:</strong> {status.Examinersdecline}
+                      </Typography>
+                    )}
+
+                    <Typography>
+                      <strong>CSMWO:</strong> {status.CSMWO}
+                    </Typography>
+                    {status.CSMWO === "Declined" && (
+                      <Typography color="error">
+                        <strong>Reason:</strong> {status.CSMWOdecline}
+                      </Typography>
+                    )}
+
+                    <Typography>
+                      <strong>CHO:</strong> {status.CHO}
+                    </Typography>
+                    {status.CHO === "Declined" && (
+                      <Typography color="error">
+                        <strong>Reason:</strong> {status.CHOdecline}
+                      </Typography>
+                    )}
+
+                    <Typography>
+                      <strong>ZONING:</strong> {status.ZONING}
+                    </Typography>
+                    {status.ZONING === "Declined" && (
+                      <Typography color="error">
+                        <strong>Reason:</strong> {status.ZONINGdecline}
+                      </Typography>
+                    )}
+
+                    <Typography>
+                      <strong>CENRO:</strong> {status.CENRO}
+                    </Typography>
+                    {status.CENRO === "Declined" && (
+                      <Typography color="error">
+                        <strong>Reason:</strong> {status.CENROdecline}
+                      </Typography>
+                    )}
+
+                    <Typography>
+                      <strong>OBO:</strong> {status.OBO}
+                    </Typography>
+                    {status.OBO === "Declined" && (
+                      <Typography color="error">
+                        <strong>Reason:</strong> {status.OBOdecline}
+                      </Typography>
+                    )}
+
+                    <Typography>
+                      <strong>Business Tax:</strong> {status.BUSINESSTAX}
+                    </Typography>
+                    {status.BUSINESSTAX === "Declined" && (
+                      <Typography color="error">
+                        <strong>Reason:</strong> {status.BUSINESSTAXdecline}
+                      </Typography>
+                    )}
+                  </Box>
+                ))}
+              </Box>
+            )}
           </Box>
         </Grow>
       </Grid>
