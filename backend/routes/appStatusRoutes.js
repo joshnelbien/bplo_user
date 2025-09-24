@@ -22,6 +22,40 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+router.get("/status/:value", async (req, res) => {
+  const { value } = req.params; // can be BIN or userId
+
+  try {
+    let statuses;
+
+    // check if BIN format (adjust regex if your BIN format differs)
+    const binRegex = /^[A-Z0-9-]+$/;
+
+    if (binRegex.test(value)) {
+      // 🔹 search by BIN
+      statuses = await AppStatus.findAll({
+        where: { bin: value },
+      });
+    } else {
+      // 🔹 fallback search by userId
+      statuses = await AppStatus.findAll({
+        where: { userId: value },
+      });
+    }
+
+    if (!statuses || statuses.length === 0) {
+      console.log("No statuses found for:", value);
+      return res.status(404).json({ error: "No applications found" });
+    }
+
+    res.json(statuses);
+  } catch (error) {
+    console.error("Error fetching tracker:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get("/status/:userId", async (req, res) => {
   const { userId } = req.params; // from useParams
 

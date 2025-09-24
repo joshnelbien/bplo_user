@@ -132,7 +132,7 @@ function New_records() {
         // ✅ Pending applicants (filter only pending)
         const pendingRes = await axios.get(`${API}/newApplication/files`);
         const onlyPending = pendingRes.data
-          .filter((a) => a.status?.toLowerCase() === "pending")
+          .filter((a) => a.BPLO?.toLowerCase() === "pending")
           .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
         setPendingApplicants(onlyPending);
 
