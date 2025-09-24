@@ -26,12 +26,11 @@ const Sidebar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState({ firstName: "", lastName: "", email: "" });
   const [openLogoutModal, setOpenLogoutModal] = useState(false);
-  const [openRequirements, setOpenRequirements] = useState(false); // ✅ state for dropdown
+  const [openRequirements, setOpenRequirements] = useState(false);
   const API = import.meta.env.VITE_API_BASE;
 
   const toggleDrawer = () => setMobileOpen(!mobileOpen);
 
-  // Fetch user data
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -106,7 +105,9 @@ const Sidebar = () => {
         {/* Navigation */}
         <List component="nav">
           {/* Requirements Dropdown */}
-          <ListItemButton onClick={() => setOpenRequirements(!openRequirements)}>
+          <ListItemButton
+            onClick={() => setOpenRequirements(!openRequirements)}
+          >
             <ListItemIcon>
               <DescriptionIcon sx={{ color: "#2E8B57" }} />
             </ListItemIcon>
