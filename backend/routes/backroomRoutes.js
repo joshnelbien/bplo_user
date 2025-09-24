@@ -3,7 +3,6 @@ const multer = require("multer");
 const Backroom = require("../db/model/backroomLocal");
 const File = require("../db/model/files");
 const AppStatus = require("../db/model/applicantStatusDB");
-const Examiners = require("../db/model/examiners");
 const router = express.Router();
 const moment = require("moment");
 
@@ -44,7 +43,7 @@ router.post("/obo/approve/:id", async (req, res) => {
     const { BSAP, SR, Mechanical, Electrical, Signage, Electronics } = req.body;
 
     // fetch all 3 records
-    const applicant = await Examiners.findByPk(id);
+    const applicant = await File.findByPk(id);
     if (!applicant)
       return res.status(404).json({ error: "Applicant not found" });
 
@@ -101,7 +100,7 @@ router.post("/obo/decline/:id", async (req, res) => {
     const { reason } = req.body;
 
     // fetch all 3 records
-    const applicant = await Examiners.findByPk(id);
+    const applicant = await File.findByPk(id);
     if (!applicant)
       return res.status(404).json({ error: "Applicant not found" });
 
@@ -116,7 +115,7 @@ router.post("/obo/decline/:id", async (req, res) => {
     const timeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
     const declineReason = reason || "No reason provided";
 
-    // ✅ Update Examiners
+    // ✅ Update File
     await applicant.update({
       OBO: "Declined",
       OBOdecline: declineReason,
@@ -157,7 +156,7 @@ router.post(
       const { id } = req.params;
       const { zoningFee } = req.body;
 
-      const applicant = await Examiners.findByPk(id);
+      const applicant = await File.findByPk(id);
       if (!applicant) {
         return res.status(404).json({ error: "Applicant not found" });
       }
@@ -174,7 +173,7 @@ router.post(
 
       const approveTime = moment().format("DD/MM/YYYY HH:mm:ss");
 
-      // Examiners
+      // File
       applicant.ZONING = "Approved";
       applicant.ZONINGtimeStamp = approveTime;
       applicant.zoningFee = zoningFee;
@@ -222,7 +221,7 @@ router.post("/zoning/decline/:id", async (req, res) => {
     const { id } = req.params;
     const { reason } = req.body;
 
-    const applicant = await Examiners.findByPk(id);
+    const applicant = await File.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
@@ -239,7 +238,7 @@ router.post("/zoning/decline/:id", async (req, res) => {
 
     const declineTime = moment().format("DD/MM/YYYY HH:mm:ss");
 
-    // Examiners
+    // File
     applicant.ZONING = "Declined";
     applicant.ZONINGtimeStamp = declineTime;
     applicant.ZONINGdecline = reason;
@@ -281,7 +280,7 @@ router.post("/cho/approve/:id", upload.single("choCert"), async (req, res) => {
     const { id } = req.params;
     const { choFee } = req.body;
 
-    const applicant = await Examiners.findByPk(id);
+    const applicant = await File.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
@@ -298,7 +297,7 @@ router.post("/cho/approve/:id", upload.single("choCert"), async (req, res) => {
 
     const approveTime = moment().format("DD/MM/YYYY HH:mm:ss");
 
-    // Examiners
+    // File
     applicant.CHO = "Approved";
     applicant.CHOtimeStamp = approveTime;
     applicant.choFee = choFee;
@@ -344,7 +343,7 @@ router.post("/cho/decline/:id", async (req, res) => {
     const { id } = req.params;
     const { reason } = req.body;
 
-    const applicant = await Examiners.findByPk(id);
+    const applicant = await File.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
@@ -361,7 +360,7 @@ router.post("/cho/decline/:id", async (req, res) => {
 
     const declineTime = moment().format("DD/MM/YYYY HH:mm:ss");
 
-    // Examiners
+    // File
     applicant.CHO = "Declined";
     applicant.CHOtimeStamp = declineTime;
     applicant.CHOdecline = reason;
@@ -406,7 +405,7 @@ router.post(
       const { id } = req.params;
       const { cenroFee } = req.body;
 
-      const applicant = await Examiners.findByPk(id);
+      const applicant = await File.findByPk(id);
       if (!applicant) {
         return res.status(404).json({ error: "Applicant not found" });
       }
@@ -423,7 +422,7 @@ router.post(
 
       const approveTime = moment().format("DD/MM/YYYY HH:mm:ss");
 
-      // Examiners
+      // File
       applicant.CENRO = "Approved";
       applicant.CENROtimeStamp = approveTime;
       applicant.cenroFee = cenroFee;
@@ -470,7 +469,7 @@ router.post("/cenro/decline/:id", async (req, res) => {
     const { id } = req.params;
     const { reason } = req.body;
 
-    const applicant = await Examiners.findByPk(id);
+    const applicant = await File.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
@@ -487,7 +486,7 @@ router.post("/cenro/decline/:id", async (req, res) => {
 
     const declineTime = moment().format("DD/MM/YYYY HH:mm:ss");
 
-    // Examiners
+    // File
     applicant.CENRO = "Declined";
     applicant.CENROtimeStamp = declineTime;
     applicant.CENROdecline = reason;
@@ -530,7 +529,7 @@ router.post(
       const { csmwoFee } = req.body;
 
       // find applicant
-      const applicant = await Examiners.findByPk(id);
+      const applicant = await File.findByPk(id);
       if (!applicant) {
         return res.status(404).json({ error: "Applicant not found" });
       }
@@ -573,7 +572,7 @@ router.post(
         { where: { id } }
       );
 
-      await Examiners.update(
+      await File.update(
         {
           CSMWO: "Approved",
           CSMWOtimeStamp: applicant.CSMWOtimeStamp,
@@ -606,8 +605,8 @@ router.post("/csmwo/decline/:id", async (req, res) => {
     const { id } = req.params;
     const { reason } = req.body; // ⬅️ get reason from frontend
 
-    // 1. Find applicant in Examiners
-    const applicant = await Examiners.findByPk(id);
+    // 1. Find applicant in File
+    const applicant = await File.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
     }
@@ -625,7 +624,7 @@ router.post("/csmwo/decline/:id", async (req, res) => {
     // 2. Update status, timestamp & decline reason
     const declineTime = moment().format("DD/MM/YYYY HH:mm:ss");
 
-    // Examiners
+    // File
     applicant.CSMWO = "Declined";
     applicant.CSMWOtimeStamp = declineTime;
     applicant.CSMWOdecline = reason;

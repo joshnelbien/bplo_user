@@ -126,6 +126,10 @@ router.post("/examiners/approve/:id", async (req, res) => {
     const applicantData = applicant.toJSON();
     const timestamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
+    const applicantFile = await File.findByPk(id);
+    if (!applicant)
+      return res.status(404).json({ error: "Applicant not found" });
+
     // ✅ Get last BIN from Backroom
     const lastBackroom = await Backroom.findOne({
       order: [["createdAt", "DESC"]],
@@ -153,6 +157,12 @@ router.post("/examiners/approve/:id", async (req, res) => {
     applicantData.BIN = BIN;
 
     const created = await Backroom.create(applicantData);
+
+    await applicantFile.update({
+      Examiners: "Approved",
+      ExaminerstimeStamp: timestamp,
+      BIN,
+    });
 
     await applicant.update({
       Examiners: "Approved",
