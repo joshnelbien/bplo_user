@@ -38,7 +38,7 @@ function Cenro() {
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get(`${API}/examiners/examiners`);
+        const res = await axios.get(`${API}/backroom/backrooms`);
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
