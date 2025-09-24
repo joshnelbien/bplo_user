@@ -15,11 +15,15 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Snackbar,
 } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { styled } from "@mui/material/styles";
 import CloseIcon from "@mui/icons-material/Close";
-import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 
 const SearchBar = styled(Box)(({ theme }) => ({
@@ -45,49 +49,11 @@ const SearchInput = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-function App() {
-  const navigate = useNavigate();
-  const [animate, setAnimate] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [searchValue, setSearchValue] = useState("");
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
-  const [modalTitle, setModalTitle] = useState("");
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "info", // "success" | "error" | "warning" | "info"
-  });
-
-  const handleSnackbarClose = () => {
-    setSnackbar({ ...snackbar, open: false });
-  };
-
-  // Modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalContent, setModalContent] = useState("");
-
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setModalContent("");
-  };
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  // Handle dropdown selection
-  const handleSelect = (value) => {
-    setAnchorEl(null);
-
-    if (value === "New Application Requirements") {
-      setModalTitle("REQUIREMENTS FOR NEW BUSINESS REGISTRATION");
-      setModalContent(
-        `1. Filled-up Unified Business Permit Application Form
+// 🔹 Centralized Requirements Data
+const requirements = {
+  new: {
+    title: "REQUIREMENTS FOR NEW BUSINESS REGISTRATION",
+    content: `1. Filled-up Unified Business Permit Application Form
 2. 1 (one) photocopy of: 
    * DTI Business Name Registration (if sole proprietor)
    * SEC Registration and Articles of Incorporation (if corporation or partnership)
@@ -98,50 +64,111 @@ function App() {
 6. Photocopy of Occupancy Permit (if newly constructed building)
 7. Location of Business (Sketch/Map)
 8. Land Tax Clearance / Certificate of Payment
-9. Market Clearance (if stallholder)`
-      );
-    } else if (value === "Renewal Requirements") {
-      setModalTitle("REQUIREMENTS FOR BUSINESS RENEWAL");
-      setModalContent(
-        `1. Filled-up Unified Business Permit Application Form
+9. Market Clearance (if stallholder)`,
+  },
+  renewal: {
+    title: "REQUIREMENTS FOR BUSINESS RENEWAL",
+    content: `1. Filled-up Unified Business Permit Application Form
 2. Previous year's Mayor's Permit
 3. Financial Statement / Income Tax Return of the previous year / Statement of Gross Sales / Receipt
 4. Barangay Clearance (Window 1 - BPLD)
 5. Land Tax Clearance / Certificate of Payment
-6. Market Clearance (if market stall holder)`
-      );
-    }
+6. Market Clearance (if market stall holder)`,
+  },
+};
 
-    setIsModalOpen(true);
+function App() {
+  const navigate = useNavigate();
+  const [animate, setAnimate] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [searchValue, setSearchValue] = useState("");
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const [modalData, setModalData] = useState(null); // { title, content }
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
+
+  const handleSnackbarClose = () => setSnackbar({ ...snackbar, open: false });
+
+  // Dropdown
+  const handleClick = (event) => setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
+
+  // Open modal with data
+  const handleSelect = (type) => {
+    setAnchorEl(null);
+    if (requirements[type]) {
+      setModalData(requirements[type]);
+    }
   };
 
-  // Optional: Track button behavior (if you want to type in search bar then Track)
   // Track button behavior
-  const handleTrackClick = () => {
+  const handleTrackClick = async () => {
+    const currentYear = new Date().getFullYear();
+    const binRegex = new RegExp(`^\\d{7}-${currentYear}-\\d{7}$`);
+
+    // 1️⃣ Empty input
     if (!searchValue.trim()) {
       setSnackbar({
         open: true,
-        message: "⚠️ Please enter your tracking details before proceeding.",
+        message: "⚠️ Please enter your BIN number before proceeding.",
         severity: "warning",
       });
       return;
     }
 
-    if (searchValue.toLowerCase().includes("new")) {
-      handleSelect("New Application Requirements");
-    } else if (searchValue.toLowerCase().includes("renew")) {
-      handleSelect("Renewal Requirements");
-    } else {
+    // 2️⃣ Incorrect or incomplete BIN format
+    if (!binRegex.test(searchValue)) {
       setSnackbar({
         open: true,
-        message:
-          "❌ No matching record found. Please enter a valid requirement.",
+        message: "❌ Incorrect format. Please try again.",
         severity: "error",
+      });
+      return;
+    }
+
+    // 3️⃣ BIN format valid → check DB
+    try {
+      const response = await fetch(`/api/check-bin?bin=${searchValue}`);
+      const data = await response.json();
+
+      if (!data.exists) {
+        setSnackbar({
+          open: true,
+          message: "❌ BIN not found in records. Please try again.",
+          severity: "error",
+        });
+        return;
+      }
+
+      // ✅ BIN found in database
+      setSnackbar({
+        open: true,
+        message: "✅ BIN validated successfully!",
+        severity: "success",
+      });
+
+      // Example usage: direct user based on type
+      if (data.type === "new") {
+        handleSelect("new");
+      } else if (data.type === "renew") {
+        handleSelect("renewal");
+      }
+    } catch (error) {
+      console.error("Error checking BIN:", error);
+      setSnackbar({
+        open: true,
+        message: "⚠️ BIN not found in records. Please try again later.",
+        severity: "warning",
       });
     }
   };
 
-  // Update time every second
+  // Time updater
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
@@ -157,6 +184,7 @@ function App() {
       .toString()
       .padStart(2, "0")}:${seconds.toString().padStart(2, "0")} ${ampm}`;
   };
+
   const formatDate = (date) => {
     const days = [
       "Sunday",
@@ -191,9 +219,7 @@ function App() {
           }}
         >
           <Box sx={{ color: "white", textAlign: "right" }}>
-            <Typography
-              sx={{ fontWeight: "bold", lineHeight: 1, fontSize: ".9rem" }}
-            >
+            <Typography sx={{ fontWeight: "bold", fontSize: ".9rem" }}>
               {formatTime(currentTime)}
             </Typography>
             <Typography sx={{ fontSize: ".9rem" }}>
@@ -207,7 +233,6 @@ function App() {
       <Grid
         container
         direction="column"
-        justifyContent="flex-start"
         alignItems="center"
         sx={{
           minHeight: "85vh",
@@ -224,7 +249,7 @@ function App() {
               component="img"
               src="spclogo.png"
               alt="Logo"
-              sx={{ width: { xs: 150, sm: 120 }, mb: 5 }}
+              sx={{ width: { xs: 120, sm: 150 }, mb: 5 }}
             />
           </Grow>
         </Slide>
@@ -234,8 +259,6 @@ function App() {
           <Fade in={animate} timeout={1500}>
             <Typography
               variant="h2"
-              component="h1"
-              gutterBottom
               sx={{
                 fontWeight: 900,
                 color: "#09360D",
@@ -262,7 +285,6 @@ function App() {
                 py: 1,
                 fontWeight: "bold",
                 backgroundColor: "#09360D",
-                color: "white",
                 "&:hover": { backgroundColor: "#07270a" },
               }}
               onClick={() => navigate("/newApplicationRegister")}
@@ -304,7 +326,24 @@ function App() {
               <SearchInput
                 placeholder="Enter a valid BIN number"
                 value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
+                onChange={(e) => {
+                  let value = e.target.value.replace(/\D/g, ""); // digits only
+
+                  // Auto-format: 7 digits - 4 digits - 7 digits
+                  if (value.length > 7 && value.length <= 11) {
+                    value = value.slice(0, 7) + "-" + value.slice(7);
+                  } else if (value.length > 11) {
+                    value =
+                      value.slice(0, 7) +
+                      "-" +
+                      value.slice(7, 11) +
+                      "-" +
+                      value.slice(11, 18);
+                  }
+
+                  setSearchValue(value);
+                }}
+                inputProps={{ maxLength: 20 }} // Prevent over-typing
               />
 
               {/* Dropdown */}
@@ -316,18 +355,16 @@ function App() {
                   pl: 0.5,
                 }}
               >
-                <IconButton onClick={handleClick}>
+                <IconButton onClick={handleClick} aria-label="Open options">
                   <ArrowDropDownIcon />
                 </IconButton>
               </Box>
 
               <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-                <MenuItem
-                  onClick={() => handleSelect("New Application Requirements")}
-                >
+                <MenuItem onClick={() => handleSelect("new")}>
                   New Application Requirements
                 </MenuItem>
-                <MenuItem onClick={() => handleSelect("Renewal Requirements")}>
+                <MenuItem onClick={() => handleSelect("renewal")}>
                   Renewal Requirements
                 </MenuItem>
               </Menu>
@@ -341,7 +378,6 @@ function App() {
                 py: 1,
                 fontWeight: "bold",
                 backgroundColor: "#09360D",
-                color: "white",
                 "&:hover": { backgroundColor: "#07270a" },
               }}
               onClick={handleTrackClick}
@@ -352,57 +388,29 @@ function App() {
         </Grow>
       </Grid>
 
-      {/* Modal */}
-      {isModalOpen && (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            zIndex: 1000,
-          }}
-        >
-          <Box
-            sx={{
-              position: "relative",
-              maxWidth: 300,
-              p: 4,
-              backgroundColor: "white",
-              borderRadius: "8px",
-              boxShadow: 24,
-            }}
+      {/* Modal using Dialog */}
+      <Dialog
+        open={!!modalData}
+        onClose={() => setModalData(null)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle sx={{ fontWeight: "bold", color: "#09360D" }}>
+          {modalData?.title}
+        </DialogTitle>
+        <DialogContent dividers sx={{ whiteSpace: "pre-line" }}>
+          {modalData?.content}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setModalData(null)}
+            startIcon={<CloseIcon />}
+            sx={{ color: "#09360D", fontWeight: "bold" }}
           >
-            <IconButton
-              onClick={handleModalClose}
-              sx={{ position: "absolute", top: 8, right: 8, color: "black" }}
-            >
-              <CloseIcon />
-            </IconButton>
-
-            {/* Title Header */}
-            <Typography
-              variant="h6"
-              sx={{ fontWeight: "bold", mb: 2, color: "#09360D" }}
-            >
-              {modalTitle}
-            </Typography>
-
-            {/* Requirements List */}
-            <Typography
-              variant="body1"
-              sx={{ whiteSpace: "pre-line", textAlign: "left" }}
-            >
-              {modalContent}
-            </Typography>
-          </Box>
-        </Box>
-      )}
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Footer */}
       <Box
@@ -420,11 +428,13 @@ function App() {
           v3.0.5
         </Typography>
       </Box>
+
+      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
         onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }} // 🔥 move to top
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <MuiAlert
           onClose={handleSnackbarClose}
