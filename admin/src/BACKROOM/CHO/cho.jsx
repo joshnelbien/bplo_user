@@ -112,7 +112,7 @@ function Cho() {
         )
       );
 
-      alert("Declined successfully");
+     
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error declining applicant:", error);

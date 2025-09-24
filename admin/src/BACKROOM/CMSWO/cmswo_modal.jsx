@@ -15,7 +15,6 @@ import {
   IconButton,
   Tooltip,
   Fade,
-  Snackbar,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -23,7 +22,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { useState, useEffect } from "react";
 
-const API = import.meta.env.VITE_API_BASE;
+const API = "/your/api/base/url";
 
 // Component to display a normal text field
 const Field = ({ label, value }) => (
@@ -65,7 +64,7 @@ const formatCurrency = (value) => {
   if (!value) return "";
   const num = parseFloat(value.toString().replace(/,/g, ""));
   if (isNaN(num)) return value;
-  return num.toLocaleString("en-US"); // commas only
+  return num.toLocaleString("en-US");
 };
 
 // Component to display files as links
@@ -154,17 +153,30 @@ function CmswoApplicantModal({
   const [confirmDeclineOpen, setConfirmDeclineOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false);
-  const [feeError, setFeeError] = useState(false); // New state for validation error
+  const [feeError, setFeeError] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState({});
+  const [selectedReasons, setSelectedReasons] = useState([]);
+
+  const handleToggleReason = (reason) => {
+    setSelectedReasons((prev) =>
+      prev.includes(reason)
+        ? prev.filter((r) => r !== reason)
+        : [...prev, reason]
+    );
+  };
+
+  const handleAddReasons = () => {
+    setDeclineReason(selectedReasons.join("\n"));
+  };
 
   const handleFileSelect = (e) => {
     const { name, files } = e.target;
     if (files[0]) {
       setSelectedFiles((prev) => ({
         ...prev,
-        [name]: files[0], // store the actual File object
+        [name]: files[0],
       }));
-      handleFileChange(name, files[0]); // send file up to parent
+      handleFileChange(name, files[0]);
     }
   };
 
@@ -177,7 +189,7 @@ function CmswoApplicantModal({
   const handleChange = (field, value) => {
     setCsmwoFee(value);
     if (value.trim() !== "") {
-      setFeeError(false); // Clear the error when the user types
+      setFeeError(false);
     }
   };
 
@@ -190,6 +202,8 @@ function CmswoApplicantModal({
   };
 
   const handleDeclineClick = () => {
+    setDeclineReason("");
+    setSelectedReasons([]);
     setConfirmDeclineOpen(true);
   };
 
@@ -436,9 +450,8 @@ function CmswoApplicantModal({
           {/* Solid Waste Fee Input */}
           <TextField
             label="Solid Waste Fee"
-            value={formatCurrency(csmwoFee)} // ✅ formatted with commas only
+            value={formatCurrency(csmwoFee)}
             onChange={(e) => {
-              // remove commas before saving to state
               const rawValue = e.target.value.replace(/,/g, "");
               handleChange("csmwoFee", rawValue);
             }}
@@ -591,13 +604,219 @@ function CmswoApplicantModal({
           id="decline-dialog-title"
           sx={{
             fontWeight: "bold",
-            backgroundColor: "#d32f2f",
+            backgroundColor: "#053d16ff",
             color: "white",
+            marginBottom: "20px",
           }}
         >
           Decline Applicant
         </DialogTitle>
         <DialogContent sx={{ pt: 2, px: 3 }}>
+          <Grid container spacing={1} sx={{ mb: 2 }}>
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                onClick={() => handleToggleReason("Incomplete Requirements")}
+                sx={{
+                  borderRadius: "50%",
+                  width: "24px",
+                  height: "24px",
+                  minWidth: "24px",
+                  mr: 1,
+                  p: 0,
+                  borderColor: "#053d16ff",
+                  ...(selectedReasons.includes("Incomplete Requirements") && {
+                    backgroundColor: "#e8f5e9",
+                  }),
+                }}
+              >
+                {selectedReasons.includes("Incomplete Requirements") && (
+                  <CheckCircleIcon
+                    sx={{ fontSize: "1rem", color: "#053d16ff" }}
+                  />
+                )}
+              </Button>
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "1.1rem",
+                  color: "#000000",
+                  verticalAlign: "middle",
+                }}
+              >
+                1. Incomplete Requirements
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                onClick={() =>
+                  handleToggleReason(
+                    "Non-Compliance with Safety and Health Standards"
+                  )
+                }
+                sx={{
+                  borderRadius: "50%",
+                  width: "24px",
+                  height: "24px",
+                  minWidth: "24px",
+                  mr: 1,
+                  p: 0,
+                  borderColor: "#053d16ff",
+                  ...(selectedReasons.includes(
+                    "Non-Compliance with Safety and Health Standards"
+                  ) && {
+                    backgroundColor: "#e8f5e9",
+                  }),
+                }}
+              >
+                {selectedReasons.includes(
+                  "Non-Compliance with Safety and Health Standards"
+                ) && (
+                  <CheckCircleIcon
+                    sx={{ fontSize: "1rem", color: "#053d16ff" }}
+                  />
+                )}
+              </Button>
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "1.1rem",
+                  color: "#000000",
+                  verticalAlign: "middle",
+                }}
+              >
+                2. Non-Compliance with Safety and Health Standards
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                onClick={() =>
+                  handleToggleReason("Regulatory or Legal Violations")
+                }
+                sx={{
+                  borderRadius: "50%",
+                  width: "24px",
+                  height: "24px",
+                  minWidth: "24px",
+                  mr: 1,
+                  p: 0,
+                  borderColor: "#053d16ff",
+                  ...(selectedReasons.includes(
+                    "Regulatory or Legal Violations"
+                  ) && {
+                    backgroundColor: "#e8f5e9",
+                  }),
+                }}
+              >
+                {selectedReasons.includes("Regulatory or Legal Violations") && (
+                  <CheckCircleIcon
+                    sx={{ fontSize: "1rem", color: "#053d16ff" }}
+                  />
+                )}
+              </Button>
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "1.1rem",
+                  color: "#000000",
+                  verticalAlign: "middle",
+                }}
+              >
+                3. Regulatory or Legal Violations
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                onClick={() =>
+                  handleToggleReason("Environmental and Compliance Concerns")
+                }
+                sx={{
+                  borderRadius: "50%",
+                  width: "24px",
+                  height: "24px",
+                  minWidth: "24px",
+                  mr: 1,
+                  p: 0,
+                  borderColor: "#053d16ff",
+                  ...(selectedReasons.includes(
+                    "Environmental and Compliance Concerns"
+                  ) && {
+                    backgroundColor: "#e8f5e9",
+                  }),
+                }}
+              >
+                {selectedReasons.includes(
+                  "Environmental and Compliance Concerns"
+                ) && (
+                  <CheckCircleIcon
+                    sx={{ fontSize: "1rem", color: "#053d16ff" }}
+                  />
+                )}
+              </Button>
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "1.1rem",
+                  color: "#000000",
+                  verticalAlign: "middle",
+                }}
+              >
+                4. Environmental and Compliance Concerns
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                onClick={() =>
+                  handleToggleReason("Zoning and Location Issues")
+                }
+                sx={{
+                  borderRadius: "50%",
+                  width: "24px",
+                  height: "24px",
+                  minWidth: "24px",
+                  mr: 1,
+                  p: 0,
+                  borderColor: "#053d16ff",
+                  ...(selectedReasons.includes(
+                    "Zoning and Location Issues"
+                  ) && {
+                    backgroundColor: "#e8f5e9",
+                  }),
+                }}
+              >
+                {selectedReasons.includes("Zoning and Location Issues") && (
+                  <CheckCircleIcon
+                    sx={{ fontSize: "1rem", color: "#053d16ff" }}
+                  />
+                )}
+              </Button>
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "1.1rem",
+                  color: "#000000",
+                  verticalAlign: "middle",
+                }}
+              >
+                5. Zoning and Location Issues
+              </Typography>
+            </Grid>
+          </Grid>
+          <Button
+            variant="contained"
+            onClick={handleAddReasons}
+            disabled={selectedReasons.length === 0}
+            sx={{
+              bgcolor: "#053d16ff",
+              mb: 2,
+            }}
+          >
+            Add
+          </Button>
           <TextField
             autoFocus
             margin="dense"
@@ -610,6 +829,22 @@ function CmswoApplicantModal({
             onChange={(e) => setDeclineReason(e.target.value)}
             multiline
             rows={4}
+            required
+            error={declineReason.trim() === ""}
+            helperText={declineReason.trim() === "" ? "Reason is required" : ""}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "#053d16ff",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#053d16ff",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#053d16ff",
+                },
+              },
+            }}
           />
         </DialogContent>
         <DialogActions>
@@ -620,7 +855,7 @@ function CmswoApplicantModal({
             onClick={handleDeclineConfirm}
             color="error"
             variant="contained"
-            disabled={!declineReason.trim()}
+            disabled={declineReason.trim() === ""}
           >
             Decline
           </Button>

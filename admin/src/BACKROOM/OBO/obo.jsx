@@ -97,7 +97,7 @@ function Obo() {
         )
       );
 
-      alert("declined successfully!");
+     
     } catch (error) {
       console.error("Error declining applicant:", error);
     }
