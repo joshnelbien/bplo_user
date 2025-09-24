@@ -19,23 +19,26 @@ import {
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { styled } from "@mui/material/styles";
 import CloseIcon from "@mui/icons-material/Close";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 
 const SearchBar = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   border: "1px solid #09360D",
-  borderRadius: 0,
+  borderRadius: 5,
   overflow: "hidden",
   width: "300px",
   backgroundColor: "#f9f9f9",
   mt: 2,
+  padding: 10,
 }));
 
 const SearchInput = styled(InputBase)(({ theme }) => ({
   flexGrow: 1,
-  px: theme.spacing(2),
-  py: theme.spacing(1),
+  px: theme.spacing(3),
+  py: theme.spacing(1.5),
   textAlign: "center",
   "&::placeholder": {
     textAlign: "center",
@@ -49,11 +52,25 @@ function App() {
   const [searchValue, setSearchValue] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const [modalTitle, setModalTitle] = useState("");
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info", // "success" | "error" | "warning" | "info"
+  });
 
-  // New state for modal and selected requirements
+  const handleSnackbarClose = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState("");
-  const [selectedRequirement, setSelectedRequirement] = useState("");
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setModalContent("");
+  };
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -63,24 +80,65 @@ function App() {
     setAnchorEl(null);
   };
 
+  // Handle dropdown selection
   const handleSelect = (value) => {
-    setSelectedRequirement(value);
-    setSearchValue(value);
     setAnchorEl(null);
-  };
 
-  const handleTrackClick = () => {
-    if (selectedRequirement) {
-      setModalContent(`Here are the requirements for a ${selectedRequirement} application. This is a sample text.`);
-    } else {
-      setModalContent("Please pop up");
+    if (value === "New Application Requirements") {
+      setModalTitle("REQUIREMENTS FOR NEW BUSINESS REGISTRATION");
+      setModalContent(
+        `1. Filled-up Unified Business Permit Application Form
+2. 1 (one) photocopy of: 
+   * DTI Business Name Registration (if sole proprietor)
+   * SEC Registration and Articles of Incorporation (if corporation or partnership)
+   * CDA Registration and Articles of Cooperation (if cooperative)
+3. Barangay Clearance (Window 1 - BPLD)
+4. Business Capitalization
+5. 1 (one) photocopy of Contract of Lease and Lessor Mayor's Permit (if rented)
+6. Photocopy of Occupancy Permit (if newly constructed building)
+7. Location of Business (Sketch/Map)
+8. Land Tax Clearance / Certificate of Payment
+9. Market Clearance (if stallholder)`
+      );
+    } else if (value === "Renewal Requirements") {
+      setModalTitle("REQUIREMENTS FOR BUSINESS RENEWAL");
+      setModalContent(
+        `1. Filled-up Unified Business Permit Application Form
+2. Previous year's Mayor's Permit
+3. Financial Statement / Income Tax Return of the previous year / Statement of Gross Sales / Receipt
+4. Barangay Clearance (Window 1 - BPLD)
+5. Land Tax Clearance / Certificate of Payment
+6. Market Clearance (if market stall holder)`
+      );
     }
+
     setIsModalOpen(true);
   };
 
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setModalContent("");
+  // Optional: Track button behavior (if you want to type in search bar then Track)
+  // Track button behavior
+  const handleTrackClick = () => {
+    if (!searchValue.trim()) {
+      setSnackbar({
+        open: true,
+        message: "⚠️ Please enter your tracking details before proceeding.",
+        severity: "warning",
+      });
+      return;
+    }
+
+    if (searchValue.toLowerCase().includes("new")) {
+      handleSelect("New Application Requirements");
+    } else if (searchValue.toLowerCase().includes("renew")) {
+      handleSelect("Renewal Requirements");
+    } else {
+      setSnackbar({
+        open: true,
+        message:
+          "❌ No matching record found. Please enter a valid requirement.",
+        severity: "error",
+      });
+    }
   };
 
   // Update time every second
@@ -159,7 +217,7 @@ function App() {
           pt: 8,
         }}
       >
-        {/* Logo with Slide + Grow */}
+        {/* Logo */}
         <Slide in={animate} direction="down" timeout={800}>
           <Grow in={animate} timeout={1200}>
             <Box
@@ -171,7 +229,7 @@ function App() {
           </Grow>
         </Slide>
 
-        {/* Title with Slide + Fade */}
+        {/* Title */}
         <Slide in={animate} direction="down" timeout={1000}>
           <Fade in={animate} timeout={1500}>
             <Typography
@@ -190,7 +248,7 @@ function App() {
           </Fade>
         </Slide>
 
-        {/* Buttons with staggered Fade */}
+        {/* Buttons */}
         <Stack
           direction="row"
           spacing={2}
@@ -230,7 +288,7 @@ function App() {
           </Fade>
         </Stack>
 
-        {/* Search Bar with Grow + Fade */}
+        {/* Search Bar */}
         <Grow in={animate} timeout={2200}>
           <Box
             sx={{
@@ -242,19 +300,31 @@ function App() {
               mb: 2,
             }}
           >
-            <SearchBar
-              sx={{ display: "flex", alignItems: "center", maxWidth: 220 }}
-            >
+            <SearchBar>
               <SearchInput
-                placeholder="Track your application..."
+                placeholder="Enter a valid BIN number"
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
               />
-              <IconButton onClick={handleClick}>
-                <ArrowDropDownIcon />
-              </IconButton>
+
+              {/* Dropdown */}
+              <Box
+                sx={{
+                  borderLeft: "1px solid #09360D",
+                  display: "flex",
+                  alignItems: "center",
+                  pl: 0.5,
+                }}
+              >
+                <IconButton onClick={handleClick}>
+                  <ArrowDropDownIcon />
+                </IconButton>
+              </Box>
+
               <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-                <MenuItem onClick={() => handleSelect("New Application Requirements")}>
+                <MenuItem
+                  onClick={() => handleSelect("New Application Requirements")}
+                >
                   New Application Requirements
                 </MenuItem>
                 <MenuItem onClick={() => handleSelect("Renewal Requirements")}>
@@ -262,6 +332,8 @@ function App() {
                 </MenuItem>
               </Menu>
             </SearchBar>
+
+            {/* Track Button */}
             <Button
               variant="contained"
               sx={{
@@ -283,7 +355,6 @@ function App() {
       {/* Modal */}
       {isModalOpen && (
         <Box
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
           sx={{
             display: "flex",
             alignItems: "center",
@@ -298,10 +369,9 @@ function App() {
           }}
         >
           <Box
-            className="relative w-80 max-w-sm rounded-lg bg-white p-6 text-center shadow-lg sm:w-96"
             sx={{
               position: "relative",
-              maxWidth: 400,
+              maxWidth: 300,
               p: 4,
               backgroundColor: "white",
               borderRadius: "8px",
@@ -310,16 +380,26 @@ function App() {
           >
             <IconButton
               onClick={handleModalClose}
-              sx={{
-                position: "absolute",
-                top: 8,
-                right: 8,
-                color: "red",
-              }}
+              sx={{ position: "absolute", top: 8, right: 8, color: "black" }}
             >
               <CloseIcon />
             </IconButton>
-            <Typography variant="body1">{modalContent}</Typography>
+
+            {/* Title Header */}
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: "bold", mb: 2, color: "#09360D" }}
+            >
+              {modalTitle}
+            </Typography>
+
+            {/* Requirements List */}
+            <Typography
+              variant="body1"
+              sx={{ whiteSpace: "pre-line", textAlign: "left" }}
+            >
+              {modalContent}
+            </Typography>
           </Box>
         </Box>
       )}
@@ -337,9 +417,25 @@ function App() {
       >
         <Typography variant="body2" sx={{ color: "#746a6aff" }}>
           © {new Date().getFullYear()} Business Permit and Licensing Office |
-          v3.0.4
+          v3.0.5
         </Typography>
       </Box>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }} // 🔥 move to top
+      >
+        <MuiAlert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          elevation={6}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </MuiAlert>
+      </Snackbar>
     </Box>
   );
 }
