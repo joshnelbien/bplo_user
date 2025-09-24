@@ -23,6 +23,8 @@ import { useNavigate } from "react-router-dom";
 import Step1BusinessInfo from "./newAppcomponents/step1";
 import Step2PersonalInfo from "./newAppcomponents/step2";
 import { useMediaQuery, useTheme } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { IconButton } from "@mui/material";
 
 const GreenButton = styled(Button)(({ variant }) => ({
   borderRadius: "8px",
@@ -290,9 +292,24 @@ function NewApplicationRegisterPage() {
           mb: 2,
         }}
       >
-        <GreenButton onClick={() => navigate(`/`)} variant="contained">
-          BACK TO DASHBOARD
-        </GreenButton>
+        <IconButton
+          onClick={() => navigate(`/`)}
+          sx={{
+            color: "#fff",
+            backgroundColor: "#4caf50",
+            borderRadius: "50%", // circle
+            p: 1.5,
+            boxShadow: "0 3px 6px rgba(0,0,0,0.2)",
+            transition: "all 0.3s ease",
+            "&:hover": {
+              backgroundColor: "#388e3c",
+              transform: "scale(1.1)", // smooth pop effect
+              boxShadow: "0 5px 12px rgba(0,0,0,0.25)",
+            },
+          }}
+        >
+          <ArrowBackIcon fontSize="medium" />
+        </IconButton>
       </Box>
 
       <Paper
