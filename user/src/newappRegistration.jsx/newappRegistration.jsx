@@ -578,11 +578,11 @@ function NewApplicationRegisterPage() {
           }}
         >
           <Grow in={successDialogOpen}>
-            <CheckCircleOutlineIcon sx={{ fontSize: 80, color: "#4caf50" }} />
+            <CheckCircleOutlineIcon sx={{ fontSize: 80, color: "#105c12ff" }} />
           </Grow>
           <Typography
             variant="h6"
-            sx={{ fontWeight: "bold", color: "#4caf50" }}
+            sx={{ fontWeight: "bold", color: "#040504ff" }}
           >
             Submitted Successfully!
           </Typography>
