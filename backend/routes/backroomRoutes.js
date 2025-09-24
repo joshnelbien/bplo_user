@@ -363,36 +363,86 @@ router.post("/cenro/decline/:id", async (req, res) => {
   }
 });
 
-router.post("/csmwo/approve/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { csmwoFee } = req.body;
+router.post(
+  "/csmwo/approve/:id",
+  upload.single("cswmoCert"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { csmwoFee } = req.body;
 
-    const applicant = await Examiners.findByPk(id);
-    if (!applicant) {
-      return res.status(404).json({ error: "Applicant not found" });
+      // find applicant
+      const applicant = await Examiners.findByPk(id);
+      if (!applicant) {
+        return res.status(404).json({ error: "Applicant not found" });
+      }
+
+      // find applicant status
+      const applicantStatus = await AppStatus.findByPk(id);
+      if (!applicantStatus) {
+        return res.status(404).json({ error: "Applicant status not found" });
+      }
+
+      const backroomApplicant = await Backroom.findByPk(id);
+      if (!applicantStatus) {
+        return res.status(404).json({ error: "Applicant status not found" });
+      }
+
+      // update applicant fields
+      applicant.CSMWO = "Approved";
+      applicant.CSMWOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+      applicant.csmwoFee = csmwoFee;
+
+      if (req.file) {
+        applicant.cswmoCert = req.file.buffer;
+        applicant.cswmoCert_filename = req.file.originalname;
+        applicant.cswmoCert_mimetype = req.file.mimetype;
+        applicant.cswmoCert_size = req.file.size;
+      }
+
+      await applicant.save();
+
+      await Backroom.update(
+        {
+          CSMWO: "Approved",
+          CSMWOtimeStamp: backroomApplicant.CSMWOtimeStamp,
+          CSMWOdecline: "",
+          cswmoCert: req.file ? req.file.buffer : null,
+          cswmoCert_filename: req.file ? req.file.originalname : null,
+          cswmoCert_mimetype: req.file ? req.file.mimetype : null,
+          cswmoCert_size: req.file ? req.file.size : null,
+        },
+        { where: { id } }
+      );
+
+      await Examiners.update(
+        {
+          CSMWO: "Approved",
+          CSMWOtimeStamp: applicant.CSMWOtimeStamp,
+          CSMWOdecline: "",
+          cswmoCert: req.file ? req.file.buffer : null,
+          cswmoCert_filename: req.file ? req.file.originalname : null,
+          cswmoCert_mimetype: req.file ? req.file.mimetype : null,
+          cswmoCert_size: req.file ? req.file.size : null,
+        },
+        { where: { id } }
+      );
+
+      // update applicant status
+      await applicantStatus.update({
+        CSMWO: "Approved",
+        CSMWOtimeStamp: applicant.CSMWOtimeStamp,
+        CSMWOdecline: "",
+      });
+
+      res.json({ message: "Applicant approved", applicant });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Failed to approve applicant" });
     }
-    const applicantStatus = await AppStatus.findByPk(id);
-    if (!applicantStatus) {
-      return res.status(404).json({ error: "Applicant not found" });
-    }
-
-    applicant.CSMWO = "Approved";
-    applicant.CSMWOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
-    applicant.csmwoFee = csmwoFee;
-
-    await applicant.save();
-    await applicantStatus.update({
-      CSMWO: "Approved",
-      CSMWOtimeStamp: applicant.CSMWOtimeStamp,
-      CSMWOdecline: "",
-    });
-
-    res.json({ message: "Applicant approved", applicant });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to approve applicant" });
   }
-});
+);
+
 router.post("/csmwo/decline/:id", async (req, res) => {
   try {
     const { id } = req.params;

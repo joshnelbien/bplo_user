@@ -25,12 +25,31 @@ function Cmswo() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filter, setFilter] = useState("pending"); // ✅ pending by default
   const recordsPerPage = 20;
+  const [selectedFiles, setSelectedFiles] = useState({});
   const API = import.meta.env.VITE_API_BASE;
 
+  const handleFileChange = (name, file) => {
+    setSelectedFiles((prev) => ({
+      ...prev,
+      [name]: file,
+    }));
+  };
+
+  const handleFileSelect = (e) => {
+    const { name, files } = e.target;
+    if (files[0]) {
+      setSelectedFiles((prev) => ({
+        ...prev,
+        [name]: files[0], // store the actual File object
+      }));
+      handleFileChange(name, files[0]); // send file up to parent
+      setValidationErrors((prev) => ({ ...prev, cswmoCert: false }));
+    }
+  };
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get(`${API}/examiners/examiners`);
+        const res = await axios.get(`${API}/backroom/backrooms`);
 
         // Sort by createdAt ascending (oldest first, newest at bottom)
         const sortedData = res.data.sort(
@@ -64,12 +83,18 @@ function Cmswo() {
     indexOfLastRecord
   );
 
-  const handleApprove = async (id, csmwoFee) => {
+  const handleApprove = async (id, csmwoFee, selectedFiles = {}) => {
     try {
-      const res = await axios.post(
-        `${API}/backroom/csmwo/approve/${id}`,
-        { csmwoFee } // ✅ must match backend & DB field
-      );
+      const formData = new FormData();
+      formData.append("csmwoFee", csmwoFee);
+
+      if (selectedFiles?.cswmoCert) {
+        formData.append("cswmoCert", selectedFiles.cswmoCert);
+      }
+
+      await axios.post(`${API}/backroom/csmwo/approve/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       setApplicants((prev) =>
         prev.map((applicant) =>
@@ -78,9 +103,6 @@ function Cmswo() {
             : applicant
         )
       );
-
-      // alert("Applicant approved");
-      // closeModal();
     } catch (error) {
       console.error("Error approving applicant:", error);
     }
@@ -259,6 +281,8 @@ function Cmswo() {
         onClose={closeModal}
         onApprove={handleApprove}
         onDecline={handleDecline}
+        handleFileChange={handleFileChange}
+        selectedFiles={selectedFiles}
       />
     </>
   );
