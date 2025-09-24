@@ -9,6 +9,9 @@ const File = sequelize.define(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
+    BIN: {
+      type: DataTypes.STRING,
+    },
     userId: { type: DataTypes.UUID, allowNull: false },
     BusinessType: DataTypes.STRING,
     dscRegNo: DataTypes.STRING,
@@ -111,10 +114,75 @@ const File = sequelize.define(
     photoOfBusinessEstExt_mimetype: { type: DataTypes.STRING, allowNull: true },
     photoOfBusinessEstExt_size: { type: DataTypes.INTEGER, allowNull: true },
 
-    status: { type: DataTypes.STRING, defaultValue: "pending" },
+    BPLO: { type: DataTypes.STRING, defaultValue: "Pending" },
+    BPLOtimeStamp: { type: DataTypes.STRING },
+
+    CSMWO: { type: DataTypes.STRING, defaultValue: "Pending" },
+    CSMWOtimeStamp: { type: DataTypes.STRING },
+    csmwoFee: { type: DataTypes.STRING },
+
+    OBO: { type: DataTypes.STRING, defaultValue: "Pending" },
+    OBOtimeStamp: { type: DataTypes.STRING },
+    //Building Structure Architectural Presentability
+    BSAP: { type: DataTypes.STRING },
+    //Sanitary Requirements
+    SR: { type: DataTypes.STRING },
+    //Mechanical
+    Mechanical: { type: DataTypes.STRING },
+    //Electrical
+    Electrical: { type: DataTypes.STRING },
+    //Signage
+    Signage: { type: DataTypes.STRING },
+    //Electronics
+    Electronics: { type: DataTypes.STRING },
+
+    Examiners: { type: DataTypes.STRING, defaultValue: "Pending" },
+    ExaminerstimeStamp: { type: DataTypes.STRING },
+
+    BusinessTax: { type: DataTypes.STRING, defaultValue: "Pending" },
+    BusinessTaxtimeStamp: { type: DataTypes.STRING },
+
+    CHO: { type: DataTypes.STRING, defaultValue: "Pending" },
+    CHOtimeStamp: { type: DataTypes.STRING },
+    choFee: { type: DataTypes.STRING },
+    choCert: { type: DataTypes.BLOB("long"), allowNull: true },
+    choCert_filename: { type: DataTypes.STRING, allowNull: true },
+    choCert_mimetype: { type: DataTypes.STRING, allowNull: true },
+    choCert_size: { type: DataTypes.INTEGER, allowNull: true },
+
+    CENRO: { type: DataTypes.STRING, defaultValue: "Pending" },
+    CENROtimeStamp: { type: DataTypes.STRING },
+    cenroFee: { type: DataTypes.STRING },
+    cenroCert: { type: DataTypes.BLOB("long"), allowNull: true },
+    cenroCert_filename: { type: DataTypes.STRING, allowNull: true },
+    cenroCert_mimetype: { type: DataTypes.STRING, allowNull: true },
+    cenroCert_size: { type: DataTypes.INTEGER, allowNull: true },
+
+    ZONING: { type: DataTypes.STRING, defaultValue: "Pending" },
+    ZONINGtimeStamp: { type: DataTypes.STRING },
+    zoningFee: { type: DataTypes.STRING },
+    zoningCert: { type: DataTypes.BLOB("long"), allowNull: true },
+    zoningCert_filename: { type: DataTypes.STRING, allowNull: true },
+    zoningCert_mimetype: { type: DataTypes.STRING, allowNull: true },
+    zoningCert_size: { type: DataTypes.INTEGER, allowNull: true },
+
+    BUSINESSTAX: { type: DataTypes.STRING, defaultValue: "Pending" },
+    BUSINESSTAXtimeStamp: { type: DataTypes.STRING },
+    businesstaxComputation: { type: DataTypes.BLOB("long"), allowNull: true },
+    businesstaxComputation_filename: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    businesstaxComputation_mimetype: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    businesstaxComputation_size: { type: DataTypes.INTEGER, allowNull: true },
+
+    TREASURER: { type: DataTypes.STRING, defaultValue: "Pending" },
+    TREASURERtimeStamp: { type: DataTypes.STRING },
     application: { type: DataTypes.STRING },
   },
-
   {
     tableName: "NewApplications",
     timestamps: true,
