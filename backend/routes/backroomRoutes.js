@@ -37,79 +37,115 @@ router.post("/backroom/approve/:id", async (req, res) => {
 });
 // List file
 
+// ✅ OBO APPROVE
 router.post("/obo/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
-
-    const applicant = await Examiners.findByPk(id);
-    if (!applicant) {
-      return res.status(404).json({ error: "Applicant not found" });
-    }
-
-    const applicantStatus = await AppStatus.findByPk(id);
-    if (!applicantStatus) {
-      return res.status(404).json({ error: "Applicant not found" });
-    }
-
     const { BSAP, SR, Mechanical, Electrical, Signage, Electronics } = req.body;
 
-    // ✅ Update fields
-    applicant.OBO = "Approved";
-    applicant.OBOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+    // fetch all 3 records
+    const applicant = await Examiners.findByPk(id);
+    if (!applicant)
+      return res.status(404).json({ error: "Applicant not found" });
 
-    if (BSAP) applicant.BSAP = BSAP;
-    if (SR) applicant.SR = SR;
-    if (Mechanical) applicant.Mechanical = Mechanical;
-    if (Electrical) applicant.Electrical = Electrical;
-    if (Signage) applicant.Signage = Signage;
-    if (Electronics) applicant.Electronics = Electronics;
+    const applicantStatus = await AppStatus.findByPk(id);
+    if (!applicantStatus)
+      return res.status(404).json({ error: "Applicant status not found" });
 
-    await applicant.save();
+    const backroom = await Backroom.findByPk(id);
+    if (!backroom)
+      return res.status(404).json({ error: "Backroom record not found" });
 
-    await applicantStatus.update({
+    const timeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+
+    // ✅ Update Examiners
+    await applicant.update({
       OBO: "Approved",
-      OBOtimeStamp: applicant.OBOtimeStamp,
+      OBOtimeStamp: timeStamp,
+      ...(BSAP && { BSAP }),
+      ...(SR && { SR }),
+      ...(Mechanical && { Mechanical }),
+      ...(Electrical && { Electrical }),
+      ...(Signage && { Signage }),
+      ...(Electronics && { Electronics }),
     });
 
-    res.json({ message: "Applicant approved", applicant });
+    // ✅ Update AppStatus
+    await applicantStatus.update({
+      OBO: "Approved",
+      OBOtimeStamp: timeStamp,
+    });
+
+    // ✅ Update Backroom
+    await backroom.update({
+      OBO: "Approved",
+      OBOtimeStamp: timeStamp,
+    });
+
+    res.json({
+      message: "Applicant approved",
+      examiner: applicant,
+      status: applicantStatus,
+      backroom,
+    });
   } catch (err) {
     console.error("Approve error:", err);
     res.status(500).json({ error: "Failed to approve applicant" });
   }
 });
 
+// ✅ OBO DECLINE
 router.post("/obo/decline/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { reason } = req.body; // get reason from frontend
+    const { reason } = req.body;
 
+    // fetch all 3 records
     const applicant = await Examiners.findByPk(id);
-    if (!applicant) {
+    if (!applicant)
       return res.status(404).json({ error: "Applicant not found" });
-    }
 
     const applicantStatus = await AppStatus.findByPk(id);
-    if (!applicantStatus) {
+    if (!applicantStatus)
       return res.status(404).json({ error: "Applicant status not found" });
-    }
 
-    // ✅ Update fields
-    applicant.OBO = "Declined";
-    applicant.OBOdecline = reason || "Declined"; // save reason
-    applicant.OBOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+    const backroom = await Backroom.findByPk(id);
+    if (!backroom)
+      return res.status(404).json({ error: "Backroom record not found" });
 
-    await applicant.save();
+    const timeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+    const declineReason = reason || "No reason provided";
 
-    await applicantStatus.update({
+    // ✅ Update Examiners
+    await applicant.update({
       OBO: "Declined",
-      OBOdecline: applicant.OBOdecline,
-      OBOtimeStamp: applicant.OBOtimeStamp,
+      OBOdecline: declineReason,
+      OBOtimeStamp: timeStamp,
     });
 
-    res.json({ message: "Applicant declined", applicant });
+    // ✅ Update AppStatus
+    await applicantStatus.update({
+      OBO: "Declined",
+      OBOdecline: declineReason,
+      OBOtimeStamp: timeStamp,
+    });
+
+    // ✅ Update Backroom
+    await backroom.update({
+      OBO: "Declined",
+      OBOdecline: declineReason,
+      OBOtimeStamp: timeStamp,
+    });
+
+    res.json({
+      message: "Applicant declined",
+      examiner: applicant,
+      status: applicantStatus,
+      backroom,
+    });
   } catch (err) {
     console.error("Decline error:", err);
-    res.status(500).json({ error: "Failed to Decline applicant" });
+    res.status(500).json({ error: "Failed to decline applicant" });
   }
 });
 
@@ -128,12 +164,19 @@ router.post(
 
       const applicantStatus = await AppStatus.findByPk(id);
       if (!applicantStatus) {
-        return res.status(404).json({ error: "Applicant not found" });
+        return res.status(404).json({ error: "Applicant status not found" });
       }
 
-      applicant.ZONING = "Approved";
-      applicant.ZONINGtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+      const backroomApplicant = await Backroom.findByPk(id);
+      if (!backroomApplicant) {
+        return res.status(404).json({ error: "Backroom record not found" });
+      }
 
+      const approveTime = moment().format("DD/MM/YYYY HH:mm:ss");
+
+      // Examiners
+      applicant.ZONING = "Approved";
+      applicant.ZONINGtimeStamp = approveTime;
       applicant.zoningFee = zoningFee;
 
       if (req.file) {
@@ -145,10 +188,26 @@ router.post(
 
       await applicant.save();
 
+      // AppStatus
       await applicantStatus.update({
         ZONING: "Approved",
-        ZONINGtimeStamp: applicant.ZONINGtimeStamp,
+        ZONINGtimeStamp: approveTime,
+        ZONINGdecline: "",
       });
+
+      // Backroom
+      await Backroom.update(
+        {
+          ZONING: "Approved",
+          ZONINGtimeStamp: approveTime,
+          ZONINGdecline: "",
+          zoningCert: req.file ? req.file.buffer : null,
+          zoningCert_filename: req.file ? req.file.originalname : null,
+          zoningCert_mimetype: req.file ? req.file.mimetype : null,
+          zoningCert_size: req.file ? req.file.size : null,
+        },
+        { where: { id } }
+      );
 
       res.json({ message: "Applicant approved", applicant });
     } catch (err) {
@@ -161,7 +220,7 @@ router.post(
 router.post("/zoning/decline/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { reason } = req.body; // ✅ get reason from frontend
+    const { reason } = req.body;
 
     const applicant = await Examiners.findByPk(id);
     if (!applicant) {
@@ -173,19 +232,39 @@ router.post("/zoning/decline/:id", async (req, res) => {
       return res.status(404).json({ error: "Applicant status not found" });
     }
 
-    // ✅ Save status, timestamp, and reason
-    const timestamp = moment().format("DD/MM/YYYY HH:mm:ss");
+    const backroomApplicant = await Backroom.findByPk(id);
+    if (!backroomApplicant) {
+      return res.status(404).json({ error: "Backroom record not found" });
+    }
 
+    const declineTime = moment().format("DD/MM/YYYY HH:mm:ss");
+
+    // Examiners
     applicant.ZONING = "Declined";
-    applicant.ZONINGtimeStamp = timestamp;
-    applicant.ZONINGdecline = reason; // ✅ save decline reason
+    applicant.ZONINGtimeStamp = declineTime;
+    applicant.ZONINGdecline = reason;
     await applicant.save();
 
+    // AppStatus
     await applicantStatus.update({
       ZONING: "Declined",
-      ZONINGtimeStamp: timestamp,
-      ZONINGdecline: reason, // ✅ also in AppStatus
+      ZONINGtimeStamp: declineTime,
+      ZONINGdecline: reason,
     });
+
+    // Backroom
+    await Backroom.update(
+      {
+        ZONING: "Declined",
+        ZONINGtimeStamp: declineTime,
+        ZONINGdecline: reason,
+        zoningCert: null,
+        zoningCert_filename: null,
+        zoningCert_mimetype: null,
+        zoningCert_size: null,
+      },
+      { where: { id } }
+    );
 
     res.json({
       message: "Applicant declined successfully",
@@ -209,12 +288,19 @@ router.post("/cho/approve/:id", upload.single("choCert"), async (req, res) => {
 
     const applicantStatus = await AppStatus.findByPk(id);
     if (!applicantStatus) {
-      return res.status(404).json({ error: "Applicant not found" });
+      return res.status(404).json({ error: "Applicant status not found" });
     }
 
-    applicant.CHO = "Approved";
-    applicant.CHOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+    const backroomApplicant = await Backroom.findByPk(id);
+    if (!backroomApplicant) {
+      return res.status(404).json({ error: "Backroom record not found" });
+    }
 
+    const approveTime = moment().format("DD/MM/YYYY HH:mm:ss");
+
+    // Examiners
+    applicant.CHO = "Approved";
+    applicant.CHOtimeStamp = approveTime;
     applicant.choFee = choFee;
 
     if (req.file) {
@@ -223,14 +309,28 @@ router.post("/cho/approve/:id", upload.single("choCert"), async (req, res) => {
       applicant.choCert_mimetype = req.file.mimetype;
       applicant.choCert_size = req.file.size;
     }
-
     await applicant.save();
 
+    // AppStatus
     await applicantStatus.update({
       CHO: "Approved",
-      CHOtimeStamp: applicant.CHOtimeStamp,
+      CHOtimeStamp: approveTime,
       CHOdecline: "",
     });
+
+    // Backroom
+    await Backroom.update(
+      {
+        CHO: "Approved",
+        CHOtimeStamp: approveTime,
+        CHOdecline: "",
+        choCert: req.file ? req.file.buffer : null,
+        choCert_filename: req.file ? req.file.originalname : null,
+        choCert_mimetype: req.file ? req.file.mimetype : null,
+        choCert_size: req.file ? req.file.size : null,
+      },
+      { where: { id } }
+    );
 
     res.json({ message: "Applicant approved", applicant });
   } catch (err) {
@@ -254,20 +354,39 @@ router.post("/cho/decline/:id", async (req, res) => {
       return res.status(404).json({ error: "Applicant status not found" });
     }
 
+    const backroomApplicant = await Backroom.findByPk(id);
+    if (!backroomApplicant) {
+      return res.status(404).json({ error: "Backroom record not found" });
+    }
+
     const declineTime = moment().format("DD/MM/YYYY HH:mm:ss");
 
-    // Update Examiners
+    // Examiners
     applicant.CHO = "Declined";
     applicant.CHOtimeStamp = declineTime;
     applicant.CHOdecline = reason;
     await applicant.save();
 
-    // Update AppStatus
+    // AppStatus
     await applicantStatus.update({
       CHO: "Declined",
       CHOtimeStamp: declineTime,
       CHOdecline: reason,
     });
+
+    // Backroom
+    await Backroom.update(
+      {
+        CHO: "Declined",
+        CHOtimeStamp: declineTime,
+        CHOdecline: reason,
+        choCert: null,
+        choCert_filename: null,
+        choCert_mimetype: null,
+        choCert_size: null,
+      },
+      { where: { id } }
+    );
 
     res.json({
       message: "Applicant declined",
@@ -294,12 +413,19 @@ router.post(
 
       const applicantStatus = await AppStatus.findByPk(id);
       if (!applicantStatus) {
-        return res.status(404).json({ error: "Applicant not found" });
+        return res.status(404).json({ error: "Applicant status not found" });
       }
 
-      applicant.CENRO = "Approved";
-      applicant.CENROtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
+      const backroomApplicant = await Backroom.findByPk(id);
+      if (!backroomApplicant) {
+        return res.status(404).json({ error: "Backroom record not found" });
+      }
 
+      const approveTime = moment().format("DD/MM/YYYY HH:mm:ss");
+
+      // Examiners
+      applicant.CENRO = "Approved";
+      applicant.CENROtimeStamp = approveTime;
       applicant.cenroFee = cenroFee;
 
       if (req.file) {
@@ -310,14 +436,26 @@ router.post(
       }
       await applicant.save();
 
+      // AppStatus
       await applicantStatus.update({
         CENRO: "Approved",
-        CENROtimeStamp: applicant.CENROtimeStamp,
+        CENROtimeStamp: approveTime,
         CENROdecline: "",
       });
 
-      // ✅ (Optional) If you really want to destroy it after approval
-      // await applicant.destroy();
+      // Backroom
+      await Backroom.update(
+        {
+          CENRO: "Approved",
+          CENROtimeStamp: approveTime,
+          CENROdecline: "",
+          cenroCert: req.file ? req.file.buffer : null,
+          cenroCert_filename: req.file ? req.file.originalname : null,
+          cenroCert_mimetype: req.file ? req.file.mimetype : null,
+          cenroCert_size: req.file ? req.file.size : null,
+        },
+        { where: { id } }
+      );
 
       res.json({ message: "Applicant approved", applicant });
     } catch (err) {
@@ -342,21 +480,41 @@ router.post("/cenro/decline/:id", async (req, res) => {
       return res.status(404).json({ error: "Applicant status not found" });
     }
 
-    const declineTimestamp = moment().format("DD/MM/YYYY HH:mm:ss");
+    const backroomApplicant = await Backroom.findByPk(id);
+    if (!backroomApplicant) {
+      return res.status(404).json({ error: "Backroom record not found" });
+    }
 
+    const declineTime = moment().format("DD/MM/YYYY HH:mm:ss");
+
+    // Examiners
     applicant.CENRO = "Declined";
-    applicant.CENROtimeStamp = declineTimestamp;
+    applicant.CENROtimeStamp = declineTime;
     applicant.CENROdecline = reason;
-
     await applicant.save();
 
+    // AppStatus
     await applicantStatus.update({
       CENRO: "Declined",
-      CENROtimeStamp: declineTimestamp,
+      CENROtimeStamp: declineTime,
       CENROdecline: reason,
     });
 
-    res.json({ message: "Applicant declined", applicant });
+    // Backroom
+    await Backroom.update(
+      {
+        CENRO: "Declined",
+        CENROtimeStamp: declineTime,
+        CENROdecline: reason,
+        cenroCert: null,
+        cenroCert_filename: null,
+        cenroCert_mimetype: null,
+        cenroCert_size: null,
+      },
+      { where: { id } }
+    );
+
+    res.json({ message: "Applicant declined successfully", applicant });
   } catch (err) {
     console.error("Decline error:", err);
     res.status(500).json({ error: "Failed to decline applicant" });
@@ -459,19 +617,40 @@ router.post("/csmwo/decline/:id", async (req, res) => {
       return res.status(404).json({ error: "Applicant status not found" });
     }
 
+    const backroomApplicant = await Backroom.findByPk(id);
+    if (!backroomApplicant) {
+      return res.status(404).json({ error: "Backroom record not found" });
+    }
+
     // 2. Update status, timestamp & decline reason
     const declineTime = moment().format("DD/MM/YYYY HH:mm:ss");
 
+    // Examiners
     applicant.CSMWO = "Declined";
     applicant.CSMWOtimeStamp = declineTime;
     applicant.CSMWOdecline = reason;
     await applicant.save();
 
+    // AppStatus
     await applicantStatus.update({
       CSMWO: "Declined",
       CSMWOtimeStamp: declineTime,
       CSMWOdecline: reason,
     });
+
+    // Backroom
+    await Backroom.update(
+      {
+        CSMWO: "Declined",
+        CSMWOtimeStamp: declineTime,
+        CSMWOdecline: reason,
+        cswmoCert: null,
+        cswmoCert_filename: null,
+        cswmoCert_mimetype: null,
+        cswmoCert_size: null,
+      },
+      { where: { id } }
+    );
 
     // 3. Respond
     res.json({
