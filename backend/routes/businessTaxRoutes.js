@@ -6,6 +6,7 @@ const BusinessTax = require("../db/model/businessTax");
 const AppStatus = require("../db/model/applicantStatusDB");
 const TreasurersOffice = require("../db/model/treasurersOfficeDB");
 const Examiners = require("../db/model/examiners");
+const File = require("../db/model/files");
 const router = express.Router();
 
 // Multer setup - store files in memory
@@ -17,7 +18,7 @@ router.post("/businessTax/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const applicant = await Backroom.findByPk(id);
-    const examinersApplicant = await Examiners.findByPk(id);
+    const examinersApplicant = await File.findByPk(id);
     if (!applicant)
       return res.status(404).json({ error: "Applicant not found" });
 
@@ -54,6 +55,12 @@ router.post(
           .status(404)
           .json({ error: "Applicant not found in BusinessTax" });
 
+      const applicantbusinessTax = await File.findByPk(id);
+      if (!applicant)
+        return res
+          .status(404)
+          .json({ error: "Applicant not found in BusinessTax" });
+
       const applicantBackroom = await Backroom.findByPk(id);
       if (!applicantBackroom)
         return res
@@ -71,6 +78,11 @@ router.post(
       const timestamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
       // Update statuses
+
+      await applicantbusinessTax.update({
+        passtoBusinessTax: "Yes",
+      });
+
       await applicantBackroom.update({
         BUSINESSTAX: "Approved",
         BUSINESSTAXtimeStamp: timestamp,
@@ -81,6 +93,7 @@ router.post(
           businesstaxComputation_size: file.size,
         }),
       });
+
       await applicant.update({
         BUSINESSTAX: "Approved",
         BUSINESSTAXtimeStamp: timestamp,

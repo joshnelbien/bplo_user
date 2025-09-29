@@ -79,6 +79,12 @@ router.post("/obo/approve/:id", async (req, res) => {
     await backroom.update({
       OBO: "Approved",
       OBOtimeStamp: timeStamp,
+      ...(BSAP && { BSAP }),
+      ...(SR && { SR }),
+      ...(Mechanical && { Mechanical }),
+      ...(Electrical && { Electrical }),
+      ...(Signage && { Signage }),
+      ...(Electronics && { Electronics }),
     });
 
     res.json({

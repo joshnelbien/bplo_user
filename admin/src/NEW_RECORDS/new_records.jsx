@@ -4,8 +4,7 @@ import Side_bar from "../SIDE_BAR/side_bar.jsx";
 import ApplicantModal from "./newApp_modal.jsx";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { IconButton, Tooltip } from "@mui/material";
+import { IconButton, Tooltip, Modal } from "@mui/material";
 import UpdateModal from "./update_modal.jsx";
 
 import {
@@ -21,100 +20,168 @@ import {
   TableHead,
   TableRow,
   Typography,
-  Modal,
 } from "@mui/material";
 
 import { CheckCircleOutline } from "@mui/icons-material";
 
 // ✅ Confirmation Modal
-const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
-  return (
-    <Modal open={isOpen} onClose={onClose}>
-      <Box
-        sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 400,
-          bgcolor: "background.paper",
-          borderRadius: 2,
-          boxShadow: 24,
-          p: 4,
-          textAlign: "center",
-          outline: "none",
-        }}
-      >
-        <Typography variant="h6" mb={2}>
-          {message}
-        </Typography>
-        <Box display="flex" justifyContent="center" gap={2}>
-          <Button variant="contained" color="success" onClick={onConfirm}>
-            Yes
-          </Button>
-          <Button variant="outlined" onClick={onClose}>
-            No
-          </Button>
-        </Box>
-      </Box>
-    </Modal>
-  );
-};
-
-// ✅ Success Modal
-const SuccessModal = ({ isOpen, onClose, message }) => {
-  return (
-    <Modal open={isOpen} onClose={onClose}>
-      <Box
-        sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 300,
-          bgcolor: "background.paper",
-          borderRadius: 2,
-          boxShadow: 24,
-          p: 4,
-          textAlign: "center",
-          outline: "none",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 2,
-        }}
-      >
-        <CheckCircleOutline sx={{ color: "green", fontSize: 60 }} />
-        <Typography variant="h6" mb={2}>
-          {message}
-        </Typography>
-        <Button variant="contained" color="success" onClick={onClose}>
-          OK
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => (
+  <Modal open={isOpen} onClose={onClose}>
+    <Box
+      sx={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: 400,
+        bgcolor: "background.paper",
+        borderRadius: 2,
+        boxShadow: 24,
+        p: 4,
+        textAlign: "center",
+      }}
+    >
+      <Typography variant="h6" mb={2}>
+        {message}
+      </Typography>
+      <Box display="flex" justifyContent="center" gap={2}>
+        <Button variant="contained" color="success" onClick={onConfirm}>
+          Yes
+        </Button>
+        <Button variant="outlined" onClick={onClose}>
+          No
         </Button>
       </Box>
-    </Modal>
-  );
-};
+    </Box>
+  </Modal>
+);
+
+// ✅ Success Modal
+const SuccessModal = ({ isOpen, onClose, message }) => (
+  <Modal open={isOpen} onClose={onClose}>
+    <Box
+      sx={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: 300,
+        bgcolor: "background.paper",
+        borderRadius: 2,
+        boxShadow: 24,
+        p: 4,
+        textAlign: "center",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+      }}
+    >
+      <CheckCircleOutline sx={{ color: "green", fontSize: 60 }} />
+      <Typography variant="h6" mb={2}>
+        {message}
+      </Typography>
+      <Button variant="contained" color="success" onClick={onClose}>
+        OK
+      </Button>
+    </Box>
+  </Modal>
+);
 
 function New_records() {
   const API = import.meta.env.VITE_API_BASE;
-  const [pendingApplicants, setPendingApplicants] = useState([]);
-  const [approvedApplicants, setApprovedApplicants] = useState([]);
+  const [applicants, setApplicants] = useState([]);
+  const [filter, setFilter] = useState("pending");
   const [currentPage, setCurrentPage] = useState(1);
+
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filter, setFilter] = useState("pending");
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [updateApplicant, setUpdateApplicant] = useState(null);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [confirmationData, setConfirmationData] = useState({
-    action: "",
-    applicant: null,
-  });
 
+  const [updateApplicant, setUpdateApplicant] = useState(null);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [confirmationData, setConfirmationData] = useState(null);
 
   const recordsPerPage = 20;
+
+  // ✅ Fetch applicants
+  const fetchApplicants = async () => {
+    try {
+      const res = await axios.get(`${API}/newApplication/files`);
+      const sorted = res.data.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      setApplicants(sorted);
+    } catch (error) {
+      console.error("❌ Error fetching applicants:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchApplicants();
+  }, [API]);
+
+  // ✅ Filter logic
+  const filteredApplicants = applicants.filter((a) => {
+    const bploStatus = a.BPLO?.toLowerCase();
+    const businessTax = a.passtoBusinessTax === "Yes";
+
+    if (filter === "pending") {
+      return bploStatus === "pending";
+    }
+
+    if (filter === "approved") {
+      // ✅ Show only approved that have NOT been passed to Business Tax
+      return bploStatus === "approved" && !businessTax;
+    }
+
+    if (filter === "businessTax") {
+      // ✅ Show only those explicitly marked for Business Tax
+      return businessTax;
+    }
+
+    return true;
+  });
+
+  // ✅ Pagination
+  const indexOfLastRecord = currentPage * recordsPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+  const currentRecords = filteredApplicants.slice(
+    indexOfFirstRecord,
+    indexOfLastRecord
+  );
+  const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
+
+  // ✅ Approve handler
+  const handleApprove = (applicant) => {
+    setConfirmationData(applicant);
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmationData) return;
+    try {
+      await axios.post(`${API}/examiners/bplo/approve/${confirmationData.id}`);
+      setIsConfirmModalOpen(false);
+      setIsSuccessModalOpen(true);
+      fetchApplicants(); // refresh list
+    } catch (error) {
+      console.error("❌ Error approving applicant:", error);
+    }
+  };
+
+  // ✅ Modal handlers
+  const openModal = (applicant) => {
+    setSelectedApplicant(applicant);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedApplicant(null);
+    setIsModalOpen(false);
+  };
 
   const openUpdateModal = (applicant) => {
     setUpdateApplicant(applicant);
@@ -126,99 +193,16 @@ function New_records() {
     setIsUpdateModalOpen(false);
   };
 
-  useEffect(() => {
-    const fetchApplicants = async () => {
-      try {
-        // ✅ Pending applicants (filter only pending)
-        const pendingRes = await axios.get(`${API}/newApplication/files`);
-        const onlyPending = pendingRes.data
-          .filter((a) => a.BPLO?.toLowerCase() === "pending")
-          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-        setPendingApplicants(onlyPending);
-
-        // ✅ Approved applicants
-        const approvedRes = await axios.get(`${API}/examiners/examiners`);
-        const sortedApproved = approvedRes.data.sort(
-          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-        );
-        setApprovedApplicants(sortedApproved);
-      } catch (error) {
-        console.error("Error fetching applicants:", error);
-      }
-    };
-
-    fetchApplicants();
-  }, []);
-
-  const applicants =
-    filter === "pending"
-      ? pendingApplicants
-      : filter === "approved"
-      ? approvedApplicants.filter((a) => a.passtoBusinessTax === "No")
-      : filter === "businessTax"
-      ? approvedApplicants.filter((a) => a.passtoBusinessTax === "Yes")
-      : [];
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = applicants.slice(
-    indexOfFirstRecord,
-    indexOfLastRecord
-  );
-  const totalPages = Math.ceil(applicants.length / recordsPerPage);
-
-  const handleApprove = (applicant) => {
-    setConfirmationData({ action: "approve", applicant });
-    setIsConfirmModalOpen(true);
-  };
-
-  const handleConfirmAction = async () => {
-    setIsConfirmModalOpen(false);
-    const { action, applicant } = confirmationData;
-
-    if (!applicant || !applicant.id) {
-      console.error(`No applicant selected for ${action}!`);
-      return;
-    }
-
-    try {
-      if (action === "approve") {
-        await axios.post(`${API}/examiners/bplo/approve/${applicant.id}`);
-        setPendingApplicants((prev) =>
-          prev.filter((a) => a.id !== applicant.id)
-        );
-        setIsSuccessModalOpen(true);
-      }
-      closeModal();
-    } catch (error) {
-      console.error(`Error ${action}ing applicant:`, error);
-    }
-  };
-
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-  };
-
-  const openModal = (applicant) => {
-    setSelectedApplicant(applicant);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setSelectedApplicant(null);
-    setIsModalOpen(false);
-  };
-
   return (
     <>
       <Side_bar />
       <Box
-        id="main_content"
         sx={{
           p: 3,
           minHeight: "100vh",
           background: "linear-gradient(to bottom, #FFFFFF, #e6ffe6)",
-          marginLeft: { xs: 0, sm: "250px" }, // 0 on mobile, 250px on larger screens
-          width: { xs: "100%", sm: "calc(100% - 250px)" }, // full width on mobile
+          marginLeft: { xs: 0, sm: "250px" },
+          width: { xs: "100%", sm: "calc(100% - 250px)" },
         }}
       >
         <Typography
@@ -229,52 +213,41 @@ function New_records() {
           NEW RECORDS
         </Typography>
 
-        {/* ✅ Filter buttons */}
+        {/* ✅ Filter Buttons */}
         <Box mb={2}>
           <ButtonGroup variant="contained">
             <Button
-              color={filter === "pending" ? "success" : "inherit"}
               onClick={() => {
                 setFilter("pending");
                 setCurrentPage(1);
               }}
               sx={{
-                bgcolor: filter === "pending" ? "#1c541eff" : undefined,
-                "&:hover": {
-                  bgcolor: filter === "pending" ? "#1c541eff" : undefined,
-                },
+                bgcolor: filter === "pending" ? "#1c541e" : undefined,
+                color: filter === "pending" ? "white" : undefined,
               }}
             >
               Pending
             </Button>
             <Button
-              color={filter === "approved" ? "success" : "inherit"}
               onClick={() => {
                 setFilter("approved");
                 setCurrentPage(1);
               }}
               sx={{
-                bgcolor: filter === "approved" ? "#1c541eff" : undefined,
-                "&:hover": {
-                  bgcolor: filter === "approved" ? "#1c541eff" : undefined,
-                },
+                bgcolor: filter === "approved" ? "#1c541e" : undefined,
+                color: filter === "approved" ? "white" : undefined,
               }}
             >
               On Going
             </Button>
-
-            {/* ✅ New Business Tax button */}
             <Button
-              color={filter === "businessTax" ? "success" : "inherit"}
               onClick={() => {
                 setFilter("businessTax");
                 setCurrentPage(1);
               }}
               sx={{
-                bgcolor: filter === "businessTax" ? "#1c541eff" : undefined,
-                "&:hover": {
-                  bgcolor: filter === "businessTax" ? "#1c541eff" : undefined,
-                },
+                bgcolor: filter === "businessTax" ? "#1c541e" : undefined,
+                color: filter === "businessTax" ? "white" : undefined,
               }}
             >
               Computation
@@ -302,7 +275,6 @@ function New_records() {
                 <TableCell>
                   <strong>Last Name</strong>
                 </TableCell>
-
                 {filter === "approved" && (
                   <>
                     <TableCell>
@@ -328,13 +300,12 @@ function New_records() {
                     </TableCell>
                   </>
                 )}
-
-                {/* ✅ New Actions column */}
                 <TableCell align="center">
                   <strong>Actions</strong>
                 </TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
               {currentRecords.map((applicant) => (
                 <TableRow key={applicant.id} hover>
@@ -346,79 +317,64 @@ function New_records() {
                   {filter === "approved" && (
                     <>
                       <TableCell>
-                        <div
-                          style={{ display: "flex", flexDirection: "column" }}
-                        >
-                          <span>{applicant.BPLO}</span>
-                          <span style={{ fontSize: "0.8em", color: "gray" }}>
+                        <div>
+                          <div>{applicant.BPLO}</div>
+                          <small style={{ color: "gray" }}>
                             {applicant.BPLOtimeStamp}
-                          </span>
+                          </small>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div
-                          style={{ display: "flex", flexDirection: "column" }}
-                        >
-                          <span>{applicant.Examiners}</span>
-                          <span style={{ fontSize: "0.8em", color: "gray" }}>
+                        <div>
+                          <div>{applicant.Examiners}</div>
+                          <small style={{ color: "gray" }}>
                             {applicant.ExaminerstimeStamp}
-                          </span>
+                          </small>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div
-                          style={{ display: "flex", flexDirection: "column" }}
-                        >
-                          <span>{applicant.CENRO}</span>
-                          <span style={{ fontSize: "0.8em", color: "gray" }}>
+                        <div>
+                          <div>{applicant.CENRO}</div>
+                          <small style={{ color: "gray" }}>
                             {applicant.CENROtimeStamp}
-                          </span>
+                          </small>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div
-                          style={{ display: "flex", flexDirection: "column" }}
-                        >
-                          <span>{applicant.CHO}</span>
-                          <span style={{ fontSize: "0.8em", color: "gray" }}>
+                        <div>
+                          <div>{applicant.CHO}</div>
+                          <small style={{ color: "gray" }}>
                             {applicant.CHOtimeStamp}
-                          </span>
+                          </small>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div
-                          style={{ display: "flex", flexDirection: "column" }}
-                        >
-                          <span>{applicant.ZONING}</span>
-                          <span style={{ fontSize: "0.8em", color: "gray" }}>
+                        <div>
+                          <div>{applicant.ZONING}</div>
+                          <small style={{ color: "gray" }}>
                             {applicant.ZONINGtimeStamp}
-                          </span>
+                          </small>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div
-                          style={{ display: "flex", flexDirection: "column" }}
-                        >
-                          <span>{applicant.CSMWO}</span>
-                          <span style={{ fontSize: "0.8em", color: "gray" }}>
+                        <div>
+                          <div>{applicant.CSMWO}</div>
+                          <small style={{ color: "gray" }}>
                             {applicant.CSMWOtimeStamp}
-                          </span>
+                          </small>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div
-                          style={{ display: "flex", flexDirection: "column" }}
-                        >
-                          <span>{applicant.OBO}</span>
-                          <span style={{ fontSize: "0.8em", color: "gray" }}>
+                        <div>
+                          <div>{applicant.OBO}</div>
+                          <small style={{ color: "gray" }}>
                             {applicant.OBOtimeStamp}
-                          </span>
+                          </small>
                         </div>
                       </TableCell>
                     </>
                   )}
 
-                  {/* ✅ Actions column with icons */}
                   <TableCell align="center">
                     <Tooltip title="View">
                       <IconButton
@@ -428,7 +384,6 @@ function New_records() {
                         <VisibilityIcon />
                       </IconButton>
                     </Tooltip>
-
                     <Tooltip title="Update">
                       <IconButton
                         color="secondary"
@@ -449,12 +404,11 @@ function New_records() {
           <Pagination
             count={totalPages}
             page={currentPage}
-            onChange={handlePageChange}
+            onChange={(e, value) => setCurrentPage(value)}
             sx={{
               "& .MuiPaginationItem-root.Mui-selected": {
-                bgcolor: "#1c541eff",
+                bgcolor: "#1c541e",
                 color: "white",
-                "&:hover": { bgcolor: "#1c541eff" },
               },
             }}
             shape="rounded"
@@ -462,46 +416,33 @@ function New_records() {
         </Box>
       </Box>
 
-      {/* ✅ Applicant Modal */}
+      {/* ✅ Modals */}
       <ApplicantModal
         applicant={selectedApplicant}
         isOpen={isModalOpen}
         onClose={closeModal}
-        onApprove={() => {
-          handleApprove(selectedApplicant);
-          closeModal();
-        }}
-        baseUrl={
-          filter === "pending"
-            ? `${API}/newApplication/files`
-            : `${API}/examiners/examiners`
-        }
-      />
-
-      {/* ✅ Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={isConfirmModalOpen}
-        onClose={() => setIsConfirmModalOpen(false)}
-        onConfirm={handleConfirmAction}
-        message={`Are you sure you want to ${confirmationData.action}?`}
-      />
-
-      {/* ✅ Success Modal */}
-      <SuccessModal
-        isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
-        message="Approved Successfully!"
+        onApprove={() => handleApprove(selectedApplicant)}
+        baseUrl={`${API}/newApplication/files`}
       />
 
       <UpdateModal
         applicant={updateApplicant}
         isOpen={isUpdateModalOpen}
         onClose={closeUpdateModal}
-        baseUrl={
-          filter === "pending"
-            ? `${API}/newApplication/files`
-            : `${API}/examiners/examiners`
-        }
+        baseUrl={`${API}/newApplication/files`}
+      />
+
+      <ConfirmationModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleConfirmAction}
+        message="Are you sure you want to approve this application?"
+      />
+
+      <SuccessModal
+        isOpen={isSuccessModalOpen}
+        onClose={() => setIsSuccessModalOpen(false)}
+        message="Approved Successfully!"
       />
     </>
   );
