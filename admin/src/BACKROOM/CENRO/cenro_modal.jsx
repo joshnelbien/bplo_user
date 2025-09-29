@@ -1,4 +1,4 @@
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import React, { useState, useEffect } from "react";
 import {
   Accordion,
   AccordionDetails,
@@ -15,13 +15,19 @@ import {
   IconButton,
   Tooltip,
   Fade,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
-
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
-import { useState, useEffect } from "react";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import { styled } from "@mui/system";
+
+// The API base URL is hardcoded as a placeholder since environment variables cannot be accessed.
+const API = "https://api.example.com";
 
 // Component to display a normal text field
 const Field = ({ label, value }) => (
@@ -58,8 +64,7 @@ const Field = ({ label, value }) => (
     />
   </Grid>
 );
-const API = import.meta.env.VITE_API_BASE;
-// Component to display files as links
+
 const FileField = ({ label, fileKey, fileData }) => (
   <Grid item xs={12} sm={6}>
     <TextField
@@ -92,7 +97,6 @@ const FileField = ({ label, fileKey, fileData }) => (
         },
       }}
     />
-
     {fileData[fileKey] && (
       <Typography
         component="span"
@@ -141,6 +145,7 @@ function CenroApplicantModal({
   const [cenroField, setcenroField] = useState({ cenroFee: "" });
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [declineReason, setDeclineReason] = useState("");
+  const [selectedReasons, setSelectedReasons] = useState([]);
   const [declineConfirmOpen, setDeclineConfirmOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false);
@@ -157,14 +162,20 @@ function CenroApplicantModal({
       });
     }
   }, [applicant]);
+
+  // Update declineReason whenever selectedReasons change
+  useEffect(() => {
+    setDeclineReason(selectedReasons.join(", "));
+  }, [selectedReasons]);
+
   const formatCurrency = (value) => {
     if (value == null || value === "") return "";
     const num = parseFloat(value.toString().replace(/,/g, ""));
-    if (isNaN(num)) return value; // keep raw input if not valid number yet
-    return num.toLocaleString("en-US"); // ✅ commas only, no .00
+    if (isNaN(num)) return value;
+    return num.toLocaleString("en-US");
   };
+
   const handleChange = (field, value) => {
-    // Strip commas for numeric fields
     const numericFields = ["cenroFee"];
     const cleanValue = numericFields.includes(field)
       ? value.replace(/,/g, "")
@@ -174,16 +185,25 @@ function CenroApplicantModal({
     setValidationErrors((prev) => ({ ...prev, [field]: false }));
   };
 
-  const files = [{ label: "cenro Certificate", name: "cenroCert" }];
+  const files = [{ label: "CENRO Certificate", name: "cenroCert" }];
+
+  // Updated decline reasons as requested
+  const declineReasonOptions = [
+    "Incomplete Requirements",
+    "Non-Compliance with Safety and Health Standards",
+    "Regulatory or Legal Violations",
+    "Environmental and Compliance Concerns",
+    "Zoning and Location Issues",
+  ];
 
   const handleFileSelect = (e) => {
     const { name, files } = e.target;
     if (files[0]) {
       setSelectedFiles((prev) => ({
         ...prev,
-        [name]: files[0], // store the actual File object
+        [name]: files[0],
       }));
-      handleFileChange(name, files[0]); // send file up to parent
+      handleFileChange(name, files[0]);
       setValidationErrors((prev) => ({ ...prev, cenroCert: false }));
     }
   };
@@ -210,6 +230,8 @@ function CenroApplicantModal({
   };
 
   const handleDeclineClick = () => {
+    setDeclineReason("");
+    setSelectedReasons([]);
     setDeclineConfirmOpen(true);
   };
 
@@ -220,6 +242,9 @@ function CenroApplicantModal({
   };
 
   const handleDeclineConfirm = () => {
+    if (declineReason.trim() === "") {
+      return;
+    }
     setDeclineConfirmOpen(false);
     onDecline(applicant.id, declineReason);
     setDeclineSuccessOpen(true);
@@ -241,6 +266,14 @@ function CenroApplicantModal({
   const handleDeclineSuccessClose = () => {
     setDeclineSuccessOpen(false);
     onClose();
+  };
+
+  const handleToggleReason = (reason) => {
+    setSelectedReasons((prevReasons) =>
+      prevReasons.includes(reason)
+        ? prevReasons.filter((r) => r !== reason)
+        : [...prevReasons, reason]
+    );
   };
 
   const Section = ({ title, children }) => (
@@ -473,7 +506,7 @@ function CenroApplicantModal({
 
           {/* File Upload */}
           {files.map((file) => (
-            <Grid container spacing={1} key={file.name} sx={{ mt: 1 }}>
+            <Grid container spacing={1} sx={{ mt: 1 }}>
               <Grid item>
                 <Button
                   variant="contained"
@@ -608,7 +641,7 @@ function CenroApplicantModal({
         </DialogActions>
       </Dialog>
 
-      {/* Decline Dialog with Reason TextField */}
+      {/* Decline Dialog with Reason Buttons and input */}
       <Dialog
         open={declineConfirmOpen}
         onClose={handleDeclineConfirmClose}
@@ -618,13 +651,52 @@ function CenroApplicantModal({
           id="decline-dialog-title"
           sx={{
             fontWeight: "bold",
-            backgroundColor: "#d32f2f",
+            backgroundColor: "#053d16ff",
             color: "white",
+            marginBottom: "20px",
           }}
         >
           Decline Applicant
         </DialogTitle>
         <DialogContent sx={{ pt: 2, px: 3 }}>
+          <Grid container spacing={1} sx={{ mb: 2 }}>
+            {declineReasonOptions.map((reason, index) => (
+              <Grid item xs={12} key={reason}>
+                <Button
+                  variant="outlined"
+                  onClick={() => handleToggleReason(reason)}
+                  sx={{
+                    borderRadius: "50%",
+                    width: "24px",
+                    height: "24px",
+                    minWidth: "24px",
+                    mr: 1,
+                    p: 0,
+                    borderColor: "#053d16ff",
+                    ...(selectedReasons.includes(reason) && {
+                      backgroundColor: "#ffebee",
+                    }),
+                  }}
+                >
+                  {selectedReasons.includes(reason) && (
+                    <CheckCircleIcon
+                      sx={{ fontSize: "1rem", color: "#053d16ff" }}
+                    />
+                  )}
+                </Button>
+                <Typography
+                  component="span"
+                  sx={{
+                    fontSize: "1.1rem",
+                    color: "#000000",
+                    verticalAlign: "middle",
+                  }}
+                >
+                  {index + 1}. {reason}
+                </Typography>
+              </Grid>
+            ))}
+          </Grid>
           <TextField
             autoFocus
             margin="dense"
@@ -637,6 +709,22 @@ function CenroApplicantModal({
             onChange={(e) => setDeclineReason(e.target.value)}
             multiline
             rows={4}
+            required
+            error={declineReason.trim() === ""}
+            helperText={declineReason.trim() === "" ? "Reason is required" : ""}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "#053d16ff",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#053d16ff",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#053d16ff",
+                },
+              },
+            }}
           />
         </DialogContent>
         <DialogActions>

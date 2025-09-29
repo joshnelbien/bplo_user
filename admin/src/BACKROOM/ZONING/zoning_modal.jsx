@@ -144,10 +144,11 @@ function ZoningApplicantModal({
   onDecline,
 }) {
   const [showCert, setShowCert] = useState(false);
-  const [declineOpen, setDeclineOpen] = useState(false);
+  const [declineConfirmOpen, setDeclineConfirmOpen] = useState(false); // Changed from declineOpen to declineConfirmOpen
   const [declineReason, setDeclineReason] = useState("");
   const [successOpen, setSuccessOpen] = useState(false);
   const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false);
+  const [selectedReasons, setSelectedReasons] = useState([]); // New state for selected reasons
 
   const files = [{ label: "Zoning Certificate", name: "zoningCert" }];
 
@@ -159,6 +160,8 @@ function ZoningApplicantModal({
     if (isOpen) {
       setSelectedFiles({});
       setValidationError(false);
+      setSelectedReasons([]); // Reset selected reasons
+      setDeclineReason(""); // Reset decline reason text
     }
   }, [isOpen]);
 
@@ -188,12 +191,25 @@ function ZoningApplicantModal({
   };
 
   const handleDeclineClick = () => {
-    setDeclineOpen(true);
+    setDeclineConfirmOpen(true); // Open the new dialog
+  };
+
+  const handleToggleReason = (reason) => {
+    setSelectedReasons((prev) =>
+      prev.includes(reason)
+        ? prev.filter((r) => r !== reason)
+        : [...prev, reason]
+    );
+  };
+
+  const handleAddReasons = () => {
+    setDeclineReason(selectedReasons.join(", "));
   };
 
   const handleDeclineConfirm = () => {
+    if (declineReason.trim() === "") return;
     onDecline(applicant.id, declineReason);
-    setDeclineOpen(false);
+    setDeclineConfirmOpen(false);
     setDeclineSuccessOpen(true);
   };
 
@@ -575,33 +591,266 @@ function ZoningApplicantModal({
           ) : null}
         </DialogActions>
       </Dialog>
-      {/* Decline Reason Modal */}
-      <Dialog open={declineOpen} onClose={() => setDeclineOpen(false)}>
-        <DialogTitle>Reason for Decline</DialogTitle>
-        <DialogContent>
+      {/* --- Decline Reason Dialog --- */}
+      <Dialog
+        open={declineConfirmOpen}
+        onClose={() => setDeclineConfirmOpen(false)}
+        aria-labelledby="decline-dialog-title"
+      >
+        <DialogTitle
+          id="decline-dialog-title"
+          sx={{
+            fontWeight: "bold",
+            backgroundColor: "#053d16ff",
+            color: "white",
+            marginBottom: "20px",
+          }}
+        >
+          Decline Applicant
+        </DialogTitle>
+        <DialogContent sx={{ pt: 2, px: 3 }}>
+          <Grid container spacing={1} sx={{ mb: 2 }}>
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                onClick={() => handleToggleReason("Incomplete Requirements")}
+                sx={{
+                  borderRadius: "50%",
+                  width: "24px",
+                  height: "24px",
+                  minWidth: "24px",
+                  mr: 1,
+                  p: 0,
+                  borderColor: "#053d16ff",
+                  ...(selectedReasons.includes("Incomplete Requirements") && {
+                    backgroundColor: "#ffebee",
+                  }),
+                }}
+              >
+                {selectedReasons.includes("Incomplete Requirements") && (
+                  <CheckCircleIcon
+                    sx={{ fontSize: "1rem", color: "#053d16ff" }}
+                  />
+                )}
+              </Button>
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "1.1rem",
+                  color: "#000000",
+                  verticalAlign: "middle",
+                }}
+              >
+                1. Incomplete Requirements
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                onClick={() =>
+                  handleToggleReason(
+                    "Non-Compliance with Safety and Health Standards"
+                  )
+                }
+                sx={{
+                  borderRadius: "50%",
+                  width: "24px",
+                  height: "24px",
+                  minWidth: "24px",
+                  mr: 1,
+                  p: 0,
+                  borderColor: "#053d16ff",
+                  ...(selectedReasons.includes(
+                    "Non-Compliance with Safety and Health Standards"
+                  ) && {
+                    backgroundColor: "#ffebee",
+                  }),
+                }}
+              >
+                {selectedReasons.includes(
+                  "Non-Compliance with Safety and Health Standards"
+                ) && (
+                  <CheckCircleIcon
+                    sx={{ fontSize: "1rem", color: "#053d16ff" }}
+                  />
+                )}
+              </Button>
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "1.1rem",
+                  color: "#000000",
+                  verticalAlign: "middle",
+                }}
+              >
+                2. Non-Compliance with Safety and Health Standards
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                onClick={() =>
+                  handleToggleReason("Regulatory or Legal Violations")
+                }
+                sx={{
+                  borderRadius: "50%",
+                  width: "24px",
+                  height: "24px",
+                  minWidth: "24px",
+                  mr: 1,
+                  p: 0,
+                  borderColor: "#053d16ff",
+                  ...(selectedReasons.includes(
+                    "Regulatory or Legal Violations"
+                  ) && {
+                    backgroundColor: "#ffebee",
+                  }),
+                }}
+              >
+                {selectedReasons.includes("Regulatory or Legal Violations") && (
+                  <CheckCircleIcon
+                    sx={{ fontSize: "1rem", color: "#053d16ff" }}
+                  />
+                )}
+              </Button>
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "1.1rem",
+                  color: "#000000",
+                  verticalAlign: "middle",
+                }}
+              >
+                3. Regulatory or Legal Violations
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                onClick={() =>
+                  handleToggleReason("Environmental and Compliance Concerns")
+                }
+                sx={{
+                  borderRadius: "50%",
+                  width: "24px",
+                  height: "24px",
+                  minWidth: "24px",
+                  mr: 1,
+                  p: 0,
+                  borderColor: "#053d16ff",
+                  ...(selectedReasons.includes(
+                    "Environmental and Compliance Concerns"
+                  ) && {
+                    backgroundColor: "#ffebee",
+                  }),
+                }}
+              >
+                {selectedReasons.includes(
+                  "Environmental and Compliance Concerns"
+                ) && (
+                  <CheckCircleIcon
+                    sx={{ fontSize: "1rem", color: "#053d16ff" }}
+                  />
+                )}
+              </Button>
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "1.1rem",
+                  color: "#000000",
+                  verticalAlign: "middle",
+                }}
+              >
+                4. Environmental and Compliance Concerns
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                onClick={() => handleToggleReason("Zoning and Location Issues")}
+                sx={{
+                  borderRadius: "50%",
+                  width: "24px",
+                  height: "24px",
+                  minWidth: "24px",
+                  mr: 1,
+                  p: 0,
+                  borderColor: "#053d16ff",
+                  ...(selectedReasons.includes("Zoning and Location Issues") && {
+                    backgroundColor: "#ffebee",
+                  }),
+                }}
+              >
+                {selectedReasons.includes("Zoning and Location Issues") && (
+                  <CheckCircleIcon
+                    sx={{ fontSize: "1rem", color: "#053d16ff" }}
+                  />
+                )}
+              </Button>
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "1.1rem",
+                  color: "#000000",
+                  verticalAlign: "middle",
+                }}
+              >
+                5. Zoning and Location Issues
+              </Typography>
+            </Grid>
+          </Grid>
+          <Button
+            variant="contained"
+            onClick={handleAddReasons}
+            disabled={selectedReasons.length === 0}
+            sx={{
+              bgcolor: "#053d16ff",
+              mb: 2,
+            }}
+          >
+            Add
+          </Button>
           <TextField
             autoFocus
             margin="dense"
-            label="Reason"
+            id="decline-reason"
+            label="Reason for Decline"
             type="text"
             fullWidth
-            multiline
-            rows={4}
+            variant="outlined"
             value={declineReason}
             onChange={(e) => setDeclineReason(e.target.value)}
+            multiline
+            rows={4}
+            required
+            error={declineReason.trim() === ""}
+            helperText={declineReason.trim() === "" ? "Reason is required" : ""}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "#053d16ff",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#053d16ff",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#053d16ff",
+                },
+              },
+            }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeclineOpen(false)} color="secondary">
+          <Button onClick={() => setDeclineConfirmOpen(false)} color="primary">
             Cancel
           </Button>
           <Button
             onClick={handleDeclineConfirm}
             color="error"
             variant="contained"
-            disabled={!declineReason.trim()}
+            disabled={declineReason.trim() === ""}
           >
-            Submit Decline
+            Decline
           </Button>
         </DialogActions>
       </Dialog>

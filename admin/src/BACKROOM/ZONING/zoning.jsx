@@ -157,7 +157,7 @@ function Zoning() {
         )
       );
 
-      alert("Applicant declined");
+     
       closeModal();
     } catch (error) {
       console.error("Error declining applicant:", error);

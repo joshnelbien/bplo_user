@@ -167,7 +167,25 @@ function OboApplicantModal({
   const [successOpen, setSuccessOpen] = useState(false);
   const [declineConfirmOpen, setDeclineConfirmOpen] = useState(false);
   const [declineReason, setDeclineReason] = useState("");
+  const [selectedReason, setSelectedReason] = useState("");
   const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false);
+
+  const handleToggleReason = (reason) => {
+    setSelectedReason(selectedReason === reason ? "" : reason);
+  };
+
+  const handleAddReason = () => {
+    if (selectedReason) {
+      setDeclineReason((prevReason) => {
+        if (prevReason.includes(selectedReason)) {
+          return prevReason;
+        }
+        return prevReason
+          ? `${prevReason}, ${selectedReason}`
+          : selectedReason;
+      });
+    }
+  };
 
   useEffect(() => {
     if (applicant) {
@@ -256,7 +274,11 @@ function OboApplicantModal({
   };
 
   // Decline Logic
-  const handleDeclineClick = () => setDeclineConfirmOpen(true);
+  const handleDeclineClick = () => {
+    setDeclineReason("");
+    setSelectedReason("");
+    setDeclineConfirmOpen(true);
+  };
   const handleDeclineConfirmClose = () => setDeclineConfirmOpen(false);
   const handleDeclineConfirm = () => {
     setDeclineConfirmOpen(false);
@@ -621,19 +643,170 @@ function OboApplicantModal({
         <DialogTitle
           id="decline-dialog-title"
           sx={{
-            fontWeight: "bold",
-            backgroundColor: "#d32f2f",
+            backgroundColor: "#053d16ff",
             color: "white",
           }}
         >
           Decline Applicant
         </DialogTitle>
         <DialogContent sx={{ pt: 2, px: 3 }}>
+          <Grid container spacing={1} sx={{ mt: 2, mb: 2 }}>
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                onClick={() => handleToggleReason("Incomplete Requirements")}
+                sx={{
+                  borderRadius: "50%",
+                  width: "24px",
+                  height: "24px",
+                  minWidth: "24px",
+                  mr: 1,
+                  p: 0,
+                  borderColor: "#053d16ff",
+                  ...(selectedReason === "Incomplete Requirements" && {
+                    backgroundColor: "#e8f5e9",
+                  }),
+                }}
+              >
+                {selectedReason === "Incomplete Requirements" && (
+                  <CheckCircleIcon sx={{ fontSize: "1rem", color: "#4caf50" }} />
+                )}
+              </Button>
+              <Typography
+                component="span"
+                sx={{ fontSize: "1.1rem", color: "#000000", verticalAlign: "middle" }}
+              >
+                Incomplete Requirements
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                onClick={() => handleToggleReason("Non-Compliance with Safety and Health Standards")}
+                sx={{
+                  borderRadius: "50%",
+                  width: "24px",
+                  height: "24px",
+                  minWidth: "24px",
+                  mr: 1,
+                  p: 0,
+                  borderColor: "#053d16ff",
+                  ...(selectedReason === "Non-Compliance with Safety and Health Standards" && {
+                    backgroundColor: "#e8f5e9",
+                  }),
+                }}
+              >
+                {selectedReason === "Non-Compliance with Safety and Health Standards" && (
+                  <CheckCircleIcon sx={{ fontSize: "1rem", color: "#4caf50" }} />
+                )}
+              </Button>
+              <Typography
+                component="span"
+                sx={{ fontSize: "1.1rem", color: "#000000", verticalAlign: "middle" }}
+              >
+                Non-Compliance with Safety and Health Standards
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                onClick={() => handleToggleReason("Regulatory or Legal Violations")}
+                sx={{
+                  borderRadius: "50%",
+                  width: "24px",
+                  height: "24px",
+                  minWidth: "24px",
+                  mr: 1,
+                  p: 0,
+                  borderColor: "#053d16ff",
+                  ...(selectedReason === "Regulatory or Legal Violations" && {
+                    backgroundColor: "#e8f5e9",
+                  }),
+                }}
+              >
+                {selectedReason === "Regulatory or Legal Violations" && (
+                  <CheckCircleIcon sx={{ fontSize: "1rem", color: "#4caf50" }} />
+                )}
+              </Button>
+              <Typography
+                component="span"
+                sx={{ fontSize: "1.1rem", color: "#000000", verticalAlign: "middle" }}
+              >
+                Regulatory or Legal Violations
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                onClick={() => handleToggleReason("Environmental and Compliance Concerns")}
+                sx={{
+                  borderRadius: "50%",
+                  width: "24px",
+                  height: "24px",
+                  minWidth: "24px",
+                  mr: 1,
+                  p: 0,
+                  borderColor: "#053d16ff",
+                  ...(selectedReason === "Environmental and Compliance Concerns" && {
+                    backgroundColor: "#e8f5e9",
+                  }),
+                }}
+              >
+                {selectedReason === "Environmental and Compliance Concerns" && (
+                  <CheckCircleIcon sx={{ fontSize: "1rem", color: "#4caf50" }} />
+                )}
+              </Button>
+              <Typography
+                component="span"
+                sx={{ fontSize: "1.1rem", color: "#000000", verticalAlign: "middle" }}
+              >
+                Environmental and Compliance Concerns
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                onClick={() => handleToggleReason("Zoning and Location Issues")}
+                sx={{
+                  borderRadius: "50%",
+                  width: "24px",
+                  height: "24px",
+                  minWidth: "24px",
+                  mr: 1,
+                  p: 0,
+                  borderColor: "#053d16ff",
+                  ...(selectedReason === "Zoning and Location Issues" && {
+                    backgroundColor: "#e8f5e9",
+                  }),
+                }}
+              >
+                {selectedReason === "Zoning and Location Issues" && (
+                  <CheckCircleIcon sx={{ fontSize: "1rem", color: "#4caf50" }} />
+                )}
+              </Button>
+              <Typography
+                component="span"
+                sx={{ fontSize: "1.1rem", color: "#000000", verticalAlign: "middle" }}
+              >
+                Zoning and Location Issues
+              </Typography>
+            </Grid>
+          </Grid>
+          <Button
+            variant="contained"
+            onClick={handleAddReason}
+            disabled={!selectedReason}
+            sx={{
+              bgcolor: "#053d16ff",
+              mb: 2,
+            }}
+          >
+            Add
+          </Button>
           <TextField
             autoFocus
             margin="dense"
             id="decline-reason"
-            label="Reason for Decline"
             type="text"
             fullWidth
             variant="outlined"
@@ -641,16 +814,42 @@ function OboApplicantModal({
             onChange={(e) => setDeclineReason(e.target.value)}
             multiline
             rows={4}
+            required
+            error={declineReason.trim() === ""}
+            helperText={declineReason.trim() === "" ? "Reason is required" : ""}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "#04812aff",
+                },
+                "&:hover fieldset": {
+                  borderColor: "#04812aff",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#04812aff",
+                },
+              },
+            }}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDeclineConfirmClose} color="primary">
+          <Button
+            onClick={handleDeclineConfirmClose}
+            sx={{
+              color: "#333",
+              "&:hover": { bgcolor: "#f5f5f5" },
+            }}
+          >
             Cancel
           </Button>
           <Button
             onClick={handleDeclineConfirm}
-            color="error"
             variant="contained"
+            sx={{
+              bgcolor: "#d32f2f",
+              "&:hover": { bgcolor: "#b71c1c" },
+            }}
+            disabled={declineReason.trim() === ""}
           >
             Decline
           </Button>
@@ -681,7 +880,12 @@ function OboApplicantModal({
             fontSize="large"
             sx={{ fontSize: "5rem", color: "#4caf50" }}
           />
-          <Typography variant="h5" fontWeight="bold">
+          <Typography
+            variant="h5"
+            fontWeight="bold" 
+            
+            sx={{ color: "black" }}
+          >
             Successfully Approved!
           </Typography>
           <Button

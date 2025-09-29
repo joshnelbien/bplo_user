@@ -98,6 +98,7 @@ export default function Step1BusinessInfo({ formData, handleChange, errors, setE
           sx={{ minWidth: 300 }}
           error={!!errors.dscRegNo}
           helperText={errors.dscRegNo}
+          type="number"
         />
 
         {/* Business Name */}
