@@ -69,7 +69,7 @@ function NewApplicationRegisterPage() {
     lastName: "",
     extName: "",
     sex: "",
-    email: "@gmail.com", // Default value set to @gmail.com
+    email: "", // Default value set to @gmail.com
     telNo: "",
     mobileNo: "+63", // Default value set to +63
   });
