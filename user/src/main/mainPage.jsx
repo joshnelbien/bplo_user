@@ -181,7 +181,7 @@ const PrivacyAgreementDialog = ({ open, onAgree, onCheck, checked }) => (
         <DialogTitle sx={{ color: "#09360D", fontWeight: "bold", borderBottom: '1px solid #eee' }}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Box component="img" src="spclogo.png" alt="San Pablo City Logo" sx={{ width: 40, mr: 2 }} />
-                Data Privacy and Acknowledgement
+                Data Privacy Consent
             </Box>
         </DialogTitle>
         <DialogContent dividers sx={{ pt: 2, maxHeight: '70vh', overflowY: 'auto' }}>
@@ -196,7 +196,7 @@ const PrivacyAgreementDialog = ({ open, onAgree, onCheck, checked }) => (
                 1. Acknowledgment of Responsibility
             </Typography>
             <Typography variant="body2" paragraph>
-                I hereby certify that all information provided in this Business Permit Application System (BPAS) is true, correct, and complete to the best of my knowledge. I understand that any false or misleading information may lead to the disapproval or revocation of my business permit and subject me to applicable legal penalties.
+                I hereby certify that all information provided in this Business Permit Application System (BPLO) is true, correct, and complete to the best of my knowledge. I understand that any false or misleading information may lead to the disapproval or revocation of my business permit and subject me to applicable legal penalties.
             </Typography>
 
             <Typography variant="body2" sx={{ fontWeight: 'bold', mt: 2, color: "#1d5236" }}>
