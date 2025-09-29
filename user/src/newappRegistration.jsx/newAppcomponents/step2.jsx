@@ -54,11 +54,12 @@ export default function Step2PersonalInfo({
   const handlePhoneNumberInput = (e) => {
     let value = e.target.value.replace(/\D/g, "");
 
-    // If value is empty or just +63, reset to +63
+    // If value is empty or just 63, reset to 63
     if (!value || value === "63") {
       value = "63";
     } else {
-      // Remove existing +63 and append user input after it
+      // Remove existing 63 and append user input after it
+      // This logic prevents the user from deleting the +63 prefix
       value = value.replace("63", "").trim();
       value = `63${value}`;
     }
@@ -69,18 +70,10 @@ export default function Step2PersonalInfo({
     handleChange({ target: { name: e.target.name, value: `+${value}` } });
   };
 
-  // ✅ Email handler: allows input before @gmail.com
+  // ❌ REMOVED CUSTOM LOGIC: Now just passes the raw input value up to the state.
+  // The validation in the parent component will handle the "@gmail.com" requirement.
   const handleEmailChange = (e) => {
-    let value = e.target.value;
-    // If value is empty or just @gmail.com, reset to @gmail.com
-    if (!value || value === "@gmail.com") {
-      value = "@gmail.com";
-    } else {
-      // Split into part before @gmail.com and append user input before it
-      const [before, after] = value.split("@gmail.com");
-      value = `${before || ""}@gmail.com`;
-    }
-    handleChange({ target: { name: e.target.name, value } });
+    handleChange(e);
   };
 
   return (
@@ -168,14 +161,14 @@ export default function Step2PersonalInfo({
           label="Email"
           type="email"
           name="email"
-          value={formData.email || "@gmail.com"}
-          onChange={handleEmailChange}
+          value={formData.email || ""} // ✅ CHANGED: Set value to an empty string (or the current state)
+          onChange={handleEmailChange} // ✅ CHANGED: Now uses the simplified handler
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
           error={!!errors.email}
-          helperText={errors.email || "Enter text before @gmail.com"}
-          placeholder="text@gmail.com"
+          helperText={errors.email || "Example: user@gmail.com"} // ✅ IMPROVED HINT
+          placeholder="user@gmail.com" // ✅ IMPROVED PLACEHOLDER
         />
 
         {/* Telephone No. (Optional) */}
@@ -201,8 +194,8 @@ export default function Step2PersonalInfo({
           variant="outlined"
           sx={{ minWidth: 300 }}
           error={!!errors.mobileNo}
-          helperText={errors.mobileNo || "Philippine mobile numbers"}
-          placeholder="+63123456789"
+          helperText={formData.mobileNo === '+63' ? "Must be 9 digits after +63" : errors.mobileNo || "Philippine mobile numbers"}
+          placeholder="+639171234567"
         />
       </Stack>
     </div>
