@@ -6,11 +6,17 @@ import {
   Stack,
   TextField,
   Typography,
+  Button,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
 
-export default function Step4TaxInfo({ formData, handleChange, errors }) {
+export default function Step4TaxInfo({
+  formData,
+  handleChange,
+  errors,
+  handleFileChange,
+}) {
   const [psgc, setPsgc] = useState(null);
   const [sameAsBusiness, setSameAsBusiness] = useState("");
 
@@ -80,6 +86,23 @@ export default function Step4TaxInfo({ formData, handleChange, errors }) {
           ?.municipality_list[formData.TaxcityOrMunicipality]?.barangay_list ||
         []
       : [];
+
+  const [selectedFiles, setSelectedFiles] = useState({});
+
+  const files = [
+    { label: "Barangay Clearance", name: "brgyClearance" },
+    { label: "Market Clearance", name: "marketClearance" },
+    { label: "Occupancy Permit", name: "occupancyPermit" },
+  ];
+
+  const handleFileSelect = (e) => {
+    const { name, files } = e.target;
+    setSelectedFiles((prev) => ({
+      ...prev,
+      [name]: files[0] ? files[0].name : "",
+    }));
+    handleFileChange(e); // call parent handler
+  };
 
   return (
     <div style={{ marginBottom: 20 }}>
@@ -273,6 +296,41 @@ export default function Step4TaxInfo({ formData, handleChange, errors }) {
             />
           </>
         ) : null}
+        <Typography variant="h6" gutterBottom>
+          Business Documents
+        </Typography>
+        {files.map((file) => (
+          <Stack key={file.name} direction="column" spacing={1}>
+            <Typography>{file.label}:</Typography>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Button
+                variant="contained"
+                component="label"
+                size="small"
+                sx={{
+                  minWidth: 120,
+                  backgroundColor: "#4caf50",
+                  "&:hover": { backgroundColor: "#15400d" },
+                }}
+              >
+                Choose File
+                <input
+                  type="file"
+                  name={file.name}
+                  hidden
+                  onChange={handleFileSelect}
+                />
+              </Button>
+              <TextField
+                value={selectedFiles[file.name] || ""}
+                placeholder="No file selected"
+                size="small"
+                fullWidth
+                InputProps={{ readOnly: true }}
+              />
+            </Stack>
+          </Stack>
+        ))}
       </Stack>
     </div>
   );
