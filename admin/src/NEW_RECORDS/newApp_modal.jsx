@@ -191,7 +191,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
 
   const handleIndustryChange = (index, selectedIndustry) => {
     const selectedRow = fsicData.find(
-      (item) => item.IndustryDescription === selectedIndustry
+      (item) => item.business_line === selectedIndustry
     );
 
     setBusinessDetails((prev) => {
@@ -199,14 +199,10 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
       if (!updated[index]) updated[index] = {};
       updated[index] = {
         ...updated[index],
-        group: selectedRow?.Group || "",
-        class: selectedRow?.Class || "",
-        subclass: selectedRow?.SubClass || "",
-        industryDescription: selectedRow?.IndustryDescription || "",
-        summary: selectedRow?.Summary || "",
-        psic1994: selectedRow?.PSIC1994 || "",
-        isicrev4: selectedRow?.ISICRev4 || "",
-        acicCode: selectedRow?.ACICCode || "",
+        nature_code: selectedRow?.nature_code || "",
+        business_nature: selectedRow?.business_nature || "",
+        line_code: selectedRow?.line_code || "",
+        business_line: selectedRow?.business_line || "",
       };
       return updated;
     });
@@ -511,17 +507,15 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
                         fullWidth
                         size="small"
                         SelectProps={{ native: true }}
-                        value={
-                          businessDetails[index]?.industryDescription || ""
-                        }
+                        value={businessDetails[index]?.business_line || ""}
                         onChange={(e) =>
                           handleIndustryChange(index, e.target.value)
                         }
                       >
-                        <option value="">-- Select Industry --</option>
+                        <option value="">-- Select Business Line --</option>
                         {fsicData.map((item, i) => (
-                          <option key={i} value={item.IndustryDescription}>
-                            {item.IndustryDescription}
+                          <option key={i} value={item.business_line}>
+                            {item.business_line}
                           </option>
                         ))}
                       </TextField>
@@ -529,56 +523,24 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
 
                     <Grid item xs={12}>
                       <TextField
-                        label="Group"
-                        value={businessDetails?.[index]?.group || ""}
+                        label="Nature Code"
+                        value={businessDetails?.[index]?.nature_code || ""}
                         {...fullWidthProps}
                       />
                     </Grid>
 
                     <Grid item xs={12}>
                       <TextField
-                        label="Class"
-                        value={businessDetails?.[index]?.class || ""}
+                        label="Business Nature"
+                        value={businessDetails?.[index]?.business_nature || ""}
                         {...fullWidthProps}
                       />
                     </Grid>
 
                     <Grid item xs={12}>
                       <TextField
-                        label="Sub Class"
-                        value={businessDetails?.[index]?.subclass || ""}
-                        {...fullWidthProps}
-                      />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <TextField
-                        label="Summary"
-                        value={businessDetails?.[index]?.summary || ""}
-                        {...fullWidthProps}
-                      />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <TextField
-                        label="PSIC1994"
-                        value={businessDetails?.[index]?.psic1994 || ""}
-                        {...fullWidthProps}
-                      />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <TextField
-                        label="ISICRev4"
-                        value={businessDetails?.[index]?.isicrev4 || ""}
-                        {...fullWidthProps}
-                      />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <TextField
-                        label="ACICCode"
-                        value={businessDetails?.[index]?.acicCode || ""}
+                        label="line_code"
+                        value={businessDetails?.[index]?.line_code || ""}
                         {...fullWidthProps}
                       />
                     </Grid>

@@ -73,17 +73,17 @@ app.use("/businessProfile", businessProfileRoutes);
 
 app.get("/api/my-existing-table", async (req, res) => {
   try {
-    const [results] = await sequelize.query("SELECT * FROM FSICDB");
+    const [results] = await sequelize.query("SELECT * FROM fsic");
 
     if (results.length > 0) {
       res.json(results);
     } else {
-      console.warn("⚠️ FSICDB table is empty or no data found.");
-      res.status(404).json({ error: "No data found in FSICDB" });
+      console.warn("⚠️ fisc table is empty or no data found.");
+      res.status(404).json({ error: "No data found in fisc" });
     }
   } catch (err) {
-    console.error("❌ Error fetching FSICDB table:", err);
-    res.status(500).json({ error: "Failed to fetch FSICDB table" });
+    console.error("❌ Error fetching fisc table:", err);
+    res.status(500).json({ error: "Failed to fetch fisc table" });
   }
 });
 
