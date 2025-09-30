@@ -19,6 +19,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 
@@ -40,36 +41,50 @@ export default function Step6BusinessActivity({
     capital: "",
   });
   const [editingIndex, setEditingIndex] = useState(null);
-
-  // Validation state for the "Add Line of Business" fields
   const [addErrors, setAddErrors] = useState({});
-
-  // Confirmation dialog state
   const [openConfirm, setOpenConfirm] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState(null);
 
-  // Line of Business options from lob.json
+  // ✅ Business line options from DB
   const [lobOptions, setLobOptions] = useState([]);
+  const API = import.meta.env.VITE_API_BASE; // ✅ Your backend base URL
 
   useEffect(() => {
-    fetch("/lob.json")
-      .then((res) => res.json())
-      .then((data) => {
-        setLobOptions(data.lob || []); // expects { "lob": [ ... ] }
-      })
-      .catch((err) => console.error("Failed to load lob.json", err));
-  }, []);
+    const fetchBusinessLines = async () => {
+      try {
+        const res = await axios.get(`${API}/api/my-existing-table`);
+        // assuming backend returns array of records with business_line field
+        const lines = res.data
+          .map((item) => item.business_line?.toUpperCase())
+          .filter(Boolean);
+        setLobOptions([...new Set(lines)]);
+      } catch (err) {
+        console.error("❌ Failed to fetch business_line from DB:", err);
+      }
+    };
+    fetchBusinessLines();
+  }, [API]);
 
+  // ✅ File select handler
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    const name = e.target.name;
+    setSelectedFiles((prev) => ({
+      ...prev,
+      [name]: file ? file.name : "",
+    }));
+    handleFileChange(e);
+  };
+
+  // ✅ Delete business line
   const handleOpenConfirm = (index) => {
     setDeleteIndex(index);
     setOpenConfirm(true);
   };
-
   const handleCloseConfirm = () => {
     setOpenConfirm(false);
     setDeleteIndex(null);
   };
-
   const handleConfirmDelete = () => {
     if (deleteIndex !== null) {
       const updated = [...businessLines];
@@ -79,15 +94,7 @@ export default function Step6BusinessActivity({
     handleCloseConfirm();
   };
 
-  const handleFileSelect = (e) => {
-    const { name, files } = e.target;
-    setSelectedFiles((prev) => ({
-      ...prev,
-      [name]: files[0] ? files[0].name.toUpperCase() : "",
-    }));
-    handleFileChange(e); // pass file to parent
-  };
-
+  // ✅ Input changes
   const handleBusinessChange = (e) => {
     const { name, value } = e.target;
     setNewBusiness((prev) => ({
@@ -97,6 +104,7 @@ export default function Step6BusinessActivity({
     setAddErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
+  // ✅ Add or edit business line
   const addBusinessLine = () => {
     const newErrors = {};
     if (!newBusiness.lineOfBusiness)
@@ -135,7 +143,7 @@ export default function Step6BusinessActivity({
     setAddErrors({});
   };
 
-  // ✅ Calculate total capital using useMemo
+  // ✅ Total Capital calculation
   const totalCapital = useMemo(() => {
     return businessLines.reduce(
       (sum, biz) => sum + (parseFloat(biz.capital) || 0),
@@ -145,8 +153,7 @@ export default function Step6BusinessActivity({
 
   useEffect(() => {
     handleChange({ target: { name: "totalCapital", value: totalCapital } });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [totalCapital]);
+  }, [totalCapital, handleChange]);
 
   return (
     <div style={{ marginBottom: 20 }}>
@@ -155,7 +162,7 @@ export default function Step6BusinessActivity({
       </Typography>
 
       <Stack spacing={3}>
-        {/* Tax Incentives */}
+        {/* ✅ Tax Incentives */}
         <FormControl fullWidth sx={{ minWidth: 300 }} error={!!errors.tIGE}>
           <InputLabel id="tIGE-label">Tax Incentives from Gov't</InputLabel>
           <Select
@@ -183,7 +190,7 @@ export default function Step6BusinessActivity({
           )}
         </FormControl>
 
-        {/* File Upload for TIGE */}
+        {/* ✅ File Upload */}
         {formData.tIGE === "YES" && (
           <Stack spacing={3}>
             {files.map((file) => (
@@ -195,7 +202,6 @@ export default function Step6BusinessActivity({
                     component="label"
                     size="small"
                     color="success"
-                    sx={{ minWidth: 120 }}
                   >
                     Choose File
                     <input
@@ -210,9 +216,7 @@ export default function Step6BusinessActivity({
                     placeholder="NO FILE SELECTED"
                     size="small"
                     fullWidth
-                    InputProps={{
-                      readOnly: true,
-                    }}
+                    InputProps={{ readOnly: true }}
                     error={!!errors[file.name]}
                     helperText={errors[file.name]}
                   />
@@ -222,7 +226,7 @@ export default function Step6BusinessActivity({
           </Stack>
         )}
 
-        {/* Office Type */}
+        {/* ✅ Office Type */}
         <FormControl
           fullWidth
           sx={{ minWidth: 300 }}
@@ -250,11 +254,6 @@ export default function Step6BusinessActivity({
             <MenuItem value="WAREHOUSE">Warehouse</MenuItem>
             <MenuItem value="OTHERS">Others (Specify)</MenuItem>
           </Select>
-          {!!errors.officeType && (
-            <Typography variant="caption" color="error">
-              {errors.officeType}
-            </Typography>
-          )}
         </FormControl>
 
         {formData.officeType === "OTHERS" && (
@@ -271,19 +270,15 @@ export default function Step6BusinessActivity({
               })
             }
             fullWidth
-            variant="outlined"
-            sx={{ minWidth: 300 }}
-            error={!!errors.officeTypeOther}
-            helperText={errors.officeTypeOther}
           />
         )}
 
-        {/* Add Line of Business Section */}
+        {/* ✅ Add Line of Business Section */}
         <Typography variant="subtitle1">Add Line of Business</Typography>
 
-        {/* Autocomplete for Line of Business */}
         <Autocomplete
-          options={lobOptions.map((opt) => opt.toUpperCase())}
+          freeSolo
+          options={lobOptions}
           value={newBusiness.lineOfBusiness}
           onChange={(event, newValue) => {
             setNewBusiness((prev) => ({
@@ -318,6 +313,7 @@ export default function Step6BusinessActivity({
           error={!!addErrors.productService}
           helperText={addErrors.productService}
         />
+
         <TextField
           label="Units"
           name="Units"
@@ -328,6 +324,7 @@ export default function Step6BusinessActivity({
           error={!!addErrors.Units}
           helperText={addErrors.Units}
         />
+
         <NumericFormat
           customInput={TextField}
           label="Capital"
@@ -355,7 +352,7 @@ export default function Step6BusinessActivity({
           {editingIndex !== null ? "SAVE CHANGES" : "ADD LINE OF BUSINESS"}
         </Button>
 
-        {/* Business List */}
+        {/* ✅ Business List */}
         <Stack spacing={2}>
           {businessLines.map((biz, index) => (
             <Card key={index} variant="outlined">
@@ -415,45 +412,9 @@ export default function Step6BusinessActivity({
         )}
       </Stack>
 
-      <FormControl
-        fullWidth
-        sx={{ minWidth: 300 }}
-        error={!!errors.Modeofpayment}
-      >
-        <InputLabel id="Modeofpayment-label">Mode of Payment</InputLabel>
-        <Select
-          labelId="Modeofpayment-label"
-          name="Modeofpayment"
-          value={formData.Modeofpayment || ""}
-          onChange={(e) =>
-            handleChange({
-              target: {
-                name: e.target.name,
-                value: e.target.value.toUpperCase(),
-              },
-            })
-          }
-          label="Office Type"
-        >
-          <MenuItem value="">-- SELECT MODE OF PAYMENT --</MenuItem>
-          <MenuItem value="ANNUALLY">ANNUALLY</MenuItem>
-          <MenuItem value="QUARTERLY">QUARTERLY</MenuItem>
-          <MenuItem value="SEMI ANNUALLY">SEMI ANNUALLY</MenuItem>
-        </Select>
-        {!!errors.Modeofpayment && (
-          <Typography variant="caption" color="error">
-            {errors.Modeofpayment}
-          </Typography>
-        )}
-      </FormControl>
-
-      {/* Delete Confirmation Modal */}
-      <Dialog
-        open={openConfirm}
-        onClose={handleCloseConfirm}
-        aria-labelledby="confirm-delete-title"
-      >
-        <DialogTitle id="confirm-delete-title">CONFIRM DELETE</DialogTitle>
+      {/* ✅ Delete Confirmation Modal */}
+      <Dialog open={openConfirm} onClose={handleCloseConfirm}>
+        <DialogTitle>CONFIRM DELETE</DialogTitle>
         <DialogContent>
           <DialogContentText>
             ARE YOU SURE YOU WANT TO DELETE THIS LINE OF BUSINESS?
