@@ -71,5 +71,21 @@ app.use("/appStatus", appStatusRoutes);
 app.use("/treasurer", TreasurersOfficeRoutes);
 app.use("/businessProfile", businessProfileRoutes);
 
+app.get("/api/my-existing-table", async (req, res) => {
+  try {
+    const [results] = await sequelize.query("SELECT * FROM FSICDB");
+
+    if (results.length > 0) {
+      res.json(results);
+    } else {
+      console.warn("⚠️ FSICDB table is empty or no data found.");
+      res.status(404).json({ error: "No data found in FSICDB" });
+    }
+  } catch (err) {
+    console.error("❌ Error fetching FSICDB table:", err);
+    res.status(500).json({ error: "Failed to fetch FSICDB table" });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

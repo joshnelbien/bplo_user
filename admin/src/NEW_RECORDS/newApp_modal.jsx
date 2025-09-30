@@ -23,6 +23,7 @@ import {
 import axios from "axios";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
+import { useState, useEffect } from "react";
 
 // ✅ Custom Colored Step Icon
 function ColorStepIcon(props) {
@@ -61,15 +62,15 @@ const formatCurrency = (value) => {
   });
 };
 
-// ✅ Component to display a normal text field
-const Field = ({ label, value }) => (
-  <Grid item xs={12} sm={6}>
+const Field = ({ label, value, fullWidth = false }) => (
+  <Grid item xs={fullWidth ? 12 : 6}>
     <TextField
       label={label}
       value={value || "—"}
       fullWidth
       variant="outlined"
       size="small"
+      disabled
       InputProps={{
         sx: {
           color: "black",
@@ -93,6 +94,12 @@ const Field = ({ label, value }) => (
         },
       }}
     />
+  </Grid>
+);
+
+const EditableField = ({ label, value, onChange }) => (
+  <Grid item xs={12} sm={6}>
+    <TextField label={label} fullWidth variant="outlined" size="small" />
   </Grid>
 );
 
@@ -165,6 +172,45 @@ const FileField = ({ label, fileKey, fileData, baseUrl }) => (
 
 function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
   if (!isOpen || !applicant) return null;
+  const [expandedSection, setExpandedSection] = useState(false);
+  const [businessDetails, setBusinessDetails] = useState([]);
+  const [fsicData, setFsicData] = useState([]);
+
+  useEffect(() => {
+    const fetchFSIC = async () => {
+      try {
+        const res = await axios.get(`${API}/api/my-existing-table`);
+        setFsicData(res.data);
+      } catch (error) {
+        console.error("❌ Failed to fetch FSICDB:", error);
+      }
+    };
+
+    fetchFSIC();
+  }, []);
+
+  const handleIndustryChange = (index, selectedIndustry) => {
+    const selectedRow = fsicData.find(
+      (item) => item.IndustryDescription === selectedIndustry
+    );
+
+    setBusinessDetails((prev) => {
+      const updated = [...prev];
+      if (!updated[index]) updated[index] = {};
+      updated[index] = {
+        ...updated[index],
+        group: selectedRow?.Group || "",
+        class: selectedRow?.Class || "",
+        subclass: selectedRow?.SubClass || "",
+        industryDescription: selectedRow?.IndustryDescription || "",
+        summary: selectedRow?.Summary || "",
+        psic1994: selectedRow?.PSIC1994 || "",
+        isicrev4: selectedRow?.ISICRev4 || "",
+        acicCode: selectedRow?.ACICCode || "",
+      };
+      return updated;
+    });
+  };
 
   // ✅ Stepper definitions
   const steps = [
@@ -186,20 +232,26 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
     (step) => applicant[step.key] === "Pending"
   );
 
-  const Section = ({ title, children }) => (
-    <Accordion>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography variant="subtitle1" fontWeight="bold">
-          {title}
-        </Typography>
-      </AccordionSummary>
-      <AccordionDetails>
-        <Grid container spacing={2}>
-          {children}
-        </Grid>
-      </AccordionDetails>
-    </Accordion>
-  );
+  const Section = ({ title, children }) => {
+    const isExpanded = expandedSection === title;
+    return (
+      <Accordion
+        expanded={isExpanded}
+        onChange={() => setExpandedSection(isExpanded ? false : title)}
+      >
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="subtitle1" fontWeight="bold">
+            {title}
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Grid container spacing={2}>
+            {children}
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
+    );
+  };
 
   // ✅ Function to send applicant to Business Tax
   const handlePassToBusinessTax = async () => {
@@ -366,6 +418,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
           <Field label="Zip Code" value={applicant.TaxzipCode} />
           <Field label="Pin Address" value={applicant.TaxpinAddress} />
         </Section>
+
         {/* Business Activity */}
         <Section title="Business Activity & Incentives">
           <Field label="Tax Incentives" value={applicant.tIGE} />
@@ -380,46 +433,160 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
 
           <Field label="Office Type" value={applicant.officeType} />
 
-          {applicant.lineOfBusiness?.split(",").map((lob, index) => {
-            const product = applicant.productService?.split(",")[index] || "";
-            const unit = applicant.Units?.split(",")[index] || "";
-            const capital = applicant.capital?.split(",")[index] || "";
+          {(applicant.lineOfBusiness?.trim().split(",") || []).map(
+            (lob, index) => {
+              const products =
+                applicant.productService?.trim().split(",") || [];
+              const units = applicant.Units?.trim().split(",") || [];
+              const capitals = applicant.capital?.trim().split(",") || [];
 
-            return (
-              <Paper
-                key={index}
-                elevation={2}
-                sx={{
-                  p: 2,
-                  mb: 2,
-                  borderRadius: 2,
-                  backgroundColor: "#f9f9f9",
-                }}
-              >
-                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                  Business Line {index + 1}
-                </Typography>
+              const product = products[index] || "";
+              const unit = units[index] || "";
+              const capital = capitals[index] || "";
 
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Field label="Line of Business" value={lob.trim()} />
+              // ✅ Define reusable full width props
+              const fullWidthProps = {
+                fullWidth: true,
+                size: "small",
+                InputProps: { readOnly: true },
+              };
+
+              return (
+                <Paper
+                  key={index}
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    mb: 2,
+                    borderRadius: 2,
+                    backgroundColor: "#f9f9f9",
+                    width: "100%",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    fontWeight="bold"
+                    gutterBottom
+                    sx={{ width: "100%" }}
+                  >
+                    Business Line {index + 1}
+                  </Typography>
+
+                  <TextField
+                    label="Line of Business"
+                    value={lob.trim()}
+                    {...fullWidthProps}
+                    sx={{ width: "100%", mb: 2 }}
+                  />
+
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Product/Service"
+                        value={product.trim()}
+                        {...fullWidthProps}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Units"
+                        value={unit.trim()}
+                        {...fullWidthProps}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Capital"
+                        value={formatCurrency(capital.trim())}
+                        {...fullWidthProps}
+                      />
+                    </Grid>
+
+                    {/* ✅ Industry dropdown */}
+                    <Grid item xs={12}>
+                      <TextField
+                        select
+                        fullWidth
+                        size="small"
+                        SelectProps={{ native: true }}
+                        value={
+                          businessDetails[index]?.industryDescription || ""
+                        }
+                        onChange={(e) =>
+                          handleIndustryChange(index, e.target.value)
+                        }
+                      >
+                        <option value="">-- Select Industry --</option>
+                        {fsicData.map((item, i) => (
+                          <option key={i} value={item.IndustryDescription}>
+                            {item.IndustryDescription}
+                          </option>
+                        ))}
+                      </TextField>
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Group"
+                        value={businessDetails?.[index]?.group || ""}
+                        {...fullWidthProps}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Class"
+                        value={businessDetails?.[index]?.class || ""}
+                        {...fullWidthProps}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Sub Class"
+                        value={businessDetails?.[index]?.subclass || ""}
+                        {...fullWidthProps}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Summary"
+                        value={businessDetails?.[index]?.summary || ""}
+                        {...fullWidthProps}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <TextField
+                        label="PSIC1994"
+                        value={businessDetails?.[index]?.psic1994 || ""}
+                        {...fullWidthProps}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <TextField
+                        label="ISICRev4"
+                        value={businessDetails?.[index]?.isicrev4 || ""}
+                        {...fullWidthProps}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <TextField
+                        label="ACICCode"
+                        value={businessDetails?.[index]?.acicCode || ""}
+                        {...fullWidthProps}
+                      />
+                    </Grid>
                   </Grid>
-                  <Grid item xs={12}>
-                    <Field label="Product/Service" value={product.trim()} />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Field label="Units" value={unit.trim()} />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Field
-                      label="Capital"
-                      value={formatCurrency(capital.trim())}
-                    />
-                  </Grid>
-                </Grid>
-              </Paper>
-            );
-          })}
+                </Paper>
+              );
+            }
+          )}
         </Section>
         {/* Business Requirements */}
         <Section title="Business Requirements">
