@@ -1,9 +1,13 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
+const csv = require("csv-parser");
+const { DataTypes } = require("sequelize");
 const { sequelize } = require("./db/sequelize");
 
-// Import your existing models and routes
+// 📌 Import your existing models and routes
 const Examiners = require("./db/model/examiners");
 const ExaminersRoutes = require("./routes/examinersRoutes");
 
@@ -30,37 +34,102 @@ const TreasurersOfficeRoutes = require("./routes/treasurerRoutes");
 
 const BusinessProfile = require("./db/model/businessProfileDB");
 const businessProfileRoutes = require("./routes/businessProfileRoutes");
+
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 
 app.get("/api/health", (_, res) => res.json({ ok: true }));
 
-(async () => {
-  await sequelize.authenticate();
-  await Examiners.sync({ alter: true });
-  await File.sync({ alter: true });
-  await Backroom.sync({ alter: true });
-  await UserAccounts.sync({ alter: true });
-  await Announcements.sync({ alter: true });
-  await BusinessTax.sync({ alter: true });
-  await AppStatus.sync({ alter: true });
-  await TreasurersOffice.sync({ alter: true });
-  await BusinessProfile.sync({ alter: true });
+// 📌 Function to create FSIC table and import CSV data
+async function importFSICData() {
+  try {
+    const tableName = "fsic";
+    const csvFilePath = path.join(__dirname, "public", "fsic.csv");
 
-  // await Examiners.sync();
-  // await File.sync();
-  // await Backroom.sync();
-  // await UserAccounts.sync();
-  // await Announcements.sync();
-  // await BusinessTax.sync();
-  // await AppStatus.sync();
-  // await TreasurersOffice.sync();
-  // await BusinessProfile.sync();
-  console.log("Database ready");
+    // ✅ Define Sequelize model dynamically
+    const Fsic = sequelize.define(
+      tableName,
+      {
+        nature_code: { type: DataTypes.STRING },
+        business_nature: { type: DataTypes.STRING },
+        line_code: { type: DataTypes.STRING },
+        business_line: { type: DataTypes.STRING },
+        license: { type: DataTypes.STRING },
+        permit: { type: DataTypes.STRING },
+        sanitary: { type: DataTypes.STRING },
+        garbage: { type: DataTypes.STRING },
+      },
+      {
+        tableName,
+        timestamps: false,
+      }
+    );
+
+    // ✅ Sync the table (creates it if not exists)
+    await Fsic.sync({ alter: true });
+    console.log(`✅ Table '${tableName}' is ready`);
+
+    // ✅ Read CSV data
+    const records = [];
+    await new Promise((resolve, reject) => {
+      fs.createReadStream(csvFilePath)
+        .pipe(csv())
+        .on("data", (row) => {
+          records.push({
+            nature_code: row.nature_code,
+            business_nature: row.business_nature,
+            line_code: row.line_code,
+            business_line: row.business_line,
+            license: row.license,
+            permit: row.permit,
+            sanitary: row.sanitary,
+            garbage: row.garbage,
+          });
+        })
+        .on("end", resolve)
+        .on("error", reject);
+    });
+
+    // ✅ Insert records
+    if (records.length > 0) {
+      await Fsic.bulkCreate(records, { ignoreDuplicates: true });
+      console.log(`✅ Inserted ${records.length} records into '${tableName}'`);
+    } else {
+      console.log("⚠️ No data found in fsic.csv");
+    }
+  } catch (error) {
+    console.error("❌ Error importing FSIC data:", error);
+  }
+}
+
+// 📌 Main startup function
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("✅ Database connected");
+
+    // Sync your existing tables
+    await Examiners.sync({ alter: true });
+    await File.sync({ alter: true });
+    await Backroom.sync({ alter: true });
+    await UserAccounts.sync({ alter: true });
+    await Announcements.sync({ alter: true });
+    await BusinessTax.sync({ alter: true });
+    await AppStatus.sync({ alter: true });
+    await TreasurersOffice.sync({ alter: true });
+    await BusinessProfile.sync({ alter: true });
+
+    // 🆕 Import FSIC CSV after syncing
+    await importFSICData();
+
+    console.log("✅ Database ready");
+  } catch (err) {
+    console.error("❌ Startup error:", err);
+  }
 })();
 
-// Use your existing routes
+// 📌 Use existing routes
 app.use("/backroom", BackroomRoutes);
 app.use("/examiners", ExaminersRoutes);
 app.use("/newApplication", fileRoutes);
@@ -71,21 +140,6 @@ app.use("/appStatus", appStatusRoutes);
 app.use("/treasurer", TreasurersOfficeRoutes);
 app.use("/businessProfile", businessProfileRoutes);
 
-app.get("/api/my-existing-table", async (req, res) => {
-  try {
-    const [results] = await sequelize.query("SELECT * FROM fsic");
-
-    if (results.length > 0) {
-      res.json(results);
-    } else {
-      console.warn("⚠️ fisc table is empty or no data found.");
-      res.status(404).json({ error: "No data found in fisc" });
-    }
-  } catch (err) {
-    console.error("❌ Error fetching fisc table:", err);
-    res.status(500).json({ error: "Failed to fetch fisc table" });
-  }
-});
-
+// 📌 Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
