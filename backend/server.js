@@ -42,15 +42,107 @@ app.use(express.json({ limit: "50mb" }));
 app.get("/api/health", (_, res) => res.json({ ok: true }));
 
 /**
- * 📌 importFSICData
- * - Checks if table already has data → skip if yes
- * - Handles headers & CSV parsing
- * - Inserts in chunks for performance
+ * Module-scoped helper to get or define the FSIC model
+ * So every function can reuse the same model instance.
+ */
+function getFsicModel() {
+  const tableName = "fsic";
+
+  // If model already defined, return it
+  if (sequelize.models && sequelize.models[tableName]) {
+    return sequelize.models[tableName];
+  }
+
+  // Define model
+  const Fsic = sequelize.define(
+    tableName,
+    {
+      nature_code: { type: DataTypes.STRING },
+      business_nature: { type: DataTypes.TEXT },
+      line_code: { type: DataTypes.STRING },
+      business_line: { type: DataTypes.TEXT },
+      license: { type: DataTypes.STRING },
+      permit: { type: DataTypes.STRING },
+      sanitary: { type: DataTypes.STRING },
+      garbage: { type: DataTypes.STRING },
+    },
+    {
+      tableName,
+      timestamps: false,
+    }
+  );
+
+  return Fsic;
+}
+
+/**
+ * clean - normalize a CSV field:
+ * - strip BOM
+ * - trim whitespace
+ * - convert empty string -> null
+ */
+const clean = (val) => {
+  if (val === undefined || val === null) return null;
+  if (typeof val !== "string") return val;
+  const v = val.replace(/^\uFEFF/, "").trim();
+  return v === "" ? null : v;
+};
+
+/**
+ * parseCsvFile
+ * - returns array of normalized records from CSV
+ * - normalizes headers to snake_case
+ */
+async function parseCsvFile(csvFilePath) {
+  return new Promise((resolve, reject) => {
+    const rows = [];
+    let parsedRows = 0;
+
+    fs.createReadStream(csvFilePath)
+      .pipe(
+        csv({
+          separator: ",",
+          quote: '"',
+          mapHeaders: ({ header }) =>
+            header ? header.trim().toLowerCase().replace(/\s+/g, "_") : header,
+        })
+      )
+      .on("data", (row) => {
+        parsedRows++;
+        if (parsedRows <= 5) console.log("🧾 CSV row sample:", row);
+
+        rows.push({
+          nature_code: clean(row.nature_code),
+          business_nature: clean(row.business_nature),
+          line_code: clean(row.line_code),
+          business_line: clean(row.business_line),
+          license: clean(row.license),
+          permit: clean(row.permit),
+          sanitary: clean(row.sanitary),
+          garbage: clean(row.garbage),
+        });
+      })
+      .on("end", () => {
+        console.log(
+          `✅ Finished parsing CSV — total parsed rows: ${parsedRows}`
+        );
+        resolve(rows);
+      })
+      .on("error", (err) => {
+        console.error("❌ CSV parsing error:", err);
+        reject(err);
+      });
+  });
+}
+
+/**
+ * importFSICData
+ * - initial import at startup if table empty
  */
 async function importFSICData() {
   try {
-    const tableName = "fsic";
     const csvFilePath = path.join(__dirname, "public", "fsic.csv");
+    const Fsic = getFsicModel();
 
     if (!fs.existsSync(csvFilePath)) {
       console.warn(
@@ -59,95 +151,27 @@ async function importFSICData() {
       return;
     }
 
-    // ✅ Define Sequelize model
-    const Fsic = sequelize.define(
-      tableName,
-      {
-        nature_code: { type: DataTypes.STRING },
-        business_nature: { type: DataTypes.TEXT },
-        line_code: { type: DataTypes.STRING },
-        business_line: { type: DataTypes.TEXT },
-        license: { type: DataTypes.STRING },
-        permit: { type: DataTypes.STRING },
-        sanitary: { type: DataTypes.STRING },
-        garbage: { type: DataTypes.STRING },
-      },
-      {
-        tableName,
-        timestamps: false,
-      }
-    );
-
-    // Create / alter table
+    // create/alter table
     await Fsic.sync({ alter: true });
-    console.log(`✅ Table '${tableName}' is ready`);
+    console.log(`✅ Table '${Fsic.getTableName()}' is ready`);
 
-    // 🛑 Check if data already exists
+    // if table already has rows, skip initial import
     const existingCount = await Fsic.count();
     if (existingCount > 0) {
       console.log(
-        `⚠️ Table '${tableName}' already has ${existingCount} records. Skipping CSV import.`
+        `⚠️ Table '${Fsic.getTableName()}' already has ${existingCount} records. Skipping initial CSV import.`
       );
       return;
     }
 
-    // Helper: normalize empty -> null
-    const clean = (val) => {
-      if (val === undefined || val === null) return null;
-      if (typeof val === "string") {
-        const v = val.replace(/^\uFEFF/, "").trim();
-        return v === "" ? null : v;
-      }
-      return val;
-    };
-
-    // Read & parse CSV
-    const records = [];
-    let parsedRows = 0;
-    await new Promise((resolve, reject) => {
-      fs.createReadStream(csvFilePath)
-        .pipe(
-          csv({
-            separator: ",",
-            quote: '"',
-            mapHeaders: ({ header }) =>
-              header
-                ? header.trim().toLowerCase().replace(/\s+/g, "_")
-                : header,
-          })
-        )
-        .on("data", (row) => {
-          parsedRows++;
-          if (parsedRows <= 5) console.log("🧾 CSV row sample:", row);
-          records.push({
-            nature_code: clean(row.nature_code),
-            business_nature: clean(row.business_nature),
-            line_code: clean(row.line_code),
-            business_line: clean(row.business_line),
-            license: clean(row.license),
-            permit: clean(row.permit),
-            sanitary: clean(row.sanitary),
-            garbage: clean(row.garbage),
-          });
-        })
-        .on("end", () => {
-          console.log(
-            `✅ Finished parsing CSV — total parsed rows: ${parsedRows}`
-          );
-          resolve();
-        })
-        .on("error", (err) => {
-          console.error("❌ CSV parsing error:", err);
-          reject(err);
-        });
-    });
-
-    if (records.length === 0) {
+    // parse CSV
+    const records = await parseCsvFile(csvFilePath);
+    if (!records || records.length === 0) {
       console.log("⚠️ No records parsed from CSV. Nothing to insert.");
       return;
     }
 
-    // ✅ Insert in chunks
+    // Insert in chunks
     const chunkSize = 5000;
     let inserted = 0;
     for (let i = 0; i < records.length; i += chunkSize) {
@@ -158,18 +182,143 @@ async function importFSICData() {
     }
 
     const totalInDb = await Fsic.count();
-    console.log(`✅ Import complete. Total rows in DB: ${totalInDb}`);
-  } catch (error) {
-    console.error("❌ Error importing FSIC data:", error);
+    console.log(`✅ Initial import complete. Total rows in DB: ${totalInDb}`);
+  } catch (err) {
+    console.error("❌ Error in importFSICData:", err);
   }
 }
 
-// 📌 Main startup
+/**
+ * importNewFSICRows
+ * - reads entire CSV, compares the CSV keys (nature_code + line_code)
+ *   with existing DB keys, and inserts only rows not already present.
+ * - This avoids per-row DB queries by loading existing keys into a Set.
+ */
+let importMutex = false; // simple guard to avoid concurrent imports
+async function importNewFSICRows() {
+  if (importMutex) {
+    console.log(
+      "⏳ importNewFSICRows already running — skipping this trigger."
+    );
+    return;
+  }
+  importMutex = true;
+
+  try {
+    const csvFilePath = path.join(__dirname, "public", "fsic.csv");
+    const Fsic = getFsicModel();
+
+    if (!fs.existsSync(csvFilePath)) {
+      console.warn(`⚠️ CSV file not found at ${csvFilePath}. Skipping import.`);
+      importMutex = false;
+      return;
+    }
+
+    // Ensure table exists
+    await Fsic.sync();
+
+    // Load existing keys from DB into a Set of "nature_code||line_code"
+    const existingRows = await Fsic.findAll({
+      attributes: ["nature_code", "line_code"],
+      raw: true,
+    });
+
+    const existingKeySet = new Set(
+      existingRows.map((r) => `${r.nature_code ?? ""}||${r.line_code ?? ""}`)
+    );
+
+    // Parse CSV fully
+    const parsed = await parseCsvFile(csvFilePath);
+    if (!parsed || parsed.length === 0) {
+      console.log("⚠️ No rows in CSV to consider for new import.");
+      importMutex = false;
+      return;
+    }
+
+    // Filter only rows that do not exist in DB
+    const toInsert = [];
+    for (const r of parsed) {
+      const key = `${r.nature_code ?? ""}||${r.line_code ?? ""}`;
+      if (!existingKeySet.has(key)) {
+        toInsert.push(r);
+        existingKeySet.add(key); // avoid duplicates within same CSV
+      }
+    }
+
+    if (toInsert.length === 0) {
+      console.log("ℹ️ No new rows to insert (CSV and DB are in sync).");
+      importMutex = false;
+      return;
+    }
+
+    // Insert in chunks
+    const chunkSize = 5000;
+    let inserted = 0;
+    for (let i = 0; i < toInsert.length; i += chunkSize) {
+      const chunk = toInsert.slice(i, i + chunkSize);
+      await Fsic.bulkCreate(chunk, { validate: true });
+      inserted += chunk.length;
+      console.log(
+        `⬆️ Inserted ${chunk.length} new records (so far ${inserted})`
+      );
+    }
+
+    const totalInDb = await Fsic.count();
+    console.log(
+      `✨ importNewFSICRows complete. New rows inserted: ${inserted}. Total in DB: ${totalInDb}`
+    );
+  } catch (err) {
+    console.error("❌ Error in importNewFSICRows:", err);
+  } finally {
+    importMutex = false;
+  }
+}
+
+/**
+ * watchFSICFile
+ * - watches the CSV file for changes and triggers importNewFSICRows
+ * - uses a debounce to avoid duplicate triggers
+ */
+function watchFSICFile() {
+  const csvFilePath = path.join(__dirname, "public", "fsic.csv");
+  if (!fs.existsSync(csvFilePath)) {
+    console.warn(`⚠️ Cannot watch '${csvFilePath}' — file not found.`);
+    return;
+  }
+
+  let timer = null;
+  try {
+    fs.watch(csvFilePath, (eventType, filename) => {
+      if (eventType === "change") {
+        clearTimeout(timer);
+        // debounce for 1s
+        timer = setTimeout(async () => {
+          console.log(
+            `👀 Detected change in ${
+              filename || "fsic.csv"
+            } — checking for new rows...`
+          );
+          try {
+            await importNewFSICRows();
+          } catch (err) {
+            console.error("❌ Error while auto-importing new rows:", err);
+          }
+        }, 1000);
+      }
+    });
+    console.log(`👀 Watching CSV file for changes: ${csvFilePath}`);
+  } catch (err) {
+    console.error("❌ Failed to watch CSV file:", err);
+  }
+}
+
+/* ---------- Main startup ---------- */
 (async () => {
   try {
     await sequelize.authenticate();
     console.log("✅ Database connected");
 
+    // Sync other app models (your existing models)
     await Examiners.sync({ alter: true });
     await File.sync({ alter: true });
     await Backroom.sync({ alter: true });
@@ -180,8 +329,11 @@ async function importFSICData() {
     await TreasurersOffice.sync({ alter: true });
     await BusinessProfile.sync({ alter: true });
 
-    // 🆕 Run CSV importer
+    // Initial import if table empty
     await importFSICData();
+
+    // Start watching CSV for changes to auto-insert new rows
+    watchFSICFile();
 
     console.log("✅ Database ready");
   } catch (err) {
@@ -189,7 +341,7 @@ async function importFSICData() {
   }
 })();
 
-// 📌 Routes
+/* ---------- Routes ---------- */
 app.use("/backroom", BackroomRoutes);
 app.use("/examiners", ExaminersRoutes);
 app.use("/newApplication", fileRoutes);
@@ -200,7 +352,7 @@ app.use("/appStatus", appStatusRoutes);
 app.use("/treasurer", TreasurersOfficeRoutes);
 app.use("/businessProfile", businessProfileRoutes);
 
-// 🧪 Simple endpoint to fetch FSIC data
+// Endpoint to fetch FSIC rows (limited)
 app.get("/api/my-existing-table", async (req, res) => {
   try {
     const [results] = await sequelize.query("SELECT * FROM fsic LIMIT 10000");
@@ -211,6 +363,6 @@ app.get("/api/my-existing-table", async (req, res) => {
   }
 });
 
-// Start server
+/* ---------- Start server ---------- */
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
