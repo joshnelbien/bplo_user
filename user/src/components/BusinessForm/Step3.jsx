@@ -485,7 +485,9 @@ export default function Step3AddressInfo({ formData, handleChange, errors, handl
               variant="outlined"
               error={!!errors.monthlyRent}
               helperText={errors.monthlyRent}
+              type="number"
             />
+
             <TextField
               label="Tax Declaration No."
               name="taxdec"
