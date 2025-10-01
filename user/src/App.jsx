@@ -8,6 +8,7 @@ import AppTracker from "./appTracker/appTracker";
 import Renew from "./Renew/Renew";
 import Main from "./main/mainPage";
 import NewApplicationRegisterPage from "./newappRegistration.jsx/newappRegistration";
+import RenewalFormStepper from "./Renew/RenewalFormStepper";
 
 function App() {
   return (
@@ -23,7 +24,7 @@ function App() {
         <Route path="/renew" element={<Renew />} />
         <Route path="/registerPage" element={<RegisterPage />} />
         <Route path="/appTracker/:id" element={<AppTracker />} />
-        <Route path="/renew/me" element={<Renew />} />
+        <Route path="/renewal-form/step1" element={<RenewalFormStepper />} />
         <Route
           path="/newApplicationRegister"
           element={<NewApplicationRegisterPage />}

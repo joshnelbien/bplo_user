@@ -3,9 +3,6 @@ import {
   Button,
   CircularProgress,
   Paper,
-  Step,
-  StepLabel,
-  Stepper,
   TextField,
   Typography,
   useMediaQuery,
@@ -21,64 +18,94 @@ function Renewal() {
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
     businessName: "",
-    bin: "",
+    bin: "", // ✅ lowercase for consistency
   });
 
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_BASE;
 
-  const departments = ["BPLO", "CSMWO", "OBO", "CHO", "CENRO", "ZONING"];
-
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // responsive
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // ✅ Fetch existing records
   useEffect(() => {
-    let intervalId;
-
-    const fetchData = async () => {
+    const fetchRenewals = async () => {
       try {
-        const res = await axios.get(`${API}/renewal/${id}`);
-        if (res.data.length > 0) {
-          setRenewals(res.data);
+        const res = await axios.get(`${API}/businessProfile/businessProfiles`);
+
+        if (Array.isArray(res.data)) {
+          const sortedData = res.data.sort(
+            (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+          );
+          setRenewals(sortedData);
+        } else {
+          console.warn("⚠️ Unexpected response format:", res.data);
         }
-      } catch (err) {
-        console.error("Error fetching renewals:", err);
+      } catch (error) {
+        console.error("❌ Error fetching renewals:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-    intervalId = setInterval(fetchData, 5000);
+    fetchRenewals();
+  }, [API]);
 
-    return () => clearInterval(intervalId);
-  }, [id, API]);
-
-  // handle form changes
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  // ✅ Format BIN to 0000000-0000-0000000 while typing
+  const formatBIN = (value) => {
+    const digits = value.replace(/\D/g, "").slice(0, 18); // max 18 digits (7+4+7)
+    if (digits.length <= 7) {
+      return digits;
+    } else if (digits.length <= 11) {
+      return `${digits.slice(0, 7)}-${digits.slice(7)}`;
+    } else {
+      return `${digits.slice(0, 7)}-${digits.slice(7, 11)}-${digits.slice(
+        11,
+        18
+      )}`;
+    }
   };
 
-  // submit form
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "bin") {
+      const formatted = formatBIN(value);
+      setForm({ ...form, bin: formatted });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
+  };
+
+  // ✅ Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate BIN before sending
-    if (!/^\d{10}$/.test(form.bin)) {
-      alert("BIN must be exactly 10 digits.");
+    const binDigitsOnly = form.bin.replace(/\D/g, "");
+    if (binDigitsOnly.length !== 18) {
+      alert("BIN must follow the format 0000000-0000-0000000 (18 digits).");
       return;
     }
 
-    try {
-      await axios.post(`${API}/renewal/${id}`, form);
-      alert("Renewal submitted successfully!");
-      setForm({
-        businessName: "",
-        bin: "",
+    console.log(" Searching for EXACT record with:");
+    console.log("   BIN:", form.bin);
+    console.log("   Business Name:", form.businessName);
+
+    // ✅ Exact match
+    const matchedRecord = renewals.find(
+      (item) => item.BIN === form.bin && item.businessName === form.businessName
+    );
+
+    if (matchedRecord) {
+      console.log(" Exact Matching Record Found:", matchedRecord);
+
+      navigate(`/renewal-form/step1`, {
+        state: { record: matchedRecord },
       });
-    } catch (err) {
-      console.error("Error submitting renewal:", err);
-      alert("Error submitting renewal");
+    } else {
+      console.warn(
+        "⚠️ No exact matching record found for BIN and Business Name."
+      );
     }
   };
 
@@ -94,17 +121,6 @@ function Renewal() {
       </Box>
     );
 
-  // reorder departments so Approved ones appear first
-  const reorderDepartments = (renewal) => {
-    return [...departments].sort((a, b) => {
-      const aApproved = renewal[a] === "Approved";
-      const bApproved = renewal[b] === "Approved";
-      if (aApproved && !bApproved) return -1;
-      if (!aApproved && bApproved) return 1;
-      return 0;
-    });
-  };
-
   return (
     <Box sx={{ p: 4, maxWidth: 900, mx: "auto" }}>
       <Button
@@ -116,7 +132,6 @@ function Renewal() {
         Back to Home
       </Button>
 
-      {/* Renewal Form */}
       <Paper elevation={3} sx={{ p: 4, mb: 4, borderRadius: 3 }}>
         <Typography variant="h5" fontWeight="bold" gutterBottom color="primary">
           Renewal Application Form
@@ -137,23 +152,18 @@ function Renewal() {
             required
             fullWidth
             color="primary"
-            InputLabelProps={{ required: true }}
           />
+
           <TextField
             label="Business Identification Number (BIN)"
-            name="bin"
+            name="bin" // ✅ fixed name to lowercase
             value={form.bin}
             onChange={handleChange}
             required
             fullWidth
             color="primary"
-            inputProps={{
-              maxLength: 10,
-              pattern: "[0-9]{10}",
-              title: "BIN must be exactly 10 digits",
-            }}
-            helperText="BIN must be exactly 10 digits"
-            InputLabelProps={{ required: true }}
+            placeholder="0000000-0000-0000000"
+            helperText="BIN must follow the format 0000000-0000-0000000"
           />
 
           <Button
@@ -172,104 +182,11 @@ function Renewal() {
         </Box>
       </Paper>
 
-      {/* Renewal Tracker */}
-      {renewals.length === 0 ? (
-        <Typography variant="h6" align="center" color="text.secondary">
-          No renewal application found.
-        </Typography>
-      ) : (
-        <>
-          <Typography
-            variant="h5"
-            fontWeight="bold"
-            gutterBottom
-            color="primary"
-          >
-            Renewal Tracker
-          </Typography>
-
-          {renewals.map((renewal, idx) => {
-            const orderedDepartments = reorderDepartments(renewal);
-            const approvedCount = orderedDepartments.filter(
-              (dept) => renewal[dept] === "Approved"
-            ).length;
-            const total = orderedDepartments.length;
-            const percentage = Math.round((approvedCount / total) * 100);
-
-            const activeStep = orderedDepartments.findIndex(
-              (dept) => renewal[dept] !== "Approved"
-            );
-            const currentStep =
-              activeStep === -1 ? orderedDepartments.length : activeStep;
-
-            return (
-              <Paper
-                key={idx}
-                elevation={3}
-                sx={{ p: 4, mb: 3, borderRadius: 3 }}
-              >
-                <Typography
-                  variant="h6"
-                  fontWeight="bold"
-                  mb={2}
-                  color="text.secondary"
-                >
-                  Renewal {idx + 1}
-                </Typography>
-
-                {/* Progress Info */}
-                <Box display="flex" alignItems="center" mb={2} gap={2}>
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      {approvedCount} of {total} Approved ({percentage}%)
-                    </Typography>
-                    <Box
-                      sx={{
-                        mt: 0.5,
-                        height: 10,
-                        borderRadius: 5,
-                        backgroundColor: "#eee",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          height: "100%",
-                          width: `${percentage}%`,
-                          backgroundColor:
-                            percentage === 100 ? "green" : "#1976d2",
-                          transition: "width 0.5s ease",
-                        }}
-                      />
-                    </Box>
-                  </Box>
-                </Box>
-
-                {/* Stepper */}
-                <Stepper
-                  activeStep={currentStep}
-                  orientation={isMobile ? "vertical" : "horizontal"}
-                  alternativeLabel={!isMobile}
-                >
-                  {orderedDepartments.map((dept) => (
-                    <Step key={dept} completed={renewal[dept] === "Approved"}>
-                      <StepLabel>
-                        <Typography variant="body1">{dept}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {renewal[dept]}{" "}
-                          {renewal[`${dept}timeStamp`]
-                            ? `(${renewal[`${dept}timeStamp`]})`
-                            : ""}
-                        </Typography>
-                      </StepLabel>
-                    </Step>
-                  ))}
-                </Stepper>
-              </Paper>
-            );
-          })}
-        </>
-      )}
+      <Typography variant="h6" align="center" color="text.secondary">
+        {renewals.length > 0
+          ? `Fetched ${renewals.length} renewal records.`
+          : "No renewal application found."}
+      </Typography>
     </Box>
   );
 }
