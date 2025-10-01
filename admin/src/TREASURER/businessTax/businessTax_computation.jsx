@@ -316,7 +316,7 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
           applicant={applicant}
           collections={collections}
           total={total}
-          otherChargesTotal={otherChargesTotal}
+          otherChargesTotal={otherChargesTotal} 
         />
       </DialogActions>
     </Dialog>
