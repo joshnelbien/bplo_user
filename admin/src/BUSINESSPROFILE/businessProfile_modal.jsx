@@ -428,11 +428,16 @@ function BusinessProfileModal({ applicant, isOpen, onClose, baseUrl }) {
 
                 <Grid container spacing={2}>
                   <Field label="Solid Waste Fee" value={applicant.csmwoFee} />
+                  <FileField
+                    fileKey="cswmoCert"
+                    label="Cenro Certificate"
+                    fileData={applicant}
+                    baseUrl={baseUrl}
+                  />
                 </Grid>
               </Paper>
 
               {/* ✅ CENRO */}
-
               <Paper
                 elevation={2}
                 sx={{

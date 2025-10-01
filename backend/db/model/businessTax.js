@@ -120,6 +120,10 @@ const BusinessTax = sequelize.define(
     CSMWO: { type: DataTypes.STRING, defaultValue: "Pending" },
     CSMWOtimeStamp: { type: DataTypes.STRING },
     csmwoFee: { type: DataTypes.STRING },
+    cswmoCert: { type: DataTypes.BLOB("long"), allowNull: true },
+    cswmoCert_filename: { type: DataTypes.STRING, allowNull: true },
+    cswmoCert_mimetype: { type: DataTypes.STRING, allowNull: true },
+    cswmoCert_size: { type: DataTypes.INTEGER, allowNull: true },
 
     OBO: { type: DataTypes.STRING, defaultValue: "Pending" },
     OBOtimeStamp: { type: DataTypes.STRING },
