@@ -264,9 +264,6 @@ function New_records() {
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                 <TableCell>
-                  <strong>BIN</strong>
-                </TableCell>
-                <TableCell>
                   <strong>Business Name</strong>
                 </TableCell>
                 <TableCell>
@@ -277,6 +274,9 @@ function New_records() {
                 </TableCell>
                 {filter === "approved" && (
                   <>
+                    <TableCell>
+                      <strong>BIN</strong>
+                    </TableCell>
                     <TableCell>
                       <strong>BPLO</strong>
                     </TableCell>
@@ -309,13 +309,17 @@ function New_records() {
             <TableBody>
               {currentRecords.map((applicant) => (
                 <TableRow key={applicant.id} hover>
-                  <TableCell>{applicant.BIN}</TableCell>
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
 
                   {filter === "approved" && (
                     <>
+                      <TableCell>
+                        <div>
+                          <div>{applicant.BIN}</div>
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <div>
                           <div>{applicant.BPLO}</div>
