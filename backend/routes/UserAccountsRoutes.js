@@ -39,12 +39,76 @@ router.post("/register", async (req, res) => {
         .json({ error: "All required fields must be filled" });
     }
 
-    // check if email already exists
-    const existingUser = await UserAccounts.findOne({
-      where: { email: email },
+    // create user
+    const user = await UserAccounts.create({
+      firstName,
+      middleName: middleName || null,
+      lastName,
+      extName: extName || null,
+      sex,
+      email: email,
+      tel: telNo || null,
+      mobile: mobileNo,
+      business_type: BusinessType || null,
+      dsc_reg_no: dscRegNo || null,
+      business_name: businessName || null,
+      tin_no: tinNo || null,
+      trade_name: TradeName || null,
+      application_type: "New",
     });
-    if (existingUser) {
-      return res.status(400).json({ error: "Email already in use" });
+
+    // ✅ send confirmation email
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "New Business Application",
+      html: `
+        <p>Hello <b>${firstName} ${lastName}</b>,</p>
+        <p>You can now proceed to your New Business application</p>
+        <p>Just Click the link below and Proceed to New Business Application</p>
+        <a href="${API}/newApplicationPage/${user.id}">
+          View Application
+        </a>
+        <br/><br/>
+        <p>Best regards,<br/>Business Portal</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(201).json({
+      message: "User registered successfully, email sent",
+      user,
+    });
+  } catch (error) {
+    console.error("❌ Register error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.post("/register-renew", async (req, res) => {
+  try {
+    const {
+      firstName,
+      middleName,
+      lastName,
+      extName,
+      sex,
+      email, // frontend field
+      mobileNo, // frontend field`
+      BusinessType,
+      dscRegNo,
+      businessName,
+      tinNo,
+      TradeName,
+      telNo,
+    } = req.body;
+
+    // validate required fields
+    if (!lastName || !firstName || !email || !mobileNo) {
+      return res
+        .status(400)
+        .json({ error: "All required fields must be filled" });
     }
 
     // create user
@@ -62,17 +126,17 @@ router.post("/register", async (req, res) => {
       business_name: businessName || null,
       tin_no: tinNo || null,
       trade_name: TradeName || null,
+      application_type: "Renew",
     });
 
-    // ✅ send confirmation email
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "Business Application Registered",
+      subject: "Business Renewal Application",
       html: `
         <p>Hello <b>${firstName} ${lastName}</b>,</p>
-        <p>Thank you for registering your business application.</p>
-        <p>You can view your application details by clicking the link below:</p>
+        <p>You can now proceed to your renewal application</p>
+        <p>Just Click the link below and Proceed to Renew Business Application</p>
         <a href="${API}/homePage/${user.id}">
           View Application
         </a>

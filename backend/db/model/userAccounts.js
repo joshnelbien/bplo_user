@@ -20,6 +20,7 @@ const UserAccounts = sequelize.define("UserAccounts", {
   email: { type: DataTypes.STRING, allowNull: false },
   tel: { type: DataTypes.STRING },
   mobile: { type: DataTypes.STRING, allowNull: false },
+  application_type: { type: DataTypes.STRING },
 });
 
 module.exports = UserAccounts;
