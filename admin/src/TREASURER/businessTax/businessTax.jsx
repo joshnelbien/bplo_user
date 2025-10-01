@@ -1,237 +1,449 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
-import Side_bar from "../../SIDE_BAR/side_bar";
+import React from "react";
+import { Button } from "@mui/material";
+import { saveAs } from "file-saver";
 import {
-  Box,
-  Button,
-  ButtonGroup,
-  Pagination,
-  Paper,
+  Document,
+  Packer,
+  Paragraph,
+  TextRun,
   Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
   TableRow,
-  Typography,
-} from "@mui/material";
-import BusinessTaxApplicantModal from "./businessTax_modal";
+  TableCell,
+  WidthType,
+  AlignmentType,
+  VerticalAlign,
+  BorderStyle,
+  HeadingLevel,
+  Media, // Assuming you have Media available if you want to embed logos
+} from "docx";
 
-function BusinessTax() {
-  const [applicants, setApplicants] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedApplicant, setSelectedApplicant] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filter, setFilter] = useState("pending"); // ✅ pending by default
-  const recordsPerPage = 20;
-  const [selectedFiles, setSelectedFiles] = useState({});
-  const API = import.meta.env.VITE_API_BASE;
+// =================================================================
+// NOTE: I've added a few utility functions to handle styles
+// The rest of your number formatting functions remain the same.
+// =================================================================
 
-  const handleFileChange = (name, file) => {
-    setSelectedFiles((prev) => ({
-      ...prev,
-      [name]: file,
-    }));
-  };
+// Function to create a cell with solid borders (for the main container)
+const createBorderedCell = (children, widthSize, verticalAlign = VerticalAlign.TOP) => {
+    return new TableCell({
+        children: children,
+        verticalAlign: verticalAlign,
+        width: { size: widthSize, type: WidthType.PERCENTAGE },
+        margins: { top: 100, bottom: 100, left: 100, right: 100 }, // Minimal internal padding
+        borders: {
+            top: { style: BorderStyle.SINGLE, size: 8, color: "000000" },
+            bottom: { style: BorderStyle.SINGLE, size: 8, color: "000000" },
+            left: { style: BorderStyle.SINGLE, size: 8, color: "000000" },
+            right: { style: BorderStyle.SINGLE, size: 8, color: "000000" },
+        },
+    });
+};
 
-  useEffect(() => {
-    const fetchApplicants = async () => {
-      try {
-        const res = await axios.get(`${API}/businessTax/businessTax`);
-        const sortedData = res.data.sort(
-          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-        );
+// Function for a simple text paragraph with no spacing
+const createNoSpacingPara = (text, isBold = false, size = 22, alignment = AlignmentType.LEFT) => {
+    return new Paragraph({
+        alignment: alignment,
+        spacing: { after: 0, before: 0 },
+        children: [
+            new TextRun({ text: text, bold: isBold, size: size }),
+        ],
+    });
+};
 
-        setApplicants(sortedData);
-        setApplicants(res.data);
-      } catch (error) {
-        console.error("Error fetching applicants:", error);
-      }
-    };
+function BusinessTaxDocxExport({
+  applicant,
+  collections,
+  total,
+  otherChargesTotal,
+}) {
+  // ✅ Peso formatter
+  const formatPeso = (value) =>
+    value > 0
+      ? `₱ ${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+      : "";
 
-    fetchApplicants();
-  }, []);
+  // ... (Your numberToWords and amountInWords functions are assumed to be here)
 
-  // ✅ Filter applicants based on button selection
-  const filteredApplicants =
-    filter === "pending"
-      ? applicants.filter((a) => a.BUSINESSTAX !== "Approved")
-      : applicants.filter((a) => a.BUSINESSTAX === "Approved");
+  // Convert number to words (re-added for completeness)
+  function numberToWords(num) {
+        if (num === 0) return "zero";
+        const belowTwenty = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+        const tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+        const thousands = ["", "thousand", "million", "billion"];
 
-  const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = filteredApplicants.slice(
-    indexOfFirstRecord,
-    indexOfLastRecord
-  );
+        function helper(n) {
+            if (n === 0) return "";
+            else if (n < 20) return belowTwenty[n] + " ";
+            else if (n < 100) return tens[Math.floor(n / 10)] + " " + helper(n % 10);
+            else return belowTwenty[Math.floor(n / 100)] + " hundred " + helper(n % 100);
+        }
 
-  const handleApprove = async (id, selectedFiles) => {
-    try {
-      const formData = new FormData();
-      if (selectedFiles.businessTaxComputation) {
-        formData.append(
-          "businessTaxComputation",
-          selectedFiles.businessTaxComputation
-        );
-      }
-
-      await axios.post(`${API}/businessTax/business/approve/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      setApplicants((prev) =>
-        prev.map((applicant) =>
-          applicant.id === id ? { ...applicant } : applicant
-        )
-      );
-
-      alert("Applicant approved with file uploaded");
-      closeModal();
-    } catch (error) {
-      console.error("Error approving applicant:", error);
+        let word = "";
+        let i = 0;
+        let tempNum = num;
+        while (tempNum > 0) {
+            if (tempNum % 1000 !== 0) {
+                word = helper(tempNum % 1000) + thousands[i] + " " + word;
+            }
+            tempNum = Math.floor(tempNum / 1000);
+            i++;
+        }
+        return word.trim();
     }
-  };
 
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-  };
+    function amountInWords(amount) {
+        const pesos = Math.floor(amount);
+        const centavos = Math.round((amount - pesos) * 100);
+        let words = "";
+        if (pesos > 0) words += numberToWords(pesos) + " pesos";
+        if (centavos > 0) {
+            words += (pesos > 0 ? " and " : "") + numberToWords(centavos) + " centavos";
+        }
+        return words || "zero";
+    }
 
-  const openModal = (applicant) => {
-    setSelectedApplicant(applicant);
-    setIsModalOpen(true);
-  };
+  // ✅ Generate DOCX file
+  const exportDocx = async () => {
+    const validCollections = collections.filter(
+      (item) => item.amount && Number(item.amount) > 0
+    );
+    
+    // --- Custom Styles for the Mayor's Permit Document ---
+    const DARK_GREEN = "1D5A2E"; // A dark green color close to the image
+    const FIELD_LABEL_WIDTH = 30;
+    const FIELD_VALUE_WIDTH = 70;
 
-  const closeModal = () => {
-    setSelectedApplicant(null);
-    setIsModalOpen(false);
+    // --- 1. Top Header Table (Logos, Permit Number) ---
+    const topHeaderTable = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+            new TableRow({
+                children: [
+                    // Logo (Left)
+                    new TableCell({
+                        width: { size: 25, type: WidthType.PERCENTAGE },
+                        verticalAlign: VerticalAlign.CENTER,
+                        children: [new Paragraph({ text: "[Bagong Pilipinas Logo Placeholder]", alignment: AlignmentType.LEFT })],
+                        borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
+                    }),
+                    // Center Text (Office/Division)
+                    new TableCell({
+                        width: { size: 50, type: WidthType.PERCENTAGE },
+                        verticalAlign: VerticalAlign.CENTER,
+                        children: [
+                            new Paragraph({ text: "[SPC Logo Placeholder]", alignment: AlignmentType.CENTER }),
+                            createNoSpacingPara("OFFICE OF THE MAYOR", true, 24, AlignmentType.CENTER),
+                            createNoSpacingPara("BUSINESS PERMIT AND LICENSING DIVISION", true, 22, AlignmentType.CENTER),
+                        ],
+                        borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
+                    }),
+                    // Permit Number (Right)
+                    new TableCell({
+                        width: { size: 25, type: WidthType.PERCENTAGE },
+                        verticalAlign: VerticalAlign.TOP,
+                        children: [
+                            createNoSpacingPara("2025", true, 48, AlignmentType.RIGHT),
+                            createNoSpacingPara(applicant?.PermitNumber || "00000", true, 36, AlignmentType.RIGHT),
+                            createNoSpacingPara("PERMIT NUMBER", true, 16, AlignmentType.RIGHT),
+                        ],
+                        borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
+                    }),
+                ],
+            }),
+        ],
+    });
+
+    // --- 2. MAYOR'S PERMIT Banner ---
+    const mayorPermitBanner = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+            new TableRow({
+                children: [
+                    new TableCell({
+                        children: [
+                            new Paragraph({
+                                alignment: AlignmentType.CENTER,
+                                spacing: { before: 100, after: 100 },
+                                children: [
+                                    new TextRun({ text: "MAYOR'S PERMIT", bold: true, size: 36, color: "FFFFFF" }),
+                                ],
+                            }),
+                        ],
+                        shading: { fill: DARK_GREEN }, // Set dark green background
+                        borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
+                    }),
+                ],
+            }),
+        ],
+    });
+
+    // --- 3. Business Info Table (6 Rows) ---
+    const createInfoRow = (label, value) => new TableRow({
+        children: [
+            new TableCell({
+                width: { size: FIELD_LABEL_WIDTH, type: WidthType.PERCENTAGE },
+                children: [createNoSpacingPara(label, true, 20)],
+                borders: { top: BorderStyle.SINGLE, bottom: BorderStyle.SINGLE, left: BorderStyle.SINGLE, right: BorderStyle.SINGLE },
+                margins: { top: 50, bottom: 50, left: 100, right: 100 },
+            }),
+            new TableCell({
+                width: { size: FIELD_VALUE_WIDTH, type: WidthType.PERCENTAGE },
+                children: [createNoSpacingPara(value, false, 20)],
+                borders: { top: BorderStyle.SINGLE, bottom: BorderStyle.SINGLE, left: BorderStyle.SINGLE, right: BorderStyle.SINGLE },
+                margins: { top: 50, bottom: 50, left: 100, right: 100 },
+            }),
+        ],
+    });
+
+    const fullName = `${applicant.firstName || ""} ${applicant.middleName || ""} ${applicant.lastName || ""}`;
+
+    const infoTable = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+            createInfoRow("NAME OF OWNER:", fullName),
+            createInfoRow("ADDRESS:", applicant?.address || "___________"),
+            createInfoRow("BUSINESS NAME:", applicant?.businessName || "___________"),
+            createInfoRow("LINE OF BUSINESS:", applicant?.lineOfBusiness || "___________"), // Placeholder field
+            createInfoRow("KIND OF ORGANIZATION:", applicant?.kindOfOrganization || "___________"), // Placeholder field
+            createInfoRow("BUSINESS ADDRESS:", applicant?.barangay || "___________"),
+        ],
+    });
+
+    // --- 4. Collection Table (Two Columns, main body) ---
+    const collectionRows = validCollections.map(
+        (item) =>
+            new TableRow({
+                children: [
+                    new TableCell({
+                        children: [createNoSpacingPara(item.label)],
+                        margins: { top: 50, bottom: 50, left: 100, right: 100 },
+                    }),
+                    new TableCell({
+                        children: [
+                            new Paragraph({
+                                text: formatPeso(Number(item.amount)),
+                                alignment: AlignmentType.RIGHT,
+                                spacing: { after: 0, before: 0 }
+                            }),
+                        ],
+                        margins: { top: 50, bottom: 50, left: 100, right: 100 },
+                    }),
+                ],
+            })
+    );
+    
+    // Add Total Row
+    if (total > 0) {
+        collectionRows.push(new TableRow({
+            children: [
+                new TableCell({
+                    children: [createNoSpacingPara("TOTAL", true)],
+                    margins: { top: 50, bottom: 50, left: 100, right: 100 },
+                }),
+                new TableCell({
+                    children: [
+                        new Paragraph({
+                            text: formatPeso(total),
+                            alignment: AlignmentType.RIGHT,
+                            spacing: { after: 0, before: 0 },
+                            children: [new TextRun({ text: formatPeso(total), bold: true })]
+                        }),
+                    ],
+                    margins: { top: 50, bottom: 50, left: 100, right: 100 },
+                }),
+            ]
+        }));
+    }
+
+    const collectionTable = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+            // Header Row
+            new TableRow({
+                children: [
+                    new TableCell({
+                        children: [createNoSpacingPara("NATURE OF COLLECTION", true, 22)],
+                        borders: { top: BorderStyle.SINGLE, bottom: BorderStyle.SINGLE, left: BorderStyle.SINGLE, right: BorderStyle.SINGLE },
+                    }),
+                    new TableCell({
+                        children: [createNoSpacingPara("AMOUNT", true, 22, AlignmentType.RIGHT)],
+                        borders: { top: BorderStyle.SINGLE, bottom: BorderStyle.SINGLE, left: BorderStyle.SINGLE, right: BorderStyle.SINGLE },
+                    }),
+                ],
+            }),
+            ...collectionRows,
+        ],
+    });
+
+    // --- 5. Mayor Signature Block (merged cell in a sub-table) ---
+    const mayorSignatureBlock = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+            new TableRow({
+                children: [
+                    new TableCell({
+                        children: [
+                            new Paragraph({ // Placeholder for empty space
+                                text: " ",
+                                spacing: { after: 100, before: 100 } 
+                            }), 
+                            new Paragraph({ // The SIGNATURE LINE, Name, and Title
+                                alignment: AlignmentType.RIGHT,
+                                children: [
+                                    // ADDED SIGNATURE LINE
+                                    new TextRun({ text: "____________________________________", break: 0 }), // The line itself
+                                    
+                                    // MAYOR'S NAME (Moved to a new line after the signature line)
+                                    new TextRun({ text: "HON. ARCADIO B. GAPANGADA JR., MNSA", bold: true, break: 1 }), 
+                                    
+                                    // MAYOR'S TITLE
+                                    new TextRun({ text: "CITY MAYOR", break: 1, size: 16 }),
+                                ],
+                            }),
+                        ],
+                        borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
+                    }),
+                ],
+            }),
+        ],
+    });
+
+    // --- The Main Document Structure Table (replicates the green frame and white content) ---
+    const mainDocTable = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+            // Header Row (Top Green Margin)
+            new TableRow({
+                children: [
+                    new TableCell({ 
+                        children: [new Paragraph({ text: " " })], 
+                        shading: { fill: DARK_GREEN },
+                        borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
+                        height: { value: 200, rule: 'exact' } // Small fixed height
+                    }),
+                ]
+            }),
+            // Body Row (White Content Area)
+            new TableRow({
+                children: [
+                    new TableCell({
+                        children: [
+                            topHeaderTable,
+                            mayorPermitBanner,
+                            new Paragraph({
+                                text: `Pursuant to City Ordinance No. 2012-40, s. of 2012, also known as the "2012 Revenue Code of the City of San Pablo", as amended, BUSINESS LICENSE and MAYOR'S PERMIT is hereby granted to:`,
+                                alignment: AlignmentType.JUSTIFIED,
+                                spacing: { before: 200, after: 200 },
+                                children: [
+                                    new TextRun({ break: 1, text: `BUSINESS ID: ${applicant?.BIN || "___________"}`, bold: true }),
+                                    new TextRun({ break: 1, text: `REFERENCE NO: ${applicant?.referenceNo || "___________"}`, bold: true }),
+                                ]
+                            }),
+                            
+                            infoTable,
+                            
+                            new Paragraph({ text: " " }), // Spacer
+                            
+                            collectionTable,
+                            
+                            mayorSignatureBlock,
+
+                            new Paragraph({ // Important Footer Text
+                                spacing: { before: 200, after: 200 },
+                                children: [
+                                    new TextRun({ 
+                                        text: "This Permit shall take effect upon approval until December 31, 2025 unless sooner revoked for cause and shall be renewed on or before January 20, 2026", 
+                                        italics: true, 
+                                        size: 20 
+                                    }),
+                                    new TextRun({
+                                        break: 2,
+                                        text: "IMPORTANT", 
+                                        bold: true,
+                                        size: 24,
+                                        alignment: AlignmentType.CENTER
+                                    }),
+                                    new TextRun({
+                                        break: 1,
+                                        text: "Violation of any provision of ordinance No. 2012, otherwise known as the \"2012 REVISED REVENUE CODE OF THE CITY OF SAN PABLO\" as amended, shall cause revocation of this permit and forfeiture of all sums paid for rights granted in addition to the penalties provided for.",
+                                        size: 18,
+                                        alignment: AlignmentType.JUSTIFIED
+                                    }),
+                                    new TextRun({
+                                        break: 2,
+                                        text: "ITO AY DAPAT IPASIKIL SA HAYAG NA POOK NG KALAKALAN AT DAPAT IPARAMDAM SA SANDALING HINGIN NG MGA KINAUUKULAN MAY KARAPATAN.",
+                                        bold: true,
+                                        size: 18,
+                                        alignment: AlignmentType.CENTER
+                                    }),
+                                    new TextRun({
+                                        break: 1,
+                                        text: "This must be posted on conspicuous place and be persented upon demand by proper authorities.",
+                                        italics: true,
+                                        size: 18,
+                                        alignment: AlignmentType.CENTER
+                                    }),
+                                ]
+                            }),
+                        ],
+                        borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
+                    }),
+                ],
+            }),
+            // Footer Row (Bottom Green Margin and Text)
+            new TableRow({
+                children: [
+                    new TableCell({
+                        children: [
+                            new Paragraph({
+                                alignment: AlignmentType.CENTER,
+                                spacing: { before: 100, after: 100 },
+                                children: [
+                                    new TextRun({ text: "ANY ALTERATION AND /OR ERASURE WILL INVALID THIS PERMIT.", bold: true, color: "FFFFFF" }),
+                                ],
+                            }),
+                        ],
+                        shading: { fill: DARK_GREEN },
+                        borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
+                    }),
+                ],
+            }),
+        ],
+        // The outer table has a thick green border to replicate the frame
+        borders: {
+            top: { style: BorderStyle.SINGLE, size: 24, color: DARK_GREEN },
+            bottom: { style: BorderStyle.SINGLE, size: 24, color: DARK_GREEN },
+            left: { style: BorderStyle.SINGLE, size: 24, color: DARK_GREEN },
+            right: { style: BorderStyle.SINGLE, size: 24, color: DARK_GREEN },
+        },
+    });
+
+    const doc = new Document({
+        // Set document page margins to zero or very small to allow the border table to take up maximum space
+        // Note: docx.js may not respect zero margins precisely, but this helps.
+        sections: [{
+            properties: {
+                page: {
+                    margin: {
+                        top: 100,
+                        right: 100,
+                        bottom: 100,
+                        left: 100,
+                    },
+                },
+            },
+            children: [mainDocTable],
+        }],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, "Mayor_s_Permit.docx");
   };
 
   return (
-    <>
-      <Side_bar />
-      <Box
-        id="main_content"
-        sx={{
-          p: 3,
-          minHeight: "100vh",
-          background: "linear-gradient(to bottom, #FFFFFF, #e6ffe6)",
-          marginLeft: { xs: 0, sm: "250px" }, // 0 on mobile, 250px on larger screens
-          width: { xs: "100%", sm: "calc(100% - 250px)" }, // full width on mobile
-        }}
-      >
-        <Typography
-          variant="h4"
-          gutterBottom
-          sx={{
-            color: "darkgreen",
-            fontWeight: "bold",
-          }}
-        >
-          BUSINESS TAX
-        </Typography>
-
-        {/* ✅ Button Group Filter */}
-        <Box mb={2}>
-          <ButtonGroup variant="contained">
-            <Button
-              sx={{
-                bgcolor: filter === "pending" ? "darkgreen" : "white",
-                color: filter === "pending" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "pending" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("pending");
-                setCurrentPage(1);
-              }}
-            >
-              Pending
-            </Button>
-            <Button
-              sx={{
-                bgcolor: filter === "approved" ? "darkgreen" : "white",
-                color: filter === "approved" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "approved" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("approved");
-                setCurrentPage(1);
-              }}
-            >
-              Approved
-            </Button>
-          </ButtonGroup>
-        </Box>
-
-        {/* ✅ Table */}
-        <TableContainer
-          component={Paper}
-          sx={{ borderRadius: 2, boxShadow: 3 }}
-        >
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell>
-                  <strong>BIN</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Business Name</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>First Name</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Last Name</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Status</strong>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {currentRecords.map((applicant) => (
-                <TableRow
-                  key={applicant.id}
-                  hover
-                  sx={{ cursor: "pointer" }}
-                  onClick={() => openModal(applicant)}
-                >
-                  <TableCell>{applicant.BIN}</TableCell>
-                  <TableCell>{applicant.businessName}</TableCell>
-                  <TableCell>{applicant.firstName}</TableCell>
-                  <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.BUSINESSTAX}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        {/* ✅ Pagination */}
-        <Box display="flex" justifyContent="center" mt={3}>
-          <Pagination
-            count={totalPages}
-            page={currentPage}
-            onChange={handlePageChange}
-            color="primary"
-            shape="rounded"
-          />
-        </Box>
-      </Box>
-      <BusinessTaxApplicantModal
-        applicant={selectedApplicant}
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        onApprove={handleApprove}
-        handleFileChange={handleFileChange}
-        selectedFiles={selectedFiles}
-      />
-    </>
+    <Button variant="contained" color="success" onClick={exportDocx}>
+      Export to Word
+    </Button>
   );
 }
 
-export default BusinessTax;
+export default BusinessTaxDocxExport;

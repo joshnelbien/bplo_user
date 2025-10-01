@@ -289,7 +289,7 @@ function BusinessTaxDocxExport({
                             new Paragraph({ // Signature Line
                                 alignment: AlignmentType.RIGHT,
                                 children: [
-                                    new TextRun({ text: "HON. ARCADIO B. GAPANGADA JR., MNS", bold: true }),
+                                    new TextRun({ text: "HON. ARCADIO B. GAPANGADA JR., MNSA", bold: true }),
                                     new TextRun({ text: "CITY MAYOR", break: 1, size: 16 }),
                                 ],
                             }),
