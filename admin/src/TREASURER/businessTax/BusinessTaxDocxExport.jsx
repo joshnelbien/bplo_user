@@ -2,324 +2,442 @@ import React from "react";
 import { Button } from "@mui/material";
 import { saveAs } from "file-saver";
 import {
-  Document,
-  Packer,
-  Paragraph,
-  TextRun,
-  Table,
-  TableRow,
-  TableCell,
-  WidthType,
-  AlignmentType,
-  VerticalAlign, // Import VerticalAlign for cell alignment
-  // Assuming you have an 'Image' or 'Media' utility for the logo. 
-  // If not, we'll use a Paragraph placeholder.
-  // Example: Media, maybe? For simplicity, we'll use a placeholder.
+  Document,
+  Packer,
+  Paragraph,
+  TextRun,
+  Table,
+  TableRow,
+  TableCell,
+  WidthType,
+  AlignmentType,
+  VerticalAlign,
+  BorderStyle,
+  HeadingLevel,
+  Media, // Assuming you have Media available if you want to embed logos
 } from "docx";
 
-// The rest of your functions (formatPeso, numberToWords, amountInWords) remain the same.
+// =================================================================
+// NOTE: I've added a few utility functions to handle styles
+// The rest of your number formatting functions remain the same.
+// =================================================================
+
+// Function to create a cell with solid borders (for the main container)
+const createBorderedCell = (children, widthSize, verticalAlign = VerticalAlign.TOP) => {
+    return new TableCell({
+        children: children,
+        verticalAlign: verticalAlign,
+        width: { size: widthSize, type: WidthType.PERCENTAGE },
+        margins: { top: 100, bottom: 100, left: 100, right: 100 }, // Minimal internal padding
+        borders: {
+            top: { style: BorderStyle.SINGLE, size: 8, color: "000000" },
+            bottom: { style: BorderStyle.SINGLE, size: 8, color: "000000" },
+            left: { style: BorderStyle.SINGLE, size: 8, color: "000000" },
+            right: { style: BorderStyle.SINGLE, size: 8, color: "000000" },
+        },
+    });
+};
+
+// Function for a simple text paragraph with no spacing
+const createNoSpacingPara = (text, isBold = false, size = 22, alignment = AlignmentType.LEFT) => {
+    return new Paragraph({
+        alignment: alignment,
+        spacing: { after: 0, before: 0 },
+        children: [
+            new TextRun({ text: text, bold: isBold, size: size }),
+        ],
+    });
+};
 
 function BusinessTaxDocxExport({
-  applicant,
-  collections,
-  total,
-  otherChargesTotal,
+  applicant,
+  collections,
+  total,
+  otherChargesTotal,
 }) {
-  // ✅ Peso formatter
-  const formatPeso = (value) =>
-    value > 0
-      ? `₱ ${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
-      : "";
+  // ✅ Peso formatter
+  const formatPeso = (value) =>
+    value > 0
+      ? `₱ ${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+      : "";
 
-  // ✅ Convert number to words
-  function numberToWords(num) {
-    if (num === 0) return "zero";
-    const belowTwenty = [
-      "",
-      "one",
-      "two",
-      "three",
-      "four",
-      "five",
-      "six",
-      "seven",
-      "eight",
-      "nine",
-      "ten",
-      "eleven",
-      "twelve",
-      "thirteen",
-      "fourteen",
-      "fifteen",
-      "sixteen",
-      "seventeen",
-      "eighteen",
-      "nineteen",
-    ];
-    const tens = [
-      "",
-      "",
-      "twenty",
-      "thirty",
-      "forty",
-      "fifty",
-      "sixty",
-      "seventy",
-      "eighty",
-      "ninety",
-    ];
-    const thousands = ["", "thousand", "million", "billion"];
+  // ... (Your numberToWords and amountInWords functions are assumed to be here)
 
-    function helper(n) {
-      if (n === 0) return "";
-      else if (n < 20) return belowTwenty[n] + " ";
-      else if (n < 100) return tens[Math.floor(n / 10)] + " " + helper(n % 10);
-      else
-        return (
-          belowTwenty[Math.floor(n / 100)] + " hundred " + helper(n % 100)
-        );
+  // Convert number to words (re-added for completeness)
+  function numberToWords(num) {
+        if (num === 0) return "zero";
+        const belowTwenty = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+        const tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+        const thousands = ["", "thousand", "million", "billion"];
+
+        function helper(n) {
+            if (n === 0) return "";
+            else if (n < 20) return belowTwenty[n] + " ";
+            else if (n < 100) return tens[Math.floor(n / 10)] + " " + helper(n % 10);
+            else return belowTwenty[Math.floor(n / 100)] + " hundred " + helper(n % 100);
+        }
+
+        let word = "";
+        let i = 0;
+        let tempNum = num;
+        while (tempNum > 0) {
+            if (tempNum % 1000 !== 0) {
+                word = helper(tempNum % 1000) + thousands[i] + " " + word;
+            }
+            tempNum = Math.floor(tempNum / 1000);
+            i++;
+        }
+        return word.trim();
     }
 
-    let word = "";
-    let i = 0;
-    while (num > 0) {
-      if (num % 1000 !== 0) {
-        word = helper(num % 1000) + thousands[i] + " " + word;
-      }
-      num = Math.floor(num / 1000);
-      i++;
+    function amountInWords(amount) {
+        const pesos = Math.floor(amount);
+        const centavos = Math.round((amount - pesos) * 100);
+        let words = "";
+        if (pesos > 0) words += numberToWords(pesos) + " pesos";
+        if (centavos > 0) {
+            words += (pesos > 0 ? " and " : "") + numberToWords(centavos) + " centavos";
+        }
+        return words || "zero";
     }
-    return word.trim();
-  }
 
-  function amountInWords(amount) {
-    const pesos = Math.floor(amount);
-    const centavos = Math.round((amount - pesos) * 100);
-    let words = "";
-    if (pesos > 0) words += numberToWords(pesos) + " pesos";
-    if (centavos > 0) words += " and " + numberToWords(centavos) + " centavos";
-    return words || "zero";
-  }
+  // ✅ Generate DOCX file
+  const exportDocx = async () => {
+    const validCollections = collections.filter(
+      (item) => item.amount && Number(item.amount) > 0
+    );
+    
+    // --- Custom Styles for the Mayor's Permit Document ---
+    const DARK_GREEN = "1D5A2E"; // A dark green color close to the image
+    const FIELD_LABEL_WIDTH = 30;
+    const FIELD_VALUE_WIDTH = 70;
 
-  // ✅ Generate DOCX file
-  const exportDocx = async () => {
-    const validCollections = collections.filter(
-      (item) => item.amount && Number(item.amount) > 0
-    );
+    // --- 1. Top Header Table (Logos, Permit Number) ---
+    const topHeaderTable = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+            new TableRow({
+                children: [
+                    // Logo (Left)
+                    new TableCell({
+                        width: { size: 25, type: WidthType.PERCENTAGE },
+                        verticalAlign: VerticalAlign.CENTER,
+                        children: [new Paragraph({ text: "[Bagong Pilipinas Logo Placeholder]", alignment: AlignmentType.LEFT })],
+                        borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
+                    }),
+                    // Center Text (Office/Division)
+                    new TableCell({
+                        width: { size: 50, type: WidthType.PERCENTAGE },
+                        verticalAlign: VerticalAlign.CENTER,
+                        children: [
+                            new Paragraph({ text: "[SPC Logo Placeholder]", alignment: AlignmentType.CENTER }),
+                            createNoSpacingPara("OFFICE OF THE MAYOR", true, 24, AlignmentType.CENTER),
+                            createNoSpacingPara("BUSINESS PERMIT AND LICENSING DIVISION", true, 22, AlignmentType.CENTER),
+                        ],
+                        borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
+                    }),
+                    // Permit Number (Right)
+                    new TableCell({
+                        width: { size: 25, type: WidthType.PERCENTAGE },
+                        verticalAlign: VerticalAlign.TOP,
+                        children: [
+                            createNoSpacingPara("2025", true, 48, AlignmentType.RIGHT),
+                            createNoSpacingPara(applicant?.PermitNumber || "00000", true, 36, AlignmentType.RIGHT),
+                            createNoSpacingPara("PERMIT NUMBER", true, 16, AlignmentType.RIGHT),
+                        ],
+                        borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
+                    }),
+                ],
+            }),
+        ],
+    });
 
-    // --- START: Logo/Header Table Definition ---
-    // NOTE: This table is the key to aligning the logo and text side-by-side.
-    const headerTable = new Table({
+    // --- 2. MAYOR'S PERMIT Banner ---
+    const mayorPermitBanner = new Table({
         width: { size: 100, type: WidthType.PERCENTAGE },
         rows: [
             new TableRow({
                 children: [
-                    // --- Column 1: Logo (Left) ---
                     new TableCell({
-                        width: { size: 15, type: WidthType.PERCENTAGE }, // Allocate 15% width for the logo
-                        verticalAlign: VerticalAlign.CENTER,
                         children: [
-                            // ⚠️ IMPORTANT: Replace this placeholder with your actual docx image insertion logic
-                            // If you use Media.addImage or a similar function, insert it here.
                             new Paragraph({
-                                text: "[spclogo.png Placeholder]", // Placeholder for the logo image
                                 alignment: AlignmentType.CENTER,
-                                spacing: { after: 0, before: 0 },
-                                style: "NoSpacing" // Use NoSpacing to reduce vertical space
-                            }),
-                        ],
-                        borders: { top: { style: "none" }, bottom: { style: "none" }, left: { style: "none" }, right: { style: "none" } },
-                    }),
-                    // --- Column 2: Text (Right/Center Block) ---
-                    new TableCell({
-                        width: { size: 85, type: WidthType.PERCENTAGE }, // Allocate 85% width for the text
-                        verticalAlign: VerticalAlign.CENTER,
-                        children: [
-                            new Paragraph({
-                                // Republic of the Philippines
-                                alignment: AlignmentType.LEFT,
-                                spacing: { after: 0, before: 0 },
+                                spacing: { before: 100, after: 100 },
                                 children: [
-                                    new TextRun({ text: "Republic of the Philippines", bold: false, size: 22 }), // Adjust size as needed
-                                ],
-                            }),
-                            new Paragraph({
-                                // CITY OF SAN PABLO
-                                alignment: AlignmentType.LEFT,
-                                spacing: { after: 0, before: 0 },
-                                children: [
-                                    new TextRun({ text: "CITY OF SAN PABLO", bold: true, size: 24 }),
-                                ],
-                            }),
-                            new Paragraph({
-                                // BUSINESS TAX ORDER OF PAYMENT
-                                alignment: AlignmentType.LEFT,
-                                spacing: { after: 200, before: 0 }, // Add slight spacing after this line
-                                children: [
-                                    new TextRun({ text: "BUSINESS TAX ORDER OF PAYMENT", bold: true, size: 22 }),
+                                    new TextRun({ text: "MAYOR'S PERMIT", bold: true, size: 36, color: "FFFFFF" }),
                                 ],
                             }),
                         ],
-                        borders: { top: { style: "none" }, bottom: { style: "none" }, left: { style: "none" }, right: { style: "none" } },
+                        shading: { fill: DARK_GREEN }, // Set dark green background
+                        borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
                     }),
                 ],
             }),
         ],
     });
-    // --- END: Logo/Header Table Definition ---
 
+    // --- 3. Business Info Table (6 Rows) ---
+    const createInfoRow = (label, value) => new TableRow({
+        children: [
+            new TableCell({
+                width: { size: FIELD_LABEL_WIDTH, type: WidthType.PERCENTAGE },
+                children: [createNoSpacingPara(label, true, 20)],
+                borders: { top: BorderStyle.SINGLE, bottom: BorderStyle.SINGLE, left: BorderStyle.SINGLE, right: BorderStyle.SINGLE },
+                margins: { top: 50, bottom: 50, left: 100, right: 100 },
+            }),
+            new TableCell({
+                width: { size: FIELD_VALUE_WIDTH, type: WidthType.PERCENTAGE },
+                children: [createNoSpacingPara(value, false, 20)],
+                borders: { top: BorderStyle.SINGLE, bottom: BorderStyle.SINGLE, left: BorderStyle.SINGLE, right: BorderStyle.SINGLE },
+                margins: { top: 50, bottom: 50, left: 100, right: 100 },
+            }),
+        ],
+    });
 
-    const doc = new Document({
-      sections: [
-        {
-          children: [
-            // Insert the new Header Table
-            headerTable,
-            
-            // Add a blank line/separator
-            new Paragraph({ text: " ", spacing: { after: 200 } }), 
+    const fullName = `${applicant.firstName || ""} ${applicant.middleName || ""} ${applicant.lastName || ""}`;
 
-            // Reference info (Improved spacing)
-            new Paragraph({ text: `REFERENCE NO: ___________`, spacing: { after: 50 } }),
-            new Paragraph({ text: `BUSINESS ID: ${applicant?.BIN || "___________"}`, spacing: { after: 50 } }),
-            new Paragraph({ text: `CAPITAL: ${applicant?.totalCapital || "___________"}`, spacing: { after: 50 } }),
-            new Paragraph({ text: `GROSS: ${applicant?.gross || "___________"}`, spacing: { after: 300 } }), // Extra space after GROSS
+    const infoTable = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+            createInfoRow("NAME OF OWNER:", fullName),
+            createInfoRow("ADDRESS:", applicant?.address || "___________"),
+            createInfoRow("BUSINESS NAME:", applicant?.businessName || "___________"),
+            createInfoRow("LINE OF BUSINESS:", applicant?.lineOfBusiness || "___________"), // Placeholder field
+            createInfoRow("KIND OF ORGANIZATION:", applicant?.kindOfOrganization || "___________"), // Placeholder field
+            createInfoRow("BUSINESS ADDRESS:", applicant?.barangay || "___________"),
+        ],
+    });
 
-            // Owner / Business Info
-            new Paragraph({
-                spacing: { before: 0, after: 50 },
+    // --- 4. Collection Table (Two Columns, main body) ---
+    const collectionRows = validCollections.map(
+        (item) =>
+            new TableRow({
                 children: [
-                    new TextRun({
-                        text: `NAME OF OWNER: ${
-                            applicant
-                                ? `${applicant.firstName || ""} ${
-                                      applicant.middleName || ""
-                                  } ${applicant.lastName || ""}`
-                                : "___________"
-                        }`,
+                    new TableCell({
+                        children: [createNoSpacingPara(item.label)],
+                        margins: { top: 50, bottom: 50, left: 100, right: 100 },
+                    }),
+                    new TableCell({
+                        children: [
+                            new Paragraph({
+                                text: formatPeso(Number(item.amount)),
+                                alignment: AlignmentType.RIGHT,
+                                spacing: { after: 0, before: 0 }
+                            }),
+                        ],
+                        margins: { top: 50, bottom: 50, left: 100, right: 100 },
+                    }),
+                ],
+            })
+    );
+    
+    // Add Total Row
+    if (total > 0) {
+        collectionRows.push(new TableRow({
+            children: [
+                new TableCell({
+                    children: [createNoSpacingPara("TOTAL", true)],
+                    margins: { top: 50, bottom: 50, left: 100, right: 100 },
+                }),
+                new TableCell({
+                    children: [
+                        new Paragraph({
+                            text: formatPeso(total),
+                            alignment: AlignmentType.RIGHT,
+                            spacing: { after: 0, before: 0 },
+                            children: [new TextRun({ text: formatPeso(total), bold: true })]
+                        }),
+                    ],
+                    margins: { top: 50, bottom: 50, left: 100, right: 100 },
+                }),
+            ]
+        }));
+    }
+
+    const collectionTable = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+            // Header Row
+            new TableRow({
+                children: [
+                    new TableCell({
+                        children: [createNoSpacingPara("NATURE OF COLLECTION", true, 22)],
+                        borders: { top: BorderStyle.SINGLE, bottom: BorderStyle.SINGLE, left: BorderStyle.SINGLE, right: BorderStyle.SINGLE },
+                    }),
+                    new TableCell({
+                        children: [createNoSpacingPara("AMOUNT", true, 22, AlignmentType.RIGHT)],
+                        borders: { top: BorderStyle.SINGLE, bottom: BorderStyle.SINGLE, left: BorderStyle.SINGLE, right: BorderStyle.SINGLE },
                     }),
                 ],
             }),
-            new Paragraph({ text: `BUSINESS NAME: ${applicant?.businessName || "___________"}`, spacing: { after: 50 } }),
-            new Paragraph({ text: `BUSINESS ADDRESS: ${applicant?.barangay || "___________"}`, spacing: { after: 50 } }),
-            new Paragraph({ text: `NATURE OF BUSINESS: ${applicant?.nature || "___________"}`, spacing: { after: 300 } }),
-
-            // Table for collections (Added Table Cell Alignment)
-            ...(validCollections.length > 0
-              ? [
-                  new Table({
-                    // Set table width to less than 100% and center it for a cleaner look
-                    width: { size: 9000, type: WidthType.DXA }, // DXA is the measurement unit for fixed table width in docx, 9000 DXA is approx 6.25 inches
-                    alignment: AlignmentType.CENTER,
-                    rows: [
-                      new TableRow({
-                        children: [
-                          new TableCell({
-                            children: [
-                              new Paragraph({
-                                text: "NATURE OF COLLECTION",
-                                bold: true,
-                              }),
-                            ],
-                          }),
-                          new TableCell({
-                            children: [
-                              new Paragraph({ 
-                                text: "AMOUNT", 
-                                bold: true,
-                                alignment: AlignmentType.RIGHT // Right-align the header AMOUNT text
-                              }),
-                            ],
-                            width: { size: 3000, type: WidthType.DXA } // Fixed width for amount column
-                          }),
-                        ],
-                      }),
-                      ...validCollections.map(
-                        (item) =>
-                          new TableRow({
-                            children: [
-                              new TableCell({
-                                children: [new Paragraph(item.label)],
-                              }),
-                              new TableCell({
-                                children: [
-                                  new Paragraph({
-                                    text: formatPeso(Number(item.amount)),
-                                    alignment: AlignmentType.RIGHT, // Crucial: Right-align the actual amount values
-                                  }),
-                                ],
-                              }),
-                            ],
-                          })
-                      ),
-                    ],
-                  }),
-                ]
-              : []),
-
-            // Totals and Footer follow...
-
-            // Other Charges (only if > 0)
-            ...(otherChargesTotal > 0
-              ? [
-                  new Paragraph({
-                    spacing: { before: 200 },
-                    alignment: AlignmentType.RIGHT, // Right-align total line
-                    children: [
-                      new TextRun(
-                        `Other Charges total: ${formatPeso(otherChargesTotal)}`
-                      ),
-                    ],
-                  }),
-                ]
-              : []),
-
-            // Total (only if > 0)
-            ...(total > 0
-              ? [
-                  new Paragraph({
-                    alignment: AlignmentType.RIGHT, // Right-align total line
-                    children: [
-                      new TextRun({
-                        text: `TOTAL: ${formatPeso(total)}`,
-                        bold: true,
-                      }),
-                    ],
-                  }),
-                  new Paragraph({
-                    spacing: { before: 200, after: 300 },
-                    children: [
-                      new TextRun({
-                        text: `AMOUNT IN WORDS: ${amountInWords(total).toUpperCase()}`, // Use UPPERCASE for professionalism
-                      }),
-                    ],
-                  }),
-                ]
-              : []),
-
-            // Footer
-            new Paragraph({ text: `No. Of Service Vehicle: ___________`, spacing: { after: 50 } }),
-            new Paragraph({ text: `Mode of Payment: ___________`, spacing: { after: 400 } }),
-            
-            new Paragraph("Computed By: ___________"),
-            new Paragraph({
-              alignment: AlignmentType.RIGHT,
-              children: [new TextRun("(Treasurer)")],
-            }),
-          ],
-        },
-      ],
+            ...collectionRows,
+        ],
     });
 
-    const blob = await Packer.toBlob(doc);
-    saveAs(blob, "Business_Tax_Order_of_Payment.docx");
-  };
+    // --- 5. Mayor Signature Block (merged cell in a sub-table) ---
+    const mayorSignatureBlock = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+            new TableRow({
+                children: [
+                    new TableCell({
+                        children: [
+                            new Paragraph({ // Placeholder for empty space
+                                text: " ",
+                                spacing: { after: 100, before: 100 } 
+                            }), 
+                            new Paragraph({ // Signature Line
+                                alignment: AlignmentType.RIGHT,
+                                children: [
+                                    new TextRun({ text: "HON. ARCADIO B. GAPANGADA JR., MNS", bold: true }),
+                                    new TextRun({ text: "CITY MAYOR", break: 1, size: 16 }),
+                                ],
+                            }),
+                        ],
+                        borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
+                    }),
+                ],
+            }),
+        ],
+    });
 
-  return (
-    <Button variant="contained" color="success" onClick={exportDocx}>
-      Export to Word
-    </Button>
-  );
+    // --- The Main Document Structure Table (replicates the green frame and white content) ---
+    const mainDocTable = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+            // Header Row (Top Green Margin)
+            new TableRow({
+                children: [
+                    new TableCell({ 
+                        children: [new Paragraph({ text: " " })], 
+                        shading: { fill: DARK_GREEN },
+                        borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
+                        height: { value: 200, rule: 'exact' } // Small fixed height
+                    }),
+                ]
+            }),
+            // Body Row (White Content Area)
+            new TableRow({
+                children: [
+                    new TableCell({
+                        children: [
+                            topHeaderTable,
+                            mayorPermitBanner,
+                            new Paragraph({
+                                text: `Pursuant to City Ordinance No. 2012-40, s. of 2012, also known as the "2012 Revenue Code of the City of San Pablo", as amended, BUSINESS LICENSE and MAYOR'S PERMIT is hereby granted to:`,
+                                alignment: AlignmentType.JUSTIFIED,
+                                spacing: { before: 200, after: 200 },
+                                children: [
+                                    new TextRun({ break: 1, text: `BUSINESS ID: ${applicant?.BIN || "___________"}`, bold: true }),
+                                    new TextRun({ break: 1, text: `REFERENCE NO: ${applicant?.referenceNo || "___________"}`, bold: true }),
+                                ]
+                            }),
+                            
+                            infoTable,
+                            
+                            new Paragraph({ text: " " }), // Spacer
+                            
+                            collectionTable,
+                            
+                            mayorSignatureBlock,
+
+                            new Paragraph({ // Important Footer Text
+                                spacing: { before: 200, after: 200 },
+                                children: [
+                                    new TextRun({ 
+                                        text: "This Permit shall take effect upon approval until December 31, 2025 unless sooner revoked for cause and shall be renewed on or before January 20, 2026", 
+                                        italics: true, 
+                                        size: 20 
+                                    }),
+                                    new TextRun({ 
+                                        break: 2,
+                                        text: "IMPORTANT", 
+                                        bold: true,
+                                        size: 24,
+                                        alignment: AlignmentType.CENTER
+                                    }),
+                                    new TextRun({
+                                        break: 1,
+                                        text: "Violation of any provision of ordinance No. 2012, otherwise known as the \"2012 REVISED REVENUE CODE OF THE CITY OF SAN PABLO\" as amended, shall cause revocation of this permit and forfeiture of all sums paid for rights granted in addition to the penalties provided for.",
+                                        size: 18,
+                                        alignment: AlignmentType.JUSTIFIED
+                                    }),
+                                    new TextRun({
+                                        break: 2,
+                                        text: "ITO AY DAPAT IPASIKIL SA HAYAG NA POOK NG KALAKALAN AT DAPAT IPARAMDAM SA SANDALING HINGIN NG MGA KINAUUKULAN MAY KARAPATAN.",
+                                        bold: true,
+                                        size: 18,
+                                        alignment: AlignmentType.CENTER
+                                    }),
+                                    new TextRun({
+                                        break: 1,
+                                        text: "This must be posted on conspicuous place and be persented upon demand by proper authorities.",
+                                        italics: true,
+                                        size: 18,
+                                        alignment: AlignmentType.CENTER
+                                    }),
+                                ]
+                            }),
+                        ],
+                        borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
+                    }),
+                ],
+            }),
+            // Footer Row (Bottom Green Margin and Text)
+            new TableRow({
+                children: [
+                    new TableCell({
+                        children: [
+                            new Paragraph({
+                                alignment: AlignmentType.CENTER,
+                                spacing: { before: 100, after: 100 },
+                                children: [
+                                    new TextRun({ text: "ANY ALTERATION AND /OR ERASURE WILL INVALID THIS PERMIT.", bold: true, color: "FFFFFF" }),
+                                ],
+                            }),
+                        ],
+                        shading: { fill: DARK_GREEN },
+                        borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
+                    }),
+                ],
+            }),
+        ],
+        // The outer table has a thick green border to replicate the frame
+        borders: {
+            top: { style: BorderStyle.SINGLE, size: 24, color: DARK_GREEN },
+            bottom: { style: BorderStyle.SINGLE, size: 24, color: DARK_GREEN },
+            left: { style: BorderStyle.SINGLE, size: 24, color: DARK_GREEN },
+            right: { style: BorderStyle.SINGLE, size: 24, color: DARK_GREEN },
+        },
+    });
+
+    const doc = new Document({
+        // Set document page margins to zero or very small to allow the border table to take up maximum space
+        // Note: docx.js may not respect zero margins precisely, but this helps.
+        sections: [{
+            properties: {
+                page: {
+                    margin: {
+                        top: 100,
+                        right: 100,
+                        bottom: 100,
+                        left: 100,
+                    },
+                },
+            },
+            children: [mainDocTable],
+        }],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, "Mayor_s_Permit.docx");
+  };
+
+  return (
+    <Button variant="contained" color="success" onClick={exportDocx}>
+      Export to Word
+    </Button>
+  );
 }
 
 export default BusinessTaxDocxExport;
