@@ -36,24 +36,27 @@ import CampaignIcon from "@mui/icons-material/Campaign";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import CalculateIcon from "@mui/icons-material/Calculate";
-import AccountBoxRoundedIcon from '@mui/icons-material/AccountBoxRounded';
+import AccountBoxRoundedIcon from "@mui/icons-material/AccountBoxRounded";
 
-// Common style
+const DARK_GREEN = "#114b16ff"; // Define the new background color
+
+// Common style - Background is transparent, text/icon is white
 const listItemStyle = {
   borderRadius: "8px",
   my: 0.5,
+  color: "white", // Set default font color to white
   "&:hover": {
-    backgroundColor: alpha("#1a7322", 0.1),
+    backgroundColor: alpha("#FFFFFF", 0.1), // Light white hover
   },
 };
 
-// Active style
+// Active style - Background is lighter green (or a darker white tint)
 const activeListItemStyle = {
   ...listItemStyle,
-  backgroundColor: alpha("#1a7322", 0.2),
+  backgroundColor: alpha("#FFFFFF", 0.2), // More visible white tint for active state
   fontWeight: "bold",
   "&:hover": {
-    backgroundColor: alpha("#1a7322", 0.3),
+    backgroundColor: alpha("#FFFFFF", 0.3),
   },
 };
 
@@ -200,7 +203,7 @@ function Side_bar() {
             >
               <ListItemIcon
                 sx={{
-                  color: "#1a7322",
+                  color: "white", // Changed to white
                   transition: "transform 0.3s",
                   "&:hover": { transform: "scale(1.1)" },
                 }}
@@ -218,13 +221,13 @@ function Side_bar() {
           sx={listItemStyle}
         >
           <ListItemIcon>
-            <BusinessIcon sx={{ color: "#1a7322" }} />
+            <BusinessIcon sx={{ color: "white" }} /> {/* Changed to white */}
           </ListItemIcon>
           <ListItemText primary="Backroom" />
           {openDept ? (
-            <ExpandLess sx={{ color: "#1a7322" }} />
+            <ExpandLess sx={{ color: "white" }} /> // Changed to white
           ) : (
-            <ExpandMore sx={{ color: "#1a7322" }} />
+            <ExpandMore sx={{ color: "white" }} /> // Changed to white
           )}
         </ListItemButton>
 
@@ -246,7 +249,7 @@ function Side_bar() {
                 >
                   <ListItemIcon
                     sx={{
-                      color: "#1a7322",
+                      color: "white", // Changed to white
                       transition: "transform 0.3s",
                       "&:hover": { transform: "scale(1.1)" },
                     }}
@@ -266,13 +269,13 @@ function Side_bar() {
           sx={listItemStyle}
         >
           <ListItemIcon>
-            <AccountBalanceIcon sx={{ color: "#1a7322" }} />
+            <AccountBalanceIcon sx={{ color: "white" }} /> {/* Changed to white */}
           </ListItemIcon>
           <ListItemText primary="Treasurer’s Office" />
           {openTreasurers ? (
-            <ExpandLess sx={{ color: "#1a7322" }} />
+            <ExpandLess sx={{ color: "white" }} /> // Changed to white
           ) : (
-            <ExpandMore sx={{ color: "#1a7322" }} />
+            <ExpandMore sx={{ color: "white" }} /> // Changed to white
           )}
         </ListItemButton>
 
@@ -294,7 +297,7 @@ function Side_bar() {
                 >
                   <ListItemIcon
                     sx={{
-                      color: "#1a7322",
+                      color: "white", // Changed to white
                       transition: "transform 0.3s",
                       "&:hover": { transform: "scale(1.1)" },
                     }}
@@ -320,6 +323,7 @@ function Side_bar() {
               bgcolor: "#be0606ff",
               "&:hover": { bgcolor: "#ce0000ff" },
               border: "none",
+              // We'll keep the text color override for the button itself
             }}
           >
             <ListItemIcon>
@@ -379,7 +383,7 @@ function Side_bar() {
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
               width: drawerWidth,
-              backgroundColor: "white",
+              backgroundColor: DARK_GREEN, // Main Background Change
               boxShadow: "2px 0 5px rgba(0,0,0,0.2)",
               borderRight: "none",
             },
@@ -389,7 +393,7 @@ function Side_bar() {
         </Drawer>
       </Box>
 
-      {/* Logout Modal */}
+      {/* Logout Modal (No changes needed here) */}
       <Modal open={openLogoutDialog} onClose={() => setOpenLogoutDialog(false)}>
         <Box sx={modalStyle}>
           <IconButton
