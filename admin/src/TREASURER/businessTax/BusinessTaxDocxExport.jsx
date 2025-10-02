@@ -19,8 +19,7 @@ import {
 } from "docx";
 
 // =================================================================
-// NOTE: I've added a few utility functions to handle styles
-// The rest of your number formatting functions remain the same.
+// NOTE: Utility functions remain the same
 // =================================================================
 
 // Function to create a cell with solid borders (for the main container)
@@ -62,9 +61,7 @@ function BusinessTaxDocxExport({
             ? `₱ ${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
             : "";
 
-    // ... (Your numberToWords and amountInWords functions are assumed to be here)
-
-    // Convert number to words (re-added for completeness)
+    // Convert number to words
     function numberToWords(num) {
         if (num === 0) return "zero";
         const belowTwenty = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
@@ -127,7 +124,7 @@ function BusinessTaxDocxExport({
             
             return {
                 data: imageData,
-                type: "png"
+                type: imagePath.endsWith('.png') ? "png" : "jpg"
             };
         } catch (error) {
             console.error('Error creating image data:', error);
@@ -144,12 +141,18 @@ function BusinessTaxDocxExport({
         // Load images
         const bagongPilipinasImageData = await createImageData('/bagongpilipinas.png');
         const spcLogoImageData = await createImageData('/spclogo.png');
+        // Load the e-signature image data for the Mayor
+        const eSignatureImageData = await createImageData('/esignature.png');
+        // Load the specific signature image for Oria
+        const oriaSignatureImageData = await createImageData('/oria_sig.png'); 
         
         console.log('Bagong Pilipinas image loaded:', !!bagongPilipinasImageData);
         console.log('SPC Logo image loaded:', !!spcLogoImageData);
+        console.log('Mayor e-Signature image loaded:', !!eSignatureImageData); 
+        console.log('Oria e-Signature image loaded:', !!oriaSignatureImageData); 
 
         // --- Custom Styles for the Mayor's Permit Document ---
-        const DARK_GREEN = "1D5A2E"; // A dark green color close to the image
+        const DARK_GREEN = "1D5A2E"; 
         const FIELD_LABEL_WIDTH = 30;
         const FIELD_VALUE_WIDTH = 70;
 
@@ -159,7 +162,7 @@ function BusinessTaxDocxExport({
             rows: [
                 new TableRow({
                     children: [
-                        // Logo (Left) - Bagong Pilipinas
+                        // Logo (Left) - 25%
                         new TableCell({
                             width: { size: 25, type: WidthType.PERCENTAGE },
                             verticalAlign: VerticalAlign.CENTER,
@@ -179,7 +182,7 @@ function BusinessTaxDocxExport({
                             ] : [new Paragraph({ text: "[Bagong Pilipinas Logo]", alignment: AlignmentType.LEFT })],
                             borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
                         }),
-                        // Center Text (Office/Division) with SPC Logo
+                        // Center Text with SPC Logo - 50%
                         new TableCell({
                             width: { size: 50, type: WidthType.PERCENTAGE },
                             verticalAlign: VerticalAlign.CENTER,
@@ -203,7 +206,7 @@ function BusinessTaxDocxExport({
                             ],
                             borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
                         }),
-                        // Permit Number (Right)
+                        // Permit Number (Right) - 25%
                         new TableCell({
                             width: { size: 25, type: WidthType.PERCENTAGE },
                             verticalAlign: VerticalAlign.TOP,
@@ -219,13 +222,14 @@ function BusinessTaxDocxExport({
             ],
         });
 
-        // --- 2. MAYOR'S PERMIT Banner ---
+        // --- 2. MAYOR'S PERMIT Banner (FIXED) ---
         const mayorPermitBanner = new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
             rows: [
                 new TableRow({
                     children: [
                         new TableCell({
+                            columnSpan: 3, // ⬅️ FIX: Span all three columns to force full width
                             children: [
                                 new Paragraph({
                                     alignment: AlignmentType.CENTER,
@@ -235,8 +239,9 @@ function BusinessTaxDocxExport({
                                     ],
                                 }),
                             ],
-                            shading: { fill: DARK_GREEN }, // Set dark green background
+                            shading: { fill: DARK_GREEN }, 
                             borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
+                            margins: { top: 0, bottom: 0, left: 0, right: 0 } // Minimize internal cell margins
                         }),
                     ],
                 }),
@@ -269,8 +274,8 @@ function BusinessTaxDocxExport({
                 createInfoRow("NAME OF OWNER:", fullName),
                 createInfoRow("ADDRESS:", applicant?.address || "___________"),
                 createInfoRow("BUSINESS NAME:", applicant?.businessName || "___________"),
-                createInfoRow("LINE OF BUSINESS:", applicant?.lineOfBusiness || "___________"), // Placeholder field
-                createInfoRow("KIND OF ORGANIZATION:", applicant?.kindOfOrganization || "___________"), // Placeholder field
+                createInfoRow("LINE OF BUSINESS:", applicant?.lineOfBusiness || "___________"), 
+                createInfoRow("KIND OF ORGANIZATION:", applicant?.kindOfOrganization || "___________"), 
                 createInfoRow("BUSINESS ADDRESS:", applicant?.barangay || "___________"),
             ],
         });
@@ -299,7 +304,6 @@ function BusinessTaxDocxExport({
         );
 
         // Add Total Row
-        // Add Total Row
         if (total > 0) {
             collectionRows.push(new TableRow({
                 children: [
@@ -310,11 +314,10 @@ function BusinessTaxDocxExport({
                     new TableCell({
                         children: [
                             new Paragraph({
-                                // REMOVED: text: formatPeso(total), 
                                 alignment: AlignmentType.RIGHT,
                                 spacing: { after: 0, before: 0 },
                                 children: [
-                                    new TextRun({ text: formatPeso(total), bold: true }) // <--- ONLY ONE DISPLAY, BOLD
+                                    new TextRun({ text: formatPeso(total), bold: true }) 
                                 ]
                             }),
                         ],
@@ -344,24 +347,77 @@ function BusinessTaxDocxExport({
             ],
         });
 
-        // --- 5. Mayor Signature Block (merged cell in a sub-table) ---
-        const mayorSignatureBlock = new Table({
+        // --- 5. Dual Signature Block (Mayor and Licensing Officer) ---
+        const signatureBlock = new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
             rows: [
                 new TableRow({
                     children: [
+                        // --- Left Cell: Licensing Officer's Signature ---
                         new TableCell({
+                            width: { size: 50, type: WidthType.PERCENTAGE },
                             children: [
-                                new Paragraph({ // Placeholder for empty space
-                                    text: " ",
-                                    spacing: { after: 100, before: 100 }
+                                // Oria signature image
+                                ...(oriaSignatureImageData ? [
+                                    new Paragraph({
+                                        alignment: AlignmentType.CENTER, 
+                                        spacing: { after: 0, before: 200 },
+                                        children: [
+                                            new ImageRun({
+                                                data: oriaSignatureImageData.data, 
+                                                transformation: {
+                                                    width: 150,
+                                                    height: 50,
+                                                },
+                                            }),
+                                        ],
+                                    }),
+                                ] : [
+                                    new Paragraph({ text: " ", spacing: { after: 100, before: 100 } }) 
+                                ]),
+
+                                new Paragraph({ // Signature Line (Text)
+                                    alignment: AlignmentType.CENTER,
+                                    spacing: { after: 0, before: 0 },
+                                    children: [
+                                        new TextRun({ text: "ORIA M. BAÑAGALE", bold: true }),
+                                        new TextRun({ break: 1, text: "LICENSING OFFICER IV CHIEF, BPLO", size: 16 }),
+                                    ],
                                 }),
-                                new Paragraph({ // Signature Line
-                                    alignment: AlignmentType.RIGHT,
+                            ],
+                            borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
+                        }),
+                        // --- Right Cell: Mayor's Signature ---
+                        new TableCell({
+                            width: { size: 50, type: WidthType.PERCENTAGE },
+                            children: [
+                                // Mayor signature image
+                                ...(eSignatureImageData ? [
+                                    new Paragraph({
+                                        alignment: AlignmentType.CENTER, 
+                                        spacing: { after: 0, before: 200 },
+                                        children: [
+                                            new ImageRun({
+                                                data: eSignatureImageData.data,
+                                                transformation: {
+                                                    width: 150,
+                                                    height: 50,
+                                                },
+                                            }),
+                                        ],
+                                    }),
+                                ] : [
+                                    new Paragraph({ text: " ", spacing: { after: 100, before: 100 } }) 
+                                ]),
+
+                                new Paragraph({ // Signature Line (Text)
+                                    alignment: AlignmentType.CENTER, 
+                                    spacing: { after: 0, before: 0 },
                                     children: [
                                         new TextRun({ text: "HON. ARCADIO B. GAPANGADA JR., MNSA", bold: true }),
-                                        new TextRun({ text: "CITY MAYOR", break: 1, size: 16 }),
+                                        new TextRun({ break: 1, text: "CITY MAYOR", size: 16 }),
                                     ],
+                                        
                                 }),
                             ],
                             borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
@@ -382,7 +438,7 @@ function BusinessTaxDocxExport({
                             children: [new Paragraph({ text: " " })],
                             shading: { fill: DARK_GREEN },
                             borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
-                            height: { value: 200, rule: 'exact' } // Small fixed height
+                            height: { value: 200, rule: 'exact' } 
                         }),
                     ]
                 }),
@@ -392,10 +448,10 @@ function BusinessTaxDocxExport({
                         new TableCell({
                             children: [
                                 topHeaderTable,
-                                mayorPermitBanner,
+                                mayorPermitBanner, // The fixed banner
                                 new Paragraph({
                                     text: `Pursuant to City Ordinance No. 2012-40, s. of 2012, also known as the "2012 Revenue Code of the City of San Pablo", as amended, BUSINESS LICENSE and MAYOR'S PERMIT is hereby granted to:`,
-                                    alignment: AlignmentType.JUSTIFIED,
+                                    alignment: AlignmentType.LEFT,
                                     spacing: { before: 200, after: 200 },
                                     children: [
                                         new TextRun({ break: 1, text: `BUSINESS ID: ${applicant?.BIN || "___________"}`, bold: true }),
@@ -409,7 +465,7 @@ function BusinessTaxDocxExport({
 
                                 collectionTable,
 
-                                mayorSignatureBlock,
+                                signatureBlock, // Contains the dual signature block now
 
                                 new Paragraph({ // Important Footer Text
                                     spacing: { before: 200, after: 200 },
@@ -483,7 +539,6 @@ function BusinessTaxDocxExport({
 
         const doc = new Document({
             // Set document page margins to zero or very small to allow the border table to take up maximum space
-            // Note: docx.js may not respect zero margins precisely, but this helps.
             sections: [{
                 properties: {
                     page: {
