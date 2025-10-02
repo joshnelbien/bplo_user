@@ -21,6 +21,7 @@ const UserAccounts = sequelize.define("UserAccounts", {
   tel: { type: DataTypes.STRING },
   mobile: { type: DataTypes.STRING, allowNull: false },
   application_type: { type: DataTypes.STRING },
+  BIN: { type: DataTypes.STRING },
 });
 
 module.exports = UserAccounts;

@@ -89,6 +89,7 @@ router.post("/register", async (req, res) => {
 router.post("/register-renew", async (req, res) => {
   try {
     const {
+      BIN,
       firstName,
       middleName,
       lastName,
@@ -113,6 +114,7 @@ router.post("/register-renew", async (req, res) => {
 
     // create user
     const user = await UserAccounts.create({
+      BIN,
       firstName,
       middleName: middleName || null,
       lastName,
@@ -137,7 +139,7 @@ router.post("/register-renew", async (req, res) => {
         <p>Hello <b>${firstName} ${lastName}</b>,</p>
         <p>You can now proceed to your renewal application</p>
         <p>Just Click the link below and Proceed to Renew Business Application</p>
-        <a href="${API}/homePage/${user.id}">
+        <a href="${API}/homePage/${user.BIN}">
           View Application
         </a>
         <br/><br/>

@@ -50,6 +50,7 @@ export default function RenewalFormStepper() {
 
       // 📝 Prepare clean payload (map fields to backend)
       const payload = {
+        BIN: formData.BIN,
         firstName: formData.firstName,
         middleName: formData.middleName,
         lastName: formData.lastName,

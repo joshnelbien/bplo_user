@@ -141,6 +141,23 @@ const HomePage = () => {
         >
           New Business Application
         </Button>
+
+        <Button
+          variant="contained"
+          onClick={() => navigate(`/renewPage/${id}`)}
+          sx={{
+            mt: 2,
+            px: 4,
+            py: 1.5,
+            width: 250,
+            height: 50,
+            fontSize: "1rem",
+            bgcolor: "#2E8B57",
+            "&:hover": { bgcolor: "#246b44" },
+          }}
+        >
+          Renew Business Application
+        </Button>
       </Box>
     </Box>
   );

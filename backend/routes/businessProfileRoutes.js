@@ -41,6 +41,21 @@ router.get("/businessProfiles", async (req, res) => {
   }
 });
 
+router.get("/:BIN", async (req, res) => {
+  try {
+    const user = await BusinessProfile.findOne({
+      where: { BIN: req.params.BIN },
+    });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (err) {
+    console.error("🔥 Error fetching user:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 router.get("/businessProfiles/export", async (req, res) => {
   try {
     const files = await BusinessProfile.findAll({});
