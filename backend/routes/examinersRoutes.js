@@ -232,7 +232,6 @@ router.get("/examiners/:id/:key", async (req, res) => {
   }
 });
 
-// Download file
 router.get("/examiners/:id/:key/download", async (req, res) => {
   try {
     const { id, key } = req.params;

@@ -10,7 +10,6 @@ const Examiners = sequelize.define(
     },
     BIN: {
       type: DataTypes.STRING,
-      unique: true,
     },
     userId: DataTypes.UUID,
     BusinessType: DataTypes.STRING,

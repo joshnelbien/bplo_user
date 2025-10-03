@@ -331,6 +331,157 @@ function ApplicantModal({ applicant, isOpen, onClose, baseUrl }) {
             baseUrl={baseUrl}
           />
         </Section>
+
+        <Section title="Backroom">
+          <Stack spacing={2}>
+            {/* ✅ Zoning */}
+            {applicant.ZONING !== "Pending" && (
+              <Paper
+                elevation={2}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                  Zoning
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <Field label="Zoning Fee" value={applicant.zoningFee} />
+                  <FileField
+                    fileKey="zoningCert"
+                    label="Zoning Certificate"
+                    fileData={applicant}
+                    baseUrl={baseUrl}
+                    fullWidth
+                  />
+                </Grid>
+              </Paper>
+            )}
+
+            {/* ✅ OBO */}
+            {applicant.OBO !== "Pending" && (
+              <Paper
+                elevation={2}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                  OBO
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <Field
+                    label="Building Structure Architectural Presentability"
+                    value={applicant.BSAP}
+                  />
+                  <Field label="Sanitary Requirements" value={applicant.SR} />
+                  <Field label="Mechanical" value={applicant.Mechanical} />
+                  <Field label="Electrical" value={applicant.Electrical} />
+                  <Field label="Signage" value={applicant.Signage} />
+                  <Field label="Electronics" value={applicant.Electronics} />
+                </Grid>
+              </Paper>
+            )}
+
+            {/* ✅ CHO */}
+            {applicant.CHO !== "Pending" && (
+              <Paper
+                elevation={2}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                  CHO
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <Field label="Sanitary Fee" value={applicant.choFee} />
+                  <FileField
+                    fileKey="choCert"
+                    label="CHO Certificate"
+                    fileData={applicant}
+                    baseUrl={baseUrl}
+                  />
+                </Grid>
+              </Paper>
+            )}
+
+            {/* ✅ CSWMO */}
+            {applicant.CSMWO !== "Pending" && (
+              <Paper
+                elevation={2}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                  CSWMO
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <Field label="Solid Waste Fee" value={applicant.csmwoFee} />
+
+                  <FileField
+                    fileKey="cswmoCert"
+                    label="Cenro Certificate"
+                    fileData={applicant}
+                    baseUrl={baseUrl}
+                  />
+                </Grid>
+              </Paper>
+            )}
+
+            {/* ✅ CENRO */}
+            {applicant.CENRO !== "Pending" && (
+              <Paper
+                elevation={2}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  backgroundColor: "#f9f9f9",
+                }}
+              >
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                  CENRO
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <Field label="Environment Fee" value={applicant.cenroFee} />
+                  <FileField
+                    fileKey="cenroCert"
+                    label="Cenro Certificate"
+                    fileData={applicant}
+                    baseUrl={baseUrl}
+                  />
+                </Grid>
+
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                  BUSINESS TAX
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <FileField
+                    fileKey="businesstaxComputation"
+                    label="Business Tax"
+                    fileData={applicant}
+                    baseUrl={baseUrl}
+                  />
+                </Grid>
+              </Paper>
+            )}
+          </Stack>
+        </Section>
       </DialogContent>
     </Dialog>
   );

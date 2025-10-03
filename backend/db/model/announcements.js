@@ -23,8 +23,9 @@ const Announcements = sequelize.define("Announcements", {
     type: DataTypes.DATEONLY,
     allowNull: false,
   },
-  attachedImageBlob: { // Reverted to attachedImageBlob with BLOB
-    type: DataTypes.BLOB('long'),
+  attachedImageBlob: {
+    // Reverted to attachedImageBlob with BLOB
+    type: DataTypes.BLOB("long"),
     allowNull: true,
   },
 });

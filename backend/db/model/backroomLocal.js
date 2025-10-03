@@ -12,7 +12,6 @@ const Backroom = sequelize.define(
     BIN: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
     BusinessType: DataTypes.STRING,
     dscRegNo: DataTypes.STRING,
