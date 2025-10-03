@@ -139,7 +139,7 @@ router.post("/register-renew", async (req, res) => {
         <p>Hello <b>${firstName} ${lastName}</b>,</p>
         <p>You can now proceed to your renewal application</p>
         <p>Just Click the link below and Proceed to Renew Business Application</p>
-        <a href="${API}/homePage/${user.BIN}">
+        <a href="${API}/homePage/${user.id}/${user.BIN}">
           View Application
         </a>
         <br/><br/>

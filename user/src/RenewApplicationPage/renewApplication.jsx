@@ -149,16 +149,23 @@ function RenewApplicationPage() {
   }, [step]); // Trigger on step change
 
   useEffect(() => {
-    if (!BIN) return; // ✅ avoid calling API with undefined BIN
+    if (!BIN) return; // ✅ Prevent API call if BIN is not set
 
     const fetchUserData = async () => {
       try {
         const res = await axios.get(`${API}/businessProfile/${BIN}`);
         const userData = res.data;
-        console.log("✅ fetched user data:", userData);
+        console.log("✅ Fetched user data:", userData);
+        console.log("📌 raw businessLines:", userData.lineOfBusiness);
+        console.log("📌 raw businessLines:", userData.productService);
+        console.log("📌 raw businessLines:", userData.Units);
+        console.log("📌 raw businessLines:", userData.capital);
 
+        // 📝 Populate all form fields by step
         setFormDataState((prev) => ({
           ...prev,
+
+          // 📝 Step 1 - Business Profile
           BIN: userData.BIN || prev.BIN,
           BusinessType: userData.BusinessType || prev.BusinessType,
           dscRegNo: userData.dscRegNo || prev.dscRegNo,
@@ -173,9 +180,77 @@ function RenewApplicationPage() {
           eMailAdd: userData.eMailAdd || prev.eMailAdd,
           telNo: userData.telNo || prev.telNo,
           mobileNo: userData.mobileNo || prev.mobileNo,
+
+          // 🧭 Step 3 - Business Address
+          region: userData.region || prev.region || "",
+          province: userData.province || prev.province || "",
+          cityOrMunicipality:
+            userData.cityOrMunicipality || prev.cityOrMunicipality || "",
+          barangay: userData.barangay || prev.barangay || "",
+          addressLine1: userData.addressLine1 || prev.addressLine1 || "",
+          zipCode: userData.zipCode || prev.zipCode || "",
+
+          // 🏡 Step 4 - Taxpayer Address
+          Taxregion: userData.region || prev.region || "",
+          Taxprovince: userData.province || prev.province || "",
+          TaxcityOrMunicipality:
+            userData.cityOrMunicipality || prev.cityOrMunicipality || "",
+          Taxbarangay: userData.barangay || prev.barangay || "",
+          TaxaddressLine1: userData.addressLine1 || prev.addressLine1 || "",
+          TaxzipCode: userData.zipCode || prev.zipCode || "",
+
+          // 📎 Step 4 - Business Documents
+          proofOfReg: userData.proofOfReg || prev.proofOfReg || "",
+          proofOfRightToUseLoc:
+            userData.proofOfRightToUseLoc || prev.proofOfRightToUseLoc || "",
+          locationPlan: userData.locationPlan || prev.locationPlan || "",
+
+          // 🟩 Step 5 - Business Details
+          totalFloorArea: userData.totalFloorArea || prev.totalFloorArea || "",
+          maleEmployee: userData.maleEmployee || prev.maleEmployee || "",
+          femaleEmployee: userData.femaleEmployee || prev.femaleEmployee || "",
+          numberOfEmployee:
+            userData.numberOfEmployee || prev.numberOfEmployee || "",
+          totalDeliveryVehicle:
+            userData.totalDeliveryVehicle || prev.totalDeliveryVehicle || "",
+          numNozzle: userData.numNozzle || prev.numNozzle || "",
+          weighScale: userData.weighScale || prev.weighScale || "",
+
+          // 📝 Step 5 - Document Files (auto-display)
+          cedula: userData.cedula || prev.cedula || "",
+          photoOfBusinessEstInt:
+            userData.photoOfBusinessEstInt || prev.photoOfBusinessEstInt || "",
+          photoOfBusinessEstExt:
+            userData.photoOfBusinessEstExt || prev.photoOfBusinessEstExt || "",
+
+          // 🟦 Step 6 - Business Activity
+          tIGE: userData.tIGE || prev.tIGE || "",
+          tIGEfiles: userData.tIGEfiles || prev.tIGEfiles || "",
+          officeType: userData.officeType || prev.officeType || "",
+          officeTypeOther:
+            userData.officeTypeOther || prev.officeTypeOther || "",
+          totalCapital: userData.totalCapital || prev.totalCapital || 0,
         }));
+
+        // 🟦 Step 6 - Business Lines (array handled separately)
+        if (userData.lineOfBusiness) {
+          const lobArray = userData.lineOfBusiness.trim().split(",");
+          const productArray = userData.productService?.trim().split(",") || [];
+          const unitsArray = userData.Units?.trim().split(",") || [];
+          const capitalArray = userData.capital?.trim().split(",") || [];
+
+          const combinedBusinessLines = lobArray.map((lob, i) => ({
+            lineOfBusiness: lob.trim(),
+            productService: productArray[i]?.trim() || "",
+            Units: unitsArray[i]?.trim() || "",
+            capital: capitalArray[i]?.trim() || "",
+          }));
+
+          setBusinessLines(combinedBusinessLines);
+          console.log("✅ Combined business lines:", combinedBusinessLines);
+        }
       } catch (err) {
-        console.error("❌ Failed to fetch user data:", err);
+        console.error("❌ Failed to fetch business profile:", err);
       }
     };
 
@@ -354,6 +429,7 @@ function RenewApplicationPage() {
     setIsSubmitting(true);
 
     const formData = new FormData();
+    formData.append("userId", id);
 
     if (businessLines.length > 0) {
       formData.append(

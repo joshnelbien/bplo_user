@@ -18,16 +18,16 @@ function App() {
         <Route path="/" element={<Main />} />
         <Route path="/loginPage" element={<LoginPage />} />
         <Route path="/homePage/:id" element={<HomePage />} />
-        <Route path="/homePage/:BIN" element={<HomePage />} />
+        <Route path="/homePage/:id/:BIN" element={<HomePage />} />
         <Route
           path="/newApplicationPage/:id"
           element={<NewApplicationPage />}
         />
         <Route path="/renew" element={<Renew />} />
-        <Route path="/renewPage/:BIN" element={<RenewApplicationPage />} />
+        <Route path="/renewPage/:id/:BIN" element={<RenewApplicationPage />} />
 
         <Route path="/registerPage" element={<RegisterPage />} />
-        <Route path="/appTracker/:" element={<AppTracker />} />
+        <Route path="/appTracker/:id" element={<AppTracker />} />
         <Route path="/renewal-form/step1" element={<RenewalFormStepper />} />
         <Route
           path="/newApplicationRegister"

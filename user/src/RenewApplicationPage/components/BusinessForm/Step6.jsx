@@ -152,8 +152,12 @@ export default function Step6BusinessActivity({
   }, [businessLines]);
 
   useEffect(() => {
-    handleChange({ target: { name: "totalCapital", value: totalCapital } });
-  }, [totalCapital, handleChange]);
+    if (formData.totalCapital !== totalCapital) {
+      handleChange({
+        target: { name: "totalCapital", value: totalCapital },
+      });
+    }
+  }, [totalCapital]);
 
   return (
     <div style={{ marginBottom: 20 }}>

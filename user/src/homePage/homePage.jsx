@@ -16,6 +16,7 @@ import { useState, useRef } from "react";
 
 const HomePage = () => {
   const { id } = useParams();
+  const { BIN } = useParams();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [openFilter, setOpenFilter] = useState(false);
@@ -144,7 +145,7 @@ const HomePage = () => {
 
         <Button
           variant="contained"
-          onClick={() => navigate(`/renewPage/${id}`)}
+          onClick={() => navigate(`/renewPage/${id}/${BIN}`)}
           sx={{
             mt: 2,
             px: 4,

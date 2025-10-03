@@ -272,6 +272,9 @@ function New_records() {
                 <TableCell>
                   <strong>Last Name</strong>
                 </TableCell>
+                <TableCell>
+                  <strong>Application Type</strong>
+                </TableCell>
                 {filter === "approved" && (
                   <>
                     <TableCell>
@@ -312,6 +315,7 @@ function New_records() {
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
+                  <TableCell>{applicant.application}</TableCell>
 
                   {filter === "approved" && (
                     <>
