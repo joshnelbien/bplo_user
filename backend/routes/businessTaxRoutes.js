@@ -81,6 +81,13 @@ router.post(
 
       await applicantbusinessTax.update({
         passtoBusinessTax: "Yes",
+        BUSINESSTAXtimeStamp: timestamp,
+        ...(file && {
+          businesstaxComputation: file.buffer,
+          businesstaxComputation_filename: file.originalname,
+          businesstaxComputation_mimetype: file.mimetype,
+          businesstaxComputation_size: file.size,
+        }),
       });
 
       await applicantBackroom.update({
