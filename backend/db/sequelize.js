@@ -1,4 +1,4 @@
-// supabase db connection
+//supabase db connection
 
 const { Sequelize } = require("sequelize");
 
