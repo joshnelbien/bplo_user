@@ -22,8 +22,8 @@ router.post("/register", async (req, res) => {
       lastName,
       extName,
       sex,
-      email, // frontend field
-      mobileNo, // frontend field
+      email,
+      mobileNo,
       BusinessType,
       dscRegNo,
       businessName,
@@ -32,21 +32,21 @@ router.post("/register", async (req, res) => {
       telNo,
     } = req.body;
 
-    // validate required fields
+    // ✅ Validate required fields
     if (!lastName || !firstName || !email || !mobileNo) {
       return res
         .status(400)
         .json({ error: "All required fields must be filled" });
     }
 
-    // create user
+    // ✅ Insert user into database
     const user = await UserAccounts.create({
       firstName,
       middleName: middleName || null,
       lastName,
       extName: extName || null,
       sex,
-      email: email,
+      email,
       tel: telNo || null,
       mobile: mobileNo,
       business_type: BusinessType || null,
@@ -57,16 +57,23 @@ router.post("/register", async (req, res) => {
       application_type: "New",
     });
 
-    // ✅ send confirmation email
+    console.log("✅ User inserted:", user.id);
+
+    res.status(200).json({
+      message: "User registered successfully",
+      user,
+    });
+
+    // 📧 Send confirmation email in background (non-blocking)
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
       subject: "New Business Application",
       html: `
         <p>Hello <b>${firstName} ${lastName}</b>,</p>
-        <p>You can now proceed to your New Business application</p>
-        <p>Just Click the link below and Proceed to New Business Application</p>
-        <a href="http:localhost:5173/newApplicationPage/${user.id}">
+        <p>You can now proceed to your New Business application.</p>
+        <p>Just click the link below to continue:</p>
+        <a href="${process.env.VITE_API_BASE}/newApplicationPage/${user.id}">
           View Application
         </a>
         <br/><br/>
@@ -74,12 +81,10 @@ router.post("/register", async (req, res) => {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
-
-    res.status(200).json({
-      message: "User registered successfully, email sent",
-      user,
-    });
+    transporter
+      .sendMail(mailOptions)
+      .then(() => console.log(`📧 Email sent successfully to ${email}`))
+      .catch((err) => console.error("❌ Email send error:", err));
   } catch (error) {
     console.error("❌ Register error:", error);
     res.status(500).json({ error: "Server error" });
