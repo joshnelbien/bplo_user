@@ -13,14 +13,16 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 async function sendEmail(to, subject, html) {
   const msg = {
     to,
-    from: process.env.SENDGRID_FROM,
+    from: process.env.SENDGRID_FROM, // MUST be a verified sender
     subject,
     html,
   };
 
   try {
-    await sgMail.send(msg);
-    console.log(`📧 Email sent successfully to ${to}`);
+    const [response] = await sgMail.send(msg); // Get SendGrid response
+    console.log(`📧 Email request sent to SendGrid for ${to}`);
+    console.log(`Status Code: ${response.statusCode}`);
+    console.log("Headers:", response.headers);
   } catch (err) {
     console.error("❌ SendGrid email error (non-blocking):", err);
   }
