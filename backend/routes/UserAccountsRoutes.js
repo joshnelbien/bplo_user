@@ -2,18 +2,35 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const UserAccounts = require("../db/model/userAccounts");
-const { sendTestEmail } = require("../routes/test");
+
 const router = express.Router();
 
-// ✅ setup nodemailer
+/* ---------------------------------------------------
+ ✅ Nodemailer Transporter (Gmail SMTP)
+--------------------------------------------------- */
 const transporter = nodemailer.createTransport({
-  service: "gmail", // or use "smtp" if you have another provider
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: Number(process.env.SMTP_PORT) === 465, // true if using SSL
   auth: {
-    user: process.env.EMAIL_USER, // your Gmail or SMTP email
-    pass: process.env.EMAIL_PASS, // your Gmail App Password
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
+  connectionTimeout: 20000,
 });
 
+// Test SMTP connection on server start
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("❌ SMTP connection failed at startup:", error);
+  } else {
+    console.log("✅ SMTP server is ready to send emails");
+  }
+});
+
+/* ---------------------------------------------------
+ 📌 REGISTER — Create user and send confirmation email
+--------------------------------------------------- */
 router.post("/register", async (req, res) => {
   try {
     const {
@@ -32,14 +49,14 @@ router.post("/register", async (req, res) => {
       telNo,
     } = req.body;
 
-    // ✅ Validate required fields
+    // ✅ Required fields validation
     if (!lastName || !firstName || !email || !mobileNo) {
       return res
         .status(400)
-        .json({ error: "All required fields must be filled" });
+        .json({ error: "All required fields must be filled." });
     }
 
-    // ✅ Insert user into database
+    // ✅ Insert new user into DB
     const user = await UserAccounts.create({
       firstName,
       middleName: middleName || null,
@@ -59,14 +76,15 @@ router.post("/register", async (req, res) => {
 
     console.log("✅ User inserted:", user.id);
 
+    // ✅ Send success response to client first
     res.status(200).json({
       message: "User registered successfully",
       user,
     });
 
-    // 📧 Send confirmation email in background (non-blocking)
+    // 📧 Prepare email
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: `"Business Portal" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "New Business Application",
       html: `
@@ -81,37 +99,52 @@ router.post("/register", async (req, res) => {
       `,
     };
 
+    // 📤 Send email asynchronously
     transporter
       .sendMail(mailOptions)
       .then(() => console.log(`📧 Email sent successfully to ${email}`))
       .catch((err) => console.error("❌ Email send error:", err));
   } catch (error) {
     console.error("❌ Register error:", error);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Server error during registration." });
   }
 });
 
-// LOGIN
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Find user by email
     const user = await UserAccounts.findOne({ where: { email } });
     if (!user) {
-      return res.status(400).json({ error: "User not found" });
+      return res.status(400).json({ error: "User not found." });
     }
 
+    // Check password
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(400).json({ error: "Invalid password" });
+      return res.status(400).json({ error: "Invalid password." });
     }
+
+    // ✅ Successful login
+    res.status(200).json({
+      message: "Login successful",
+      user: {
+        id: user.id,
+        firstname: user.firstName,
+        lastname: user.lastName,
+        email: user.email,
+      },
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Server error" });
+    console.error("❌ Login error:", error);
+    res.status(500).json({ error: "Server error during login." });
   }
 });
 
-// /me
+/* ---------------------------------------------------
+ 👤 GET USER PROFILE — /:id
+--------------------------------------------------- */
 router.get("/:id", async (req, res) => {
   try {
     const user = await UserAccounts.findByPk(req.params.id, {
@@ -119,13 +152,13 @@ router.get("/:id", async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: "User not found." });
     }
 
     res.json(user);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Server error" });
+    console.error("❌ Get user error:", error);
+    res.status(500).json({ error: "Server error." });
   }
 });
 
