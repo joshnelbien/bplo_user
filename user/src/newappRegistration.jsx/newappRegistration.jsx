@@ -213,37 +213,71 @@ function NewApplicationRegisterPage() {
     });
   };
 
+  // const handleSubmit = async () => {
+  //   console.log("📤 Testing email send...");
+
+  //   setIsSubmitting(true);
+
+  //   try {
+  //     console.log("🌐 API URL:", API);
+
+  //     // 👇 Just trigger the backend email test route
+  //     const response = await axios.post(
+  //       `${API}/userAccounts/register`,
+  //       {}, // no formData needed if it's just a test
+  //       { headers: { "Content-Type": "application/json" } }
+  //     );
+
+  //     console.log("📡 Response status:", response.status);
+  //     console.log("📝 Server Response:", response.data);
+
+  //     setSnackbarState({
+  //       open: true,
+  //       message: "✅ Test email sent successfully!",
+  //       severity: "success",
+  //     });
+  //   } catch (err) {
+  //     console.error("❌ Email test failed:", err);
+  //     setSnackbarState({
+  //       open: true,
+  //       message: err.response?.data?.error || "❌ Failed to send test email.",
+  //       severity: "error",
+  //     });
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
   const handleSubmit = async () => {
-    console.log("📤 Testing email send...");
+    console.log("Submitting formDataState:", formDataState);
+    if (!validateStep()) {
+      setSnackbarState({
+        open: true,
+        message: "Please complete all required fields",
+        severity: "error",
+      });
+      return;
+    }
 
     setIsSubmitting(true);
 
     try {
-      console.log("🌐 API URL:", API);
-
-      // 👇 Just trigger the backend email test route
-      const response = await axios.post(
-        `${API}/userAccounts/register`,
-        {}, // no formData needed if it's just a test
-        { headers: { "Content-Type": "application/json" } }
-      );
-
-      console.log("📡 Response status:", response.status);
-      console.log("📝 Server Response:", response.data);
-
-      setSnackbarState({
-        open: true,
-        message: "✅ Test email sent successfully!",
-        severity: "success",
+      await axios.post(`${API}/userAccounts/register`, formDataState, {
+        headers: { "Content-Type": "application/json" },
       });
+
+      localStorage.removeItem("formDataState");
+      localStorage.removeItem("filesState");
+      localStorage.removeItem("businessLines");
+      localStorage.removeItem("formStep");
+      setTimeout(() => navigate(`/`), 2000);
     } catch (err) {
-      console.error("❌ Email test failed:", err);
+      console.error(err);
       setSnackbarState({
         open: true,
-        message: err.response?.data?.error || "❌ Failed to send test email.",
+        message: "Submission failed. Please try again.",
         severity: "error",
       });
-    } finally {
       setIsSubmitting(false);
     }
   };

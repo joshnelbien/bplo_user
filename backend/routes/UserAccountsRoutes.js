@@ -15,19 +15,74 @@ const transporter = nodemailer.createTransport({
 });
 
 router.post("/register", async (req, res) => {
-  console.log("📩 Received test request for email");
-
   try {
-    const emailSent = await sendTestEmail("pilaresjoshuel@gmail.com");
+    const {
+      firstName,
+      middleName,
+      lastName,
+      extName,
+      sex,
+      email, // frontend field
+      mobileNo, // frontend field
+      BusinessType,
+      dscRegNo,
+      businessName,
+      tinNo,
+      TradeName,
+      telNo,
+    } = req.body;
 
-    if (!emailSent) {
-      return res.status(500).json({ error: "❌ Failed to send test email" });
+    // validate required fields
+    if (!lastName || !firstName || !email || !mobileNo) {
+      return res
+        .status(400)
+        .json({ error: "All required fields must be filled" });
     }
 
-    return res.status(200).json({ message: "✅ Test email sent successfully" });
+    // create user
+    const user = await UserAccounts.create({
+      firstName,
+      middleName: middleName || null,
+      lastName,
+      extName: extName || null,
+      sex,
+      email: email,
+      tel: telNo || null,
+      mobile: mobileNo,
+      business_type: BusinessType || null,
+      dsc_reg_no: dscRegNo || null,
+      business_name: businessName || null,
+      tin_no: tinNo || null,
+      trade_name: TradeName || null,
+      application_type: "New",
+    });
+
+    // ✅ send confirmation email
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "New Business Application",
+      html: `
+        <p>Hello <b>${firstName} ${lastName}</b>,</p>
+        <p>You can now proceed to your New Business application</p>
+        <p>Just Click the link below and Proceed to New Business Application</p>
+        <a href="http:localhost:5173/newApplicationPage/${user.id}">
+          View Application
+        </a>
+        <br/><br/>
+        <p>Best regards,<br/>Business Portal</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({
+      message: "User registered successfully, email sent",
+      user,
+    });
   } catch (error) {
-    console.error("❌ Email send error:", error);
-    return res.status(500).json({ error: "❌ Server error during email test" });
+    console.error("❌ Register error:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
