@@ -36,7 +36,9 @@ const BusinessProfile = require("./db/model/businessProfileDB");
 const businessProfileRoutes = require("./routes/businessProfileRoutes");
 
 const app = express();
-app.use(cors());
+
+app.use(cors({ origin: "*" }));
+
 app.use(express.json({ limit: "50mb" }));
 
 app.get("/api/health", (_, res) => res.json({ ok: true }));
@@ -272,15 +274,25 @@ function watchFSICFile() {
     await sequelize.authenticate();
     console.log(" Database connected");
 
-    await Examiners.sync({ alter: true });
-    await File.sync({ alter: true });
-    await Backroom.sync({ alter: true });
-    await UserAccounts.sync({ alter: true });
-    await Announcements.sync({ alter: true });
-    await BusinessTax.sync({ alter: true });
-    await AppStatus.sync({ alter: true });
-    await TreasurersOffice.sync({ alter: true });
-    await BusinessProfile.sync({ alter: true });
+    await Examiners.sync();
+    await File.sync();
+    await Backroom.sync();
+    await UserAccounts.sync();
+    await Announcements.sync();
+    await BusinessTax.sync();
+    await AppStatus.sync();
+    await TreasurersOffice.sync();
+    await BusinessProfile.sync();
+
+    // await Examiners.sync({ alter: true });
+    // await File.sync({ alter: true });
+    // await Backroom.sync({ alter: true });
+    // await UserAccounts.sync({ alter: true });
+    // await Announcements.sync({ alter: true });
+    // await BusinessTax.sync({ alter: true });
+    // await AppStatus.sync({ alter: true });
+    // await TreasurersOffice.sync({ alter: true });
+    // await BusinessProfile.sync({ alter: true });
 
     await importFSICData();
 

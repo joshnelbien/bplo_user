@@ -214,37 +214,36 @@ function NewApplicationRegisterPage() {
   };
 
   const handleSubmit = async () => {
-    console.log("Submitting formDataState:", formDataState);
-    if (!validateStep()) {
-      setSnackbarState({
-        open: true,
-        message: "Please complete all required fields",
-        severity: "error",
-      });
-      return;
-    }
+    console.log("📤 Testing email send...");
 
     setIsSubmitting(true);
 
     try {
-      await axios.post(`${API}/userAccounts/register`, formDataState, {
-        headers: { "Content-Type": "application/json" },
-      });
+      console.log("🌐 API URL:", API);
 
-      localStorage.removeItem("formDataState");
-      localStorage.removeItem("filesState");
-      localStorage.removeItem("businessLines");
-      localStorage.removeItem("formStep");
+      // 👇 Just trigger the backend email test route
+      const response = await axios.post(
+        `${API}/userAccounts/register`,
+        {}, // no formData needed if it's just a test
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-      setSuccessDialogOpen(true);
-      setTimeout(() => navigate(`/`), 2000);
-    } catch (err) {
-      console.error(err);
+      console.log("📡 Response status:", response.status);
+      console.log("📝 Server Response:", response.data);
+
       setSnackbarState({
         open: true,
-        message: "Submission failed. Please try again.",
+        message: "✅ Test email sent successfully!",
+        severity: "success",
+      });
+    } catch (err) {
+      console.error("❌ Email test failed:", err);
+      setSnackbarState({
+        open: true,
+        message: err.response?.data?.error || "❌ Failed to send test email.",
         severity: "error",
       });
+    } finally {
       setIsSubmitting(false);
     }
   };

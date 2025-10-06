@@ -2,9 +2,9 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const UserAccounts = require("../db/model/userAccounts");
-
+const { sendTestEmail } = require("../routes/test");
 const router = express.Router();
-const API = process.env.VITE_API_BASE;
+
 // ✅ setup nodemailer
 const transporter = nodemailer.createTransport({
   service: "gmail", // or use "smtp" if you have another provider
@@ -15,147 +15,19 @@ const transporter = nodemailer.createTransport({
 });
 
 router.post("/register", async (req, res) => {
-  try {
-    const {
-      firstName,
-      middleName,
-      lastName,
-      extName,
-      sex,
-      email, // frontend field
-      mobileNo, // frontend field
-      BusinessType,
-      dscRegNo,
-      businessName,
-      tinNo,
-      TradeName,
-      telNo,
-    } = req.body;
+  console.log("📩 Received test request for email");
 
-    // validate required fields
-    if (!lastName || !firstName || !email || !mobileNo) {
-      return res
-        .status(400)
-        .json({ error: "All required fields must be filled" });
+  try {
+    const emailSent = await sendTestEmail("pilaresjoshuel@gmail.com");
+
+    if (!emailSent) {
+      return res.status(500).json({ error: "❌ Failed to send test email" });
     }
 
-    // create user
-    const user = await UserAccounts.create({
-      firstName,
-      middleName: middleName || null,
-      lastName,
-      extName: extName || null,
-      sex,
-      email: email,
-      tel: telNo || null,
-      mobile: mobileNo,
-      business_type: BusinessType || null,
-      dsc_reg_no: dscRegNo || null,
-      business_name: businessName || null,
-      tin_no: tinNo || null,
-      trade_name: TradeName || null,
-      application_type: "New",
-    });
-
-    // ✅ send confirmation email
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "New Business Application",
-      html: `
-        <p>Hello <b>${firstName} ${lastName}</b>,</p>
-        <p>You can now proceed to your New Business application</p>
-        <p>Just Click the link below and Proceed to New Business Application</p>
-        <a href="${API}/newApplicationPage/${user.id}">
-          View Application
-        </a>
-        <br/><br/>
-        <p>Best regards,<br/>Business Portal</p>
-      `,
-    };
-
-    await transporter.sendMail(mailOptions);
-
-    res.status(201).json({
-      message: "User registered successfully, email sent",
-      user,
-    });
+    return res.status(200).json({ message: "✅ Test email sent successfully" });
   } catch (error) {
-    console.error("❌ Register error:", error);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-router.post("/register-renew", async (req, res) => {
-  try {
-    const {
-      BIN,
-      firstName,
-      middleName,
-      lastName,
-      extName,
-      sex,
-      email, // frontend field
-      mobileNo, // frontend field`
-      BusinessType,
-      dscRegNo,
-      businessName,
-      tinNo,
-      TradeName,
-      telNo,
-    } = req.body;
-
-    // validate required fields
-    if (!lastName || !firstName || !email || !mobileNo) {
-      return res
-        .status(400)
-        .json({ error: "All required fields must be filled" });
-    }
-
-    // create user
-    const user = await UserAccounts.create({
-      BIN,
-      firstName,
-      middleName: middleName || null,
-      lastName,
-      extName: extName || null,
-      sex,
-      email: email,
-      tel: telNo || null,
-      mobile: mobileNo,
-      business_type: BusinessType || null,
-      dsc_reg_no: dscRegNo || null,
-      business_name: businessName || null,
-      tin_no: tinNo || null,
-      trade_name: TradeName || null,
-      application_type: "Renew",
-    });
-
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Business Renewal Application",
-      html: `
-        <p>Hello <b>${firstName} ${lastName}</b>,</p>
-        <p>You can now proceed to your renewal application</p>
-        <p>Just Click the link below and Proceed to Renew Business Application</p>
-        <a href="${API}/homePage/${user.id}/${user.BIN}">
-          View Application
-        </a>
-        <br/><br/>
-        <p>Best regards,<br/>Business Portal</p>
-      `,
-    };
-
-    await transporter.sendMail(mailOptions);
-
-    res.status(201).json({
-      message: "User registered successfully, email sent",
-      user,
-    });
-  } catch (error) {
-    console.error("❌ Register error:", error);
-    res.status(500).json({ error: "Server error" });
+    console.error("❌ Email send error:", error);
+    return res.status(500).json({ error: "❌ Server error during email test" });
   }
 });
 
@@ -183,7 +55,7 @@ router.post("/login", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const user = await UserAccounts.findByPk(req.params.id, {
-      attributes: ["id", "lastName", "firstName", "email", "mobile"],
+      attributes: ["id", "lastname", "firstname", "email", "mobile"],
     });
 
     if (!user) {
