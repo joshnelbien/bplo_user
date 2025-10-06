@@ -1,30 +1,28 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
+const sgTransport = require("nodemailer-sendgrid-transport"); // Add SendGrid transport
 const UserAccounts = require("../db/model/userAccounts");
 
 const router = express.Router();
 
 /* ---------------------------------------------------
- ✅ Nodemailer Transporter (Gmail SMTP)
+ ✅ Nodemailer Transporter (SendGrid)
 --------------------------------------------------- */
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: Number(process.env.SMTP_PORT) === 465, // true if using SSL
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  connectionTimeout: 20000,
-});
+const transporter = nodemailer.createTransport(
+  sgTransport({
+    auth: {
+      api_key: process.env.SENDGRID_API_KEY,
+    },
+  })
+);
 
-// Test SMTP connection on server start
+// Test SendGrid connection on server start
 transporter.verify((error, success) => {
   if (error) {
-    console.error("❌ SMTP connection failed at startup:", error);
+    console.error("❌ SendGrid connection failed at startup:", error);
   } else {
-    console.log("✅ SMTP server is ready to send emails");
+    console.log("✅ SendGrid is ready to send emails");
   }
 });
 
@@ -84,7 +82,7 @@ router.post("/register", async (req, res) => {
 
     // 📧 Prepare email
     const mailOptions = {
-      from: `"Business Portal" <${process.env.EMAIL_USER}>`,
+      from: process.env.SENDGRID_FROM,
       to: email,
       subject: "New Business Application",
       html: `
