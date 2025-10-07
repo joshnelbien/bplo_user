@@ -59,7 +59,10 @@ const BusinessTax = sequelize.define(
 
     officeType: DataTypes.STRING,
     officeTypeOther: DataTypes.STRING,
-    lineOfBusiness: DataTypes.STRING,
+    lineOfBusiness: DataTypes.TEXT,
+    natureCode: DataTypes.STRING,
+    businessNature: DataTypes.STRING,
+    lineCode: DataTypes.STRING,
     productService: DataTypes.STRING,
     Units: DataTypes.STRING,
     capital: DataTypes.STRING,

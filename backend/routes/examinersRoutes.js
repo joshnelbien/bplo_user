@@ -75,6 +75,10 @@ router.post(
 router.post("/bplo/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    const { businessDetails } = req.body; // ✅ receive from frontend
+
+    // 📝 Log the incoming businessDetails to verify payload
+    console.log("📥 Incoming businessDetails:", businessDetails);
 
     const applicant = await File.findByPk(id);
     if (!applicant)
@@ -82,19 +86,38 @@ router.post("/bplo/approve/:id", async (req, res) => {
 
     const applicantStatus = await AppStatus.findByPk(id);
     if (!applicantStatus)
-      return res.status(404).json({ error: "Applicant not found" });
+      return res.status(404).json({ error: "Applicant status not found" });
 
+    // Convert applicant to JSON for Examiners insertion
     const applicantData = applicant.toJSON();
 
     applicantData.BPLO = "Approved";
     applicantData.BPLOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
+    // ✅ Add FSIC fields here (if multiple lines, stringify them)
+    if (businessDetails && businessDetails.length > 0) {
+      applicantData.natureCode = businessDetails
+        .map((b) => b.nature_code)
+        .join(", ");
+      applicantData.businessNature = businessDetails
+        .map((b) => b.business_nature)
+        .join(", ");
+      applicantData.lineCode = businessDetails
+        .map((b) => b.line_code)
+        .join(", ");
+    }
+
+    // ✅ Insert into Examiners table
     const created = await Examiners.create(applicantData);
 
+    // ✅ Update File & Status tables
     await applicant.update({
       BPLO: "Approved",
       BPLOtimeStamp: applicantData.BPLOtimeStamp,
       status: "Approved",
+      natureCode: applicantData.natureCode,
+      businessNature: applicantData.businessNature,
+      lineCode: applicantData.lineCode,
     });
 
     await applicantStatus.update({
@@ -103,14 +126,15 @@ router.post("/bplo/approve/:id", async (req, res) => {
     });
 
     res.status(201).json({
-      message: "Applicant approved, archived in Files, and moved to Examiners",
+      message: "✅ Applicant approved and FSIC details saved",
       created,
     });
   } catch (err) {
-    console.error("Approve error:", err);
+    console.error("❌ Approve error:", err);
     res.status(500).json({ error: "Failed to approve applicant" });
   }
 });
+
 router.post("/examiners/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;

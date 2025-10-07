@@ -4,10 +4,10 @@ import Side_bar from "../SIDE_BAR/side_bar.jsx";
 import ApplicantModal from "./newApp_modal.jsx";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
-import { IconButton, Tooltip, Modal } from "@mui/material";
-import UpdateModal from "./update_modal.jsx";
-
 import {
+  IconButton,
+  Tooltip,
+  Modal,
   Box,
   Button,
   ButtonGroup,
@@ -21,10 +21,10 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-
 import { CheckCircleOutline } from "@mui/icons-material";
+import UpdateModal from "./update_modal.jsx";
 
-// ✅ Confirmation Modal
+/* ✅ Confirmation Modal */
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => (
   <Modal open={isOpen} onClose={onClose}>
     <Box
@@ -56,7 +56,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => (
   </Modal>
 );
 
-// ✅ Success Modal
+/* ✅ Success Modal */
 const SuccessModal = ({ isOpen, onClose, message }) => (
   <Modal open={isOpen} onClose={onClose}>
     <Box
@@ -106,7 +106,7 @@ function New_records() {
 
   const recordsPerPage = 20;
 
-  // ✅ Fetch applicants
+  /* ✅ Fetch applicants */
   const fetchApplicants = async () => {
     try {
       const res = await axios.get(`${API}/newApplication/files`);
@@ -123,7 +123,7 @@ function New_records() {
     fetchApplicants();
   }, [API]);
 
-  // ✅ Filter logic
+  /* ✅ Filter logic */
   const filteredApplicants = applicants.filter((a) => {
     const bploStatus = a.BPLO?.toLowerCase();
     const businessTax = a.passtoBusinessTax === "Yes";
@@ -133,19 +133,17 @@ function New_records() {
     }
 
     if (filter === "approved") {
-      // ✅ Show only approved that have NOT been passed to Business Tax
       return bploStatus === "approved" && !businessTax;
     }
 
     if (filter === "businessTax") {
-      // ✅ Show only those explicitly marked for Business Tax
       return businessTax;
     }
 
     return true;
   });
 
-  // ✅ Pagination
+  /* ✅ Pagination */
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentRecords = filteredApplicants.slice(
@@ -154,25 +152,40 @@ function New_records() {
   );
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
 
-  // ✅ Approve handler
-  const handleApprove = (applicant) => {
-    setConfirmationData(applicant);
+  /* ✅ Approve handler (called from ApplicantModal) */
+  const handleApprove = (applicant, businessDetails) => {
+    console.log("📌 handleApprove() called");
+    console.log("👉 Applicant:", applicant);
+    console.log("👉 Business Details:", businessDetails);
+
+    setConfirmationData({
+      ...applicant,
+      businessDetails, // ✅ Attach business details properly
+    });
     setIsConfirmModalOpen(true);
   };
 
+  /* ✅ Confirm Approval */
   const handleConfirmAction = async () => {
+    console.log(
+      "📥 Incoming confirmationData before submit:",
+      confirmationData
+    );
+
     if (!confirmationData) return;
     try {
-      await axios.post(`${API}/examiners/bplo/approve/${confirmationData.id}`);
+      await axios.post(`${API}/examiners/bplo/approve/${confirmationData.id}`, {
+        businessDetails: confirmationData.businessDetails,
+      });
       setIsConfirmModalOpen(false);
       setIsSuccessModalOpen(true);
-      fetchApplicants(); // refresh list
+      fetchApplicants();
     } catch (error) {
       console.error("❌ Error approving applicant:", error);
     }
   };
 
-  // ✅ Modal handlers
+  /* ✅ Modal handlers */
   const openModal = (applicant) => {
     setSelectedApplicant(applicant);
     setIsModalOpen(true);
@@ -319,67 +332,20 @@ function New_records() {
 
                   {filter === "approved" && (
                     <>
+                      <TableCell>{applicant.BIN}</TableCell>
                       <TableCell>
-                        <div>
-                          <div>{applicant.BIN}</div>
-                        </div>
+                        {applicant.BPLO}
+                        <br />
+                        <small style={{ color: "gray" }}>
+                          {applicant.BPLOtimeStamp}
+                        </small>
                       </TableCell>
-                      <TableCell>
-                        <div>
-                          <div>{applicant.BPLO}</div>
-                          <small style={{ color: "gray" }}>
-                            {applicant.BPLOtimeStamp}
-                          </small>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div>{applicant.Examiners}</div>
-                          <small style={{ color: "gray" }}>
-                            {applicant.ExaminerstimeStamp}
-                          </small>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div>{applicant.CENRO}</div>
-                          <small style={{ color: "gray" }}>
-                            {applicant.CENROtimeStamp}
-                          </small>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div>{applicant.CHO}</div>
-                          <small style={{ color: "gray" }}>
-                            {applicant.CHOtimeStamp}
-                          </small>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div>{applicant.ZONING}</div>
-                          <small style={{ color: "gray" }}>
-                            {applicant.ZONINGtimeStamp}
-                          </small>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div>{applicant.CSMWO}</div>
-                          <small style={{ color: "gray" }}>
-                            {applicant.CSMWOtimeStamp}
-                          </small>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div>{applicant.OBO}</div>
-                          <small style={{ color: "gray" }}>
-                            {applicant.OBOtimeStamp}
-                          </small>
-                        </div>
-                      </TableCell>
+                      <TableCell>{applicant.Examiners}</TableCell>
+                      <TableCell>{applicant.CENRO}</TableCell>
+                      <TableCell>{applicant.CHO}</TableCell>
+                      <TableCell>{applicant.ZONING}</TableCell>
+                      <TableCell>{applicant.CSMWO}</TableCell>
+                      <TableCell>{applicant.OBO}</TableCell>
                     </>
                   )}
 
@@ -424,12 +390,10 @@ function New_records() {
         </Box>
       </Box>
 
-      {/* ✅ Modals */}
       <ApplicantModal
         applicant={selectedApplicant}
         isOpen={isModalOpen}
-        onClose={closeModal}
-        onApprove={() => handleApprove(selectedApplicant)}
+        onApprove={handleApprove} // ✅ Pass both applicant & businessDetails
         baseUrl={`${API}/newApplication/files`}
       />
 

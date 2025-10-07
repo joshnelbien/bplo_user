@@ -354,16 +354,22 @@ function NewApplicationPage() {
     const formData = new FormData();
 
     if (businessLines.length > 0) {
-      formData.append(
-        "lineOfBusiness",
-        businessLines.map((b) => b.lineOfBusiness).join(",")
-      );
+      // Wrap each lineOfBusiness in quotes
+      const wrappedLOB = businessLines.map((b) => `"${b.lineOfBusiness}"`);
+      formData.append("lineOfBusiness", wrappedLOB.join(","));
+
       formData.append(
         "productService",
-        businessLines.map((b) => b.productService).join(",")
+        businessLines.map((b) => `"${b.productService}"`).join(",")
       );
-      formData.append("Units", businessLines.map((b) => b.Units).join(","));
-      formData.append("capital", businessLines.map((b) => b.capital).join(","));
+      formData.append(
+        "Units",
+        businessLines.map((b) => `"${b.Units}"`).join(",")
+      );
+      formData.append(
+        "capital",
+        businessLines.map((b) => `"${b.capital}"`).join(",")
+      );
     }
 
     Object.keys(formDataState).forEach((key) => {

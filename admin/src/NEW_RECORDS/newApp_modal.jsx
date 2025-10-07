@@ -189,23 +189,41 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
     fetchFSIC();
   }, []);
 
-  const handleIndustryChange = (index, selectedIndustry) => {
-    const selectedRow = fsicData.find(
-      (item) => item.business_line === selectedIndustry
-    );
+  useEffect(() => {
+    if (applicant.lineOfBusiness && fsicData.length > 0) {
+      const lobArray =
+        applicant.lineOfBusiness
+          .match(/"[^"]+"/g)
+          ?.map((l) => l.replace(/"/g, "")) || [];
 
-    setBusinessDetails((prev) => {
-      const updated = [...prev];
-      if (!updated[index]) updated[index] = {};
-      updated[index] = {
-        ...updated[index],
-        nature_code: selectedRow?.nature_code || "",
-        business_nature: selectedRow?.business_nature || "",
-        line_code: selectedRow?.line_code || "",
-        business_line: selectedRow?.business_line || "",
-      };
-      return updated;
-    });
+      const initialized = lobArray.map((lob) => {
+        const matched = fsicData.find(
+          (item) => item.business_line.toUpperCase() === lob.toUpperCase()
+        );
+        return {
+          business_line: lob.toUpperCase(),
+          nature_code: matched?.nature_code || "",
+          business_nature: matched?.business_nature || "",
+          line_code: matched?.line_code || "",
+        };
+      });
+
+      setBusinessDetails(initialized);
+    }
+  }, [applicant.lineOfBusiness, fsicData]);
+
+  const handleIndustryChange = (index, value) => {
+    const selectedFSIC = fsicData.find((item) => item.business_line === value);
+
+    const updated = [...businessDetails];
+    updated[index] = {
+      business_line: value,
+      nature_code: selectedFSIC?.nature_code || "",
+      business_nature: selectedFSIC?.business_nature || "",
+      line_code: selectedFSIC?.line_code || "",
+    };
+
+    setBusinessDetails(updated);
   };
 
   // ✅ Stepper definitions
@@ -417,30 +435,31 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
 
         {/* Business Activity */}
         <Section title="Business Activity & Incentives">
-          <Field label="Tax Incentives" value={applicant.tIGE} />
-          {applicant.tIGE === "Yes" && (
-            <FileField
-              fileKey="tIGEfiles"
-              label="Tax Incentives From Government"
-              fileData={applicant}
-              baseUrl={baseUrl}
-            />
-          )}
-
           <Field label="Office Type" value={applicant.officeType} />
 
-          {(applicant.lineOfBusiness?.trim().split(",") || []).map(
+          {/* ✅ Use regex to properly split quoted lineOfBusiness values */}
+          {(applicant.lineOfBusiness?.match(/"[^"]+"/g) || []).map(
             (lob, index) => {
+              const cleanedLOB = lob.replace(/"/g, ""); // remove quotes
+
+              // Parse corresponding arrays using the same quoted format
               const products =
-                applicant.productService?.trim().split(",") || [];
-              const units = applicant.Units?.trim().split(",") || [];
-              const capitals = applicant.capital?.trim().split(",") || [];
+                applicant.productService
+                  ?.match(/"[^"]+"/g)
+                  ?.map((p) => p.replace(/"/g, "")) || [];
+              const units =
+                applicant.Units?.match(/"[^"]+"/g)?.map((u) =>
+                  u.replace(/"/g, "")
+                ) || [];
+              const capitals =
+                applicant.capital
+                  ?.match(/"[^"]+"/g)
+                  ?.map((c) => c.replace(/"/g, "")) || [];
 
               const product = products[index] || "";
               const unit = units[index] || "";
               const capital = capitals[index] || "";
 
-              // ✅ Define reusable full width props
               const fullWidthProps = {
                 fullWidth: true,
                 size: "small",
@@ -468,9 +487,10 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
                     Business Line {index + 1}
                   </Typography>
 
+                  {/* ✅ Proper Line of Business Display */}
                   <TextField
                     label="Line of Business"
-                    value={lob.trim()}
+                    value={cleanedLOB.toUpperCase()}
                     {...fullWidthProps}
                     sx={{ width: "100%", mb: 2 }}
                   />
@@ -479,7 +499,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
                     <Grid item xs={12}>
                       <TextField
                         label="Product/Service"
-                        value={product.trim()}
+                        value={product}
                         {...fullWidthProps}
                       />
                     </Grid>
@@ -487,7 +507,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
                     <Grid item xs={12}>
                       <TextField
                         label="Units"
-                        value={unit.trim()}
+                        value={unit}
                         {...fullWidthProps}
                       />
                     </Grid>
@@ -495,27 +515,31 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
                     <Grid item xs={12}>
                       <TextField
                         label="Capital"
-                        value={formatCurrency(capital.trim())}
+                        value={formatCurrency(capital)}
                         {...fullWidthProps}
                       />
                     </Grid>
 
-                    {/* ✅ Industry dropdown */}
+                    {/* ✅ Industry dropdown with proper default */}
                     <Grid item xs={12}>
                       <TextField
+                        label="FSIC"
                         select
                         fullWidth
                         size="small"
                         SelectProps={{ native: true }}
-                        value={businessDetails[index]?.business_line || ""}
+                        value={cleanedLOB.toUpperCase()}
                         onChange={(e) =>
                           handleIndustryChange(index, e.target.value)
                         }
                       >
                         <option value="">-- Select Business Line --</option>
                         {fsicData.map((item, i) => (
-                          <option key={i} value={item.business_line}>
-                            {item.business_line}
+                          <option
+                            key={i}
+                            value={item.business_line.toUpperCase()}
+                          >
+                            {item.business_line.toUpperCase()}
                           </option>
                         ))}
                       </TextField>
@@ -550,6 +574,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
             }
           )}
         </Section>
+
         {/* Business Requirements */}
         <Section title="Business Requirements">
           <FileField
@@ -790,7 +815,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
         {applicant.BPLO?.toLowerCase() !== "approved" ? (
           <>
             <Button
-              onClick={() => onApprove(applicant)}
+              onClick={() => onApprove(applicant, businessDetails)}
               variant="contained"
               color="success"
             >
