@@ -268,6 +268,11 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
               const product = applicant.productService?.split(",")[index] || "";
               const unit = applicant.Units?.split(",")[index] || "";
               const capital = applicant.capital?.split(",")[index] || "";
+              const natureCode =
+                applicant.businessNature?.split(",")[index] || "";
+              const businessNature =
+                applicant.businessNature?.split(",")[index] || "";
+              const lineCOde = applicant.lineCOde?.split(",")[index] || "";
 
               return (
                 <Paper
@@ -300,6 +305,18 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
                     </Grid>
                     <Grid item xs={12}>
                       <Field label="Capital" value={capital.trim()} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Field label="Nature code" value={natureCode.trim()} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Field
+                        label="Business Nature"
+                        value={businessNature.trim()}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Field label="Line Code" value={lineCOde.trim()} />
                     </Grid>
                   </Grid>
                 </Paper>

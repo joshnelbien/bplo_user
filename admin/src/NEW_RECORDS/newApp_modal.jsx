@@ -170,6 +170,10 @@ const FileField = ({ label, fileKey, fileData, baseUrl }) => (
   </Grid>
 );
 
+const formatForDatabase = (arr) => {
+  return arr.map((val) => `"${val || ""}"`).join(",");
+};
+
 function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
   if (!isOpen || !applicant) return null;
   const [expandedSection, setExpandedSection] = useState(false);
@@ -218,9 +222,9 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
     const updated = [...businessDetails];
     updated[index] = {
       business_line: value,
-      nature_code: selectedFSIC?.nature_code || "",
-      business_nature: selectedFSIC?.business_nature || "",
-      line_code: selectedFSIC?.line_code || "",
+      nature_code: `"${selectedFSIC?.nature_code}"` || "",
+      business_nature: `"${selectedFSIC?.business_nature}"` || "",
+      line_code: `"${selectedFSIC?.line_code}"` || "",
     };
 
     setBusinessDetails(updated);
@@ -815,7 +819,9 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
         {applicant.BPLO?.toLowerCase() !== "approved" ? (
           <>
             <Button
-              onClick={() => onApprove(applicant, businessDetails)}
+              onClick={() => {
+                onApprove(applicant, businessDetails);
+              }}
               variant="contained"
               color="success"
             >

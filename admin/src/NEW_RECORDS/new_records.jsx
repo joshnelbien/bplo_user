@@ -395,6 +395,7 @@ function New_records() {
         isOpen={isModalOpen}
         onApprove={handleApprove} // ✅ Pass both applicant & businessDetails
         baseUrl={`${API}/newApplication/files`}
+        onClose={closeModal}
       />
 
       <UpdateModal

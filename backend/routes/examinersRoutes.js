@@ -94,16 +94,15 @@ router.post("/bplo/approve/:id", async (req, res) => {
     applicantData.BPLO = "Approved";
     applicantData.BPLOtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
-    // ✅ Add FSIC fields here (if multiple lines, stringify them)
     if (businessDetails && businessDetails.length > 0) {
       applicantData.natureCode = businessDetails
-        .map((b) => b.nature_code)
+        .map((b) => `"${b.nature_code}"`)
         .join(", ");
       applicantData.businessNature = businessDetails
-        .map((b) => b.business_nature)
+        .map((b) => `"${b.business_nature}"`)
         .join(", ");
       applicantData.lineCode = businessDetails
-        .map((b) => b.line_code)
+        .map((b) => `"${b.line_code}"`)
         .join(", ");
     }
 
