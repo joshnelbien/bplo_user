@@ -213,41 +213,6 @@ function NewApplicationRegisterPage() {
     });
   };
 
-  // const handleSubmit = async () => {
-  //   console.log("📤 Testing email send...");
-
-  //   setIsSubmitting(true);
-
-  //   try {
-  //     console.log("🌐 API URL:", API);
-
-  //     // 👇 Just trigger the backend email test route
-  //     const response = await axios.post(
-  //       `${API}/userAccounts/register`,
-  //       {}, // no formData needed if it's just a test
-  //       { headers: { "Content-Type": "application/json" } }
-  //     );
-
-  //     console.log("📡 Response status:", response.status);
-  //     console.log("📝 Server Response:", response.data);
-
-  //     setSnackbarState({
-  //       open: true,
-  //       message: "✅ Test email sent successfully!",
-  //       severity: "success",
-  //     });
-  //   } catch (err) {
-  //     console.error("❌ Email test failed:", err);
-  //     setSnackbarState({
-  //       open: true,
-  //       message: err.response?.data?.error || "❌ Failed to send test email.",
-  //       severity: "error",
-  //     });
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
   const handleSubmit = async () => {
     console.log("Submitting formDataState:", formDataState);
     if (!validateStep()) {
@@ -270,6 +235,7 @@ function NewApplicationRegisterPage() {
       localStorage.removeItem("filesState");
       localStorage.removeItem("businessLines");
       localStorage.removeItem("formStep");
+      setSuccessDialogOpen(true);
       setTimeout(() => navigate(`/`), 2000);
     } catch (err) {
       console.error(err);
