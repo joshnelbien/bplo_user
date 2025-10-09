@@ -518,6 +518,8 @@ function App() {
             </Button>
 
             {/* Results Section */}
+
+            {/* 🔹 Results Section */}
             {results.length > 0 && (
               <Box
                 sx={{
@@ -536,115 +538,82 @@ function App() {
                   Application Status
                 </Typography>
 
-                {noResults && (
+                {results.map((status, index) => (
                   <Box
+                    key={index}
                     sx={{
-                      mt: 3,
+                      mb: 2,
                       p: 2,
                       border: "1px solid #ccc",
                       borderRadius: 2,
-                      backgroundColor: "#fff8f8",
-                      color: "#b71c1c",
-                      width: "300px",
-                      textAlign: "center",
+                      textAlign: "left",
+                      backgroundColor: "white",
                     }}
                   >
-                    <Typography variant="body1" fontWeight="bold">
-                      ❌ No application found for this BIN/User ID.
+                    <Typography>
+                      <strong>Tracking ID:</strong> {status.userId}
                     </Typography>
+                    <Typography>
+                      <strong>BPLO:</strong> {status.BPLO}
+                    </Typography>
+                    <Typography>
+                      <strong>Examiners:</strong> {status.Examiners}
+                    </Typography>
+                    {status.Examiners === "Declined" && (
+                      <Typography color="error">
+                        <strong>Reason:</strong> {status.Examinersdecline}
+                      </Typography>
+                    )}
+                    <Typography>
+                      <strong>CSMWO:</strong> {status.CSMWO}
+                    </Typography>
+                    {status.CSMWO === "Declined" && (
+                      <Typography color="error">
+                        <strong>Reason:</strong> {status.CSMWOdecline}
+                      </Typography>
+                    )}
+                    <Typography>
+                      <strong>CHO:</strong> {status.CHO}
+                    </Typography>
+                    {status.CHO === "Declined" && (
+                      <Typography color="error">
+                        <strong>Reason:</strong> {status.CHOdecline}
+                      </Typography>
+                    )}
+                    <Typography>
+                      <strong>ZONING:</strong> {status.ZONING}
+                    </Typography>
+                    {status.ZONING === "Declined" && (
+                      <Typography color="error">
+                        <strong>Reason:</strong> {status.ZONINGdecline}
+                      </Typography>
+                    )}
+                    <Typography>
+                      <strong>CENRO:</strong> {status.CENRO}
+                    </Typography>
+                    {status.CENRO === "Declined" && (
+                      <Typography color="error">
+                        <strong>Reason:</strong> {status.CENROdecline}
+                      </Typography>
+                    )}
+                    <Typography>
+                      <strong>OBO:</strong> {status.OBO}
+                    </Typography>
+                    {status.OBO === "Declined" && (
+                      <Typography color="error">
+                        <strong>Reason:</strong> {status.OBOdecline}
+                      </Typography>
+                    )}
+                    <Typography>
+                      <strong>Business Tax:</strong> {status.BUSINESSTAX}
+                    </Typography>
+                    {status.BUSINESSTAX === "Declined" && (
+                      <Typography color="error">
+                        <strong>Reason:</strong> {status.BUSINESSTAXdecline}
+                      </Typography>
+                    )}
                   </Box>
-                )}
-
-                {/* 🔹 Results Section */}
-                {results.length > 0 && (
-                  <Box
-                    sx={{
-                      mt: 4,
-                      px: { xs: 2, md: 6 },
-                      py: 3,
-                      borderTop: "2px solid #09360D",
-                      width: "100%",
-                      backgroundColor: "#fafafa",
-                    }}
-                  >
-                    {results.map((status, index) => (
-                      <Box
-                        key={index}
-                        sx={{
-                          mb: 2,
-                          p: 2,
-                          border: "1px solid #ccc",
-                          borderRadius: 2,
-                          textAlign: "left",
-                          backgroundColor: "white",
-                        }}
-                      >
-                        <Typography>
-                          <strong>Tracking ID:</strong> {status.userId}
-                        </Typography>
-                        <Typography>
-                          <strong>BPLO:</strong> {status.BPLO}
-                        </Typography>
-                        <Typography>
-                          <strong>Examiners:</strong> {status.Examiners}
-                        </Typography>
-                        {status.Examiners === "Declined" && (
-                          <Typography color="error">
-                            <strong>Reason:</strong> {status.Examinersdecline}
-                          </Typography>
-                        )}
-                        <Typography>
-                          <strong>CSMWO:</strong> {status.CSMWO}
-                        </Typography>
-                        {status.CSMWO === "Declined" && (
-                          <Typography color="error">
-                            <strong>Reason:</strong> {status.CSMWOdecline}
-                          </Typography>
-                        )}
-                        <Typography>
-                          <strong>CHO:</strong> {status.CHO}
-                        </Typography>
-                        {status.CHO === "Declined" && (
-                          <Typography color="error">
-                            <strong>Reason:</strong> {status.CHOdecline}
-                          </Typography>
-                        )}
-                        <Typography>
-                          <strong>ZONING:</strong> {status.ZONING}
-                        </Typography>
-                        {status.ZONING === "Declined" && (
-                          <Typography color="error">
-                            <strong>Reason:</strong> {status.ZONINGdecline}
-                          </Typography>
-                        )}
-                        <Typography>
-                          <strong>CENRO:</strong> {status.CENRO}
-                        </Typography>
-                        {status.CENRO === "Declined" && (
-                          <Typography color="error">
-                            <strong>Reason:</strong> {status.CENROdecline}
-                          </Typography>
-                        )}
-                        <Typography>
-                          <strong>OBO:</strong> {status.OBO}
-                        </Typography>
-                        {status.OBO === "Declined" && (
-                          <Typography color="error">
-                            <strong>Reason:</strong> {status.OBOdecline}
-                          </Typography>
-                        )}
-                        <Typography>
-                          <strong>Business Tax:</strong> {status.BUSINESSTAX}
-                        </Typography>
-                        {status.BUSINESSTAX === "Declined" && (
-                          <Typography color="error">
-                            <strong>Reason:</strong> {status.BUSINESSTAXdecline}
-                          </Typography>
-                        )}
-                      </Box>
-                    ))}
-                  </Box>
-                )}
+                ))}
               </Box>
             )}
           </Box>
