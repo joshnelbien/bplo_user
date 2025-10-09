@@ -52,7 +52,7 @@ const PermitHeader = () => (
                     fontWeight="bold"
                     sx={{ fontSize: "1.2rem" }}
                 >
-                    BUSINESS PERMIT AND LICENSING DIVISION
+                    BUSINESS TAX ORDER OF PAYMENT
                 </Typography>
             </Grid>
         </Grid>
