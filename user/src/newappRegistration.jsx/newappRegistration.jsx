@@ -25,6 +25,7 @@ import Step2PersonalInfo from "./newAppcomponents/step2";
 import { useMediaQuery, useTheme } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { IconButton } from "@mui/material";
+import PrivacyAgreementDialog from "./DataPrivacyModal"; // Import the privacy modal
 
 const GreenButton = styled(Button)(({ variant }) => ({
   borderRadius: "8px",
@@ -84,6 +85,8 @@ function NewApplicationRegisterPage() {
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [errors, setErrors] = useState({});
+  const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false); // New state for privacy dialog
+  const [privacyChecked, setPrivacyChecked] = useState(false); // State for checkbox
 
   const steps = ["Business Info", "Owner Info"];
 
@@ -246,6 +249,15 @@ function NewApplicationRegisterPage() {
       });
       setIsSubmitting(false);
     }
+  };
+
+  const handlePrivacyCheck = (e) => {
+    setPrivacyChecked(e.target.checked);
+  };
+
+  const handlePrivacyAgree = () => {
+    setPrivacyDialogOpen(false);
+    handleSubmit(); // Proceed to final submission after agreement
   };
 
   const renderStepContent = (step) => {
@@ -548,13 +560,21 @@ function NewApplicationRegisterPage() {
             variant="contained"
             onClick={() => {
               setSubmitDialogOpen(false);
-              handleSubmit();
+              setPrivacyDialogOpen(true); // Open privacy dialog before submission
             }}
           >
             Yes
           </GreenButton>
         </DialogActions>
       </Dialog>
+
+      {/* Privacy Agreement Dialog */}
+      <PrivacyAgreementDialog
+        open={privacyDialogOpen}
+        onAgree={handlePrivacyAgree}
+        onCheck={handlePrivacyCheck}
+        checked={privacyChecked}
+      />
 
       {/* ✅ Success Popup */}
       <Dialog
