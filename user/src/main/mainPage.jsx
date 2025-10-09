@@ -27,6 +27,7 @@ import { styled } from "@mui/material/styles";
 import CloseIcon from "@mui/icons-material/Close";
 import MuiAlert from "@mui/material/Alert";
 import axios from "axios";
+import { CircularProgress } from "@mui/material";
 
 // Key for local storage (removed privacy-related key)
 const AGREEMENT_KEY = null; // No longer needed
@@ -195,6 +196,8 @@ function App() {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const API = import.meta.env.VITE_API_BASE;
+  const [isTracking, setIsTracking] = useState(false);
+  const [noResults, setNoResults] = useState(false);
 
   const [modalData, setModalData] = useState(null); // { title, content }
 
@@ -232,16 +235,21 @@ function App() {
       return;
     }
 
+    setIsTracking(true);
+    setNoResults(false);
+
     try {
       const response = await axios.get(
         `${API}/appStatus/status/${encodeURIComponent(searchValue)}`
       );
 
       if (response.data && response.data.length > 0) {
-        setResults(response.data); // 🔹 store results instead of navigate
+        setResults(response.data);
+        setNoResults(false);
         console.log("Search results:", response.data);
       } else {
-        setResults([]); // clear results
+        setResults([]);
+        setNoResults(true);
         setSnackbar({
           open: true,
           message: "No application found for this BIN/User ID.",
@@ -251,11 +259,14 @@ function App() {
     } catch (error) {
       console.error("Error checking BIN/UserId:", error);
       setResults([]);
+      setNoResults(true);
       setSnackbar({
         open: true,
         message: "❌ Error checking application.",
         severity: "error",
       });
+    } finally {
+      setIsTracking(false);
     }
   };
 
@@ -466,15 +477,23 @@ function App() {
             <Button
               variant="contained"
               sx={{
-                width: "300px", // Match SearchBar width
+                width: "300px",
                 py: 1,
                 fontWeight: "bold",
                 backgroundColor: "#09360D",
                 "&:hover": { backgroundColor: "#07270a" },
               }}
               onClick={handleTrackClick}
+              disabled={isTracking}
             >
-              Track
+              {isTracking ? (
+                <>
+                  <CircularProgress size={20} sx={{ color: "white", mr: 1 }} />
+                  Tracking...
+                </>
+              ) : (
+                "Track"
+              )}
             </Button>
 
             {/* 🔹 Business Assessment Button (under Track) */}
@@ -517,89 +536,122 @@ function App() {
                   Application Status
                 </Typography>
 
-                {results.map((status, index) => (
+                {noResults && (
                   <Box
-                    key={index}
                     sx={{
-                      mb: 2,
+                      mt: 3,
                       p: 2,
                       border: "1px solid #ccc",
                       borderRadius: 2,
-                      textAlign: "left",
-                      backgroundColor: "white",
+                      backgroundColor: "#fff8f8",
+                      color: "#b71c1c",
+                      width: "300px",
+                      textAlign: "center",
                     }}
                   >
-                    <Typography>
-                      <strong>Tracking ID:</strong> {status.userId}
+                    <Typography variant="body1" fontWeight="bold">
+                      ❌ No application found for this BIN/User ID.
                     </Typography>
-                    <Typography>
-                      <strong>BPLO:</strong> {status.BPLO}
-                    </Typography>
-
-                    <Typography>
-                      <strong>Examiners:</strong> {status.Examiners}
-                    </Typography>
-                    {status.Examiners === "Declined" && (
-                      <Typography color="error">
-                        <strong>Reason:</strong> {status.Examinersdecline}
-                      </Typography>
-                    )}
-
-                    <Typography>
-                      <strong>CSMWO:</strong> {status.CSMWO}
-                    </Typography>
-                    {status.CSMWO === "Declined" && (
-                      <Typography color="error">
-                        <strong>Reason:</strong> {status.CSMWOdecline}
-                      </Typography>
-                    )}
-
-                    <Typography>
-                      <strong>CHO:</strong> {status.CHO}
-                    </Typography>
-                    {status.CHO === "Declined" && (
-                      <Typography color="error">
-                        <strong>Reason:</strong> {status.CHOdecline}
-                      </Typography>
-                    )}
-
-                    <Typography>
-                      <strong>ZONING:</strong> {status.ZONING}
-                    </Typography>
-                    {status.ZONING === "Declined" && (
-                      <Typography color="error">
-                        <strong>Reason:</strong> {status.ZONINGdecline}
-                      </Typography>
-                    )}
-
-                    <Typography>
-                      <strong>CENRO:</strong> {status.CENRO}
-                    </Typography>
-                    {status.CENRO === "Declined" && (
-                      <Typography color="error">
-                        <strong>Reason:</strong> {status.CENROdecline}
-                      </Typography>
-                    )}
-
-                    <Typography>
-                      <strong>OBO:</strong> {status.OBO}
-                    </Typography>
-                    {status.OBO === "Declined" && (
-                      <Typography color="error">
-                        <strong>Reason:</strong> {status.OBOdecline}
-                      </Typography>
-                    )}
-
-                    <Typography>
-                      <strong>Business Tax:</strong> {status.BUSINESSTAX}
-                    </Typography>
-                    {status.BUSINESSTAX === "Declined" && (
-                      <Typography color="error">
-                        <strong>Reason:</strong> {status.BUSINESSTAXdecline}
-                      </Typography>
-                    )}
                   </Box>
-                ))}
+                )}
+
+                {/* 🔹 Results Section */}
+                {results.length > 0 && (
+                  <Box
+                    sx={{
+                      mt: 4,
+                      px: { xs: 2, md: 6 },
+                      py: 3,
+                      borderTop: "2px solid #09360D",
+                      width: "100%",
+                      backgroundColor: "#fafafa",
+                    }}
+                  >
+                    <Typography
+                      variant="h5"
+                      sx={{ fontWeight: "bold", mb: 2, color: "#09360D" }}
+                    >
+                      Application Status
+                    </Typography>
+
+                    {results.map((status, index) => (
+                      <Box
+                        key={index}
+                        sx={{
+                          mb: 2,
+                          p: 2,
+                          border: "1px solid #ccc",
+                          borderRadius: 2,
+                          textAlign: "left",
+                          backgroundColor: "white",
+                        }}
+                      >
+                        <Typography>
+                          <strong>Tracking ID:</strong> {status.userId}
+                        </Typography>
+                        <Typography>
+                          <strong>BPLO:</strong> {status.BPLO}
+                        </Typography>
+                        <Typography>
+                          <strong>Examiners:</strong> {status.Examiners}
+                        </Typography>
+                        {status.Examiners === "Declined" && (
+                          <Typography color="error">
+                            <strong>Reason:</strong> {status.Examinersdecline}
+                          </Typography>
+                        )}
+                        <Typography>
+                          <strong>CSMWO:</strong> {status.CSMWO}
+                        </Typography>
+                        {status.CSMWO === "Declined" && (
+                          <Typography color="error">
+                            <strong>Reason:</strong> {status.CSMWOdecline}
+                          </Typography>
+                        )}
+                        <Typography>
+                          <strong>CHO:</strong> {status.CHO}
+                        </Typography>
+                        {status.CHO === "Declined" && (
+                          <Typography color="error">
+                            <strong>Reason:</strong> {status.CHOdecline}
+                          </Typography>
+                        )}
+                        <Typography>
+                          <strong>ZONING:</strong> {status.ZONING}
+                        </Typography>
+                        {status.ZONING === "Declined" && (
+                          <Typography color="error">
+                            <strong>Reason:</strong> {status.ZONINGdecline}
+                          </Typography>
+                        )}
+                        <Typography>
+                          <strong>CENRO:</strong> {status.CENRO}
+                        </Typography>
+                        {status.CENRO === "Declined" && (
+                          <Typography color="error">
+                            <strong>Reason:</strong> {status.CENROdecline}
+                          </Typography>
+                        )}
+                        <Typography>
+                          <strong>OBO:</strong> {status.OBO}
+                        </Typography>
+                        {status.OBO === "Declined" && (
+                          <Typography color="error">
+                            <strong>Reason:</strong> {status.OBOdecline}
+                          </Typography>
+                        )}
+                        <Typography>
+                          <strong>Business Tax:</strong> {status.BUSINESSTAX}
+                        </Typography>
+                        {status.BUSINESSTAX === "Declined" && (
+                          <Typography color="error">
+                            <strong>Reason:</strong> {status.BUSINESSTAXdecline}
+                          </Typography>
+                        )}
+                      </Box>
+                    ))}
+                  </Box>
+                )}
               </Box>
             )}
           </Box>
