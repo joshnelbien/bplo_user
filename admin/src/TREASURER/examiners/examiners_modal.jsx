@@ -22,12 +22,22 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
 const API = import.meta.env.VITE_API_BASE;
 // Component to display a normal text field
-const Field = ({ label, value }) => (
-  <Grid item xs={12} sm={6}>
+const Field = ({
+  label,
+  value,
+  xs = 12,
+  sm = 6,
+  fullWidth = false,
+  multiline = false,
+  rows = 1,
+}) => (
+  <Grid item xs={fullWidth ? 12 : sm} sm={sm}>
     <TextField
       label={label}
       value={value || "—"}
       fullWidth
+      multiline={multiline}
+      rows={rows}
       variant="outlined"
       size="small"
       disabled
@@ -48,9 +58,7 @@ const Field = ({ label, value }) => (
       InputLabelProps={{
         sx: {
           color: "black",
-          "&.Mui-disabled": {
-            color: "black",
-          },
+          "&.Mui-disabled": { color: "black" },
         },
       }}
     />
@@ -325,6 +333,7 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
                       mb: 2,
                       borderRadius: 2,
                       backgroundColor: "#f9f9f9",
+                      width: "100%", // 🟩 Ensure Paper itself takes full width
                     }}
                   >
                     <Typography
@@ -336,9 +345,15 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
                     </Typography>
 
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
-                        <Field label="Line of Business" value={lob} />
-                      </Grid>
+                      {/* 🟩 Line of Business — full width */}
+                      <Field
+                        label="Line of Business"
+                        value={lob}
+                        fullWidth
+                        multiline
+                        rows={3} // adjust rows if you want a taller box (e.g., 4 or 5)
+                      />
+
                       <Grid item xs={12} sm={6}>
                         <Field label="Product/Service" value={product} />
                       </Grid>
