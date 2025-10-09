@@ -567,13 +567,6 @@ function App() {
                       backgroundColor: "#fafafa",
                     }}
                   >
-                    <Typography
-                      variant="h5"
-                      sx={{ fontWeight: "bold", mb: 2, color: "#09360D" }}
-                    >
-                      Application Status
-                    </Typography>
-
                     {results.map((status, index) => (
                       <Box
                         key={index}
