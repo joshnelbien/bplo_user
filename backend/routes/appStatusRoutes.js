@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const AppStatus = require("../db/model/applicantStatusDB");
 const File = require("../db/model/files");
+const { Op } = require("sequelize");
 
 router.post("/", async (req, res) => {
   try {
@@ -24,25 +25,24 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/status/:value", async (req, res) => {
-  const { value } = req.params; // can be BIN or userId
+  const { value } = req.params;
 
   try {
-    let statuses;
-
-    // check if BIN format (adjust regex if your BIN format differs)
-    const binRegex = /^[A-Z0-9-]+$/;
-
-    if (binRegex.test(value)) {
-      // 🔹 search by BIN
-      statuses = await AppStatus.findAll({
-        where: { bin: value },
-      });
-    } else {
-      // 🔹 fallback search by userId
-      statuses = await AppStatus.findAll({
-        where: { userId: value },
-      });
-    }
+    const statuses = await File.findAll({
+      where: {
+        [Op.or]: [
+          { BIN: value },
+          { businessName: value },
+          { tinNo: value },
+          // ✅ only match userId if it looks like a UUID to avoid DB error
+          ...(value.match(
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+          )
+            ? [{ userId: value }]
+            : []),
+        ],
+      },
+    });
 
     if (!statuses || statuses.length === 0) {
       console.log("No statuses found for:", value);
