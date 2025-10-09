@@ -27,12 +27,22 @@ import ZoningCert from "./zoningCert";
 import { useEffect } from "react";
 const API = import.meta.env.VITE_API_BASE;
 // ✅ Normal text field
-const Field = ({ label, value }) => (
-  <Grid item xs={12} sm={6}>
+const Field = ({
+  label,
+  value,
+  xs = 12,
+  sm = 6,
+  fullWidth = false,
+  multiline = false,
+  rows = 1,
+}) => (
+  <Grid item xs={fullWidth ? 12 : sm} sm={sm}>
     <TextField
       label={label}
       value={value || "—"}
       fullWidth
+      multiline={multiline}
+      rows={rows}
       variant="outlined"
       size="small"
       disabled
@@ -372,54 +382,110 @@ function ZoningApplicantModal({
 
                 <Field label="Office Type" value={applicant.officeType} />
 
-                {applicant.lineOfBusiness?.split(",").map((lob, index) => {
-                  const product =
-                    applicant.productService?.split(",")[index] || "";
-                  const unit = applicant.Units?.split(",")[index] || "";
-                  const capital = applicant.capital?.split(",")[index] || "";
+                {(() => {
+                  // ✅ Utility function to safely parse CSV-like fields with quotes
+                  const parseCSV = (text) => {
+                    if (!text) return [];
+                    return text
 
-                  return (
-                    <Paper
-                      key={index}
-                      elevation={2}
-                      sx={{
-                        p: 2,
-                        mb: 2,
-                        borderRadius: 2,
-                        backgroundColor: "#f9f9f9",
-                      }}
-                    >
-                      <Typography
-                        variant="subtitle2"
-                        fontWeight="bold"
-                        gutterBottom
-                      >
-                        Business Line {index + 1}
-                      </Typography>
+                      .trim()
 
-                      <Grid container spacing={2}>
-                        <Grid item xs={12}>
-                          <Field label="Line of Business" value={lob.trim()} />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <Field
-                            label="Product/Service"
-                            value={product.trim()}
-                          />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <Field label="Units" value={unit.trim()} />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <Field
-                            label="Capital"
-                            value={formatCurrency(capital.trim())}
-                          />
-                        </Grid>
-                      </Grid>
-                    </Paper>
+                      .replace(/^\[|\]$/g, "")
+
+                      .split(/",\s*"?/)
+
+                      .map((val) => val.replace(/^"|"$/g, "").trim())
+                      .filter((val) => val.length > 0);
+                  };
+
+                  // ✅ Extract arrays for each field
+                  const lobArr = parseCSV(applicant.lineOfBusiness);
+                  const productArr = parseCSV(applicant.productService);
+                  const unitArr = parseCSV(applicant.Units);
+                  const capitalArr = parseCSV(applicant.capital);
+                  const natureCodeArr = parseCSV(applicant.natureCode);
+                  const businessNatureArr = parseCSV(applicant.businessNature);
+                  const lineCodeArr = parseCSV(applicant.lineCode);
+
+                  // ✅ Find the maximum length among arrays (in case some are shorter)
+                  const maxLength = Math.max(
+                    lobArr.length,
+                    productArr.length,
+                    unitArr.length,
+                    capitalArr.length,
+                    natureCodeArr.length,
+                    businessNatureArr.length,
+                    lineCodeArr.length
                   );
-                })}
+
+                  return Array.from({ length: maxLength }).map((_, index) => {
+                    const lob = lobArr[index] || "";
+                    const product = productArr[index] || "";
+                    const unit = unitArr[index] || "";
+                    const capital = capitalArr[index] || "";
+                    const natureCode = natureCodeArr[index] || "";
+                    const businessNature = businessNatureArr[index] || "";
+                    const lineCode = lineCodeArr[index] || "";
+
+                    return (
+                      <Paper
+                        key={index}
+                        elevation={2}
+                        sx={{
+                          p: 2,
+                          mb: 2,
+                          borderRadius: 2,
+                          backgroundColor: "#f9f9f9",
+                          width: "100%", // 🟩 Ensure Paper itself takes full width
+                        }}
+                      >
+                        <Typography
+                          variant="subtitle2"
+                          fontWeight="bold"
+                          gutterBottom
+                        >
+                          Business Line {index + 1}
+                        </Typography>
+
+                        <Grid container spacing={2}>
+                          {/* 🟩 Line of Business — full width */}
+                          <Field
+                            label="Line of Business"
+                            value={lob}
+                            fullWidth
+                            multiline
+                            rows={3} // adjust rows if you want a taller box (e.g., 4 or 5)
+                          />
+
+                          <Grid item xs={12} sm={6}>
+                            <Field label="Product/Service" value={product} />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Field label="Units" value={unit} />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Field
+                              label="Capital"
+                              value={formatCurrency(capital)}
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Field label="Nature Code" value={natureCode} />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Field
+                              label="Business Nature"
+                              value={businessNature}
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Field label="Line Code" value={lineCode} />
+                          </Grid>
+                        </Grid>
+                      </Paper>
+                    );
+                  });
+                })()}
               </Section>
 
               {/* Business Requirements */}
@@ -472,9 +538,13 @@ function ZoningApplicantModal({
               </Section>
 
               {/* Zoning Attachments */}
-              <Typography variant="subtitle1" sx={{ mb: 3 }}>
+              <Typography variant="subtitle1" sx={{ mb: 3, pt: 2 }}>
                 ZONING FEE:{" "}
-                <b>{zoningFee === "Exempted" ? zoningFee : `₱${zoningFee}`}</b>
+                <b>
+                  {zoningFee === "Exempted"
+                    ? zoningFee
+                    : `₱${formatCurrency(zoningFee)}`}
+                </b>
               </Typography>
 
               {applicant.ZONING === "Pending" ? (
@@ -776,7 +846,9 @@ function ZoningApplicantModal({
                   mr: 1,
                   p: 0,
                   borderColor: "#053d16ff",
-                  ...(selectedReasons.includes("Zoning and Location Issues") && {
+                  ...(selectedReasons.includes(
+                    "Zoning and Location Issues"
+                  ) && {
                     backgroundColor: "#ffebee",
                   }),
                 }}
