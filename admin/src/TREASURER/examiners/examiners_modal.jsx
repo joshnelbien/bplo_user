@@ -57,6 +57,13 @@ const Field = ({ label, value }) => (
   </Grid>
 );
 
+const formatNumber = (value) => {
+  if (!value) return "—";
+  const num = Number(value.toString().replace(/[^0-9.-]+/g, ""));
+  if (isNaN(num)) return value;
+  return num.toLocaleString("en-US");
+};
+
 // Component to display files as links
 const FileField = ({ label, fileKey, fileData }) => (
   <Grid item xs={12} sm={6}>
@@ -264,64 +271,97 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
 
             <Field label="Office Type" value={applicant.officeType} />
 
-            {applicant.lineOfBusiness?.split(",").map((lob, index) => {
-              const product = applicant.productService?.split(",")[index] || "";
-              const unit = applicant.Units?.split(",")[index] || "";
-              const capital = applicant.capital?.split(",")[index] || "";
-              const natureCode =
-                applicant.businessNature?.split(",")[index] || "";
-              const businessNature =
-                applicant.businessNature?.split(",")[index] || "";
-              const lineCOde = applicant.lineCOde?.split(",")[index] || "";
+            {(() => {
+              // ✅ Utility function to safely parse CSV-like fields with quotes
+              const parseCSV = (text) => {
+                if (!text) return [];
+                return text
 
-              return (
-                <Paper
-                  key={index}
-                  elevation={2}
-                  sx={{
-                    p: 2,
-                    mb: 2,
-                    borderRadius: 2,
-                    backgroundColor: "#f9f9f9",
-                  }}
-                >
-                  <Typography
-                    variant="subtitle2"
-                    fontWeight="bold"
-                    gutterBottom
-                  >
-                    Business Line {index + 1}
-                  </Typography>
+                  .trim()
 
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <Field label="Line of Business" value={lob.trim()} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Field label="Product/Service" value={product.trim()} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Field label="Units" value={unit.trim()} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Field label="Capital" value={capital.trim()} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Field label="Nature code" value={natureCode.trim()} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Field
-                        label="Business Nature"
-                        value={businessNature.trim()}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Field label="Line Code" value={lineCOde.trim()} />
-                    </Grid>
-                  </Grid>
-                </Paper>
+                  .replace(/^\[|\]$/g, "")
+
+                  .split(/",\s*"?/)
+
+                  .map((val) => val.replace(/^"|"$/g, "").trim())
+                  .filter((val) => val.length > 0);
+              };
+
+              // ✅ Extract arrays for each field
+              const lobArr = parseCSV(applicant.lineOfBusiness);
+              const productArr = parseCSV(applicant.productService);
+              const unitArr = parseCSV(applicant.Units);
+              const capitalArr = parseCSV(applicant.capital);
+              const natureCodeArr = parseCSV(applicant.natureCode);
+              const businessNatureArr = parseCSV(applicant.businessNature);
+              const lineCodeArr = parseCSV(applicant.lineCode);
+
+              // ✅ Find the maximum length among arrays (in case some are shorter)
+              const maxLength = Math.max(
+                lobArr.length,
+                productArr.length,
+                unitArr.length,
+                capitalArr.length,
+                natureCodeArr.length,
+                businessNatureArr.length,
+                lineCodeArr.length
               );
-            })}
+
+              return Array.from({ length: maxLength }).map((_, index) => {
+                const lob = lobArr[index] || "";
+                const product = productArr[index] || "";
+                const unit = unitArr[index] || "";
+                const capital = capitalArr[index] || "";
+                const natureCode = natureCodeArr[index] || "";
+                const businessNature = businessNatureArr[index] || "";
+                const lineCode = lineCodeArr[index] || "";
+
+                return (
+                  <Paper
+                    key={index}
+                    elevation={2}
+                    sx={{
+                      p: 2,
+                      mb: 2,
+                      borderRadius: 2,
+                      backgroundColor: "#f9f9f9",
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      fontWeight="bold"
+                      gutterBottom
+                    >
+                      Business Line {index + 1}
+                    </Typography>
+
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Field label="Line of Business" value={lob} />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Field label="Product/Service" value={product} />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Field label="Units" value={unit} />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Field label="Capital" value={formatNumber(capital)} />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Field label="Nature Code" value={natureCode} />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Field label="Business Nature" value={businessNature} />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Field label="Line Code" value={lineCode} />
+                      </Grid>
+                    </Grid>
+                  </Paper>
+                );
+              });
+            })()}
           </Section>
 
           {/* Business Requirements */}
