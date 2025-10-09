@@ -194,6 +194,13 @@ function NewApplicationRegisterPage() {
     setSnackbarState({ ...snackbarState, open: false });
   };
 
+  const handleClose = () => {
+  // 1. Hide the dialog (essential for the dialog to disappear)
+  setDialogOpen(false); 
+  
+  // 2. Go back to the previous browser history entry
+  window.history.back(); 
+};
   const handleNextClick = () => {
     if (validateStep()) {
       setDialogOpen(true);
@@ -574,6 +581,7 @@ function NewApplicationRegisterPage() {
         onAgree={handlePrivacyAgree}
         onCheck={handlePrivacyCheck}
         checked={privacyChecked}
+        onClose={handleClose}
       />
 
       {/* ✅ Success Popup */}

@@ -9,9 +9,10 @@ import {
   Checkbox,
   Button,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+// CloseIcon import is not used in the JSX, but keeping it doesn't hurt.
+import CloseIcon from '@mui/icons-material/Close'; 
 
-const PrivacyAgreementDialog = ({ open, onAgree, onCheck, checked }) => (
+const PrivacyAgreementDialog = ({ open, onAgree, onClose, onCheck, checked }) => (
   <Dialog open={open} fullWidth maxWidth="sm" disableEscapeKeyDown>
     <DialogTitle sx={{ color: "#09360D", fontWeight: "bold", borderBottom: '1px solid #eee' }}>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -60,7 +61,7 @@ const PrivacyAgreementDialog = ({ open, onAgree, onCheck, checked }) => (
     <DialogActions>
       <Button
         onClick={onAgree}
-        disabled={!checked}
+        disabled={!checked} // Only "Proceed" is disabled if not checked
         variant="contained"
         sx={{
           backgroundColor: "#09360D",
@@ -69,7 +70,20 @@ const PrivacyAgreementDialog = ({ open, onAgree, onCheck, checked }) => (
           px: 3
         }}
       >
-        Proceed and Close
+        Proceed
+      </Button>
+
+      <Button
+        onClick={onClose} // This button is now always active
+        variant="contained"
+        sx={{
+          backgroundColor: "#09360D",
+          "&:hover": { backgroundColor: "#07270a" },
+          py: 1,
+          px: 3
+        }}
+      >
+        Close
       </Button>
     </DialogActions>
   </Dialog>
