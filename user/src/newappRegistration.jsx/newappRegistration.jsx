@@ -195,12 +195,12 @@ function NewApplicationRegisterPage() {
   };
 
   const handleClose = () => {
-  // 1. Hide the dialog (essential for the dialog to disappear)
-  setDialogOpen(false); 
-  
-  // 2. Go back to the previous browser history entry
-  window.history.back(); 
-};
+    // 1. Hide the dialog (essential for the dialog to disappear)
+    setDialogOpen(false);
+
+    // 2. Go back to the previous browser history entry
+    window.history.back();
+  };
   const handleNextClick = () => {
     if (validateStep()) {
       setDialogOpen(true);
@@ -612,13 +612,17 @@ function NewApplicationRegisterPage() {
             sx={{ fontWeight: "bold", color: "#040504ff" }}
           >
             Submitted Successfully!
+            <br />
+            Please Check your Email for the next steps.
+            <br />
+            Check your Spam/Junk folder just in case.
           </Typography>
         </DialogContent>
       </Dialog>
 
       <Snackbar
         open={snackbarState.open}
-        autoHideDuration={4000}
+        autoHideDuration={5000}
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
