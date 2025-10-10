@@ -532,6 +532,26 @@ function App() {
               Business Assessment
             </Button>
 
+             <Button
+              variant="outlined"
+              sx={{
+                width: "300px", // Match SearchBar width
+                py: 1,
+                fontWeight: "bold",
+                borderColor: "#09360D",
+                color: "#09360D",
+                "&:hover": {
+                  borderColor: "#07270a",
+                  color: "#07270a",
+                  backgroundColor: "rgba(9, 54, 13, 0.04)",
+                },
+                mt: 0, // Ensure no extra margin is applied
+              }}
+              onClick={() => setIsAssessmentOpen(true)}
+            >
+              Feedback
+            </Button>
+
             {/* Results Section */}
 
             {/* 🔹 Results Section */}
