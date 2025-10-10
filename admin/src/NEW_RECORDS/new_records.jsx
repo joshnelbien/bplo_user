@@ -267,12 +267,12 @@ function New_records() {
             </Button>
              <Button
               onClick={() => {
-                setFilter("pending");
+                setFilter("permitRelease");
                 setCurrentPage(1);
               }}
               sx={{
-                bgcolor: filter === "pending" ? "#1c541e" : undefined,
-                color: filter === "pending" ? "white" : undefined,
+                bgcolor: filter === "permitRelease" ? "#1c541e" : undefined,
+                color: filter === "permitRelease" ? "white" : undefined,
               }}
             >
               FOR RELEASING PERMIT
