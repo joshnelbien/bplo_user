@@ -280,7 +280,7 @@ export default function ClientFeedbackForm() {
     event.preventDefault();
     console.log("Form submitted. Ratings:", ratings);
     // Add your form submission logic here (e.g., API call)
-    alert("Form submitted! Check console for data.");
+    alert("Thankyou for submitting your feedback means a lot to us. Every response helps us make your experience better.");
   };
 
   return (
