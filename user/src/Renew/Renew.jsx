@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  CircularProgress,
   Paper,
   TextField,
   Typography,
@@ -15,7 +14,6 @@ import { useNavigate, useParams } from "react-router-dom";
 function Renewal() {
   const { id } = useParams();
   const [renewals, setRenewals] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
     businessName: "",
     bin: "", // ✅ lowercase for consistency
@@ -27,7 +25,7 @@ function Renewal() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // ✅ Fetch existing records
+  // ✅ Fetch existing records (no loading state)
   useEffect(() => {
     const fetchRenewals = async () => {
       try {
@@ -43,8 +41,6 @@ function Renewal() {
         }
       } catch (error) {
         console.error("❌ Error fetching renewals:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -109,18 +105,6 @@ function Renewal() {
     }
   };
 
-  if (loading)
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="60vh"
-      >
-        <CircularProgress />
-      </Box>
-    );
-
   return (
     <Box sx={{ p: 4, maxWidth: 900, mx: "auto" }}>
       <Button
@@ -181,12 +165,6 @@ function Renewal() {
           </Button>
         </Box>
       </Paper>
-
-      <Typography variant="h6" align="center" color="text.secondary">
-        {renewals.length > 0
-          ? `Fetched ${renewals.length} renewal records.`
-          : "No renewal application found."}
-      </Typography>
     </Box>
   );
 }

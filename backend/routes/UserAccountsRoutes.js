@@ -86,24 +86,95 @@ router.post("/register", async (req, res) => {
     // Send confirmation email asynchronously
     const htmlContent = `
       <p>Hello <b>${firstName} ${lastName}</b>,</p>
-      <p>You can now proceed to your New Business application.</p>
-      <p>Click the link below to continue:</p>
-      <a href="${process.env.VITE_API_BASE}/newApplicationPage/${user.id}">
+      <p>We are pleased to inform you that you may now proceed with your <b>New Business Application.</b></p>
+      <p>Please click the link below to continue with your application process:</p>
+      <a href="${process.env.VITE_API_BASE}/newApplicationPage/${user.id}"></a>
         View Application
       </a>
+      <p>Should you have any questions or require further assistance, please do not hesitate to contact us.</p>
       <br/><br/>
-      <p>Best regards,<br/>Business Portal</p>
+      <p>Kind regards,<br/><b>Business Portal Team</b></p>
     `;
-    sendEmail(email, "New Business Application", htmlContent);
+    sendEmail(email, "Renew Business Application", htmlContent);
   } catch (error) {
     console.error("❌ Register error:", error);
     res.status(500).json({ error: "Server error during registration." });
   }
 });
 
-/* ---------------------------------------------------
- 👤 GET USER PROFILE — /:id
---------------------------------------------------- */
+router.post("/register-renew", async (req, res) => {
+  try {
+    const {
+      BIN,
+      firstName,
+      middleName,
+      lastName,
+      extName,
+      sex,
+      email,
+      mobileNo,
+      BusinessType,
+      dscRegNo,
+      businessName,
+      tinNo,
+      TradeName,
+      telNo,
+    } = req.body;
+
+    // Validate required fields
+    if (!lastName || !firstName || !email || !mobileNo) {
+      return res
+        .status(400)
+        .json({ error: "All required fields must be filled." });
+    }
+
+    // Insert user into DB
+    const user = await UserAccounts.create({
+      BIN,
+      firstName,
+      middleName: middleName || null,
+      lastName,
+      extName: extName || null,
+      sex,
+      email,
+      tel: telNo || null,
+      mobile: mobileNo,
+      business_type: BusinessType || null,
+      dsc_reg_no: dscRegNo || null,
+      business_name: businessName || null,
+      tin_no: tinNo || null,
+      trade_name: TradeName || null,
+      application_type: "New",
+      DataPrivacy: "True",
+    });
+
+    console.log("✅ User inserted:", user.id, user.BIN);
+
+    // Send success response immediately
+    res.status(200).json({
+      message: "User registered successfully",
+      user,
+    });
+
+    // Send confirmation email asynchronously
+    const htmlContent = `
+      <p>Hello <b>${firstName} ${lastName}</b>,</p>
+      <p>We are pleased to inform you that you may now proceed with your <b>Business Renewal Application.</b></p>
+      <p>Please click the link below to continue with your application process:</p>
+      <a href="${process.env.VITE_API_BASE}/renewPage/${user.id}/${user.BIN}">
+        View Application
+      </a>
+      <p>Should you have any questions or require further assistance, please do not hesitate to contact us.</p>
+      <br/><br/>
+      <p>Kind regards,<br/><b>Business Portal Team</b></p>
+    `;
+    sendEmail(email, "Renew Business Application", htmlContent);
+  } catch (error) {
+    console.error("❌ Register error:", error);
+    res.status(500).json({ error: "Server error during registration." });
+  }
+});
+
 router.get("/:id", async (req, res) => {
   try {
     const user = await UserAccounts.findByPk(req.params.id, {
