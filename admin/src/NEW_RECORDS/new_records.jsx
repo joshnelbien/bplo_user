@@ -265,6 +265,18 @@ function New_records() {
             >
               Computation
             </Button>
+             <Button
+              onClick={() => {
+                setFilter("permitRelease");
+                setCurrentPage(1);
+              }}
+              sx={{
+                bgcolor: filter === "permitRelease" ? "#1c541e" : undefined,
+                color: filter === "permitRelease" ? "white" : undefined,
+              }}
+            >
+              FOR RELEASING PERMIT
+            </Button>
           </ButtonGroup>
         </Box>
 
