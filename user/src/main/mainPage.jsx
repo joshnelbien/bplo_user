@@ -532,7 +532,7 @@ function App() {
               Business Assessment
             </Button>
 
-             <Button
+            <Button
               variant="outlined"
               sx={{
                 width: "300px", // Match SearchBar width
@@ -547,7 +547,7 @@ function App() {
                 },
                 mt: 0, // Ensure no extra margin is applied
               }}
-              onClick={() => setIsAssessmentOpen(true)}
+              onClick={() => navigate("/feedback")}
             >
               Feedback
             </Button>
