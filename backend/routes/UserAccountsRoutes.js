@@ -72,6 +72,7 @@ router.post("/register", async (req, res) => {
       tin_no: tinNo || null,
       trade_name: TradeName || null,
       application_type: "New",
+      DataPrivacy: "True",
     });
 
     console.log("✅ User inserted:", user.id);
