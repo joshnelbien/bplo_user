@@ -153,7 +153,8 @@ export default function Step6BusinessActivity({
 
   useEffect(() => {
     handleChange({ target: { name: "totalCapital", value: totalCapital } });
-  }, [totalCapital, handleChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [totalCapital]);
 
   return (
     <div style={{ marginBottom: 20 }}>

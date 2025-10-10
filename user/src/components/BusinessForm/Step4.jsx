@@ -29,8 +29,9 @@ export default function Step4TaxInfo({
 
   // ✅ Auto-fill taxpayer’s address if same as business
   useEffect(() => {
+    if (!formData) return; // safety check
+
     if (sameAsBusiness === "YES") {
-      // Autofill with business address
       handleChange({ target: { name: "Taxregion", value: formData.region } });
       handleChange({
         target: { name: "Taxprovince", value: formData.province },
@@ -49,7 +50,6 @@ export default function Step4TaxInfo({
       });
       handleChange({ target: { name: "TaxzipCode", value: formData.zipCode } });
     } else if (sameAsBusiness === "NO") {
-      // Clear all taxpayer’s address fields
       handleChange({ target: { name: "Taxregion", value: "" } });
       handleChange({ target: { name: "Taxprovince", value: "" } });
       handleChange({ target: { name: "TaxcityOrMunicipality", value: "" } });
@@ -57,7 +57,7 @@ export default function Step4TaxInfo({
       handleChange({ target: { name: "TaxaddressLine1", value: "" } });
       handleChange({ target: { name: "TaxzipCode", value: "" } });
     }
-  }, [sameAsBusiness, formData, handleChange]);
+  }, [sameAsBusiness]);
 
   const handleUppercaseChange = (e) => {
     const { name, value } = e.target;
