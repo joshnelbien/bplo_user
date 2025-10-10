@@ -497,6 +497,7 @@ function App() {
                 fontWeight: "bold",
                 backgroundColor: "#09360D",
                 "&:hover": { backgroundColor: "#07270a" },
+                m: 1,
               }}
               onClick={handleTrackClick}
               disabled={isTracking}
@@ -525,7 +526,7 @@ function App() {
                   color: "#07270a",
                   backgroundColor: "rgba(9, 54, 13, 0.04)",
                 },
-                mt: 0, // Ensure no extra margin is applied
+                m: 1, // Ensure no extra margin is applied
               }}
               onClick={() => setIsAssessmentOpen(true)}
             >
@@ -564,6 +565,7 @@ function App() {
                   borderTop: "2px solid #09360D",
                   width: "100%",
                   backgroundColor: "#fafafa",
+                  m: 1,
                 }}
               >
                 <Typography
