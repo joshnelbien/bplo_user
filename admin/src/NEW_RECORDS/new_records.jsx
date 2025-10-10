@@ -265,6 +265,18 @@ function New_records() {
             >
               Computation
             </Button>
+             <Button
+              onClick={() => {
+                setFilter("pending");
+                setCurrentPage(1);
+              }}
+              sx={{
+                bgcolor: filter === "pending" ? "#1c541e" : undefined,
+                color: filter === "pending" ? "white" : undefined,
+              }}
+            >
+              FOR RELEASING PERMIT
+            </Button>
           </ButtonGroup>
         </Box>
 
