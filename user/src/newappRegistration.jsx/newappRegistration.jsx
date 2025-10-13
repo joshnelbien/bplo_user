@@ -50,11 +50,11 @@ const GreenButton = styled(Button)(({ variant }) => ({
 
 const BackButtonContained = styled(Button)({
   borderRadius: "8px",
-  backgroundColor: PRIMARY_COLOR, 
+  backgroundColor: PRIMARY_COLOR,
   color: "#fff",
   boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
   "&:hover": {
-    backgroundColor: HOVER_COLOR, 
+    backgroundColor: HOVER_COLOR,
   },
 });
 
@@ -274,7 +274,7 @@ function NewApplicationRegisterPage() {
 
   const handleBackButton = () => {
     if (step === 1) {
-      navigate('/');
+      navigate("/");
     } else {
       setStep(step - 1);
     }
@@ -320,14 +320,35 @@ function NewApplicationRegisterPage() {
           width: "100%",
           maxWidth: isMobile ? 320 : 900,
           mx: "auto",
-          mb: 2,
+          mb: -2,
+        }}
+      ></Box>
+
+      <Box
+        sx={{
+          width: "100%",
+          backgroundColor: "#09360D",
+          py: 1.5, // vertical padding for height
         }}
       >
+        <Typography
+          variant="h6"
+          align="center"
+          gutterBottom={false}
+          sx={{
+            fontWeight: "bold",
+            color: "#fff", // white text
+            mt: 0, // remove top margin (since Box handles spacing)
+          }}
+        >
+          BUSINESS APPLICATION FORM
+        </Typography>
       </Box>
 
       <Paper
         elevation={6}
         sx={{
+          mt: 6,
           p: { xs: 2, sm: 4 },
           width: "100%",
           maxWidth: isMobile ? 320 : 900,
@@ -335,19 +356,6 @@ function NewApplicationRegisterPage() {
           borderRadius: "16px",
         }}
       >
-        <Typography
-          variant="h6"
-          align="center"
-          gutterBottom
-          sx={{
-            fontWeight: "bold",
-            color: "#333",
-            mt: 2,
-          }}
-        >
-          BUSINESS APPLICATION FORM
-        </Typography>
-
         <Stepper
           activeStep={step - 1}
           alternativeLabel
@@ -357,19 +365,17 @@ function NewApplicationRegisterPage() {
             justifyContent: "center",
             "& .MuiStepIcon-root": {
               color: PRIMARY_COLOR,
+              opacity: 0.3, // fade out by default
+              transition: "opacity 0.3s ease",
               "&.Mui-active": {
                 color: HOVER_COLOR,
+                opacity: 1, // fully visible when active
               },
               "&.Mui-completed": {
                 color: PRIMARY_COLOR,
+                opacity: 1, // fully visible when completed
               },
             },
-            "& .MuiStepConnector-line": {
-              borderColor: PRIMARY_COLOR,
-            },
-            "& .MuiStepLabel-label": {
-              color: PRIMARY_COLOR,
-            }
           }}
         >
           {steps.map((label, index) => (
@@ -434,7 +440,7 @@ function NewApplicationRegisterPage() {
                       Processing...
                     </>
                   ) : (
-                    "Submit Form"
+                    "Submit"
                   )}
                 </GreenButton>
               )}
@@ -491,7 +497,9 @@ function NewApplicationRegisterPage() {
           }}
         >
           <Grow in={successDialogOpen}>
-            <CheckCircleOutlineIcon sx={{ fontSize: 80, color: PRIMARY_COLOR }} />
+            <CheckCircleOutlineIcon
+              sx={{ fontSize: 80, color: PRIMARY_COLOR }}
+            />
           </Grow>
           <Typography
             variant="h6"
