@@ -1,4 +1,11 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button } from "@mui/material";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+  Button,
+} from "@mui/material";
 import { styled } from "@mui/system";
 
 // Define styles for buttons (reusing the same styles as in the main component)
@@ -28,32 +35,46 @@ const GreenButton = styled(Button)(({ variant }) => ({
 }));
 
 // Reusable NextStepConfirmationDialog component
-function NextStepConfirmationDialog({ open, onClose, onConfirm, formData, step, isSubmit = false }) {
+function NextStepConfirmationDialog({
+  open,
+  onClose,
+  onConfirm,
+  formData,
+  step,
+  isSubmit = false,
+}) {
   return (
-    <Dialog open={open} onClose={onClose} PaperProps={{ sx: { borderRadius: '12px' } }}>
-      <DialogTitle sx={{ 
-          backgroundColor: PRIMARY_COLOR, 
-          color: WHITE, 
-          borderTopLeftRadius: '12px',
-          borderTopRightRadius: '12px',
-          fontWeight: 'bold' 
-        }}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      PaperProps={{ sx: { borderRadius: "12px" } }}
+    >
+      <DialogTitle
+        sx={{
+          backgroundColor: PRIMARY_COLOR,
+          color: WHITE,
+          borderTopLeftRadius: "12px",
+          borderTopRightRadius: "12px",
+          fontWeight: "bold",
+        }}
+      >
         {isSubmit ? "Submit Application" : "Confirm Next Step"}
       </DialogTitle>
       <DialogContent sx={{ p: 3 }}>
-        <Typography variant="body1" sx={{ color: 'text.primary', mb: 1 }}>
-          {isSubmit 
-            ? "Are you sure you want to submit?"
-            : "Are you sure you want to proceed to the next step?"
-          }
+        <Typography variant="body1" sx={{ color: "text.primary", mb: 1 }}>
+          {isSubmit}
         </Typography>
-        <Typography component="div" variant="body2" sx={{ 
-            mt: 2, 
-            p: 2, 
-            backgroundColor: 'rgba(9, 54, 13, 0.04)',
-            borderRadius: '6px',
-            color: PRIMARY_COLOR
-        }}>
+        <Typography
+          component="div"
+          variant="body2"
+          sx={{
+            mt: 2,
+            p: 2,
+            backgroundColor: "rgba(9, 54, 13, 0.04)",
+            borderRadius: "6px",
+            color: PRIMARY_COLOR,
+          }}
+        >
           {isSubmit || step === 1 ? (
             <>
               <strong>Business Type:</strong>{" "}
@@ -104,37 +125,48 @@ function NextStepConfirmationDialog({ open, onClose, onConfirm, formData, step, 
               <strong>Middle Name:</strong>{" "}
               {formData.middleName || "Not specified"}
               <br />
-              <strong>Last Name:</strong>{" "}
-              {formData.lastName || "Not specified"}
+              <strong>Last Name:</strong> {formData.lastName || "Not specified"}
               <br />
-              <strong>Ext. Name:</strong>{" "}
-              {formData.extName || "Not specified"}
+              <strong>Ext. Name:</strong> {formData.extName || "Not specified"}
               <br />
               <strong>Gender:</strong> {formData.sex || "Not specified"}
               <br />
               <strong>Email:</strong> {formData.email || "Not specified"}
               <br />
-              <strong>Telephone No:</strong>{" "}
-              {formData.telNo || "Not specified"}
+              <strong>Telephone No:</strong> {formData.telNo || "Not specified"}
               <br />
-              <strong>Mobile No:</strong>{" "}
-              {formData.mobileNo || "Not specified"}
+              <strong>Mobile No:</strong> {formData.mobileNo || "Not specified"}
             </>
           )}
         </Typography>
       </DialogContent>
-      <DialogActions sx={{ justifyContent: "center", gap: 2, p: 2, borderTop: `1px solid ${LIGHT_HOVER_COLOR}` }}>
+      <DialogActions
+        sx={{
+          justifyContent: "center",
+          gap: 2,
+          p: 2,
+          borderTop: `1px solid ${LIGHT_HOVER_COLOR}`,
+        }}
+      >
         <GreenButton
-          variant="outlined"
+          variant="contained"
           onClick={onClose}
-          sx={{ minWidth: "90px" }}
+          sx={{
+            minWidth: "100px",
+            backgroundColor: "#70706fff",
+            color: "#fff",
+            "&:hover": {
+              backgroundColor: "#acababff",
+            },
+          }}
         >
           No
         </GreenButton>
+
         <GreenButton
           variant="contained"
           onClick={onConfirm}
-          sx={{ minWidth: "120px" }}
+          sx={{ minWidth: "100px" }}
         >
           Yes
         </GreenButton>
