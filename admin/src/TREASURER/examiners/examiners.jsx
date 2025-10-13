@@ -31,9 +31,7 @@ function Examiners() {
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get(
-          `${API}/examiners/examiners`
-        );
+        const res = await axios.get(`${API}/examiners/examiners`);
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
@@ -64,10 +62,9 @@ function Examiners() {
 
   const handleApprove = async (id) => {
     try {
-      await axios.post(
-        `${API}/examiners/examiners/approve/${id}`,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      await axios.post(`${API}/examiners/examiners/approve/${id}`, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       setApplicants((prev) =>
         prev.map((applicant) =>

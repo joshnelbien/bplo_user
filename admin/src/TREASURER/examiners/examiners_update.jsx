@@ -1,8 +1,5 @@
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useState, useEffect } from "react";
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Button,
   Dialog,
   DialogActions,
@@ -12,68 +9,48 @@ import {
   Paper,
   TextField,
   Typography,
-  IconButton,
   Tooltip,
+  IconButton,
 } from "@mui/material";
-import { useState, useEffect } from "react";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import ExaminersApplicantModalUpdate from "./examiners_update";
+import axios from "axios";
+import ExaminersApplicantModal from "./examiners_modal";
 
 const API = import.meta.env.VITE_API_BASE;
-// Component to display a normal text field
-const Field = ({
-  label,
-  value,
-  xs = 12,
-  sm = 6,
-  fullWidth = false,
-  multiline = false,
-  rows = 1,
-}) => (
-  <Grid item xs={fullWidth ? 12 : sm} sm={sm}>
+
+// ✅ Reusable Text Field
+const Field = ({ label, value, onChange, name }) => (
+  <Grid item xs={12} sm={6}>
     <TextField
       label={label}
-      value={value || "—"}
+      name={name}
+      value={value || ""}
+      onChange={onChange}
       fullWidth
-      multiline={multiline}
-      rows={rows}
       variant="outlined"
       size="small"
-      disabled
-      InputProps={{
-        sx: {
-          color: "black",
-          "& .MuiInputBase-input.Mui-disabled": {
-            WebkitTextFillColor: "black",
-          },
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "black",
-          },
-          "&.Mui-disabled .MuiOutlinedInput-notchedOutline": {
-            borderColor: "black",
-          },
-        },
-      }}
-      InputLabelProps={{
-        sx: {
-          color: "black",
-          "&.Mui-disabled": { color: "black" },
-        },
-      }}
     />
   </Grid>
 );
 
-const formatNumber = (value) => {
-  if (!value) return "—";
-  const num = Number(value.toString().replace(/[^0-9.-]+/g, ""));
-  if (isNaN(num)) return value;
-  return num.toLocaleString("en-US");
-};
+// ✅ Section Wrapper
+const Section = ({ title, children }) => (
+  <Paper
+    elevation={0}
+    sx={{ border: "1px solid #ddd", p: 2, mb: 2, borderRadius: 2 }}
+  >
+    <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+      {title}
+    </Typography>
+    <Grid container spacing={2}>
+      {children}
+    </Grid>
+  </Paper>
+);
 
-// Component to display files as links
+// ✅ File Viewer / Downloader
 const FileField = ({ label, fileKey, fileData }) => (
   <Grid item xs={12} sm={6}>
     <TextField
@@ -91,25 +68,12 @@ const FileField = ({ label, fileKey, fileData }) => (
           "& .MuiInputBase-input.Mui-disabled": {
             WebkitTextFillColor: "black",
           },
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "black",
-          },
-          "&.Mui-disabled .MuiOutlinedInput-notchedOutline": {
-            borderColor: "black",
-          },
-        },
-      }}
-      InputLabelProps={{
-        sx: {
-          color: "black",
-          "&.Mui-disabled": { color: "black" },
         },
       }}
     />
-
     {fileData[fileKey] && (
       <Typography
-        component="span"
+        variant="body2"
         sx={{ mt: 0.5, display: "flex", gap: 1, alignItems: "center" }}
       >
         <Tooltip title="View File">
@@ -120,7 +84,7 @@ const FileField = ({ label, fileKey, fileData }) => (
             target="_blank"
             rel="noreferrer"
           >
-            <Typography component="span"> View</Typography>
+            <Typography component="span">view</Typography>
             <VisibilityIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -133,7 +97,7 @@ const FileField = ({ label, fileKey, fileData }) => (
             target="_blank"
             rel="noreferrer"
           >
-            <Typography component="span"> Download</Typography>
+            <Typography component="span">download</Typography>
             <DownloadIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -142,77 +106,82 @@ const FileField = ({ label, fileKey, fileData }) => (
   </Grid>
 );
 
-const formatCurrency = (value) => {
-  if (!value) return "";
-  const num = parseFloat(value.toString().replace(/,/g, ""));
-  if (isNaN(num)) return value;
-  return num.toLocaleString("en-US");
-};
-function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
-  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
-  const [updateModal, setUpdateModal] = useState(false);
+function ExaminersApplicantModalUpdate({
+  applicant,
+  isOpen,
+  onClose,
+  onApprove,
+}) {
+  const [formData, setFormData] = useState({});
   const [capitalValues, setCapitalValues] = useState([]);
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [examinersModal, setExaminersModal] = useState(false);
 
   useEffect(() => {
-    if (applicant?.capital) {
-      const parseCSV = (text) => {
-        if (!text) return [];
-        return text
-          .trim()
-          .replace(/^\[|\]$/g, "")
-          .split(/",\s*"?/)
-          .map((val) => val.replace(/^"|"$/g, "").trim())
-          .filter((val) => val.length > 0);
-      };
-
+    if (applicant) {
+      setFormData({ ...applicant });
       setCapitalValues(parseCSV(applicant.capital));
     }
   }, [applicant]);
 
+  const parseCSV = (text) => {
+    if (!text) return [];
+    return text
+      .trim()
+      .replace(/^\[|\]$/g, "")
+      .split(/",\s*"?/)
+      .map((val) => val.replace(/^"|"$/g, "").trim())
+      .filter((val) => val.length > 0);
+  };
+
   if (!isOpen || !applicant) return null;
 
-  const Section = ({ title, children }) => (
-    <Accordion>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography variant="subtitle1" fontWeight="bold">
-          {title}
-        </Typography>
-      </AccordionSummary>
-      <AccordionDetails>
-        <Grid container spacing={2}>
-          {children}
-        </Grid>
-      </AccordionDetails>
-    </Accordion>
-  );
-
-  const handleUpdate = () => {
-    setUpdateModal(true);
-  };
-  const handleCloseUpdate = () => {
-    setUpdateModal(false);
-  };
-  const handleApproveClick = () => {
-    setConfirmDialogOpen(true);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value.toUpperCase(),
+    }));
   };
 
-  const handleConfirmApprove = () => {
-    setConfirmDialogOpen(false);
-    setSuccessDialogOpen(true);
-    if (onApprove) {
-      onApprove(applicant.id);
+  const handleUpdate = async () => {
+    try {
+      const updatedData = {
+        ...formData,
+        capital: JSON.stringify(capitalValues), // send as JSON array string
+      };
+
+      const res = await axios.put(
+        `${API}/examiners/examiners/${formData.id}`,
+        updatedData
+      );
+
+      if (res.status === 200) {
+        console.log("✅ Updated record:", res.data);
+        setSuccessDialogOpen(true);
+
+        if (onApprove) onApprove(formData, capitalValues);
+
+        // wait a bit before closing and refreshing
+        setTimeout(() => {
+          setSuccessDialogOpen(false);
+          setExaminersModal(false);
+          onClose();
+
+          // 🔄 Refresh the whole page
+          window.location.reload();
+        }, 1500);
+      }
+    } catch (err) {
+      console.error("❌ Update failed:", err);
+      alert("Failed to update applicant details.");
     }
-    setTimeout(() => {
-      setSuccessDialogOpen(false);
-      onClose();
-    }, 2000);
   };
 
   return (
     <>
       <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
-        <DialogTitle>Applicant Details</DialogTitle>
+        <DialogTitle>Update Applicant Details</DialogTitle>
         <DialogContent dividers>
           {/* Business Info */}
           <Section title="Business Information">
@@ -298,7 +267,6 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
           </Section>
 
           {/* Business Activity */}
-
           <Section title="Business Activity & Incentives">
             <Field label="Tax Incentives" value={applicant.tIGE} />
             {applicant.tIGE === "Yes" && (
@@ -312,105 +280,134 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
             <Field label="Office Type" value={applicant.officeType} />
 
             {(() => {
-              // ✅ Utility function to safely parse CSV-like fields with quotes
               const parseCSV = (text) => {
                 if (!text) return [];
                 return text
-
                   .trim()
-
                   .replace(/^\[|\]$/g, "")
-
                   .split(/",\s*"?/)
-
                   .map((val) => val.replace(/^"|"$/g, "").trim())
                   .filter((val) => val.length > 0);
               };
 
-              // ✅ Extract arrays for each field
               const lobArr = parseCSV(applicant.lineOfBusiness);
               const productArr = parseCSV(applicant.productService);
               const unitArr = parseCSV(applicant.Units);
-              const capitalArr = parseCSV(applicant.capital);
               const natureCodeArr = parseCSV(applicant.natureCode);
               const businessNatureArr = parseCSV(applicant.businessNature);
               const lineCodeArr = parseCSV(applicant.lineCode);
 
-              // ✅ Find the maximum length among arrays (in case some are shorter)
               const maxLength = Math.max(
                 lobArr.length,
                 productArr.length,
                 unitArr.length,
-                capitalArr.length,
+                capitalValues.length,
                 natureCodeArr.length,
                 businessNatureArr.length,
                 lineCodeArr.length
               );
 
-              return Array.from({ length: maxLength }).map((_, index) => {
-                const lob = lobArr[index] || "";
-                const product = productArr[index] || "";
-                const unit = unitArr[index] || "";
-                const capital = capitalArr[index] || "";
-                const natureCode = natureCodeArr[index] || "";
-                const businessNature = businessNatureArr[index] || "";
-                const lineCode = lineCodeArr[index] || "";
-
-                return (
-                  <Paper
-                    key={index}
-                    elevation={2}
-                    sx={{
-                      p: 2,
-                      mb: 2,
-                      borderRadius: 2,
-                      backgroundColor: "#f9f9f9",
-                      width: "100%", // 🟩 Ensure Paper itself takes full width
-                    }}
+              return Array.from({ length: maxLength }).map((_, index) => (
+                <Paper
+                  key={index}
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    mb: 2,
+                    borderRadius: 2,
+                    backgroundColor: "#f9f9f9",
+                    width: "100%",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    fontWeight="bold"
+                    gutterBottom
                   >
-                    <Typography
-                      variant="subtitle2"
-                      fontWeight="bold"
-                      gutterBottom
-                    >
-                      Business Line {index + 1}
-                    </Typography>
+                    Business Line {index + 1}
+                  </Typography>
 
-                    <Grid container spacing={2}>
-                      {/* 🟩 Line of Business — full width */}
+                  <Grid container spacing={2}>
+                    <Field
+                      label="Line of Business"
+                      value={lobArr[index] || ""}
+                      fullWidth
+                      multiline
+                      rows={3}
+                    />
+                    <Grid item xs={12} sm={6}>
                       <Field
-                        label="Line of Business"
-                        value={lob}
-                        fullWidth
-                        multiline
-                        rows={3} // adjust rows if you want a taller box (e.g., 4 or 5)
+                        label="Product/Service"
+                        value={productArr[index] || ""}
                       />
-
-                      <Grid item xs={12} sm={6}>
-                        <Field label="Product/Service" value={product} />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Field label="Units" value={unit} />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Field
-                          label="Capital"
-                          value={formatCurrency(capital)}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Field label="Nature Code" value={natureCode} />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Field label="Business Nature" value={businessNature} />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Field label="Line Code" value={lineCode} />
-                      </Grid>
                     </Grid>
-                  </Paper>
-                );
-              });
+                    <Grid item xs={12} sm={6}>
+                      <Field label="Units" value={unitArr[index] || ""} />
+                    </Grid>
+
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        label="Capital"
+                        value={
+                          capitalValues[index]
+                            ? Number(
+                                capitalValues[index]
+                                  .toString()
+                                  .replace(/,/g, "")
+                              ).toLocaleString()
+                            : ""
+                        }
+                        onChange={(e) => {
+                          // Remove any commas, only keep digits
+                          const rawValue = e.target.value
+                            .replace(/,/g, "")
+                            .replace(/\D/g, "");
+                          const updated = [...capitalValues];
+                          updated[index] = rawValue; // store numeric value (unformatted) in state
+                          setCapitalValues(updated);
+                        }}
+                        fullWidth
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                          backgroundColor: "#fffbe6",
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#1c541e",
+                          },
+                          "&:hover .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#2e7d32",
+                          },
+                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#1b5e20",
+                          },
+                        }}
+                        InputLabelProps={{
+                          sx: { color: "black" },
+                        }}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12} sm={6}>
+                      <Field
+                        label="Nature Code"
+                        value={natureCodeArr[index] || ""}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Field
+                        label="Business Nature"
+                        value={businessNatureArr[index] || ""}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Field
+                        label="Line Code"
+                        value={lineCodeArr[index] || ""}
+                      />
+                    </Grid>
+                  </Grid>
+                </Paper>
+              ));
             })()}
           </Section>
 
@@ -461,88 +458,30 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
         </DialogContent>
 
         <DialogActions>
-          <Button
-            onClick={onClose}
-            variant="contained"
-            color="gray"
-            sx={{
-              color: "#1c541eff",
-              borderColor: "#1c541eff",
-              "&:hover": {
-                borderColor: "#1c541eff",
-              },
-              width: "100px",
-            }}
-          >
+          <Button onClick={onClose} variant="outlined">
             Close
           </Button>
-          <Button
-            onClick={handleApproveClick}
-            variant="contained"
-            color="success"
-          >
-            Approve
-          </Button>
-          <Button onClick={handleUpdate} variant="contained" color="success">
-            Update
-          </Button>
-
-          <Button
-            onClick={onClose}
-            variant="contained"
-            color="error"
-            sx={{
-              color: "white",
-            }}
-          >
-            Decline
+          <Button variant="contained" color="success" onClick={handleUpdate}>
+            Save
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Confirm Approve Dialog */}
-      <Dialog
-        open={confirmDialogOpen}
-        onClose={() => setConfirmDialogOpen(false)}
-      >
-        <DialogTitle>Are you sure you want to approve?</DialogTitle>
-        <DialogActions>
-          <Button onClick={() => setConfirmDialogOpen(false)}>No</Button>
-          <Button onClick={handleConfirmApprove} color="success" autoFocus>
-            Yes
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Success Dialog */}
+      {/* ✅ Success Feedback */}
       <Dialog
         open={successDialogOpen}
         onClose={() => setSuccessDialogOpen(false)}
       >
-        <DialogContent
-          sx={{
-            textAlign: "center",
-            p: 4,
-          }}
-        >
+        <DialogContent sx={{ textAlign: "center", p: 4 }}>
           <CheckCircleOutlineIcon
             color="success"
             sx={{ fontSize: 60, mb: 2 }}
           />
-          <Typography variant="h6" gutterBottom>
-            Approved Successfully!
-          </Typography>
+          <Typography variant="h6">Updated Successfully!</Typography>
         </DialogContent>
       </Dialog>
-      {updateModal && (
-        <ExaminersApplicantModalUpdate
-          applicant={applicant}
-          isOpen={updateModal}
-          onClose={handleCloseUpdate}
-        />
-      )}
     </>
   );
 }
 
-export default ExaminersApplicantModal;
+export default ExaminersApplicantModalUpdate;
