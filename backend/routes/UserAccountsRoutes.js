@@ -96,7 +96,7 @@ router.post("/register", async (req, res) => {
   <br/><br/>
   <p>Kind regards,<br/><b>Business Portal Team</b></p>
 `;
-    sendEmail(email, "Renew Business Application", htmlContent);
+    sendEmail(email, "Business Application", htmlContent);
   } catch (error) {
     console.error("❌ Register error:", error);
     res.status(500).json({ error: "Server error during registration." });
