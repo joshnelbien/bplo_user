@@ -220,6 +220,24 @@ router.get("/examiners", async (req, res) => {
   }
 });
 
+router.put("/examiners/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    const examiner = await Examiners.findByPk(id);
+    if (!examiner) {
+      return res.status(404).json({ error: "Examiner not found" });
+    }
+
+    await examiner.update(updates);
+    res.json({ message: "Examiner updated successfully", examiner });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Update failed" });
+  }
+});
+
 // List files of a specific user by userId
 router.get("/examiners/:id", async (req, res) => {
   try {

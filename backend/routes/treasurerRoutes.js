@@ -6,12 +6,12 @@ const moment = require("moment");
 const AppStatus = require("../db/model/applicantStatusDB");
 const TreasurersOffice = require("../db/model/treasurersOfficeDB");
 const BusinessProfile = require("../db/model/businessProfileDB");
+const File = require("../db/model/files");
 
 router.post("/businessTax/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // 1. Get applicant from Files table
     const applicant = await Backroom.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
@@ -43,6 +43,10 @@ router.post("/treasurerOffice/approve/:id", async (req, res) => {
     // 1. Get applicant from Files table
     const applicant = await TreasurersOffice.findByPk(id);
     if (!applicant) {
+    }
+
+    const forRelease = await File.findByPk(id);
+    if (!forRelease) {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
@@ -53,7 +57,10 @@ router.post("/treasurerOffice/approve/:id", async (req, res) => {
     applicantData.TREASURERtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
     const created = await BusinessProfile.create(applicantData);
-
+    await forRelease.update({
+      passtoTreasurer: "Done",
+      permitRelease: "Yes",
+    });
     await applicant.update({
       TREASURER: "Approved",
       TREASURERtimeStamp: applicant.CHOtimeStamp,

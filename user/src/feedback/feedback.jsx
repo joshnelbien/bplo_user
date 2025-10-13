@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -243,6 +244,8 @@ const RatingTable = ({
 export default function ClientFeedbackForm() {
   // State to hold the selected ratings for the two tables
   const [ratings, setRatings] = useState({});
+  const navigate = useNavigate();
+  const API = import.meta.env.VITE_API_BASE;
 
   const clientFields = [
     {
@@ -276,11 +279,47 @@ export default function ClientFeedbackForm() {
     { id: "f3", criteria: "Sufficiency/Sapat (Pasilidad/ Kagamitan)" },
   ];
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("Form submitted. Ratings:", ratings);
-    // Add your form submission logic here (e.g., API call)
-    alert("Thank you for submitting your feedback. It means a lot to us and helps us improve your experience.");
+
+    const formData = {
+      clientName: document.getElementById("clientName").value,
+      emailAddress: document.getElementById("emailAddress").value,
+      contactNo: document.getElementById("contactNo").value,
+      transactionDate: document.getElementById("transactionDate").value,
+      transactionTime: document.getElementById("transactionTime").value,
+      employeeName: document.getElementById("employeeName").value,
+      serviceAvailed: document.getElementById("serviceAvailed").value,
+      comments: document.querySelector("textarea").value,
+      ratings: {
+        "Quality of Service": qualityOfServiceItems.map((item) => ({
+          criteria: item.criteria,
+          rating: ratings[item.id] || "Not rated",
+        })),
+        Facilities: facilitiesItems.map((item) => ({
+          criteria: item.criteria,
+          rating: ratings[item.id] || "Not rated",
+        })),
+      },
+    };
+
+    try {
+      const response = await fetch(`${API}/user-feedback/send-feedback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        alert("Thank you for submitting your feedback!");
+        navigate("/");
+      } else {
+        alert("Error sending feedback. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Server error. Please try again later.");
+    }
   };
 
   return (

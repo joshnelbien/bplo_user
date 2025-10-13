@@ -126,14 +126,24 @@ function New_records() {
   /* ✅ Filter logic */
   const filteredApplicants = applicants.filter((a) => {
     const bploStatus = a.BPLO?.toLowerCase();
+    const nobplostatus = a.passtoBusinessTax === "No";
     const businessTax = a.passtoBusinessTax === "Yes";
+    const treasurerOffice = a.passtoTreasurer === "Yes";
+    const permitRelease = a.permitRelease === "Yes";
 
     if (filter === "pending") {
       return bploStatus === "pending";
     }
 
-    if (filter === "approved") {
-      return bploStatus === "approved" && !businessTax;
+    if (filter === "nobplostatus") {
+      return nobplostatus;
+    }
+    if (filter === "treasurerOffice") {
+      return treasurerOffice;
+    }
+
+    if (filter === "permitRelease") {
+      return permitRelease;
     }
 
     if (filter === "businessTax") {
@@ -235,44 +245,75 @@ function New_records() {
                 setCurrentPage(1);
               }}
               sx={{
-                bgcolor: filter === "pending" ? "#1c541e" : undefined,
-                color: filter === "pending" ? "white" : undefined,
+                bgcolor: filter === "pending" ? "#1c541e" : "#ffff", // ✅ gray when inactive
+                color: filter === "pending" ? "white" : "black",
+                "&:hover": {
+                  bgcolor: filter === "pending" ? "#174a18" : "#bdbdbd", // darker hover effect
+                },
               }}
             >
               Pending
             </Button>
+
             <Button
               onClick={() => {
-                setFilter("approved");
+                setFilter("nobplostatus");
                 setCurrentPage(1);
               }}
               sx={{
-                bgcolor: filter === "approved" ? "#1c541e" : undefined,
-                color: filter === "approved" ? "white" : undefined,
+                bgcolor: filter === "nobplostatus" ? "#1c541e" : "#ffff",
+                color: filter === "nobplostatus" ? "white" : "black",
+                "&:hover": {
+                  bgcolor: filter === "nobplostatus" ? "#174a18" : "#bdbdbd",
+                },
               }}
             >
               On Going
             </Button>
+
             <Button
               onClick={() => {
                 setFilter("businessTax");
                 setCurrentPage(1);
               }}
               sx={{
-                bgcolor: filter === "businessTax" ? "#1c541e" : undefined,
-                color: filter === "businessTax" ? "white" : undefined,
+                bgcolor: filter === "businessTax" ? "#1c541e" : "#ffff",
+                color: filter === "businessTax" ? "white" : "black",
+                "&:hover": {
+                  bgcolor: filter === "businessTax" ? "#174a18" : "#bdbdbd",
+                },
               }}
             >
               Computation
             </Button>
-             <Button
+
+            <Button
+              onClick={() => {
+                setFilter("treasurerOffice");
+                setCurrentPage(1);
+              }}
+              sx={{
+                bgcolor: filter === "treasurerOffice" ? "#1c541e" : "#ffff",
+                color: filter === "treasurerOffice" ? "white" : "black",
+                "&:hover": {
+                  bgcolor: filter === "treasurerOffice" ? "#174a18" : "#bdbdbd",
+                },
+              }}
+            >
+              For Payment
+            </Button>
+
+            <Button
               onClick={() => {
                 setFilter("permitRelease");
                 setCurrentPage(1);
               }}
               sx={{
-                bgcolor: filter === "permitRelease" ? "#1c541e" : undefined,
-                color: filter === "permitRelease" ? "white" : undefined,
+                bgcolor: filter === "permitRelease" ? "#1c541e" : "#ffff",
+                color: filter === "permitRelease" ? "white" : "black",
+                "&:hover": {
+                  bgcolor: filter === "permitRelease" ? "#174a18" : "#bdbdbd",
+                },
               }}
             >
               FOR RELEASING PERMIT

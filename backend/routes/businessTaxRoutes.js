@@ -27,7 +27,9 @@ router.post("/businessTax/approve/:id", async (req, res) => {
     applicantData.BUSINESSTAXtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
     const created = await BusinessTax.create(applicantData);
-    await examinersApplicant.update({ passtoBusinessTax: "Yes" });
+    await examinersApplicant.update({
+      passtoBusinessTax: "Yes",
+    });
     res.status(201).json({
       message:
         "Applicant approved, archived in Backroom, and moved to BusinessTax",
@@ -80,7 +82,8 @@ router.post(
       // Update statuses
 
       await applicantbusinessTax.update({
-        passtoBusinessTax: "Yes",
+        passtoBusinessTax: "Done",
+        passtoTreasurer: "Yes",
         BUSINESSTAXtimeStamp: timestamp,
         ...(file && {
           businesstaxComputation: file.buffer,

@@ -83,18 +83,19 @@ router.post("/register", async (req, res) => {
       user,
     });
 
-    // Send confirmation email asynchronously
     const htmlContent = `
-      <p>Hello <b>${firstName} ${lastName}</b>,</p>
-      <p>We are pleased to inform you that you may now proceed with your <b>New Business Application.</b></p>
-      <p>Please click the link below to continue with your application process:</p>
-      <a href="${process.env.VITE_API_BASE}/newApplicationPage/${user.id}"></a>
-        View Application
-      </a>
-      <p>Should you have any questions or require further assistance, please do not hesitate to contact us.</p>
-      <br/><br/>
-      <p>Kind regards,<br/><b>Business Portal Team</b></p>
-    `;
+  <p>Hello <b>${firstName} ${lastName}</b>,</p>
+  <p>We are pleased to inform you that you may now proceed with your <b>New Business Application.</b></p>
+  <p>Please click the link below to continue with your application process:</p>
+  <a href="${process.env.VITE_API_BASE}/newApplicationPage/${user.id}"
+     style="display:inline-block; padding:10px 16px; background-color:#144C22; color:white; 
+            text-decoration:none; border-radius:4px; font-weight:bold;">
+    View Application
+  </a>
+  <p>Should you have any questions or require further assistance, please do not hesitate to contact us.</p>
+  <br/><br/>
+  <p>Kind regards,<br/><b>Business Portal Team</b></p>
+`;
     sendEmail(email, "Renew Business Application", htmlContent);
   } catch (error) {
     console.error("❌ Register error:", error);
@@ -158,16 +159,19 @@ router.post("/register-renew", async (req, res) => {
 
     // Send confirmation email asynchronously
     const htmlContent = `
-      <p>Hello <b>${firstName} ${lastName}</b>,</p>
-      <p>We are pleased to inform you that you may now proceed with your <b>Business Renewal Application.</b></p>
-      <p>Please click the link below to continue with your application process:</p>
-      <a href="${process.env.VITE_API_BASE}/renewPage/${user.id}/${user.BIN}">
-        View Application
-      </a>
-      <p>Should you have any questions or require further assistance, please do not hesitate to contact us.</p>
-      <br/><br/>
-      <p>Kind regards,<br/><b>Business Portal Team</b></p>
-    `;
+  <p>Hello <b>${firstName} ${lastName}</b>,</p>
+  <p>We are pleased to inform you that you may now proceed with your <b>Business Renewal Application.</b></p>
+  <p>Please click the link below to continue with your application process:</p>
+  <a href="${process.env.VITE_API_BASE}/renewPage/${user.id}/${user.BIN}"
+     style="display:inline-block; padding:10px 16px; background-color:#144C22; color:white; 
+            text-decoration:none; border-radius:4px; font-weight:bold;">
+    View Application
+  </a>
+  <p>Should you have any questions or require further assistance, please do not hesitate to contact us.</p>
+  <br/><br/>
+  <p>Kind regards,<br/><b>Business Portal Team</b></p>
+`;
+
     sendEmail(email, "Renew Business Application", htmlContent);
   } catch (error) {
     console.error("❌ Register error:", error);

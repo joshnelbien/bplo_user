@@ -446,76 +446,115 @@ function UpdateModal({ applicant, isOpen, onClose, baseUrl }) {
 
         {/* Business Activity */}
         <Section title="Business Activity & Incentives">
-          <Field
-            label="Tax Incentives"
-            name="tIGE"
-            value={formData.tIGE}
-            onChange={handleChange}
-          />
+          <Field label="Tax Incentives" value={applicant.tIGE} />
+          {applicant.tIGE === "Yes" && (
+            <FileField
+              fileKey="tIGEfiles"
+              label="Tax Incentives From Government"
+              fileData={applicant}
+            />
+          )}
 
-          <Field
-            label="Office Type"
-            name="officeType"
-            value={formData.officeType}
-            onChange={handleChange}
-          />
+          <Field label="Office Type" value={applicant.officeType} />
 
-          {formData.lineOfBusiness?.split(",").map((lob, index) => {
-            const product = formData.productService?.split(",")[index] || "";
-            const unit = formData.Units?.split(",")[index] || "";
-            const capital = formData.capital?.split(",")[index] || "";
+          {(() => {
+            // ✅ Utility function to safely parse CSV-like fields with quotes
+            const parseCSV = (text) => {
+              if (!text) return [];
+              return text
 
-            return (
-              <Paper
-                key={index}
-                elevation={2}
-                sx={{
-                  p: 2,
-                  mb: 2,
-                  borderRadius: 2,
-                  backgroundColor: "#f9f9f9",
-                }}
-              >
-                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                  Business Line {index + 1}
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
+                .trim()
+
+                .replace(/^\[|\]$/g, "")
+
+                .split(/",\s*"?/)
+
+                .map((val) => val.replace(/^"|"$/g, "").trim())
+                .filter((val) => val.length > 0);
+            };
+
+            // ✅ Extract arrays for each field
+            const lobArr = parseCSV(applicant.lineOfBusiness);
+            const productArr = parseCSV(applicant.productService);
+            const unitArr = parseCSV(applicant.Units);
+            const capitalArr = parseCSV(applicant.capital);
+            const natureCodeArr = parseCSV(applicant.natureCode);
+            const businessNatureArr = parseCSV(applicant.businessNature);
+            const lineCodeArr = parseCSV(applicant.lineCode);
+
+            // ✅ Find the maximum length among arrays (in case some are shorter)
+            const maxLength = Math.max(
+              lobArr.length,
+              productArr.length,
+              unitArr.length,
+              capitalArr.length,
+              natureCodeArr.length,
+              businessNatureArr.length,
+              lineCodeArr.length
+            );
+
+            return Array.from({ length: maxLength }).map((_, index) => {
+              const lob = lobArr[index] || "";
+              const product = productArr[index] || "";
+              const unit = unitArr[index] || "";
+              const capital = capitalArr[index] || "";
+              const natureCode = natureCodeArr[index] || "";
+              const businessNature = businessNatureArr[index] || "";
+              const lineCode = lineCodeArr[index] || "";
+
+              return (
+                <Paper
+                  key={index}
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    mb: 2,
+                    borderRadius: 2,
+                    backgroundColor: "#f9f9f9",
+                    width: "100%", // 🟩 Ensure Paper itself takes full width
+                  }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    fontWeight="bold"
+                    gutterBottom
+                  >
+                    Business Line {index + 1}
+                  </Typography>
+
+                  <Grid container spacing={2}>
+                    {/* 🟩 Line of Business — full width */}
                     <Field
                       label="Line of Business"
-                      name={`lob-${index}`}
-                      value={lob.trim()}
-                      onChange={handleChange}
+                      value={lob}
+                      fullWidth
+                      multiline
+                      rows={3} // adjust rows if you want a taller box (e.g., 4 or 5)
                     />
+
+                    <Grid item xs={12} sm={6}>
+                      <Field label="Product/Service" value={product} />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Field label="Units" value={unit} />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Field label="Capital" value={formatCurrency(capital)} />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Field label="Nature Code" value={natureCode} />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Field label="Business Nature" value={businessNature} />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Field label="Line Code" value={lineCode} />
+                    </Grid>
                   </Grid>
-                  <Grid item xs={12}>
-                    <Field
-                      label="Product/Service"
-                      name={`product-${index}`}
-                      value={product.trim()}
-                      onChange={handleChange}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Field
-                      label="Units"
-                      name={`unit-${index}`}
-                      value={unit.trim()}
-                      onChange={handleChange}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Field
-                      label="Capital"
-                      name={`capital-${index}`}
-                      value={formatCurrency(capital.trim())}
-                      onChange={handleChange}
-                    />
-                  </Grid>
-                </Grid>
-              </Paper>
-            );
-          })}
+                </Paper>
+              );
+            });
+          })()}
         </Section>
 
         {/* Business Requirements */}

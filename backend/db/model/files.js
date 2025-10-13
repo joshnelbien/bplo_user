@@ -186,6 +186,8 @@ const File = sequelize.define(
     },
     businesstaxComputation_size: { type: DataTypes.INTEGER, allowNull: true },
     passtoBusinessTax: { type: DataTypes.STRING, defaultValue: "No" },
+    passtoTreasurer: { type: DataTypes.STRING, defaultValue: "No" },
+    permitRelease: { type: DataTypes.STRING, defaultValue: "No" },
 
     TREASURER: { type: DataTypes.STRING, defaultValue: "Pending" },
     TREASURERtimeStamp: { type: DataTypes.STRING },
