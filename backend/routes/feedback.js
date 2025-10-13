@@ -72,7 +72,7 @@ router.post("/send-feedback", async (req, res) => {
     // 📨 Build email content
     const htmlContent = `
       <div style="font-family:Arial, sans-serif; color:#333;">
-        <h2 style="color:#144C22;">📝 New Client Feedback Submission</h2>
+        <h2 style="color:#144C22;">📝 BPLO Feedback</h2>
         <p><b>Client Name:</b> ${clientName || "N/A"}</p>
         <p><b>Email:</b> ${emailAddress || "N/A"}</p>
         <p><b>Contact No.:</b> ${contactNo || "N/A"}</p>
