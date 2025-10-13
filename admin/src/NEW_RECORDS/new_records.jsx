@@ -341,7 +341,7 @@ function New_records() {
                 <TableCell>
                   <strong>Application Type</strong>
                 </TableCell>
-                {filter === "approved" && (
+                {filter === "nobplostatus" && (
                   <>
                     <TableCell>
                       <strong>BIN</strong>
@@ -383,7 +383,7 @@ function New_records() {
                   <TableCell>{applicant.lastName}</TableCell>
                   <TableCell>{applicant.application}</TableCell>
 
-                  {filter === "approved" && (
+                  {filter === "nobplostatus" && (
                     <>
                       <TableCell>{applicant.BIN}</TableCell>
                       <TableCell>
