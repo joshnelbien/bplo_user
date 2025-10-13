@@ -225,16 +225,30 @@ router.put("/examiners/:id", async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
+    // Find the examiner first
     const examiner = await Examiners.findByPk(id);
     if (!examiner) {
       return res.status(404).json({ error: "Examiner not found" });
     }
 
+    // Find related application (if exists)
+    const application = await File.findOne({ where: { id: id } });
+
+    // Update both
+    if (application) {
+      await application.update(updates);
+    }
+
     await examiner.update(updates);
-    res.json({ message: "Examiner updated successfully", examiner });
+
+    res.json({
+      message: "✅ Examiner and related application updated successfully",
+      examiner,
+      application,
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Update failed" });
+    console.error("❌ Update failed:", err);
+    res.status(500).json({ error: "Update failed", details: err.message });
   }
 });
 

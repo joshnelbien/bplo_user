@@ -21,7 +21,7 @@ import ExaminersApplicantModal from "./examiners_modal";
 const API = import.meta.env.VITE_API_BASE;
 
 // ✅ Reusable Text Field
-const Field = ({ label, value, onChange, name }) => (
+const Field = ({ label, value, onChange, name, disabled = true }) => (
   <Grid item xs={12} sm={6}>
     <TextField
       label={label}
@@ -31,6 +31,18 @@ const Field = ({ label, value, onChange, name }) => (
       fullWidth
       variant="outlined"
       size="small"
+      disabled={disabled}
+      InputProps={{
+        sx: {
+          color: "black",
+          "& .MuiInputBase-input.Mui-disabled": {
+            WebkitTextFillColor: "black",
+          },
+        },
+      }}
+      InputLabelProps={{
+        sx: { color: "black" },
+      }}
     />
   </Grid>
 );
@@ -358,12 +370,11 @@ function ExaminersApplicantModalUpdate({
                             : ""
                         }
                         onChange={(e) => {
-                          // Remove any commas, only keep digits
                           const rawValue = e.target.value
                             .replace(/,/g, "")
                             .replace(/\D/g, "");
                           const updated = [...capitalValues];
-                          updated[index] = rawValue; // store numeric value (unformatted) in state
+                          updated[index] = rawValue;
                           setCapitalValues(updated);
                         }}
                         fullWidth
