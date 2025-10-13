@@ -235,44 +235,75 @@ function New_records() {
                 setCurrentPage(1);
               }}
               sx={{
-                bgcolor: filter === "pending" ? "#1c541e" : undefined,
-                color: filter === "pending" ? "white" : undefined,
+                bgcolor: filter === "pending" ? "#1c541e" : "#ffff", // ✅ gray when inactive
+                color: filter === "pending" ? "white" : "black",
+                "&:hover": {
+                  bgcolor: filter === "pending" ? "#174a18" : "#bdbdbd", // darker hover effect
+                },
               }}
             >
               Pending
             </Button>
+
             <Button
               onClick={() => {
                 setFilter("approved");
                 setCurrentPage(1);
               }}
               sx={{
-                bgcolor: filter === "approved" ? "#1c541e" : undefined,
-                color: filter === "approved" ? "white" : undefined,
+                bgcolor: filter === "approved" ? "#1c541e" : "#ffff",
+                color: filter === "approved" ? "white" : "black",
+                "&:hover": {
+                  bgcolor: filter === "approved" ? "#174a18" : "#bdbdbd",
+                },
               }}
             >
               On Going
             </Button>
+
             <Button
               onClick={() => {
                 setFilter("businessTax");
                 setCurrentPage(1);
               }}
               sx={{
-                bgcolor: filter === "businessTax" ? "#1c541e" : undefined,
-                color: filter === "businessTax" ? "white" : undefined,
+                bgcolor: filter === "businessTax" ? "#1c541e" : "#ffff",
+                color: filter === "businessTax" ? "white" : "black",
+                "&:hover": {
+                  bgcolor: filter === "businessTax" ? "#174a18" : "#bdbdbd",
+                },
               }}
             >
               Computation
             </Button>
-             <Button
+
+            <Button
+              onClick={() => {
+                setFilter("Treasurer");
+                setCurrentPage(1);
+              }}
+              sx={{
+                bgcolor: filter === "Treasurer" ? "#1c541e" : "#ffff",
+                color: filter === "Treasurer" ? "white" : "black",
+                "&:hover": {
+                  bgcolor: filter === "Treasurer" ? "#174a18" : "#bdbdbd",
+                },
+              }}
+            >
+              For Payment
+            </Button>
+
+            <Button
               onClick={() => {
                 setFilter("permitRelease");
                 setCurrentPage(1);
               }}
               sx={{
-                bgcolor: filter === "permitRelease" ? "#1c541e" : undefined,
-                color: filter === "permitRelease" ? "white" : undefined,
+                bgcolor: filter === "permitRelease" ? "#1c541e" : "#ffff",
+                color: filter === "permitRelease" ? "white" : "black",
+                "&:hover": {
+                  bgcolor: filter === "permitRelease" ? "#174a18" : "#bdbdbd",
+                },
               }}
             >
               FOR RELEASING PERMIT
