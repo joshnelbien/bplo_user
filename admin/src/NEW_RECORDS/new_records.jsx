@@ -126,14 +126,24 @@ function New_records() {
   /* ✅ Filter logic */
   const filteredApplicants = applicants.filter((a) => {
     const bploStatus = a.BPLO?.toLowerCase();
+    const nobplostatus = a.passtoBusinessTax === "No";
     const businessTax = a.passtoBusinessTax === "Yes";
+    const treasurerOffice = a.passtoTreasurer === "Yes";
+    const permitRelease = a.permitRelease === "Yes";
 
     if (filter === "pending") {
       return bploStatus === "pending";
     }
 
-    if (filter === "approved") {
-      return bploStatus === "approved" && !businessTax;
+    if (filter === "nobplostatus") {
+      return nobplostatus;
+    }
+    if (filter === "treasurerOffice") {
+      return treasurerOffice;
+    }
+
+    if (filter === "permitRelease") {
+      return permitRelease;
     }
 
     if (filter === "businessTax") {
@@ -247,14 +257,14 @@ function New_records() {
 
             <Button
               onClick={() => {
-                setFilter("approved");
+                setFilter("nobplostatus");
                 setCurrentPage(1);
               }}
               sx={{
-                bgcolor: filter === "approved" ? "#1c541e" : "#ffff",
-                color: filter === "approved" ? "white" : "black",
+                bgcolor: filter === "nobplostatus" ? "#1c541e" : "#ffff",
+                color: filter === "nobplostatus" ? "white" : "black",
                 "&:hover": {
-                  bgcolor: filter === "approved" ? "#174a18" : "#bdbdbd",
+                  bgcolor: filter === "nobplostatus" ? "#174a18" : "#bdbdbd",
                 },
               }}
             >
@@ -279,14 +289,14 @@ function New_records() {
 
             <Button
               onClick={() => {
-                setFilter("Treasurer");
+                setFilter("treasurerOffice");
                 setCurrentPage(1);
               }}
               sx={{
-                bgcolor: filter === "Treasurer" ? "#1c541e" : "#ffff",
-                color: filter === "Treasurer" ? "white" : "black",
+                bgcolor: filter === "treasurerOffice" ? "#1c541e" : "#ffff",
+                color: filter === "treasurerOffice" ? "white" : "black",
                 "&:hover": {
-                  bgcolor: filter === "Treasurer" ? "#174a18" : "#bdbdbd",
+                  bgcolor: filter === "treasurerOffice" ? "#174a18" : "#bdbdbd",
                 },
               }}
             >

@@ -179,6 +179,9 @@ const BusinessTax = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    passtoBusinessTax: { type: DataTypes.STRING, defaultValue: "No" },
+    passtoTreasurer: { type: DataTypes.STRING, defaultValue: "No" },
+    permitRelease: { type: DataTypes.STRING, defaultValue: "No" },
     businesstaxComputation_mimetype: {
       type: DataTypes.STRING,
       allowNull: true,
