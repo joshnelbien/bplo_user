@@ -271,6 +271,10 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
     );
   };
 
+  const handleGeneratePermit = async () => {
+    alert("Feature coming soon!");
+  };
+
   // ✅ Function to send applicant to Business Tax
   const handlePassToBusinessTax = async () => {
     try {
@@ -815,13 +819,21 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
           Close
         </Button>
 
-        {/* If BPLO is not approved yet → show Approve/Decline */}
-        {applicant.BPLO?.toLowerCase() !== "approved" ? (
+        {/* Conditional Buttons */}
+        {applicant.permitRelease === "Yes" ? (
+          // ✅ Show Generate Permit
+          <Button
+            onClick={handleGeneratePermit}
+            variant="contained"
+            color="success"
+          >
+            Generate Permit
+          </Button>
+        ) : applicant.BPLO?.toLowerCase() !== "approved" ? (
+          // ✅ Show Approve / Decline
           <>
             <Button
-              onClick={() => {
-                onApprove(applicant, businessDetails);
-              }}
+              onClick={() => onApprove(applicant, businessDetails)}
               variant="contained"
               color="success"
             >
@@ -837,11 +849,12 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
             </Button>
           </>
         ) : (
+          // ✅ Show Pass to Business Tax
           <Button
             onClick={handlePassToBusinessTax}
             variant="contained"
             color="success"
-            disabled={!allApproved} // ✅ Disable if not all approved
+            disabled={!allApproved}
           >
             Pass to Business Tax
           </Button>
