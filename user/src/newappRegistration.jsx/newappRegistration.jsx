@@ -3,9 +3,7 @@ import {
   Button,
   CircularProgress,
   Dialog,
-  DialogActions,
   DialogContent,
-  DialogTitle,
   Paper,
   Snackbar,
   Step,
@@ -23,29 +21,42 @@ import { useNavigate } from "react-router-dom";
 import Step1BusinessInfo from "./newAppcomponents/step1";
 import Step2PersonalInfo from "./newAppcomponents/step2";
 import { useMediaQuery, useTheme } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { IconButton } from "@mui/material";
-import PrivacyAgreementDialog from "./DataPrivacyModal"; // Import the privacy modal
+import PrivacyAgreementDialog from "./DataPrivacyModal";
+import NextStepConfirmationDialog from "./newAppcomponents/NextStepConfirmationDialog";
+
+const PRIMARY_COLOR = "#09360D";
+const HOVER_COLOR = "#072b0b";
+const LIGHT_HOVER_COLOR = "rgba(9, 54, 13, 0.08)";
 
 const GreenButton = styled(Button)(({ variant }) => ({
   borderRadius: "8px",
   ...(variant === "contained" && {
-    backgroundColor: "#4caf50",
+    backgroundColor: PRIMARY_COLOR,
     color: "#fff",
     boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
     "&:hover": {
-      backgroundColor: "#388e3c",
+      backgroundColor: HOVER_COLOR,
     },
   }),
   ...(variant === "outlined" && {
-    borderColor: "#4caf50",
-    color: "#4caf50",
+    borderColor: PRIMARY_COLOR,
+    color: PRIMARY_COLOR,
     "&:hover": {
-      backgroundColor: "rgba(76, 175, 80, 0.08)",
-      borderColor: "#4caf50",
+      backgroundColor: LIGHT_HOVER_COLOR,
+      borderColor: PRIMARY_COLOR,
     },
   }),
 }));
+
+const BackButtonContained = styled(Button)({
+  borderRadius: "8px",
+  backgroundColor: PRIMARY_COLOR, 
+  color: "#fff",
+  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+  "&:hover": {
+    backgroundColor: HOVER_COLOR, 
+  },
+});
 
 const Alert = forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -70,9 +81,9 @@ function NewApplicationRegisterPage() {
     lastName: "",
     extName: "",
     sex: "",
-    email: "", // Default value set to @gmail.com
+    email: "",
     telNo: "",
-    mobileNo: "+63", // Default value set to +63
+    mobileNo: "+63",
   });
 
   const [snackbarState, setSnackbarState] = useState({
@@ -85,8 +96,8 @@ function NewApplicationRegisterPage() {
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [errors, setErrors] = useState({});
-  const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false); // New state for privacy dialog
-  const [privacyChecked, setPrivacyChecked] = useState(false); // State for checkbox
+  const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
+  const [privacyChecked, setPrivacyChecked] = useState(false);
 
   const steps = ["Business Info", "Owner Info"];
 
@@ -104,7 +115,7 @@ function NewApplicationRegisterPage() {
 
     const requiredFields = {
       1: ["BusinessType", "businessName", "tinNo", "TradeName"],
-      2: ["firstName", "lastName", "sex", "email", "mobileNo"], // extName and telNo are optional
+      2: ["firstName", "lastName", "sex", "email", "mobileNo"],
     };
 
     requiredFields[step]?.forEach((field) => {
@@ -122,7 +133,6 @@ function NewApplicationRegisterPage() {
         "TIN must be in format XXX-XXX-XXX or XXX-XXX-XXX-XX (9-12 digits)";
     }
 
-    // Additional validation for minimum 3 letters in TradeName and businessName
     const letterCountBusinessName = (
       formDataState.businessName.replace(/[^A-Za-z]/g, "") || ""
     ).length;
@@ -141,7 +151,6 @@ function NewApplicationRegisterPage() {
       newErrors.TradeName = "Minimum of 3 letters required";
     }
 
-    // Validation for Step 2
     const letterCountFirstName = (
       formDataState.firstName.replace(/[^A-Za-z]/g, "") || ""
     ).length;
@@ -163,7 +172,6 @@ function NewApplicationRegisterPage() {
       newErrors.lastName = "Minimum of 3 letters required";
     }
 
-    // Email validation: must end with @gmail.com
     if (
       step === 2 &&
       formDataState.email &&
@@ -172,7 +180,6 @@ function NewApplicationRegisterPage() {
       newErrors.email = "Email must end with @gmail.com";
     }
 
-    // Mobile number validation: must start with +63
     if (
       step === 2 &&
       formDataState.mobileNo &&
@@ -195,12 +202,10 @@ function NewApplicationRegisterPage() {
   };
 
   const handleClose = () => {
-    // 1. Hide the dialog (essential for the dialog to disappear)
     setDialogOpen(false);
-
-    // 2. Go back to the previous browser history entry
     window.history.back();
   };
+
   const handleNextClick = () => {
     if (validateStep()) {
       setDialogOpen(true);
@@ -264,7 +269,15 @@ function NewApplicationRegisterPage() {
 
   const handlePrivacyAgree = () => {
     setPrivacyDialogOpen(false);
-    handleSubmit(); // Proceed to final submission after agreement
+    handleSubmit();
+  };
+
+  const handleBackButton = () => {
+    if (step === 1) {
+      navigate('/');
+    } else {
+      setStep(step - 1);
+    }
   };
 
   const renderStepContent = (step) => {
@@ -310,24 +323,6 @@ function NewApplicationRegisterPage() {
           mb: 2,
         }}
       >
-        <IconButton
-          onClick={() => navigate(`/`)}
-          sx={{
-            color: "#fff",
-            backgroundColor: "#4caf50",
-            borderRadius: "50%", // circle
-            p: 1.5,
-            boxShadow: "0 3px 6px rgba(0,0,0,0.2)",
-            transition: "all 0.3s ease",
-            "&:hover": {
-              backgroundColor: "#388e3c",
-              transform: "scale(1.1)", // smooth pop effect
-              boxShadow: "0 5px 12px rgba(0,0,0,0.25)",
-            },
-          }}
-        >
-          <ArrowBackIcon fontSize="medium" />
-        </IconButton>
       </Box>
 
       <Paper
@@ -335,7 +330,7 @@ function NewApplicationRegisterPage() {
         sx={{
           p: { xs: 2, sm: 4 },
           width: "100%",
-          maxWidth: isMobile ? 320 : 900, // ✅ Responsive maxWidth
+          maxWidth: isMobile ? 320 : 900,
           mx: "auto",
           borderRadius: "16px",
         }}
@@ -350,7 +345,7 @@ function NewApplicationRegisterPage() {
             mt: 2,
           }}
         >
-          Business Application Form
+          BUSINESS APPLICATION FORM
         </Typography>
 
         <Stepper
@@ -361,17 +356,20 @@ function NewApplicationRegisterPage() {
             flexWrap: "wrap",
             justifyContent: "center",
             "& .MuiStepIcon-root": {
-              color: "#4caf50",
+              color: PRIMARY_COLOR,
               "&.Mui-active": {
-                color: "#388e3c",
+                color: HOVER_COLOR,
               },
               "&.Mui-completed": {
-                color: "#4caf50",
+                color: PRIMARY_COLOR,
               },
             },
             "& .MuiStepConnector-line": {
-              borderColor: "#4caf50",
+              borderColor: PRIMARY_COLOR,
             },
+            "& .MuiStepLabel-label": {
+              color: PRIMARY_COLOR,
+            }
           }}
         >
           {steps.map((label, index) => (
@@ -382,7 +380,7 @@ function NewApplicationRegisterPage() {
                   "& .MuiStepLabel-label": {
                     fontSize: { xs: "0.6rem", sm: "0.75rem", md: "0.9rem" },
                     textAlign: "center",
-                    color: step - 1 >= index ? "#4caf50" : "#333",
+                    color: step - 1 >= index ? PRIMARY_COLOR : "#333",
                   },
                 }}
               >
@@ -398,184 +396,73 @@ function NewApplicationRegisterPage() {
           <Box
             sx={{
               display: "flex",
-              justifyContent: step === 1 ? "flex-end" : "space-between",
+              justifyContent: "space-between",
               mt: 3,
             }}
           >
-            {step > 1 && (
-              <GreenButton
-                type="button"
-                variant="outlined"
-                onClick={() => setStep(step - 1)}
-              >
-                Back
-              </GreenButton>
-            )}
-            {step < 2 && (
-              <GreenButton
+            {(step === 1 || step > 1) && (
+              <BackButtonContained
                 type="button"
                 variant="contained"
-                onClick={handleNextClick}
+                onClick={handleBackButton}
               >
-                Next
-              </GreenButton>
+                {step === 1 ? "Back" : "Back"}
+              </BackButtonContained>
             )}
-            {step === 2 && (
-              <GreenButton
-                type="button"
-                variant="contained"
-                disabled={isSubmitting}
-                onClick={() => setSubmitDialogOpen(true)}
-                sx={{ display: "flex", alignItems: "center", gap: 1 }}
-              >
-                {isSubmitting ? (
-                  <>
-                    <CircularProgress size={20} color="inherit" />
-                    Processing...
-                  </>
-                ) : (
-                  "Submit Form"
-                )}
-              </GreenButton>
-            )}
+
+            <Box>
+              {step < 2 && (
+                <GreenButton
+                  type="button"
+                  variant="contained"
+                  onClick={handleNextClick}
+                >
+                  Next
+                </GreenButton>
+              )}
+              {step === 2 && (
+                <GreenButton
+                  type="button"
+                  variant="contained"
+                  disabled={isSubmitting}
+                  onClick={() => setSubmitDialogOpen(true)}
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <CircularProgress size={20} color="inherit" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Submit Form"
+                  )}
+                </GreenButton>
+              )}
+            </Box>
           </Box>
         </form>
       </Paper>
 
-      {/* Next Step Confirmation */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-        <DialogTitle>Confirm Next Step</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to proceed to the next step? <br />
-            {step === 1 ? (
-              <>
-                <strong>Business Type:</strong>{" "}
-                {formDataState.BusinessType || "Not specified"}
-                <br />
-                <strong>Registration No:</strong>{" "}
-                {formDataState.dscRegNo || "Not specified"}
-                <br />
-                <strong>Business Name:</strong>{" "}
-                {formDataState.businessName || "Not specified"}
-                <br />
-                <strong>TIN No:</strong>{" "}
-                {formDataState.tinNo || "Not specified"}
-                <br />
-                <strong>Trade Name:</strong>{" "}
-                {formDataState.TradeName || "Not specified"}
-              </>
-            ) : (
-              <>
-                <strong>First Name:</strong>{" "}
-                {formDataState.firstName || "Not specified"}
-                <br />
-                <strong>Middle Name:</strong>{" "}
-                {formDataState.middleName || "Not specified"}
-                <br />
-                <strong>Last Name:</strong>{" "}
-                {formDataState.lastName || "Not specified"}
-                <br />
-                <strong>Ext. Name:</strong>{" "}
-                {formDataState.extName || "Not specified"}
-                <br />
-                <strong>Gender:</strong> {formDataState.sex || "Not specified"}
-                <br />
-                <strong>Email:</strong> {formDataState.email || "Not specified"}
-                <br />
-                <strong>Telephone No:</strong>{" "}
-                {formDataState.telNo || "Not specified"}
-                <br />
-                <strong>Mobile No:</strong>{" "}
-                {formDataState.mobileNo || "Not specified"}
-              </>
-            )}
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ justifyContent: "center", gap: 2, p: 2 }}>
-          <GreenButton
-            variant="outlined"
-            onClick={() => setDialogOpen(false)}
-            sx={{ minWidth: "90px" }}
-          >
-            No
-          </GreenButton>
-          <GreenButton
-            variant="contained"
-            onClick={handleDialogConfirm}
-            sx={{ minWidth: "120px" }}
-          >
-            Yes
-          </GreenButton>
-        </DialogActions>
-      </Dialog>
+      <NextStepConfirmationDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        onConfirm={handleDialogConfirm}
+        formData={formDataState}
+        step={step}
+      />
 
-      {/* Submit Confirmation */}
-      <Dialog
+      <NextStepConfirmationDialog
         open={submitDialogOpen}
         onClose={() => setSubmitDialogOpen(false)}
-      >
-        <DialogTitle>Submit Application</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to submit? <br />
-            <strong>Business Type:</strong>{" "}
-            {formDataState.BusinessType || "Not specified"}
-            <br />
-            <strong>Registration No:</strong>{" "}
-            {formDataState.dscRegNo || "Not specified"}
-            <br />
-            <strong>Business Name:</strong>{" "}
-            {formDataState.businessName || "Not specified"}
-            <br />
-            <strong>TIN No:</strong> {formDataState.tinNo || "Not specified"}
-            <br />
-            <strong>Trade Name:</strong>{" "}
-            {formDataState.TradeName || "Not specified"}
-            <br />
-            <strong>First Name:</strong>{" "}
-            {formDataState.firstName || "Not specified"}
-            <br />
-            <strong>Middle Name:</strong>{" "}
-            {formDataState.middleName || "Not specified"}
-            <br />
-            <strong>Last Name:</strong>{" "}
-            {formDataState.lastName || "Not specified"}
-            <br />
-            <strong>Ext. Name:</strong>{" "}
-            {formDataState.extName || "Not specified"}
-            <br />
-            <strong>Gender:</strong> {formDataState.sex || "Not specified"}
-            <br />
-            <strong>Email:</strong> {formDataState.email || "Not specified"}
-            <br />
-            <strong>Telephone No:</strong>{" "}
-            {formDataState.telNo || "Not specified"}
-            <br />
-            <strong>Mobile No:</strong>{" "}
-            {formDataState.mobileNo || "Not specified"}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <GreenButton
-            variant="outlined"
-            onClick={() => setSubmitDialogOpen(false)}
-          >
-            No
-          </GreenButton>
-          <GreenButton
-            variant="contained"
-            onClick={() => {
-              setSubmitDialogOpen(false);
-              setPrivacyDialogOpen(true); // Open privacy dialog before submission
-            }}
-          >
-            Yes
-          </GreenButton>
-        </DialogActions>
-      </Dialog>
+        onConfirm={() => {
+          setSubmitDialogOpen(false);
+          setPrivacyDialogOpen(true);
+        }}
+        formData={formDataState}
+        step={step}
+        isSubmit={true}
+      />
 
-      {/* Privacy Agreement Dialog */}
       <PrivacyAgreementDialog
         open={privacyDialogOpen}
         onAgree={handlePrivacyAgree}
@@ -584,7 +471,6 @@ function NewApplicationRegisterPage() {
         onClose={handleClose}
       />
 
-      {/* ✅ Success Popup */}
       <Dialog
         open={successDialogOpen}
         onClose={() => setSuccessDialogOpen(false)}
@@ -605,7 +491,7 @@ function NewApplicationRegisterPage() {
           }}
         >
           <Grow in={successDialogOpen}>
-            <CheckCircleOutlineIcon sx={{ fontSize: 80, color: "#105c12ff" }} />
+            <CheckCircleOutlineIcon sx={{ fontSize: 80, color: PRIMARY_COLOR }} />
           </Grow>
           <Typography
             variant="h6"
@@ -631,7 +517,7 @@ function NewApplicationRegisterPage() {
           severity={snackbarState.severity}
           sx={{
             backgroundColor:
-              snackbarState.severity === "success" ? "#4caf50" : "#d32f2f",
+              snackbarState.severity === "success" ? PRIMARY_COLOR : "#d32f2f",
           }}
         >
           {snackbarState.message}
