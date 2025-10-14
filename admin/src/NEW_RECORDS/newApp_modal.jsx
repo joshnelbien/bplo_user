@@ -24,6 +24,7 @@ import axios from "axios";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
 import { useState, useEffect } from "react";
+import MayorsPermit from "./MayorsPermitDocsExport"; // ✅ Import the export component
 
 // ✅ Custom Colored Step Icon
 function ColorStepIcon(props) {
@@ -271,11 +272,19 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
     );
   };
 
-  const handleGeneratePermit = async () => {
-    alert("Feature coming soon!");
-  };
+  // ✅ Collections data - customize based on your applicant fields (e.g., fees from backroom sections)
+  // This is a placeholder; map real fields like applicant.zoningFee, applicant.choFee, etc.
+  const collections = [
+    { label: "Zoning Fee", amount: applicant.zoningFee || 0 },
+    { label: "Sanitary Fee", amount: applicant.choFee || 0 },
+    { label: "Solid Waste Fee", amount: applicant.csmwoFee || 0 },
+    { label: "Environment Fee", amount: applicant.cenroFee || 0 },
+    // Add more as needed, e.g., { label: "Other Charge", amount: applicant.someOtherFee }
+  ].filter(item => item.amount > 0);
 
-  // ✅ Function to send applicant to Business Tax
+  const total = collections.reduce((sum, item) => sum + Number(item.amount), 0);
+  const otherChargesTotal = 0; // If you have separate other charges, calculate here
+
   const handlePassToBusinessTax = async () => {
     try {
       const res = await axios.post(
@@ -821,14 +830,15 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
 
         {/* Conditional Buttons */}
         {applicant.permitRelease === "Yes" ? (
-          // ✅ Show Generate Permit
-          <Button
-            onClick={handleGeneratePermit}
-            variant="contained"
-            color="success"
-          >
-            Generate Permit
-          </Button>
+          // ✅ Generate Permit Button triggers the export component's logic
+          <>
+            <MayorsPermit
+              applicant={applicant}
+              collections={collections}
+              total={total}
+              otherChargesTotal={otherChargesTotal}
+            />
+          </>
         ) : applicant.BPLO?.toLowerCase() !== "approved" ? (
           // ✅ Show Approve / Decline
           <>
