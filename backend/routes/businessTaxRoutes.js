@@ -17,12 +17,13 @@ const upload = multer({ storage: multer.memoryStorage() });
 router.post("/businessTax/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const applicant = await Backroom.findByPk(id);
+    const applicant = await File.findByPk(id);
     const examinersApplicant = await File.findByPk(id);
     if (!applicant)
       return res.status(404).json({ error: "Applicant not found" });
 
     const applicantData = applicant.toJSON();
+
     applicantData.BUSINESSTAX = "pending";
     applicantData.BUSINESSTAXtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
@@ -41,8 +42,6 @@ router.post("/businessTax/approve/:id", async (req, res) => {
   }
 });
 
-// -----------------------------
-// Approve applicant in BusinessTax and move to Treasurer's Office with file
 router.post(
   "/business/approve/:id",
   upload.single("businessTaxComputation"),
