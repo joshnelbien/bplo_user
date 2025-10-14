@@ -320,7 +320,7 @@ function NewApplicationRegisterPage() {
           width: "100%",
           maxWidth: isMobile ? 320 : 900,
           mx: "auto",
-          mb: -2,
+          mb: -3.5,
         }}
       ></Box>
 
@@ -328,7 +328,7 @@ function NewApplicationRegisterPage() {
         sx={{
           width: "100%",
           backgroundColor: "#09360D",
-          py: 1.5, // vertical padding for height
+          py: 2.7, // vertical padding for height
         }}
       >
         <Typography
