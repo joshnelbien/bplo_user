@@ -184,6 +184,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
   useEffect(() => {
     const fetchFSIC = async () => {
       try {
+        const API = import.meta.env.VITE_API_BASE;
         const res = await axios.get(`${API}/api/my-existing-table`);
         setFsicData(res.data);
       } catch (error) {
@@ -280,7 +281,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
     { label: "Solid Waste Fee", amount: applicant.csmwoFee || 0 },
     { label: "Environment Fee", amount: applicant.cenroFee || 0 },
     // Add more as needed, e.g., { label: "Other Charge", amount: applicant.someOtherFee }
-  ].filter(item => item.amount > 0);
+  ].filter((item) => item.amount > 0);
 
   const total = collections.reduce((sum, item) => sum + Number(item.amount), 0);
   const otherChargesTotal = 0; // If you have separate other charges, calculate here
@@ -305,10 +306,19 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
 
   return (
     <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>Applicant Details</DialogTitle>
+      <DialogTitle
+        sx={{
+          backgroundColor: "#1d5236", // Requested Background Color
+          color: "white", // White text for contrast
+          textAlign: "center", // Center the text
+          py: 2, // Vertical padding
+        }}
+      >
+        Applicant Details
+      </DialogTitle>
 
-      {/* ✅ Stepper Flow */}
-      <DialogContent>
+      {/* ✅ Stepper Flow - Added vertical margin */}
+      <DialogContent sx={{ mt: 2, mb: 4 }}>
         <Stepper activeStep={activeStep === -1 ? steps.length : activeStep}>
           {steps
             .sort((a, b) => {
@@ -818,11 +828,11 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
           onClick={onClose}
           variant="contained"
           sx={{
-            backgroundColor: "white",
-            color: "#1c541eff",
-            border: "1px solid #1c541eff",
-            "&:hover": { backgroundColor: "#f5f5f5" },
+            backgroundColor: "#70706fff",
+            color: "white",
+            "&:hover": { backgroundColor: "#acababff" },
             width: "100px",
+            border: "none",
           }}
         >
           Close
