@@ -321,7 +321,17 @@ function OboApplicantModal({
   return (
     <>
       <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
-        <DialogTitle>Applicant Details</DialogTitle>
+        <DialogTitle
+          sx={{
+            backgroundColor: "#1d5236", // Requested Background Color
+            color: "white", // White text for contrast
+            textAlign: "center", // Center the text
+            py: 2, // Vertical padding
+          }}
+        >
+          Applicant Details
+        </DialogTitle>
+
         <DialogContent dividers>
           {/* Business Info */}
           <Section title="Business Information">
@@ -603,17 +613,17 @@ function OboApplicantModal({
         </DialogContent>
 
         <DialogActions>
+          {/* Close Button */}
+          
           <Button
             onClick={onClose}
             variant="contained"
-            color="gray"
             sx={{
-              color: "#1c541eff",
-              borderColor: "#1c541eff",
-              "&:hover": {
-                borderColor: "#1c541eff",
-              },
+              backgroundColor: "#70706fff",
+              color: "white",
+              "&:hover": { backgroundColor: "#acababff" },
               width: "100px",
+              border: "none",
             }}
           >
             Close

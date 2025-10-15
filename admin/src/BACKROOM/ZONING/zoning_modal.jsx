@@ -604,17 +604,16 @@ function ZoningApplicantModal({
           {/* Only show Approve/Decline if not yet approved and not viewing cert */}
           {!showCert && applicant.ZONING !== "Approved" && (
             <>
+              {/* Close Button */}
               <Button
                 onClick={onClose}
                 variant="contained"
-                color="gray"
                 sx={{
-                  color: "#1c541eff",
-                  borderColor: "#1c541eff",
-                  "&:hover": {
-                    borderColor: "#1c541eff",
-                  },
+                  backgroundColor: "#70706fff",
+                  color: "white",
+                  "&:hover": { backgroundColor: "#acababff" },
                   width: "100px",
+                  border: "none",
                 }}
               >
                 Close

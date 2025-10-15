@@ -373,7 +373,17 @@ function ChoApplicantModal({
   return (
     <>
       <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
-        <DialogTitle>Applicant Details</DialogTitle>
+        <DialogTitle
+          sx={{
+            backgroundColor: "#1d5236", // Requested Background Color
+            color: "white", // White text for contrast
+            textAlign: "center", // Center the text
+            py: 2, // Vertical padding
+          }}
+        >
+          Applicant Details
+        </DialogTitle>
+
         <DialogContent dividers>
           <Section title="Business Information">
             <Field label="Status" value={applicant.CHO} />
@@ -621,16 +631,16 @@ function ChoApplicantModal({
           </Grid>
         </DialogContent>
         <DialogActions>
+          {/* Close Button */}
           <Button
             onClick={onClose}
             variant="contained"
             sx={{
-              backgroundColor: "#e0e0e0",
-              color: "#424242",
+              backgroundColor: "#70706fff",
+              color: "white",
+              "&:hover": { backgroundColor: "#acababff" },
               width: "100px",
-              "&:hover": {
-                backgroundColor: "#bdbdbd",
-              },
+              border: "none",
             }}
           >
             Close
