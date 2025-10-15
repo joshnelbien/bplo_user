@@ -320,7 +320,7 @@ function MayorsPermit({ applicant, collections, total, otherChargesTotal }) {
     );
 
     const blob = await pdf(<PdfDocument />).toBlob();
-    saveAs(blob, "Mayors_Permit.pdf");
+    saveAs(blob, `${applicant.businessName}_Mayors_Permit.pdf`);
   };
 
   return (
