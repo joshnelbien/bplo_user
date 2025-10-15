@@ -606,7 +606,6 @@ function NewApplicationPage() {
                 type="button"
                 variant="outlined"
                 onClick={() => setStep(step - 1)}
-                
               >
                 Back
               </GreenButton>
