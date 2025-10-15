@@ -62,7 +62,7 @@ router.post(
           .status(404)
           .json({ error: "Applicant not found in BusinessTax" });
 
-      const applicantBackroom = await Backroom.findByPk(id);
+      const applicantBackroom = await File.findByPk(id);
       if (!applicantBackroom)
         return res
           .status(404)

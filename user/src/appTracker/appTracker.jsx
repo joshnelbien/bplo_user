@@ -61,6 +61,7 @@ function AppTracker() {
     "CENRO",
     "ZONING",
     "BUSINESSTAX",
+    "TREASURER",
   ];
 
   const theme = useTheme();

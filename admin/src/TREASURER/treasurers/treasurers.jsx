@@ -30,9 +30,7 @@ function Treasurers() {
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get(
-          `${API}/treasurer/treasurer`
-        );
+        const res = await axios.get(`${API}/treasurer/treasurer`);
 
         // Sort by createdAt ascending (oldest first, newest at bottom)
         const sortedData = res.data.sort(
@@ -69,8 +67,7 @@ function Treasurers() {
   const handleApprove = async (id, csmwoFee) => {
     try {
       const res = await axios.post(
-        `${API}/treasurer/treasurerOffice/approve/${id}`,
-        { csmwoFee } // ✅ must match backend & DB field
+        `${API}/treasurer/treasurerOffice/approve/${id}`
       );
 
       setApplicants((prev) =>
@@ -90,9 +87,7 @@ function Treasurers() {
 
   const handleDecline = async (id) => {
     try {
-      const res = await axios.post(
-        `${API}/backroom/csmwo/decline/${id}`
-      );
+      const res = await axios.post(`${API}/backroom/csmwo/decline/${id}`);
 
       setApplicants((prev) =>
         prev.map((applicant) =>

@@ -60,7 +60,10 @@ router.post("/treasurerOffice/approve/:id", async (req, res) => {
     await forRelease.update({
       passtoTreasurer: "Done",
       permitRelease: "Yes",
+      TREASURER: "Approved",
+      TREASURERtimeStamp: applicantData.TREASURERtimeStamp,
     });
+
     await applicant.update({
       TREASURER: "Approved",
       TREASURERtimeStamp: applicant.CHOtimeStamp,
