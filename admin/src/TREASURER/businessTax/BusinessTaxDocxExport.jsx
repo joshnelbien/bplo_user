@@ -1,51 +1,13 @@
 import React from "react";
 import { Button } from "@mui/material";
 import { saveAs } from "file-saver";
-import {
-    Document,
-    Packer,
-    Paragraph,
-    TextRun,
-    Table,
-    TableRow,
-    TableCell,
-    WidthType,
-    AlignmentType,
-    VerticalAlign,
-    BorderStyle,
-    Media,
-    ImageRun,
-    ShadingType,
-} from "docx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
-// Utility function to create a cell with solid borders
-const createBorderedCell = (children, widthSize, verticalAlign = VerticalAlign.TOP) => {
-    return new TableCell({
-        children: children,
-        verticalAlign: verticalAlign,
-        width: { size: widthSize, type: WidthType.PERCENTAGE },
-        margins: { top: 100, bottom: 100, left: 100, right: 100 },
-        borders: {
-            top: { style: BorderStyle.SINGLE, size: 8, color: "000000" },
-            bottom: { style: BorderStyle.SINGLE, size: 8, color: "000000" },
-            left: { style: BorderStyle.SINGLE, size: 8, color: "000000" },
-            right: { style: BorderStyle.SINGLE, size: 8, color: "000000" },
-        },
-    });
-};
+// Optional: If you want custom fonts (e.g., Calibri), generate and import
+// For now, using default Helvetica which is close enough; add later if needed.
 
-// Utility function for a simple text paragraph with no spacing
-const createNoSpacingPara = (text, isBold = false, size = 22, alignment = AlignmentType.LEFT, color = "000000") => {
-    return new Paragraph({
-        alignment: alignment,
-        spacing: { after: 0, before: 0 },
-        children: [
-            new TextRun({ text: text, bold: isBold, size: size, color: color }),
-        ],
-    });
-};
-
-function BusinessTaxDocxExport({
+function BusinessTaxPdfExport({
     applicant,
     collections,
     total,
@@ -57,7 +19,7 @@ function BusinessTaxDocxExport({
             ? `₱ ${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
             : "";
 
-    // Convert number to words
+    // Convert number to words (unchanged)
     function numberToWords(num) {
         if (num === 0) return "zero";
         const belowTwenty = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
@@ -95,338 +57,179 @@ function BusinessTaxDocxExport({
         return words || "zero";
     }
 
-    // Function to load image as Uint8Array for docx
-    const loadImageAsUint8Array = async (imagePath) => {
+    // Load image as base64 for jsPDF
+    const loadImageAsBase64 = async (imagePath) => {
         try {
             console.log('Loading image from:', imagePath);
             const response = await fetch(imagePath);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const arrayBuffer = await response.arrayBuffer();
-            console.log('Image loaded successfully, size:', arrayBuffer.byteLength);
-            return new Uint8Array(arrayBuffer);
+            const blob = await response.blob();
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(blob);
+            });
         } catch (error) {
             console.error('Error loading image:', error);
             return null;
         }
     };
 
-    // Function to create image data for docx
-    const createImageData = async (imagePath) => {
-        try {
-            const imageData = await loadImageAsUint8Array(imagePath);
-            if (!imageData) return null;
-            
-            return {
-                data: imageData,
-                type: imagePath.endsWith('.png') ? "png" : "jpg"
-            };
-        } catch (error) {
-            console.error('Error creating image data:', error);
-            return null;
-        }
-    };
-
-    // Generate DOCX file
-    const exportDocx = async () => {
+    // Generate PDF
+    const exportPdf = async () => {
         const validCollections = collections.filter(
             (item) => item.amount && Number(item.amount) > 0
         );
 
-        // Load images
-        const spcLogoImageData = await createImageData('/spclogo.png');
-        const eSignatureImageData = await createImageData('/samplesig.png');
-        const oriaSignatureImageData = await createImageData('/samplesig.png');
+        // Load images as base64
+        const spcLogoImageData = await loadImageAsBase64('/spclogo.png');
+        const eSignatureImageData = await loadImageAsBase64('/samplesig.png');
+        const oriaSignatureImageData = await loadImageAsBase64('/samplesig.png');
         
         console.log('SPC Logo image loaded:', !!spcLogoImageData);
         console.log('Mayor e-Signature image loaded:', !!eSignatureImageData);
         console.log('Oria e-Signature image loaded:', !!oriaSignatureImageData);
 
-        // Custom Styles
-        const FIELD_LABEL_WIDTH = 30;
-        const FIELD_VALUE_WIDTH = 70;
+        const fullName = `${applicant.firstName || ""} ${applicant.middleName || ""} ${applicant.lastName || ""}`.trim();
 
-        // Header Section (Non-table)
-        const headerSection = [
-            ...(spcLogoImageData ? [
-                new Paragraph({
-                    alignment: AlignmentType.CENTER,
-                    children: [
-                        new ImageRun({
-                            data: spcLogoImageData.data,
-                            transformation: {
-                                width: 100,
-                                height: 100,
-                            },
-                        }),
-                    ],
-                })
-            ] : [new Paragraph({ text: "[SPC Logo]", alignment: AlignmentType.CENTER })]),
-            createNoSpacingPara("Republic of the Philippines", true, 24, AlignmentType.CENTER),
-            createNoSpacingPara("City of San Pablo", true, 22, AlignmentType.CENTER),
-            new Table({
-                width: { size: 100, type: WidthType.PERCENTAGE },
-                rows: [
-                    new TableRow({
-                        children: [
-                            new TableCell({
-                                children: [
-                                    createNoSpacingPara("BUSINESS TAX ORDER OF PAYMENT", true, 28, AlignmentType.CENTER, "FFFFFF"),
-                                ],
-                                shading: {
-                                    fill: "D9D9D9", // Gray background
-                                    type: ShadingType.SOLID,
-                                },
-                                borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
-                            }),
-                        ],
-                    }),
-                ],
-            }),
+        // jsPDF setup (A4: 595 x 842 pt)
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'pt',
+            format: 'a4',
+        });
+
+        // Set default font (Helvetica approximates Calibri)
+        pdf.setFont('helvetica');
+        pdf.setFontSize(11); // Base size matching DOCX 22 half-points
+
+        let yPos = 40; // Top margin
+
+        // Header: Logo (centered)
+        if (spcLogoImageData) {
+            const logoWidth = 100;
+            const logoHeight = 100;
+            const xLogo = (pdf.internal.pageSize.getWidth() - logoWidth) / 2;
+            pdf.addImage(spcLogoImageData, 'PNG', xLogo, yPos, logoWidth, logoHeight);
+        } else {
+            pdf.text("[SPC Logo]", pdf.internal.pageSize.getWidth() / 2, yPos + 50, { align: 'center' });
+        }
+        yPos += 120;
+
+        // Republic and City text (centered, bold)
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text("Republic of the Philippines", pdf.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
+        yPos += 15;
+        pdf.setFontSize(11);
+        pdf.text("City of San Pablo", pdf.internal.pageSize.getWidth() / 2, yPos, { align: 'center' });
+        yPos += 30;
+
+        // Title: Shaded single-cell table
+        autoTable(pdf, {
+            startY: yPos,
+            theme: 'plain',
+            styles: { fillColor: [217, 217, 217], textColor: [255, 255, 255], fontSize: 14, fontStyle: 'bold', cellPadding: 10, halign: 'center' },
+            body: [["BUSINESS TAX ORDER OF PAYMENT"]],
+            margin: { left: 40, right: 40 },
+            tableWidth: 'wrap',
+        });
+        yPos = pdf.lastAutoTable.finalY + 20;
+
+        // Business ID and Reference No
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(`BUSINESS ID: ${applicant?.BIN || "___________"}`, 40, yPos);
+        yPos += 15;
+        pdf.text(`REFERENCE NO: ${applicant?.referenceNo || "___________"}`, 40, yPos);
+        yPos += 30;
+
+        // Business Info Table
+        const infoBody = [
+            ["NAME OF OWNER:", fullName || "___________"],
+            ["ADDRESS:", applicant?.address || "___________"],
+            ["BUSINESS NAME:", applicant?.businessName || "___________"],
+            ["LINE OF BUSINESS:", applicant?.lineOfBusiness || "___________"],
+            ["KIND OF ORGANIZATION:", applicant?.kindOfOrganization || "___________"],
+            ["BUSINESS ADDRESS:", applicant?.barangay || "___________"],
         ];
-
-        // Business Info Table (6 Rows)
-        const createInfoRow = (label, value) => new TableRow({
-            children: [
-                new TableCell({
-                    width: { size: FIELD_LABEL_WIDTH, type: WidthType.PERCENTAGE },
-                    children: [createNoSpacingPara(label, true, 20)],
-                    borders: { top: BorderStyle.SINGLE, bottom: BorderStyle.SINGLE, left: BorderStyle.SINGLE, right: BorderStyle.SINGLE },
-                    margins: { top: 50, bottom: 50, left: 100, right: 100 },
-                }),
-                new TableCell({
-                    width: { size: FIELD_VALUE_WIDTH, type: WidthType.PERCENTAGE },
-                    children: [createNoSpacingPara(value, false, 20)],
-                    borders: { top: BorderStyle.SINGLE, bottom: BorderStyle.SINGLE, left: BorderStyle.SINGLE, right: BorderStyle.SINGLE },
-                    margins: { top: 50, bottom: 50, left: 100, right: 100 },
-                }),
-            ],
+        autoTable(pdf, {
+            startY: yPos,
+            body: infoBody,
+            theme: 'grid',
+            styles: { cellPadding: 5, fontSize: 10, lineColor: [0, 0, 0], lineWidth: 1 },
+            columnStyles: { 
+                0: { fontStyle: 'bold', cellWidth: 150, fillColor: [255, 255, 255] }, 
+                1: { cellWidth: 350, fillColor: [255, 255, 255] } 
+            },
+            margin: { left: 40, right: 40 },
         });
+        yPos = pdf.lastAutoTable.finalY + 20;
 
-        const fullName = `${applicant.firstName || ""} ${applicant.middleName || ""} ${applicant.lastName || ""}`;
-
-        const infoTable = new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [
-                createInfoRow("NAME OF OWNER:", fullName),
-                createInfoRow("ADDRESS:", applicant?.address || "___________"),
-                createInfoRow("BUSINESS NAME:", applicant?.businessName || "___________"),
-                createInfoRow("LINE OF BUSINESS:", applicant?.lineOfBusiness || "___________"),
-                createInfoRow("KIND OF ORGANIZATION:", applicant?.kindOfOrganization || "___________"),
-                createInfoRow("BUSINESS ADDRESS:", applicant?.barangay || "___________"),
-            ],
-        });
-
-        // Collection Table (Two Columns)
-        const collectionRows = validCollections.map(
-            (item) =>
-                new TableRow({
-                    children: [
-                        new TableCell({
-                            children: [createNoSpacingPara(item.label)],
-                            margins: { top: 50, bottom: 50, left: 100, right: 100 },
-                        }),
-                        new TableCell({
-                            children: [
-                                new Paragraph({
-                                    text: formatPeso(Number(item.amount)),
-                                    alignment: AlignmentType.RIGHT,
-                                    spacing: { after: 0, before: 0 }
-                                }),
-                            ],
-                            margins: { top: 50, bottom: 50, left: 100, right: 100 },
-                        }),
-                    ],
-                })
-        );
-
-        // Add Total Row
+        // Collections Table
+        const collectionBody = validCollections.map(item => [
+            item.label, 
+            { content: formatPeso(Number(item.amount)), styles: { halign: 'right' } }
+        ]);
         if (total > 0) {
-            collectionRows.push(
-                new TableRow({
-                    children: [
-                        new TableCell({
-                            children: [createNoSpacingPara("TOTAL", true)],
-                            margins: { top: 50, bottom: 50, left: 100, right: 100 },
-                        }),
-                        new TableCell({
-                            children: [
-                                new Paragraph({
-                                    alignment: AlignmentType.RIGHT,
-                                    spacing: { after: 0, before: 0 },
-                                    children: [
-                                        new TextRun({ text: formatPeso(total), bold: true })
-                                    ]
-                                }),
-                            ],
-                            margins: { top: 50, bottom: 50, left: 100, right: 100 },
-                        }),
-                    ]
-                }),
-                new TableRow({
-                    children: [
-                        new TableCell({
-                            children: [createNoSpacingPara("AMOUNT IN WORDS", true)],
-                            margins: { top: 50, bottom: 50, left: 100, right: 100 },
-                        }),
-                        new TableCell({
-                            children: [
-                                new Paragraph({
-                                    text: amountInWords(total).toUpperCase(),
-                                    alignment: AlignmentType.RIGHT,
-                                    spacing: { after: 0, before: 0 }
-                                }),
-                            ],
-                            margins: { top: 50, bottom: 50, left: 100, right: 100 },
-                        }),
-                    ]
-                })
+            collectionBody.push(
+                [{ content: "TOTAL", styles: { fontStyle: 'bold' } }, { content: formatPeso(total), styles: { halign: 'right', fontStyle: 'bold' } }],
+                [{ content: "AMOUNT IN WORDS", styles: { fontStyle: 'bold' } }, { content: amountInWords(total).toUpperCase(), styles: { halign: 'right' } }]
             );
         }
-
-        const collectionTable = new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [
-                // Header Row
-                new TableRow({
-                    children: [
-                        new TableCell({
-                            children: [createNoSpacingPara("NATURE OF COLLECTION", true, 22)],
-                            borders: { top: BorderStyle.SINGLE, bottom: BorderStyle.SINGLE, left: BorderStyle.SINGLE, right: BorderStyle.SINGLE },
-                        }),
-                        new TableCell({
-                            children: [createNoSpacingPara("AMOUNT", true, 22, AlignmentType.RIGHT)],
-                            borders: { top: BorderStyle.SINGLE, bottom: BorderStyle.SINGLE, left: BorderStyle.SINGLE, right: BorderStyle.SINGLE },
-                        }),
-                    ],
-                }),
-                ...collectionRows,
-            ],
+        autoTable(pdf, {
+            startY: yPos,
+            head: [["NATURE OF COLLECTION", "AMOUNT"]],
+            body: collectionBody,
+            theme: 'grid',
+            styles: { cellPadding: 5, fontSize: 11, lineColor: [0, 0, 0], lineWidth: 1 },
+            headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold' },
+            columnStyles: { 0: {}, 1: { halign: 'right' } },
+            margin: { left: 40, right: 40 },
+            pageBreak: 'auto', // Handles overflow automatically
         });
+        yPos = pdf.lastAutoTable.finalY + 40;
 
-        // Dual Signature Block (Mayor and Licensing Officer)
-        const signatureBlock = new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            rows: [
-                new TableRow({
-                    children: [
-                        // Left Cell: Licensing Officer's Signature
-                        new TableCell({
-                            width: { size: 50, type: WidthType.PERCENTAGE },
-                            children: [
-                                ...(oriaSignatureImageData ? [
-                                    new Paragraph({
-                                        alignment: AlignmentType.CENTER,
-                                        spacing: { after: 0, before: 200 },
-                                        children: [
-                                            new ImageRun({
-                                                data: oriaSignatureImageData.data,
-                                                transformation: {
-                                                    width: 150,
-                                                    height: 50,
-                                                },
-                                            }),
-                                        ],
-                                    }),
-                                ] : [
-                                    new Paragraph({ text: " ", spacing: { after: 100, before: 100 } })
-                                ]),
-                                new Paragraph({
-                                    alignment: AlignmentType.CENTER,
-                                    spacing: { after: 0, before: 0 },
-                                    children: [
-                                        new TextRun({ text: "WILLIAM CARTABIO", bold: true }),
-                                        new TextRun({ break: 1, text: "COMPUTED BY:", size: 16 }),
-                                    ],
-                                }),
-                            ],
-                            borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
-                        }),
-                        // Right Cell: Mayor's Signature
-                        new TableCell({
-                            width: { size: 50, type: WidthType.PERCENTAGE },
-                            children: [
-                                ...(eSignatureImageData ? [
-                                    new Paragraph({
-                                        alignment: AlignmentType.CENTER,
-                                        spacing: { after: 0, before: 200 },
-                                        children: [
-                                            new ImageRun({
-                                                data: eSignatureImageData.data,
-                                                transformation: {
-                                                    width: 150,
-                                                    height: 50,
-                                                },
-                                            }),
-                                        ],
-                                    }),
-                                ] : [
-                                    new Paragraph({ text: " ", spacing: { after: 100, before: 100 } })
-                                ]),
-                                new Paragraph({
-                                    alignment: AlignmentType.CENTER,
-                                    spacing: { after: 0, before: 0 },
-                                    children: [
-                                        new TextRun({ text: "LUCIO GERALDO G. CIOLO", bold: true }),
-                                        new TextRun({ break: 1, text: "ACTING CITY TREASURER", size: 16 }),
-                                    ],
-                                }),
-                            ],
-                            borders: { top: BorderStyle.NONE, bottom: BorderStyle.NONE, left: BorderStyle.NONE, right: BorderStyle.NONE },
-                        }),
-                    ],
-                }),
-            ],
-        });
+        // Signature Block (side by side)
+        const sigWidth = 150;
+        const sigHeight = 50;
+        const leftX = 70;
+        const rightX = 370;
 
-        // Main Document Structure
-        const mainDocChildren = [
-            // Header Section (Non-table)
-            ...headerSection,
-            // Business ID and Reference No
-            new Paragraph({
-                alignment: AlignmentType.LEFT,
-                spacing: { before: 200, after: 200 },
-                children: [
-                    new TextRun({ break: 1, text: `BUSINESS ID: ${applicant?.BIN || "___________"}`, bold: true }),
-                    new TextRun({ break: 1, text: `REFERENCE NO: ${applicant?.referenceNo || "___________"}`, bold: true }),
-                ]
-            }),
-            // Business Info Table
-            infoTable,
-            new Paragraph({ text: " " }),
-            // Collection Table
-            collectionTable,
-            // Signature Block
-            signatureBlock,
-        ];
+        // Left: Oria
+        if (oriaSignatureImageData) {
+            pdf.addImage(oriaSignatureImageData, 'PNG', leftX, yPos, sigWidth, sigHeight);
+        }
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text("WILLIAM CARTABIO", leftX + sigWidth / 2, yPos + sigHeight + 10, { align: 'center' });
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text("COMPUTED BY:", leftX + sigWidth / 2, yPos + sigHeight + 20, { align: 'center' });
 
-        const doc = new Document({
-            sections: [{
-                properties: {
-                    page: {
-                        margin: {
-                            top: 100,
-                            right: 100,
-                            bottom: 100,
-                            left: 100,
-                        },
-                    },
-                },
-                children: mainDocChildren,
-            }],
-        });
+        // Right: Mayor
+        if (eSignatureImageData) {
+            pdf.addImage(eSignatureImageData, 'PNG', rightX, yPos, sigWidth, sigHeight);
+        }
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text("LUCIO GERALDO G. CIOLO", rightX + sigWidth / 2, yPos + sigHeight + 10, { align: 'center' });
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text("ACTING CITY TREASURER", rightX + sigWidth / 2, yPos + sigHeight + 20, { align: 'center' });
 
-        const blob = await Packer.toBlob(doc);
-        saveAs(blob, "Business_Tax_Document.docx");
+        // Save as Blob and download
+        const blob = pdf.output('blob');
+        saveAs(blob, "Business_Tax_Document.pdf");
     };
 
     return (
-        <Button variant="contained" color="success" onClick={exportDocx}>
-            Export to Word
+        <Button variant="contained" color="success" onClick={exportPdf}>
+            Export to PDF
         </Button>
     );
 }
 
-export default BusinessTaxDocxExport;
+export default BusinessTaxPdfExport;

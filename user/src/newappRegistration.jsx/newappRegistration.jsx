@@ -24,7 +24,7 @@ import { useMediaQuery, useTheme } from "@mui/material";
 import PrivacyAgreementDialog from "./DataPrivacyModal";
 import NextStepConfirmationDialog from "./newAppcomponents/NextStepConfirmationDialog";
 
-const PRIMARY_COLOR = "#09360D";
+const PRIMARY_COLOR = "#1d5236";
 const HOVER_COLOR = "#072b0b";
 const LIGHT_HOVER_COLOR = "rgba(9, 54, 13, 0.08)";
 
@@ -327,7 +327,7 @@ function NewApplicationRegisterPage() {
       <Box
         sx={{
           width: "100%",
-          backgroundColor: "#09360D",
+          backgroundColor: "#1d5236",
           py: 2.7, // vertical padding for height
         }}
       >
