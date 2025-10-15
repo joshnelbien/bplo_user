@@ -107,6 +107,23 @@ router.get("/files/:id", async (req, res) => {
   }
 });
 
+// ✅ Corrected route
+router.put("/appDone/:id", async (req, res) => {
+  try {
+    const { id } = req.params; // get the id from the URL
+
+    const file = await File.findByPk(id);
+    if (!file) return res.status(404).send("File not found");
+
+    await file.update({ permitRelease: "Done" });
+
+    res.status(200).send("Permit marked as released");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
 // Preview file
 router.get("/files/:id/:key", async (req, res) => {
   const { id, key } = req.params;

@@ -35,6 +35,8 @@ const TreasurersOfficeRoutes = require("./routes/treasurerRoutes");
 const BusinessProfile = require("./db/model/businessProfileDB");
 const businessProfileRoutes = require("./routes/businessProfileRoutes");
 
+const AdminAccounts = require("./db/model/adminAccountsDB");
+
 const feedback = require("./routes/feedback");
 
 const app = express();
@@ -291,6 +293,7 @@ function watchFSICFile() {
     await AppStatus.sync();
     await TreasurersOffice.sync();
     await BusinessProfile.sync();
+    await AdminAccounts.sync();
 
     // await Examiners.sync({ alter: true });
     // await File.sync({ alter: true });
