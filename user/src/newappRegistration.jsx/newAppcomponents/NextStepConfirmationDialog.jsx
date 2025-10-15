@@ -9,7 +9,7 @@ import {
 import { styled } from "@mui/system";
 
 // Define styles for buttons (reusing the same styles as in the main component)
-const PRIMARY_COLOR = "#09360D";
+const PRIMARY_COLOR = "#1d5236";
 const HOVER_COLOR = "#072b0b";
 const LIGHT_HOVER_COLOR = "rgba(9, 54, 13, 0.08)";
 const WHITE = "#fff";

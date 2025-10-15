@@ -513,6 +513,12 @@ function NewApplicationPage() {
         <GreenButton
           onClick={() => navigate(`/homePage/${id}`)}
           variant="contained"
+          sx={{
+            backgroundColor: "#09360D",
+            "&:hover": {
+              backgroundColor: "#062708", // slightly darker on hover
+            },
+          }}
         >
           BACK TO DASHBOARD
         </GreenButton>
@@ -600,6 +606,7 @@ function NewApplicationPage() {
                 type="button"
                 variant="outlined"
                 onClick={() => setStep(step - 1)}
+                
               >
                 Back
               </GreenButton>
@@ -609,6 +616,12 @@ function NewApplicationPage() {
                 type="button"
                 variant="contained"
                 onClick={handleNextClick}
+                sx={{
+                  backgroundColor: "#09360D",
+                  "&:hover": {
+                    backgroundColor: "#062708", // darker shade on hover
+                  },
+                }}
               >
                 Next
               </GreenButton>
