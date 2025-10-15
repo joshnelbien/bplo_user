@@ -7,6 +7,7 @@ import {
   useTheme,
   Divider,
   useMediaQuery,
+  Button,
 } from "@mui/material";
 import { styled, keyframes } from "@mui/material/styles";
 import Side_bar from "../SIDE_BAR/side_bar";
@@ -17,6 +18,7 @@ import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import AddAdminModal from "./AddAdminModal";
 
 /* ================== STYLES ================== */
 const hoverAnimation = keyframes`
@@ -120,6 +122,7 @@ const renderCard = (Icon, label, value, growth, color) => (
 function Dashboard() {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
+  const [openModal, setOpenModal] = useState(false);
 
   const months = [
     "Jan",
@@ -309,7 +312,15 @@ function Dashboard() {
         </Grid>
 
         <Divider sx={{ my: 4, width: "100%" }} />
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setOpenModal(true)}
+        >
+          Add Admin
+        </Button>
 
+        <AddAdminModal open={openModal} onClose={() => setOpenModal(false)} />
         {/* Data Analytics Graph */}
         <Paper
           sx={{

@@ -36,6 +36,7 @@ const BusinessProfile = require("./db/model/businessProfileDB");
 const businessProfileRoutes = require("./routes/businessProfileRoutes");
 
 const AdminAccounts = require("./db/model/adminAccountsDB");
+const AdminAccountRoutes = require("./routes/adminAccountRoutes");
 
 const feedback = require("./routes/feedback");
 
@@ -326,6 +327,7 @@ app.use("/appStatus", appStatusRoutes);
 app.use("/treasurer", TreasurersOfficeRoutes);
 app.use("/businessProfile", businessProfileRoutes);
 app.use("/user-feedback", feedback);
+app.use("/adminAccounts", AdminAccountRoutes);
 
 // Endpoint to fetch FSIC rows (limited)
 app.get("/api/my-existing-table", async (req, res) => {
