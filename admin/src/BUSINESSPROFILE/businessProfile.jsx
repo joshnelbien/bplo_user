@@ -226,7 +226,7 @@ function BusinessProfile() {
       <Box
         id="main_content"
         sx={{
-          p: 3,
+          p: 0,
           minHeight: "100vh",
           background: "white", // CHANGED: Set background to plain white
           marginLeft: { xs: 0, sm: "250px" },
@@ -241,6 +241,7 @@ function BusinessProfile() {
         <Box
           mb={2}
           display="flex"
+          ml={5}
           justifyContent="space-between"
           alignItems="center"
           flexWrap="wrap"
@@ -304,7 +305,7 @@ function BusinessProfile() {
           </ButtonGroup>
 
           {/* ✅ Search + Export */}
-          <Box display="flex" alignItems="center" gap={2}>
+          <Box display="flex" alignItems="center">
             <TextField
               label="Search..."
               variant="outlined"
@@ -329,7 +330,12 @@ function BusinessProfile() {
         {/* ✅ Table */}
         <TableContainer
           component={Paper}
-          sx={{ borderRadius: 2, boxShadow: 3 }}
+          sx={{
+            borderRadius: 2,
+            boxShadow: 3,
+            maxWidth: "1600px", // ✅ Set your desired max width
+            margin: "0 auto", // ✅ Centers the table horizontally
+          }}
         >
           <Table>
             <TableHead>
