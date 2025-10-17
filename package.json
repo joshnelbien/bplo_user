@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "dev": "concurrently -n user,admin,backend -c green,cyan,yellow \"npm run dev --prefix user\" \"npm run dev --prefix admin\" \"npm run dev --prefix backend\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}

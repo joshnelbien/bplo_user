@@ -18,10 +18,10 @@ const API = import.meta.env.VITE_API_BASE;
 const handleDone = async (id) => {
   try {
     const res = await axios.put(`${API}/newApplication/appDone/${id}`);
-    console.log("✅ Permit updated:", res.data);
+    console.log("Permit updated:", res.data);
     alert("Permit marked as released!");
   } catch (error) {
-    console.error("❌ Error updating permit:", error);
+    console.error("Error updating permit:", error);
     alert("Failed to update permit");
   }
 };
@@ -29,7 +29,7 @@ const handleDone = async (id) => {
 // Styles to mimic Word layout with adjustments
 const styles = StyleSheet.create({
   page: { padding: 20, fontFamily: "Helvetica" },
-  frame: { border: "10pt solid #1D5A2E", padding: 10 },
+  frame: { border: "10pt solid #1D5A2E", padding: 10 }, // Keep frame border thick
   darkGreen: { backgroundColor: "#1D5A2E" },
   whiteText: { color: "white" },
   bold: { fontWeight: "bold" },
@@ -38,12 +38,12 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row" },
   col25: { width: "25%" },
   col50: { width: "50%" },
-  col70: { width: "70%", border: "1pt solid black", padding: 5 },
-  col30: { width: "30%", border: "1pt solid black", padding: 5 },
+  col70: { width: "70%", border: "1pt solid black", padding: 5 }, // Left this one as is, but could be reduced
+  col30: { width: "30%", border: "1pt solid black", padding: 5 }, // Left this one as is, but could be reduced
   banner: { backgroundColor: "#1D5A2E", padding: 10, marginVertical: 10 },
   bannerText: {
     color: "white",
-    fontSize: 18,
+    fontSize: 12,
     fontWeight: "bold",
     textAlign: "center",
   },
@@ -51,23 +51,32 @@ const styles = StyleSheet.create({
   signatureCol: { width: "50%", alignItems: "center", marginTop: 20 },
   footerGreenBar: { backgroundColor: "#1D5A2E", padding: 10, marginTop: 20 },
   introText: { fontSize: 10, marginBottom: 10 },
-  infoTableRow: { flexDirection: "row", border: "1pt solid black" },
+
+  // *** UPDATED TABLE STYLES FOR FONT SIZE 8 IN INFO TABLE ***
+  infoTableRow: { flexDirection: "row", border: "0.5pt solid black" },
   infoTableHeader: {
     fontWeight: "bold",
     fontSize: 10,
     padding: 5,
-    border: "1pt solid black",
+    border: "0.5pt solid black", 
     backgroundColor: "#F5F5F5",
   },
-  infoTableCell: { padding: 5, border: "1pt solid black", fontSize: 10 },
+  infoTableCell: { padding: 5, border: "0.5pt solid black", fontSize: 8 }, // <<< MODIFIED TO 8
   collectionHeader: {
     fontWeight: "bold",
     fontSize: 10,
     padding: 5,
-    border: "1pt solid black",
+    border: "0.5pt solid black", 
     backgroundColor: "#F5F5F5",
   },
-  collectionCell: { padding: 5, border: "1pt solid black", fontSize: 10 },
+  collectionCell: { padding: 5, border: "0.5pt solid black", fontSize: 10 }, // KEPT AS 10 for Collections
+  wordsRow: { flexDirection: "row", border: "0.5pt solid black" },
+  wordsLabel: { width: "30%", padding: 5, border: "0.5pt solid black", fontSize: 10, fontWeight: "bold" },
+  wordsValue: { width: "70%", padding: 5, border: "0.5pt solid black", fontSize: 10 },
+  // *** NEW/MODIFIED STYLES FOR TOTAL/AMOUNT IN WORDS FONT SIZE 8 ***
+  totalCell: { padding: 5, border: "0.5pt solid black", fontSize: 8, fontWeight: "bold" },
+  wordsLabelSmall: { width: "30%", padding: 5, border: "0.5pt solid black", fontSize: 8, fontWeight: "bold" },
+  wordsValueSmall: { width: "70%", padding: 5, border: "0.5pt solid black", fontSize: 8 },
 });
 
 async function loadImageAsBase64(imagePath) {
@@ -84,12 +93,69 @@ async function loadImageAsBase64(imagePath) {
     console.error("Error loading image:", error);
     return null;
   }
+  
+}// Helper function to convert number to words (Philippine Pesos style)
+function numberToWords(num) {
+  if (num === 0) return 'ZERO PESOS AND ZERO CENTAVOS';
+
+  const ones = ['', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE', 'TEN', 'ELEVEN', 'TWELVE', 'THIRTEEN', 'FOURTEEN', 'FIFTEEN', 'SIXTEEN', 'SEVENTEEN', 'EIGHTEEN', 'NINETEEN'];
+  const tens = ['', '', 'TWENTY', 'THIRTY', 'FORTY', 'FIFTY', 'SIXTY', 'SEVENTY', 'EIGHTY', 'NINETY'];
+  const scales = ['', 'THOUSAND', 'MILLION', 'BILLION'];
+
+  const pesos = Math.floor(num);
+  const centavos = Math.round((num - pesos) * 100);
+
+  function convertGroup(n) {
+    let str = '';
+    if (n >= 100) {
+      str += ones[Math.floor(n / 100)] + ' HUNDRED ';
+      n %= 100;
+    }
+    if (n >= 20) {
+      str += tens[Math.floor(n / 10)] + ' ';
+      n %= 10;
+    }
+    if (n > 0) {
+      str += ones[n] + ' ';
+    }
+    return str.trim();
+  }
+
+  function convertNumber(n) {
+    if (n === 0) return '';
+    let str = '';
+    let scaleIndex = 0;
+    while (n > 0) {
+      const group = n % 1000;
+      if (group > 0) {
+        let groupStr = convertGroup(group);
+        if (scaleIndex > 0) {
+          groupStr += ' ' + scales[scaleIndex] + ' ';
+        } else if (groupStr) {
+          groupStr += ' ';
+        }
+        str = groupStr + str;
+      }
+      n = Math.floor(n / 1000);
+      scaleIndex++;
+    }
+    return str.trim().replace(/\s+/g, ' ');
+  }
+
+  let words = convertNumber(pesos) + ' PESOS';
+  if (centavos > 0) {
+    words += ' AND ' + convertNumber(centavos) + ' CENTAVOS';
+  } else {
+    words += ' AND ZERO CENTAVOS';
+  }
+  return words.trim().replace(/\s+/g, ' ');
 }
 
 function MayorsPermit({ applicant, collections, total, otherChargesTotal }) {
+  // MODIFIED: formatPeso now returns only the formatted number string (no ₱)
   const formatPeso = (value) =>
     value > 0
-      ? `₱ ${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+      ? value.toLocaleString(undefined, { minimumFractionDigits: 2 })
       : "";
 
   const exportPdf = async () => {
@@ -98,7 +164,7 @@ function MayorsPermit({ applicant, collections, total, otherChargesTotal }) {
     );
 
     // Load images (place in /public folder)
-    const bagongPilipinasSrc = await loadImageAsBase64("/bagongp.png");
+    const bagongPilipinasSrc = await loadImageAsBase64("/bagongpilipinas.png");
     const spcLogoSrc = await loadImageAsBase64("/spclogo.png");
     const eSignatureSrc = await loadImageAsBase64("/samplesig.png");
     const oriaSignatureSrc = await loadImageAsBase64("/samplesig.png");
@@ -110,6 +176,8 @@ function MayorsPermit({ applicant, collections, total, otherChargesTotal }) {
       applicant.cityOrMunicipality || ""
     }`; // Adjust fields as needed
 
+    const amountInWords = total > 0 ? numberToWords(total) : '';
+
     const PdfDocument = () => (
       <Document>
         <Page size="A4" style={styles.page}>
@@ -119,21 +187,21 @@ function MayorsPermit({ applicant, collections, total, otherChargesTotal }) {
               <View style={styles.col25}>
                 <Image
                   src={bagongPilipinasSrc}
-                  style={{ width: 90, height: 90 }}
+                  style={{ width: 50, height: 50 }}
                 />
               </View>
               <View style={[styles.col50, { alignItems: "center" }]}>
-                <Image src={spcLogoSrc} style={{ width: 70, height: 70 }} />
+                <Image src={spcLogoSrc} style={{ width: 50, height: 50 }} />
                 <Text style={{ fontSize: 12, fontWeight: "bold" }}>
                   OFFICE OF THE MAYOR
                 </Text>
-                <Text style={{ fontSize: 11 }}>
+                <Text style={{ fontSize: 9 }}>
                   BUSINESS PERMIT AND LICENSING DIVISION
                 </Text>
               </View>
               <View style={[styles.col25, { alignItems: "flex-end" }]}>
-                <Text style={{ fontSize: 24, fontWeight: "bold" }}>2025</Text>
-                <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                <Text style={{ fontSize: 20, fontWeight: "bold" }}>2025</Text>
+                <Text style={{ fontSize: 14, fontWeight: "bold" }}>
                   {applicant?.PermitNumber || "00000"}
                 </Text>
                 <Text style={{ fontSize: 8, fontWeight: "bold" }}>
@@ -163,13 +231,13 @@ function MayorsPermit({ applicant, collections, total, otherChargesTotal }) {
             {/* 4. Business Info Table (6 rows, 2 cols with header) */}
             <View style={{ marginVertical: 10 }}>
               <View style={styles.row}>
-                <Text style={[styles.infoTableHeader, { width: "70%" }]}>
+                <Text style={[styles.infoTableHeader, { width: "30%" }]}>
                   DESCRIPTION
                 </Text>
                 <Text
                   style={[
                     styles.infoTableHeader,
-                    { width: "30%", textAlign: "left" },
+                    { width: "70%", textAlign: "center" },
                   ]}
                 >
                   DETAILS
@@ -190,10 +258,10 @@ function MayorsPermit({ applicant, collections, total, otherChargesTotal }) {
                 ["BUSINESS ADDRESS:", businessAddress],
               ].map(([label, value]) => (
                 <View style={styles.infoTableRow} key={label}>
-                  <Text style={[styles.infoTableCell, { width: "70%" }]}>
+                  <Text style={[styles.infoTableCell, { width: "30%" }]}>
                     {label}
                   </Text>
-                  <Text style={[styles.infoTableCell, { width: "30%" }]}>
+                  <Text style={[styles.infoTableCell, { width: "70%" }]}>
                     {value}
                   </Text>
                 </View>
@@ -202,16 +270,16 @@ function MayorsPermit({ applicant, collections, total, otherChargesTotal }) {
 
             <View style={styles.spacer} />
 
-            {/* 5. Collections Table */}
+            {/* 5. Collections Table (using existing styles with size 10, except total/words) */}
             <View>
               <View style={styles.row}>
-                <Text style={[styles.collectionHeader, { width: "70%" }]}>
+                <Text style={[styles.collectionHeader, { width: "30%" }]}>
                   NATURE OF COLLECTION
                 </Text>
                 <Text
                   style={[
                     styles.collectionHeader,
-                    { width: "30%", textAlign: "right" },
+                    { width: "70%", textAlign: "center" },
                   ]}
                 >
                   AMOUNT
@@ -219,13 +287,13 @@ function MayorsPermit({ applicant, collections, total, otherChargesTotal }) {
               </View>
               {validCollections.map((item) => (
                 <View style={styles.row} key={item.label}>
-                  <Text style={[styles.collectionCell, { width: "70%" }]}>
+                  <Text style={[styles.collectionCell, { width: "30%" }]}>
                     {item.label}
                   </Text>
                   <Text
                     style={[
                       styles.collectionCell,
-                      { width: "30%", textAlign: "right" },
+                      { width: "70%", textAlign: "left" },
                     ]}
                   >
                     {formatPeso(Number(item.amount))}
@@ -233,24 +301,30 @@ function MayorsPermit({ applicant, collections, total, otherChargesTotal }) {
                 </View>
               ))}
               {total > 0 && (
-                <View style={styles.row}>
-                  <Text
-                    style={[
-                      styles.collectionCell,
-                      { width: "70%", fontWeight: "bold" },
-                    ]}
-                  >
-                    TOTAL
-                  </Text>
-                  <Text
-                    style={[
-                      styles.collectionCell,
-                      { width: "30%", textAlign: "right", fontWeight: "bold" },
-                    ]}
-                  >
-                    {formatPeso(total)}
-                  </Text>
-                </View>
+                <>
+                  <View style={styles.row}>
+                    <Text
+                      style={[
+                        styles.totalCell, // Use totalCell for size 8 bold
+                        { width: "30%" },
+                      ]}
+                    >
+                      TOTAL
+                    </Text>
+                    <Text
+                      style={[
+                        styles.totalCell, // Use totalCell for size 8 bold
+                        { width: "70%", textAlign: "left" },
+                      ]}
+                    >
+                      {formatPeso(total)}
+                    </Text>
+                  </View>
+                  <View style={styles.wordsRow}>
+                    <Text style={styles.wordsLabelSmall}>AMOUNT IN WORDS:</Text> {/* Use wordsLabelSmall for size 8 */}
+                    <Text style={styles.wordsValueSmall}>{amountInWords}</Text> {/* Use wordsValueSmall for size 8 */}
+                  </View>
+                </>
               )}
             </View>
 
@@ -259,26 +333,26 @@ function MayorsPermit({ applicant, collections, total, otherChargesTotal }) {
               <View style={styles.signatureCol}>
                 <Image
                   src={oriaSignatureSrc}
-                  style={{ width: 150, height: 50 }}
+                  style={{ width: 50, height: 50 }}
                 />
                 <Text style={{ fontWeight: "bold", fontSize: 10 }}>
                   ORIA M. BAÑAGALE
                 </Text>
-                <Text style={{ fontSize: 8 }}>
+                <Text style={{ fontSize: 10 }}>
                   LICENSING OFFICER IV, CHIEF, BPLO
                 </Text>
               </View>
               <View style={styles.signatureCol}>
-                <Image src={eSignatureSrc} style={{ width: 150, height: 50 }} />
+                <Image src={eSignatureSrc} style={{ width: 50, height: 50 }} />
                 <Text style={{ fontWeight: "bold", fontSize: 10 }}>
                   HON. ARCADIO B. GAPANGADA JR., MNSA
                 </Text>
-                <Text style={{ fontSize: 8 }}>CITY MAYOR</Text>
+                <Text style={{ fontSize: 10 }}>CITY MAYOR</Text>
               </View>
             </View>
 
             {/* 7. Footer Text */}
-            <Text style={{ fontSize: 9, marginTop: 20, textAlign: "justify" }}>
+            <Text style={{ fontSize: 8, marginTop: 20, textAlign: "justify" }}>
               This Permit shall take effect upon approval until December 31,
               2025 unless sooner revoked for cause and shall be renewed on or
               before January 20, 2026{"\n\n"}
@@ -309,6 +383,7 @@ function MayorsPermit({ applicant, collections, total, otherChargesTotal }) {
                   styles.whiteText,
                   styles.center,
                   { fontWeight: "bold" },
+                  { fontSize: 7 },
                 ]}
               >
                 ANY ALTERATION AND /OR ERASURE WILL INVALID THIS PERMIT.
