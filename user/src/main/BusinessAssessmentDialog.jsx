@@ -186,7 +186,7 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ color: "#09360D", fontWeight: "bold" }}>
-        Business Fee Assessment
+        Business Fee Assessment For New Businesses
       </DialogTitle>
 
       <DialogContent>
