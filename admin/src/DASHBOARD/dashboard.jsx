@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -8,360 +8,655 @@ import {
   Divider,
   useMediaQuery,
   Button,
+  Card,
+  CardContent,
+  Chip,
+  Stack,
+  Avatar,
+  alpha,
+  IconButton,
 } from "@mui/material";
-import { styled, keyframes } from "@mui/material/styles";
+import {
+  Description,
+  TrendingUp,
+  AccessTime,
+  PersonAdd,
+} from "@mui/icons-material";
 import Side_bar from "../SIDE_BAR/side_bar";
-import { LineChart } from "@mui/x-charts/LineChart";
-
-import BusinessIcon from "@mui/icons-material/Business";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import HowToRegIcon from "@mui/icons-material/HowToReg";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import { LineChart, lineElementClasses } from "@mui/x-charts/LineChart";
+import { BarChart, barElementClasses } from "@mui/x-charts/BarChart";
 import AddAdminModal from "./AddAdminModal";
 
-/* ================== STYLES ================== */
-const hoverAnimation = keyframes`
-  0% { transform: translateY(0); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-  50% { transform: translateY(-6px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-  100% { transform: translateY(0); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-`;
+/* ================== CONSTANTS ================== */
+const primaryGreen = "#1d5236";
+const lightGreen = alpha(primaryGreen, 0.1);
+const darkGreen = "#0f2a1b";
 
-const DashboardCard = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(4),
-  borderRadius: theme.shape.borderRadius * 2,
-  textAlign: "center",
-  transition: "all 0.3s ease-in-out",
-  cursor: "pointer",
-  minHeight: "200px",
-  minWidth: "250px",
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "center",
-  alignItems: "center",
-  "&:hover": {
-    animation: `${hoverAnimation} 0.8s ease-in-out`,
-    transform: "translateY(-6px)",
-  },
-}));
+/* ================== NEW COMPONENT: LIVE CLOCK ================== */
 
-const IconWrapper = styled(Box)(({ theme }) => ({
-  marginBottom: theme.spacing(2),
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  fontSize: "3rem",
-}));
+function LiveClock() {
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
-/* ================== UTILITY FUNCTIONS ================== */
-const sumArray = (arr) => arr.reduce((a, b) => a + b, 0);
+  useEffect(() => {
+    // Update the date and time every second (1000 milliseconds)
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
 
-const calculateGrowth = (currentArr, previousArr) => {
-  const currentSum = sumArray(currentArr);
-  const previousSum = sumArray(previousArr);
-  if (previousSum === 0) return 0;
-  return ((currentSum - previousSum) / previousSum) * 100;
-};
+    // Cleanup the interval when the component unmounts
+    return () => clearInterval(timer);
+  }, []); // Empty dependency array ensures this effect runs only once on mount
 
-// ✅ Fixed filtering function
-const filterByMonth = (dataArr, monthsArr, selectedMonth) => {
-  if (selectedMonth === "All") {
-    return { data: dataArr, labels: monthsArr };
-  } else {
-    const idx = monthsArr.indexOf(selectedMonth);
-    return {
-      data: idx >= 0 ? [dataArr[idx]] : [],
-      labels: idx >= 0 ? [monthsArr[idx]] : [],
-    };
-  }
-};
+  // Format time (HH:MM:SS) and date (Day, Month DD, YYYY)
+  const timeOptions = {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false, // 24-hour format
+  };
 
-/* ================== COMPONENTS ================== */
-const GrowthIndicator = ({ growth }) => (
-  <Box
-    sx={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      mt: 1,
-    }}
-  >
-    {growth >= 0 ? (
-      <ArrowUpwardIcon color="success" fontSize="small" />
-    ) : (
-      <ArrowDownwardIcon color="error" fontSize="small" />
-    )}
-    <Typography
-      variant="subtitle2"
-      color={growth >= 0 ? "success.main" : "error.main"}
-      sx={{ ml: 0.5 }}
-    >
-      {Math.abs(growth).toFixed(1)}%
-    </Typography>
-  </Box>
-);
+  const dateOptions = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
 
-const renderCard = (Icon, label, value, growth, color) => (
-  <Grid item xs={12} md={4}>
-    <DashboardCard>
-      <IconWrapper>
-        <Icon color={color} fontSize="large" />
-      </IconWrapper>
-      <Typography variant="h6" color="textSecondary">
-        {label}
-      </Typography>
-      <Typography variant="h4" color={`${color}.main`} fontWeight="bold">
-        {sumArray(value).toLocaleString()}
-      </Typography>
-      <GrowthIndicator growth={growth} />
-    </DashboardCard>
-  </Grid>
-);
-
-/* ================== DASHBOARD ================== */
-function Dashboard() {
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
-  const [openModal, setOpenModal] = useState(false);
-
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  const years = [2024, 2025, 2026];
-
-  const [selectedMonth, setSelectedMonth] = useState("All");
-  const [selectedYear, setSelectedYear] = useState(2025);
-
-  /* ================== HARD CODED DATA ================== */
-  const businesses = [
-    { year: 2025, month: "Jan", type: "Renewal", amount: 120 },
-    { year: 2025, month: "Jan", type: "New", amount: 80 },
-    { year: 2025, month: "Feb", type: "Renewal", amount: 150 },
-    { year: 2025, month: "Feb", type: "New", amount: 90 },
-    { year: 2025, month: "Mar", type: "Renewal", amount: 180 },
-    { year: 2025, month: "Mar", type: "New", amount: 110 },
-    { year: 2024, month: "Jan", type: "Renewal", amount: 100 },
-    { year: 2024, month: "Jan", type: "New", amount: 70 },
-    { year: 2024, month: "Feb", type: "Renewal", amount: 130 },
-    { year: 2024, month: "Feb", type: "New", amount: 60 },
-    { year: 2024, month: "Mar", type: "Renewal", amount: 160 },
-    { year: 2024, month: "Mar", type: "New", amount: 90 },
-  ];
-
-  /* ================== PROCESS DATA ================== */
-  // Filter by year
-  const businessesByYear = businesses.filter(
-    (b) => parseInt(b.year) === selectedYear
-  );
-
-  // Map monthly sums
-  const renewalData = months.map((month) =>
-    sumArray(
-      businessesByYear
-        .filter((b) => b.type === "Renewal" && b.month === month)
-        .map((b) => parseInt(b.amount || 0))
-    )
-  );
-
-  const newBusinessesData = months.map((month) =>
-    sumArray(
-      businessesByYear
-        .filter((b) => b.type === "New" && b.month === month)
-        .map((b) => parseInt(b.amount || 0))
-    )
-  );
-
-  const registeredData = renewalData.map(
-    (val, i) => val + newBusinessesData[i]
-  );
-
-  // Previous year data for growth
-  const businessesPrevYear = businesses.filter(
-    (b) => parseInt(b.year) === selectedYear - 1
-  );
-  const prevRenewal = months.map((month) =>
-    sumArray(
-      businessesPrevYear
-        .filter((b) => b.type === "Renewal" && b.month === month)
-        .map((b) => parseInt(b.amount || 0))
-    )
-  );
-  const prevNewBusinesses = months.map((month) =>
-    sumArray(
-      businessesPrevYear
-        .filter((b) => b.type === "New" && b.month === month)
-        .map((b) => parseInt(b.amount || 0))
-    )
-  );
-  const prevRegistered = prevRenewal.map(
-    (val, i) => val + prevNewBusinesses[i]
-  );
-
-  /* ================== CALCULATIONS ================== */
-  const growthRenewal = calculateGrowth(renewalData, prevRenewal);
-  const growthNew = calculateGrowth(newBusinessesData, prevNewBusinesses);
-  const growthRegistered = calculateGrowth(registeredData, prevRegistered);
-
-  const renewalFiltered = filterByMonth(renewalData, months, selectedMonth);
-  const newFiltered = filterByMonth(newBusinessesData, months, selectedMonth);
-  const registeredFiltered = filterByMonth(
-    registeredData,
-    months,
-    selectedMonth
-  );
-
-  const chartRenewal = renewalFiltered.data;
-  const chartNew = newFiltered.data;
-  const chartRegistered = registeredFiltered.data;
-  const chartMonths = renewalFiltered.labels;
+  const timeString = currentDateTime.toLocaleTimeString("en-US", timeOptions);
+  const dateString = currentDateTime.toLocaleDateString("en-US", dateOptions);
 
   return (
     <Box
       sx={{
         display: "flex",
-        background: "linear-gradient(to bottom, #ffffff, #e6ffe6)",
-        minHeight: "100vh",
-        flexDirection: isSmallScreen ? "column" : "row",
-        justifyContent: "center",
-        alignItems: "flex-start",
-        px: isSmallScreen ? 2 : 4,
+        flexDirection: "column",
+        alignItems: "flex-start", // Left-align text
+        color: "white",
+        pl: 2, // Added padding on the left to space it from the edge
+        ml: 33,
       }}
     >
-      {!isSmallScreen && <Side_bar />}
-      <Box
-        component="main"
+      <Typography
+        variant="h5"
         sx={{
-          flexGrow: 1,
-          maxWidth: 1200,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          width: "100%",
+          fontWeight: "bold",
+          lineHeight: 1, // Tighter line height
+          textShadow: `0 0 5px ${alpha("#000000", 0.5)}`, // Subtle shadow for contrast
         }}
       >
-        {/* Filters */}
+        {timeString}
+      </Typography>
+      <Typography variant="body2" sx={{ fontSize: "0.8rem", opacity: 0.8 }}>
+        {dateString}
+      </Typography>
+    </Box>
+  );
+}
+
+/* ================== TOP BAR COMPONENTS ================== */
+
+// The TopBar component itself
+function TopBar({ onAddAdminClick }) {
+  const TOP_BAR_HEIGHT = 80;
+
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        height: TOP_BAR_HEIGHT,
+        backgroundColor: primaryGreen,
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        p: 2,
+        boxSizing: "border-box",
+        color: "white",
+        boxShadow: 3,
+        zIndex: 1100,
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+      }}
+    >
+      {/* 1. LEFT ALIGNED: LIVE CLOCK */}
+      <LiveClock />
+
+      {/* 2. CENTERED: DASHBOARD TITLE */}
+      <Typography
+        variant="h4"
+        component="div"
+        sx={{
+          fontWeight: "light",
+          textShadow: `0 0 5px ${alpha("#000000", 0.5)}`,
+          // This allows the title to be centered while the other items are at the edges
+          position: "absolute",
+          ml: 8,
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: { xs: "none", sm: "block" }, // Hide on extra small screens if needed
+        }}
+      >
+        Dashboard Overview
+      </Typography>
+
+      {/* 3. RIGHT ALIGNED: ADD ADMIN BUTTON (Replaced 'ml: 215' with alignment) */}
+      <Button
+        variant="contained"
+        onClick={onAddAdminClick}
+        startIcon={<PersonAdd sx={{ color: primaryGreen }} />}
+        sx={{
+          background: "#ffffff",
+          color: primaryGreen,
+          "&:hover": { background: alpha("#ffffff", 0.8) },
+          borderRadius: 20,
+          py: 1,
+          textTransform: "none",
+          fontWeight: "bold",
+          boxShadow: `0 4px 12px ${alpha(primaryGreen, 0.5)}`,
+          // Use ml: 'auto' to push the button to the far right.
+          // Since the Title is position: absolute, this works well with the clock on the left.
+          ml: "auto", 
+          mr: 2, // Add a bit of right margin from the edge
+        }}
+      >
+        Add Admin
+      </Button>
+    </Box>
+  );
+}
+
+/* ================== DASHBOARD COMPONENTS ================== */
+
+// Custom Peso Icon
+const PesoIcon = () => (
+  <Typography sx={{ fontWeight: "bold", fontSize: "1.2rem" }}>₱</Typography>
+);
+
+function Dashboard() {
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
+  const [openModal, setOpenModal] = useState(false);
+  const TOP_BAR_HEIGHT = 80;
+
+  // Sample data for metrics
+  const metrics = {
+    totalApplications: 1245,
+    approvedPermits: 890,
+    pendingRenewals: 155,
+    revenueCollected: 456789,
+  };
+
+  // Sample revenue data for line chart
+  const revenueData = [
+    { month: "Jan", revenue: 30000 },
+    { month: "Feb", revenue: 45000 },
+    { month: "Mar", revenue: 38000 },
+    { month: "Apr", revenue: 52000 },
+    { month: "May", revenue: 48000 },
+    { month: "Jun", revenue: 61000 },
+    { month: "Jul", revenue: 55000 },
+    { month: "Aug", revenue: 67000 },
+    { month: "Sep", revenue: 72000 },
+    { month: "Oct", revenue: 78000 },
+    { month: "Nov", revenue: 82000 },
+    { month: "Dec", revenue: 91000 },
+  ];
+
+  const xLabels = revenueData.map((d) => d.month);
+  const revenueValues = revenueData.map((d) => d.revenue);
+
+  // Sample data for bar chart (e.g., applications breakdown by category)
+  const barData = {
+    categories: ["New Apps", "Renewals", "Permits", "Appeals"],
+    values: [450, 300, 290, 205],
+  };
+
+  // Handlers for modal
+  const handleOpenModal = () => setOpenModal(true);
+  const handleCloseModal = () => setOpenModal(false);
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        background: "#f5f5f5",
+        minHeight: "100vh",
+        flexDirection: "column",
+        justifyContent: "flex-start",
+        alignItems: "flex-start",
+      }}
+    >
+      {/* 1. TOP BAR (Fixed at the top) */}
+      <TopBar onAddAdminClick={handleOpenModal} />
+
+      {/* 2. SIDE BAR AND MAIN CONTENT WRAPPER */}
+      <Box
+        sx={{
+          display: "flex",
+          width: "100%",
+          flexGrow: 1,
+          flexDirection: isSmallScreen ? "column" : "row",
+          pt: `${TOP_BAR_HEIGHT}px`, // Add padding to push content down below fixed TopBar
+          px: isSmallScreen ? 2 : 4,
+          pb: 4,
+        }}
+      >
+        {/* SIDE BAR */}
+        {!isSmallScreen && <Side_bar />}
+
+        {/* MAIN CONTENT */}
         <Box
+          component="main"
           sx={{
-            mb: 3,
+            flexGrow: 1,
+            maxWidth: 1400,
             display: "flex",
-            flexDirection: isSmallScreen ? "column" : "row",
-            gap: 2,
-            justifyContent: "center",
-          }}
-        >
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            style={{ padding: "8px", borderRadius: "4px" }}
-          >
-            <option value="All">All Months</option>
-            {months.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            style={{ padding: "8px", borderRadius: "4px" }}
-          >
-            {years.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
-        </Box>
-
-        {/* Cards Section */}
-        <Grid container spacing={15.7} justifyContent="center">
-          {renderCard(
-            BusinessIcon,
-            "Renewal",
-            chartRenewal,
-            growthRenewal,
-            "success"
-          )}
-          {renderCard(
-            PersonAddIcon,
-            "New Businesses",
-            chartNew,
-            growthNew,
-            "error"
-          )}
-          {renderCard(
-            HowToRegIcon,
-            "Registered Businesses",
-            chartRegistered,
-            growthRegistered,
-            "primary"
-          )}
-        </Grid>
-
-        <Divider sx={{ my: 4, width: "100%" }} />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setOpenModal(true)}
-        >
-          Add Admin
-        </Button>
-
-        <AddAdminModal open={openModal} onClose={() => setOpenModal(false)} />
-        {/* Data Analytics Graph */}
-        <Paper
-          sx={{
-            p: 3,
-            borderRadius: 4,
-            boxShadow: "0 6px 16px rgba(0,0,0,0.1)",
-            height: isSmallScreen ? 350 : 520,
+            flexDirection: "column",
+            alignItems: "center",
             width: "100%",
-            maxWidth: 1200,
-            marginTop: 4,
+            ml: isSmallScreen ? 0 : 2,
+            mt: 4,
           }}
         >
-          <Typography variant="h6" gutterBottom textAlign="center">
-            Overview
-          </Typography>
-          <LineChart
-            height={isSmallScreen ? 300 : 440}
-            xAxis={[{ scaleType: "point", data: chartMonths }]}
-            series={[
-              {
-                data: chartRenewal,
-                label: "Renewal",
-                color: theme.palette.success.main,
-                showMark: true,
-              },
-              {
-                data: chartNew,
-                label: "New Businesses",
-                color: theme.palette.error.main,
-                showMark: true,
-              },
-              {
-                data: chartRegistered,
-                label: "Registered Businesses",
-                color: theme.palette.primary.main,
-                showMark: true,
-              },
-            ]}
-            grid={{ vertical: true, horizontal: true }}
-          />
-        </Paper>
+          {/* Summary Metrics Grid */}
+          <Grid
+            container
+            spacing={4}
+            sx={{
+              mb: 6,
+              width: "100%",
+            }}
+          >
+            <Grid item xs={12} sm={6} md={3}>
+              <Card
+                elevation={3}
+                sx={{
+                  background: "#ffffff",
+                  borderRadius: 3,
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-8px)",
+                    boxShadow: `0 12px 24px ${alpha(primaryGreen, 0.2)}`,
+                  },
+                  border: `1px solid ${lightGreen}`,
+                  // === HEIGHT ADJUSTMENT HERE ===
+                  height: 180, // Increased height for a taller card
+                  width: 325,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                }}
+              >
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    spacing={2}
+                  >
+                    <Box>
+                      <Typography
+                        color="textSecondary"
+                        gutterBottom
+                        sx={{ fontSize: "1.5rem", color: darkGreen }}
+                      >
+                        Total Applications
+                      </Typography>
+                      <Typography
+                        variant="h5"
+                        sx={{ fontWeight: "bold", color: primaryGreen }}
+                      >
+                        {metrics.totalApplications.toLocaleString()}
+                      </Typography>
+                      <Chip
+                        label="+12% from last month"
+                        size="small"
+                        sx={{ mt: 3, background: lightGreen, color: primaryGreen }}
+                      />
+                    </Box>
+                    <Avatar
+                      sx={{
+                        bgcolor: lightGreen,
+                        color: primaryGreen,
+                        width: 65,
+                        height: 65,
+                      }}
+                    >
+                      <Description />
+                    </Avatar>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={3}>
+              <Card
+                elevation={3}
+                sx={{
+                  background: "#ffffff",
+                  borderRadius: 3,
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-8px)",
+                    boxShadow: `0 12px 24px ${alpha(primaryGreen, 0.2)}`,
+                  },
+                  border: `1px solid ${lightGreen}`,
+                  // === HEIGHT ADJUSTMENT HERE ===
+                  height: 180, // Increased height for a taller
+                  width: 325,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                }}
+              >
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    spacing={2}
+                  >
+                    <Box>
+                      <Typography
+                        color="textSecondary"
+                        gutterBottom
+                        sx={{ fontSize: "1.5rem", color: darkGreen }}
+                      >
+                        Approved Permits
+                      </Typography>
+                      <Typography
+                        variant="h5"
+                        sx={{ fontWeight: "bold", color: primaryGreen }}
+                      >
+                        {metrics.approvedPermits.toLocaleString()}
+                      </Typography>
+                      <Chip
+                        label="+8% from last month"
+                        size="small"
+                        sx={{ mt: 3, background: lightGreen, color: primaryGreen }}
+                      />
+                    </Box>
+                    <Avatar
+                      sx={{
+                        bgcolor: lightGreen,
+                        color: primaryGreen,
+                        width: 65,
+                        height: 65,
+                      }}
+                    >
+                      <TrendingUp />
+                    </Avatar>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={3}>
+              <Card
+                elevation={3}
+                sx={{
+                  background: "#ffffff",
+                  borderRadius: 3,
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-8px)",
+                    boxShadow: `0 12px 24px ${alpha(primaryGreen, 0.2)}`,
+                  },
+                  border: `1px solid ${lightGreen}`,
+                  // === HEIGHT ADJUSTMENT HERE ===
+                  height: 180, // Increased height for a taller card
+                  width: 325,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                }}
+              >
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    spacing={2}
+                  >
+                    <Box>
+                      <Typography
+                        color="textSecondary"
+                        gutterBottom
+                        sx={{ fontSize: "1.5rem", color: darkGreen }}
+                      >
+                        Pending Renewals
+                      </Typography>
+                      <Typography
+                        variant="h5"
+                        sx={{ fontWeight: "bold", color: primaryGreen }}
+                      >
+                        {metrics.pendingRenewals.toLocaleString()}
+                      </Typography>
+                      <Chip
+                        label="Urgent: 23"
+                        size="small"
+                        color="warning"
+                        sx={{ mt: 3 }}
+                      />
+                    </Box>
+                    <Avatar
+                      sx={{
+                        bgcolor: lightGreen,
+                        color: primaryGreen,
+                        width: 65,
+                        height: 65,
+                      }}
+                    >
+                      <AccessTime />
+                    </Avatar>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={3}>
+              <Card
+                elevation={3}
+                sx={{
+                  background: "#ffffff",
+                  borderRadius: 3,
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-8px)",
+                    boxShadow: `0 12px 24px ${alpha(primaryGreen, 0.2)}`,
+                  },
+                  border: `1px solid ${lightGreen}`,
+                  // === HEIGHT ADJUSTMENT HERE ===
+                  height: 180, // Increased height for a taller card
+                  width: 320,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                }}
+              >
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    spacing={2}
+                  >
+                    <Box>
+                      <Typography
+                        color="textSecondary"
+                        gutterBottom
+                        sx={{ fontSize: "1.5rem", color: darkGreen }}
+                      >
+                        Revenue Collected
+                      </Typography>
+                      <Typography
+                        variant="h5"
+                        sx={{ fontWeight: "bold", color: primaryGreen }}
+                      >
+                        ₱{metrics.revenueCollected.toLocaleString()}
+                      </Typography>
+                      <Chip
+                        label="+18% YoY"
+                        size="small"
+                        sx={{ mt: 3, background: lightGreen, color: primaryGreen }}
+                      />
+                    </Box>
+                    <Avatar
+                      sx={{
+                        bgcolor: lightGreen,
+                        color: primaryGreen,
+                        width: 65,
+                        height: 65,
+                      }}
+                    >
+                      <PesoIcon />
+                    </Avatar>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+
+          <Divider sx={{ my: 4, width: "100%", borderColor: lightGreen }} />
+
+          {/* Charts Section: Line Chart on left, Bar Chart on right in a new Grid */}
+          <Grid container spacing={4} sx={{ width: "100%", mb: 6 }}>
+            {/* Line Chart - Stays at 50% width on md+ screens */}
+            <Grid item xs={12} md={6}>
+              <Paper
+                elevation={3}
+                sx={{
+                  // width: "100%", // Retain 100% width to fill the grid column
+                  p: 3,
+                  borderRadius: 3,
+                  background: "#ffffff",
+                  border: `1px solid ${lightGreen}`,
+                  // === HEIGHT ADJUSTMENT HERE ===
+                  height: 400, // Increased height for a taller chart container
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{
+                    mb: 2,
+                    fontWeight: "bold",
+                    color: darkGreen,
+                    textAlign: "center",
+                  }}
+                >
+                  Revenue Trend (Annual)
+                </Typography>
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    display: "flex",
+                    justifyContet: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <LineChart
+                    // === WIDTH/HEIGHT ADJUSTMENT ON CHART COMPONENT ===
+                    width={600} // Set a new default width (though parent's styles override if set to 100% in sx)
+                    height={300} // Set a new default height
+                    series={[
+                      { data: revenueValues, label: "Revenue", color: primaryGreen },
+                    ]}
+                    xAxis={[{ scaleType: "point", data: xLabels }]}
+                    sx={{
+                      [`& .${lineElementClasses.root}`]: {
+                        strokeWidth: 3,
+                        strokeDasharray: "0",
+                      },
+                      ".MuiChartsLegend-root": {
+                        color: darkGreen,
+                      },
+                      // This ensures the chart fills the width of its parent box
+                      width: "100% !important",
+                      maxWidth: "100% !important",
+                    }}
+                  />
+                </Box>
+              </Paper>
+            </Grid>
+
+            {/* Bar Chart - **ADJUSTED HERE** to align the entire item/paper to the right */}
+            <Grid
+              item
+              xs={12}
+              md={6}
+              sx={{
+                // Using margin-left: auto effectively pushes the item to the right edge
+                marginLeft: { xs: 0, md: "auto" },
+                // Ensure it's a flex container for auto-margin to work on the item
+                display: "flex",
+                // Ensure the Paper fills the space if it has content, and aligns to the end of the Grid cell
+                justifyContent: { xs: "center", md: "flex-end" },
+              }}
+            >
+              <Paper
+                elevation={3}
+                sx={{
+                  // Retain 100% width to fill the grid column
+                  width: "100%",
+                  p: 3,
+                  borderRadius: 3,
+                  background: "#ffffff",
+                  border: `1px solid ${lightGreen}`,
+                  // === HEIGHT ADJUSTMENT HERE ===
+                  height: 400, // Increased height for a taller chart container
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{
+                    mb: 2,
+                    fontWeight: "bold",
+                    color: darkGreen,
+                    textAlign: "center",
+                  }}
+                >
+                  Applications Breakdown
+                </Typography>
+                {/* We keep the BarChart aligned right inside the Paper as well */}
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                  }}
+                >
+                  <BarChart
+                    // === WIDTH/HEIGHT ADJUSTMENT ON CHART COMPONENT ===
+                    width={600} // Set a new default width
+                    height={350} // Set a new default height
+                    series={[{ data: barData.values, color: primaryGreen }]}
+                    xAxis={[{ scaleType: "band", data: barData.categories }]}
+                    sx={{
+                      [`& .${barElementClasses.root}`]: {
+                        fill: primaryGreen,
+                      },
+                      ".MuiChartsLegend-root": {
+                        color: darkGreen,
+                      },
+                      // This ensures the chart fills the width of its parent box
+                      width: "100% !important",
+                      maxWidth: "100% !important",
+                    }}
+                  />
+                </Box>
+              </Paper>
+            </Grid>
+          </Grid>
+
+          <AddAdminModal open={openModal} onClose={handleCloseModal} />
+        </Box>
       </Box>
     </Box>
   );
