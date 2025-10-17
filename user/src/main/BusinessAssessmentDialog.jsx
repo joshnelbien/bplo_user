@@ -9,14 +9,13 @@ import {
   Button,
   Box,
   Divider,
-  Grid,
   Paper,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import barangayBrackets from "../../public/barangay_brackets.json";
 import barangayList from "../../public/barangaylist.json";
 
-// 🔹 Fee Ranges (same as before)
+// 🔹 Fee Ranges
 const feeRanges = {
   "Bracket A": [
     { min: 1, max: 20000, fee: 100 },
@@ -59,7 +58,7 @@ const feeRanges = {
   ],
 };
 
-// 🔹 Extra Fees (you can adjust values anytime here)
+// 🔹 Extra Fees
 const extraFees = {
   sanitary: 150,
   solidWaste: 150,
@@ -72,7 +71,7 @@ const extraFees = {
   electronics: 150,
 };
 
-// 🔹 Utility functions
+// 🔹 Utility Functions
 const getBarangayBracket = (barangay) => {
   if (!barangay) return null;
   for (const [bracket, list] of Object.entries(barangayBrackets)) {
@@ -102,27 +101,19 @@ const calculateZoningFee = (totalCapital) => {
   return ((totalCapital - 100000) * 0.001 + 500).toFixed(2);
 };
 
-// 🔹 Main business tax + fees calculator
+// 🔹 Main Calculator
 const calculateBusinessTax = (capital, employees, barangay) => {
   const c = Number(capital.replace(/,/g, ""));
   const e = Number(employees);
-  if (isNaN(c) || c <= 0) {
-    return { fee: "0.00", details: null };
-  }
+  if (isNaN(c) || c <= 0) return { fee: "0.00", details: null };
 
   const businessTax = c * 0.005;
   const barangayFee = computeBarangayFee(barangay, c);
   const occupationalTax = e * 50;
   const zoningFee = calculateZoningFee(c);
-
   const zoningFeeValue = zoningFee === "Exempted" ? 0 : Number(zoningFee);
 
-  // 🧮 Sum up extra fees dynamically
-  const totalExtraFees = Object.values(extraFees).reduce(
-    (sum, v) => sum + v,
-    0
-  );
-
+  const totalExtraFees = Object.values(extraFees).reduce((a, b) => a + b, 0);
   const total =
     businessTax +
     barangayFee +
@@ -211,16 +202,12 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
           margin="normal"
           value={formData.barangay}
           onChange={handleChange}
-          SelectProps={{
-            native: true,
-          }}
-          InputLabelProps={{
-            shrink: true,
-          }}
+          SelectProps={{ native: true }}
+          InputLabelProps={{ shrink: true }}
         >
           <option value="">-- Select Barangay --</option>
-          {barangayList.barangays.map((b, index) => (
-            <option key={index} value={b}>
+          {barangayList.barangays.map((b, i) => (
+            <option key={i} value={b}>
               {b}
             </option>
           ))}
@@ -269,53 +256,51 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
             <Box sx={{ mt: 2 }}>
               <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                 <li
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: 4,
-                  }}
+                  style={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <Typography>Business Tax</Typography>
                   <Typography>
-                    ₱{result.details.businessTax.toFixed(2)}
+                    ₱
+                    {result.details.businessTax.toLocaleString("en-PH", {
+                      minimumFractionDigits: 2,
+                    })}
                   </Typography>
                 </li>
                 <li
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: 4,
-                  }}
+                  style={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <Typography>Barangay Fee</Typography>
                   <Typography>
-                    ₱{result.details.barangayFee.toFixed(2)}
+                    ₱
+                    {result.details.barangayFee.toLocaleString("en-PH", {
+                      minimumFractionDigits: 2,
+                    })}
                   </Typography>
                 </li>
                 <li
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: 4,
-                  }}
+                  style={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <Typography>Occupational Tax</Typography>
                   <Typography>
-                    ₱{result.details.occupationalTax.toFixed(2)}
+                    ₱
+                    {result.details.occupationalTax.toLocaleString("en-PH", {
+                      minimumFractionDigits: 2,
+                    })}
                   </Typography>
                 </li>
                 <li
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: 4,
-                  }}
+                  style={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <Typography>Zoning Fee</Typography>
                   <Typography>
                     {result.details.zoningFee === "Exempted"
                       ? "Exempted"
-                      : `₱${Number(result.details.zoningFee).toFixed(2)}`}
+                      : `₱${Number(result.details.zoningFee).toLocaleString(
+                          "en-PH",
+                          {
+                            minimumFractionDigits: 2,
+                          }
+                        )}`}
                   </Typography>
                 </li>
                 {Object.entries(result.details.extraFees).map(
@@ -325,7 +310,6 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
                       style={{
                         display: "flex",
                         justifyContent: "space-between",
-                        marginBottom: 4,
                       }}
                     >
                       <Typography>
@@ -333,7 +317,12 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
                           .replace(/([A-Z])/g, " $1")
                           .replace(/^./, (s) => s.toUpperCase())}
                       </Typography>
-                      <Typography>₱{value.toFixed(2)}</Typography>
+                      <Typography>
+                        ₱
+                        {value.toLocaleString("en-PH", {
+                          minimumFractionDigits: 2,
+                        })}
+                      </Typography>
                     </li>
                   )
                 )}
@@ -355,7 +344,10 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
                     variant="h6"
                     sx={{ color: "#1B5E20", fontWeight: "bold" }}
                   >
-                    ₱{result.details.total.toFixed(2)}
+                    ₱
+                    {result.details.total.toLocaleString("en-PH", {
+                      minimumFractionDigits: 2,
+                    })}
                   </Typography>
                   <Typography
                     variant="body2"
