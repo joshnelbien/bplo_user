@@ -125,7 +125,7 @@ function TopBar({ onAddAdminClick }) {
 
       {/* 2. CENTERED: DASHBOARD TITLE */}
       <Typography
-        variant="h4"
+        variant="h5"
         component="div"
         sx={{
           fontWeight: "light",
@@ -138,7 +138,7 @@ function TopBar({ onAddAdminClick }) {
           display: { xs: "none", sm: "block" }, // Hide on extra small screens if needed
         }}
       >
-        Dashboard Overview
+        DASHBOARD OVERVIEW
       </Typography>
 
       {/* 3. RIGHT ALIGNED: ADD ADMIN BUTTON (Replaced 'ml: 215' with alignment) */}
