@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import barangayBrackets from "../../public/barangay_brackets.json";
+import barangayList from "../../public/barangaylist.json";
 
 // 🔹 Fee Ranges (same as before)
 const feeRanges = {
@@ -203,13 +204,27 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
           onChange={handleChange}
         />
         <TextField
+          select
           name="barangay"
-          label="Barangay"
+          label="Select Barangay"
           fullWidth
           margin="normal"
           value={formData.barangay}
           onChange={handleChange}
-        />
+          SelectProps={{
+            native: true,
+          }}
+          InputLabelProps={{
+            shrink: true,
+          }}
+        >
+          <option value="">-- Select Barangay --</option>
+          {barangayList.barangays.map((b, index) => (
+            <option key={index} value={b}>
+              {b}
+            </option>
+          ))}
+        </TextField>
         <TextField
           name="employees"
           label="Total Employees"
