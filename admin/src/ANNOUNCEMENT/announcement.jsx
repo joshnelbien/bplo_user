@@ -22,6 +22,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  alpha, // Added alpha for TopBar styling
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -29,6 +30,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import Side_bar from "../SIDE_BAR/side_bar";
+
+/* ================== CONSTANTS & STYLES ================== */
+const primaryGreen = "#1d5236";
+const TOP_BAR_HEIGHT = 80; // Define height constant
 
 const modalStyle = {
   position: "absolute",
@@ -46,6 +51,133 @@ const modalStyle = {
   maxHeight: "90vh",
   overflowY: "auto",
 };
+
+/* ================== LIVE CLOCK ================== */
+
+function LiveClock() {
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const timeOptions = {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  };
+
+  const dateOptions = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+
+  const timeString = currentDateTime.toLocaleTimeString("en-US", timeOptions);
+  const dateString = currentDateTime.toLocaleDateString("en-US", dateOptions);
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        color: "white",
+        pl: 2,
+        ml: 33, // Margin to push it past the side bar area
+      }}
+    >
+      <Typography
+        variant="h5"
+        sx={{
+          fontWeight: "bold",
+          lineHeight: 1,
+          textShadow: `0 0 5px ${alpha("#000000", 0.5)}`,
+        }}
+      >
+        {timeString}
+      </Typography>
+      <Typography variant="body2" sx={{ fontSize: "0.8rem", opacity: 0.8 }}>
+        {dateString}
+      </Typography>
+    </Box>
+  );
+}
+
+/* ================== TOP BAR (TITLE & BUTTON) ================== */
+
+function TopBar({ onNewAnnouncementClick }) {
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        height: TOP_BAR_HEIGHT,
+        backgroundColor: primaryGreen,
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between", // Spread content across
+        p: 2,
+        boxSizing: "border-box",
+        color: "white",
+        boxShadow: 3,
+        zIndex: 1100,
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+      }}
+    >
+      {/* 1. LEFT ALIGNED: LIVE CLOCK */}
+      <LiveClock />
+
+      {/* 2. CENTERED: PAGE TITLE */}
+      <Typography
+        variant="h5"
+        component="div"
+        sx={{
+          fontWeight: "light",
+          textShadow: `0 0 5px ${alpha("#000000", 0.5)}`,
+          position: "absolute",
+          ml: 8,
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: { xs: "none", sm: "block" },
+        }}
+      >
+        ANNOUNCEMENT
+      </Typography>
+
+      {/* 3. RIGHT ALIGNED: NEW ANNOUNCEMENT BUTTON */}
+      <Box sx={{ mr: 4 }}>
+        <Button
+          variant="contained"
+          sx={{
+            bgcolor: "#fff", // White button
+            color: primaryGreen, // Green text
+            fontWeight: "bold",
+            "&:hover": {
+              bgcolor: alpha("#fff", 0.85), // Slightly darker on hover
+            },
+            borderRadius: "8px",
+          }}
+          startIcon={<AddIcon />}
+          onClick={onNewAnnouncementClick}
+        >
+          New Announcement
+        </Button>
+      </Box>
+    </Box>
+  );
+}
+
+/* ================== MAIN COMPONENT ================== */
 
 const Announcement = () => {
   const navigate = useNavigate();
@@ -73,12 +205,14 @@ const Announcement = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/announcements");
+      // NOTE: Using window.fetch as in original code
+      const response = await fetch("/api/announcements"); 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setAnnouncements(data);
+      // Reverse array so latest is at the top
+      setAnnouncements(data.reverse()); 
     } catch (e) {
       console.error("Failed to fetch announcements:", e);
       setError("Failed to load announcements. Please try again.");
@@ -158,6 +292,7 @@ const Announcement = () => {
             if (!response.ok) {
               throw new Error("Failed to save announcement.");
             }
+            // Reset state
             setNewAnnouncement({
               text: "",
               startDate: "",
@@ -201,18 +336,35 @@ const Announcement = () => {
   };
 
   const handleEditAnnouncement = (ann) => {
-  setNewAnnouncement({
-    text: ann.text,
-    startDate: ann.startDate,
-    endDate: ann.endDate,
-    createdBy: ann.createdBy,
-    attachedImageBlob: ann.attachedImageBlob,
-  });
-  setCurrentId(ann.id);
-  setIsEditing(true);
-  setIsModalOpen(true);
-};
+    setNewAnnouncement({
+      text: ann.text,
+      startDate: ann.startDate,
+      endDate: ann.endDate,
+      createdBy: ann.createdBy,
+      attachedImageBlob: ann.attachedImageBlob,
+    });
+    setCurrentId(ann.id);
+    setIsEditing(true);
+    setIsModalOpen(true);
+  };
 
+  const handleNewAnnouncementClick = () => {
+    confirmActionHandler(
+      "Do you want to create a new announcement?",
+      () => {
+        setIsEditing(false);
+        setCurrentId(null);
+        setNewAnnouncement({
+          text: "",
+          startDate: "",
+          endDate: "",
+          createdBy: "Admin",
+          attachedImageBlob: null,
+        });
+        setIsModalOpen(true);
+      }
+    );
+  };
 
   const handleSnackbarClose = (_, reason) => {
     if (reason === "clickaway") return;
@@ -220,58 +372,34 @@ const Announcement = () => {
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        background: "linear-gradient(to bottom, #ffffff, #e6ffe6)",
-        minHeight: "100vh",
-      }}
-    >
+    <Box sx={{ display: "flex", minHeight: "100vh", background: "white" }}>
+      {/* 1. TOP BAR */}
+      <TopBar onNewAnnouncementClick={handleNewAnnouncementClick} />
+
+      {/* 2. SIDE BAR */}
       <Side_bar />
+
+      {/* 3. MAIN CONTENT (Updated styles for TopBar clearance and white background) */}
       <Box
+        id="main_content"
         sx={{
           flexGrow: 1,
           p: { xs: 2, sm: 4 },
           maxWidth: "900px",
           mx: "auto",
+          width: { xs: "100%", sm: "calc(100% - 250px)" }, // Adjusted for sidebar
+          marginLeft: { xs: 0, sm: "250px" }, // Adjusted for sidebar
+          pt: `${TOP_BAR_HEIGHT + 24}px`, // Added padding top to clear the fixed TopBar
+          background: "white", // Set to white
         }}
       >
-        {/* Add New Announcement Button */}
-        <Box sx={{ mb: 4, textAlign: "left" }}>
-          <Button
-            variant="contained"
-            sx={{
-              bgcolor: "#1a7322",
-              "&:hover": { bgcolor: "#155a1b" },
-              borderRadius: "8px",
-            }}
-            startIcon={<AddIcon />}
-            onClick={() => {
-              confirmActionHandler(
-                "Do you want to create a new announcement?",
-                () => {
-                  setIsEditing(false);
-                  setCurrentId(null);
-                  setNewAnnouncement({
-                    text: "",
-                    startDate: "",
-                    endDate: "",
-                    createdBy: "Admin",
-                    attachedImageBlob: null,
-                  });
-                  setIsModalOpen(true);
-                }
-              );
-            }}
-          >
-            New Announcement
-          </Button>
-        </Box>
+        {/* REMOVED: The original <Box sx={{ mb: 4, textAlign: "left" }}> for the button */}
 
         {/* Announcement History */}
         <Paper
           elevation={5}
           sx={{
+            mt: 10,
             p: { xs: 2, sm: 4 },
             borderRadius: "12px",
             bgcolor: "#fafafa",
@@ -391,7 +519,7 @@ const Announcement = () => {
                       </Typography>
                       <Typography
                         variant="body1"
-                        sx={{ fontWeight: "bold", color: "#1a7322" }}
+                        sx={{ fontWeight: "bold", color: primaryGreen }}
                       >
                         {ann.createdBy}
                       </Typography>
@@ -536,7 +664,7 @@ const Announcement = () => {
               fullWidth
               sx={{
                 mt: 2,
-                bgcolor: "#1a7322",
+                bgcolor: primaryGreen,
                 "&:hover": { bgcolor: "#155a1b" },
               }}
             >
@@ -615,7 +743,7 @@ const Announcement = () => {
               </Typography>
               <Typography
                 variant="body1"
-                sx={{ fontWeight: "bold", color: "#1a7322" }}
+                sx={{ fontWeight: "bold", color: primaryGreen }}
               >
                 {newAnnouncement.createdBy}
               </Typography>

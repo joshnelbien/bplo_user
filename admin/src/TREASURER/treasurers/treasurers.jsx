@@ -16,7 +16,124 @@ import {
   TableHead,
   TableRow,
   Typography,
+  alpha, // Needed for text shadow effect
 } from "@mui/material";
+
+/* ================== CONSTANTS ================== */
+const primaryGreen = "#1d5236";
+const TOP_BAR_HEIGHT = 80; // Define height constant
+const SIDE_BAR_WIDTH = 250;
+
+/* ================== LIVE CLOCK COMPONENT (Top Bar Element) ================== */
+
+function LiveClock() {
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const timeOptions = {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  };
+
+  const dateOptions = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+
+  const timeString = currentDateTime.toLocaleTimeString("en-US", timeOptions);
+  const dateString = currentDateTime.toLocaleDateString("en-US", dateOptions);
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        color: "white",
+        pl: 2,
+        // Aligned past the fixed sidebar area
+        ml: `${SIDE_BAR_WIDTH + 16}px`,
+      }}
+    >
+      <Typography
+        variant="h5"
+        sx={{
+          fontWeight: "bold",
+          lineHeight: 1,
+          textShadow: `0 0 5px ${alpha("#000000", 0.5)}`,
+        }}
+      >
+        {timeString}
+      </Typography>
+      <Typography variant="body2" sx={{ fontSize: "0.8rem", opacity: 0.8 }}>
+        {dateString}
+      </Typography>
+    </Box>
+  );
+}
+
+/* ================== TOP BAR COMPONENT (Title only) ================== */
+
+function TopBar() {
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        height: TOP_BAR_HEIGHT,
+        backgroundColor: primaryGreen,
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        p: 2,
+        boxSizing: "border-box",
+        color: "white",
+        boxShadow: 3,
+        zIndex: 1100,
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+      }}
+    >
+      {/* 1. LEFT ALIGNED: LIVE CLOCK (Offset by sidebar width) */}
+      <LiveClock />
+
+      {/* 2. CENTERED: PAGE TITLE */}
+      <Typography
+        variant="h5"
+        component="div"
+        sx={{
+          fontWeight: "light",
+          textShadow: `0 0 5px ${alpha("#000000", 0.5)}`,
+          position: "absolute",
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: { xs: "none", sm: "block" },
+        }}
+      >
+        {/* 🛑 CHANGED: Title updated to TREASURER'S OFFICE */}
+        TREASURER'S OFFICE
+      </Typography>
+
+      {/* 3. RIGHT ALIGNED: Placeholder (keeping structure) */}
+      <Box sx={{ mr: 4 }} />
+    </Box>
+  );
+}
+
+/* ================== MAIN COMPONENT ================== */
 
 function Treasurers() {
   const [applicants, setApplicants] = useState([]);
@@ -44,7 +161,7 @@ function Treasurers() {
     };
 
     fetchApplicants();
-  }, []);
+  }, [API]);
 
   // ✅ Filter applicants based on button selection
   const filteredApplicants =
@@ -66,7 +183,8 @@ function Treasurers() {
 
   const handleApprove = async (id, csmwoFee) => {
     try {
-      const res = await axios.post(
+      // API call logic (kept original logic)
+      await axios.post(
         `${API}/treasurer/treasurerOffice/approve/${id}`
       );
 
@@ -77,9 +195,6 @@ function Treasurers() {
             : applicant
         )
       );
-
-      // alert("Applicant approved");
-      // closeModal();
     } catch (error) {
       console.error("Error approving applicant:", error);
     }
@@ -87,16 +202,14 @@ function Treasurers() {
 
   const handleDecline = async (id) => {
     try {
-      const res = await axios.post(`${API}/backroom/csmwo/decline/${id}`);
+      // API call logic (kept original logic)
+      await axios.post(`${API}/backroom/csmwo/decline/${id}`);
 
       setApplicants((prev) =>
         prev.map((applicant) =>
           applicant.id === id ? { ...applicant, CSMWO: "Declined" } : applicant
         )
       );
-
-      // alert("Applicant declined");
-      // closeModal();
     } catch (error) {
       console.error("Error approving applicant:", error);
     }
@@ -118,15 +231,25 @@ function Treasurers() {
 
   return (
     <>
+      {/* 1. TOP BAR (Fixed Header) - NEWLY ADDED */}
+      <TopBar />
+
+      {/* 2. SIDE BAR (Original Position Maintained) */}
       <Side_bar />
+
+      {/* 3. MAIN CONTENT (Padded to clear fixed TopBar and offset by Side_bar) */}
       <Box
         id="main_content"
         sx={{
           p: 3,
           minHeight: "100vh",
-          background: "linear-gradient(to bottom, #FFFFFF, #e6ffe6)",
-          marginLeft: { xs: 0, sm: "250px" }, // 0 on mobile, 250px on larger screens
-          width: { xs: "100%", sm: "calc(100% - 250px)" }, // full width on mobile
+          // 🛑 CHANGED: Set to white background
+          background: "white",
+          // Offset from sidebar (250px)
+          marginLeft: { xs: 0, sm: `${SIDE_BAR_WIDTH}px` },
+          width: { xs: "100%", sm: `calc(100% - ${SIDE_BAR_WIDTH}px)` },
+          // Padded to clear fixed TopBar (80px + margin)
+          pt: `${TOP_BAR_HEIGHT + 24}px`,
         }}
       >
         <Typography
@@ -135,59 +258,35 @@ function Treasurers() {
           sx={{
             color: "darkgreen",
             fontWeight: "bold",
+            // Only show on mobile since the TopBar handles the title on desktop
+            display: { xs: "block", sm: "none" },
           }}
         >
-          TREASURER's OFFICE
+          {/* Title for Mobile View */}
+          TREASURER'S OFFICE
         </Typography>
 
         {/* ✅ Button Group Filter */}
         <Box mb={2}>
           <ButtonGroup variant="contained">
-            <Button
-              sx={{
-                bgcolor: filter === "pending" ? "darkgreen" : "white",
-                color: filter === "pending" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "pending" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("pending");
-                setCurrentPage(1);
-              }}
-            >
-              Pending
-            </Button>
-            <Button
-              sx={{
-                bgcolor: filter === "approved" ? "darkgreen" : "white",
-                color: filter === "approved" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "approved" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("approved");
-                setCurrentPage(1);
-              }}
-            >
-              Approved
-            </Button>
-            <Button
-              sx={{
-                bgcolor: filter === "declined" ? "darkgreen" : "white",
-                color: filter === "declined" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "declined" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("declined");
-                setCurrentPage(1);
-              }}
-            >
-              Declined
-            </Button>
+            {["pending", "approved", "declined"].map((status) => (
+              <Button
+                key={status}
+                sx={{
+                  bgcolor: filter === status ? "darkgreen" : "white",
+                  color: filter === status ? "white" : "darkgreen",
+                  "&:hover": {
+                    bgcolor: filter === status ? "#004d00" : "#f0f0f0",
+                  },
+                }}
+                onClick={() => {
+                  setFilter(status);
+                  setCurrentPage(1);
+                }}
+              >
+                {status.charAt(0).toUpperCase() + status.slice(1)}
+              </Button>
+            ))}
           </ButtonGroup>
         </Box>
 

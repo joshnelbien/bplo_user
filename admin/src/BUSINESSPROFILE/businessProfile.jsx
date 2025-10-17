@@ -16,8 +16,119 @@ import {
   TableHead,
   TableRow,
   Typography,
+  alpha,
 } from "@mui/material";
 
+/* ================== CONSTANTS ================== */
+const primaryGreen = "#1d5236";
+const TOP_BAR_HEIGHT = 80; // Define height constant
+
+/* ================== LIVE CLOCK ================== */
+
+function LiveClock() {
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const timeOptions = {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  };
+
+  const dateOptions = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+
+  const timeString = currentDateTime.toLocaleTimeString("en-US", timeOptions);
+  const dateString = currentDateTime.toLocaleDateString("en-US", dateOptions);
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        color: "white",
+        pl: 2,
+        ml: -148, // Margin to push it past the side bar area
+      }}
+    >
+      <Typography
+        variant="h5"
+        sx={{
+          fontWeight: "bold",
+          lineHeight: 1,
+          textShadow: `0 0 5px ${alpha("#000000", 0.5)}`,
+        }}
+      >
+        {timeString}
+      </Typography>
+      <Typography variant="body2" sx={{ fontSize: "0.8rem", opacity: 0.8 }}>
+        {dateString}
+      </Typography>
+    </Box>
+  );
+}
+
+/* ================== TOP BAR (TITLE: BUSINESS PROFILE) ================== */
+
+function TopBar() {
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        height: TOP_BAR_HEIGHT,
+        backgroundColor: primaryGreen,
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        p: 2,
+        boxSizing: "border-box",
+        color: "white",
+        boxShadow: 3,
+        zIndex: 1100,
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+      }}
+    >
+      {/* 1. LEFT ALIGNED: LIVE CLOCK */}
+      <LiveClock />
+
+      {/* 2. CENTERED: PAGE TITLE */}
+      <Typography
+        variant="h5"
+        component="div"
+        sx={{
+          fontWeight: "light",
+          textShadow: `0 0 5px ${alpha("#000000", 0.5)}`,
+          position: "absolute",
+          ml: 8,
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: { xs: "none", sm: "block" },
+        }}
+      >
+        BUSINESS PROFILE
+      </Typography>
+    </Box>
+  );
+}
+
+// Renamed the component to follow React conventions (PascalCase)
 function BusinessProfile() {
   const [applicants, setApplicants] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,7 +158,7 @@ function BusinessProfile() {
     };
 
     fetchApplicants();
-  }, []);
+  }, [API]);
 
   // ✅ Filter applicants
   const filteredApplicants =
@@ -104,24 +215,25 @@ function BusinessProfile() {
 
   return (
     <>
+      {/* 1. TOP BAR (New component) */}
+      <TopBar />
+      
+      {/* 2. SIDE BAR */}
       <Side_bar />
+      
+      {/* 3. MAIN CONTENT (Updated styles for TopBar clearance and white background) */}
       <Box
         id="main_content"
         sx={{
           p: 3,
           minHeight: "100vh",
-          background: "linear-gradient(to bottom, #FFFFFF, #e6ffe6)",
+          background: "white", // CHANGED: Set background to plain white
           marginLeft: { xs: 0, sm: "250px" },
           width: { xs: "100%", sm: "calc(100% - 250px)" },
+          pt: `${TOP_BAR_HEIGHT + 24}px`, // Added padding top to clear the fixed TopBar
         }}
       >
-        <Typography
-          variant="h4"
-          gutterBottom
-          sx={{ color: "darkgreen", fontWeight: "bold" }}
-        >
-          Business Profile
-        </Typography>
+        {/* REMOVED: The original <Typography> is now in the TopBar */}
 
         {/* ✅ Filter & Export */}
         <Box
@@ -133,8 +245,8 @@ function BusinessProfile() {
           <ButtonGroup variant="contained">
             <Button
               sx={{
-                bgcolor: filter === "all" ? "darkgreen" : "white",
-                color: filter === "all" ? "white" : "darkgreen",
+                bgcolor: filter === "all" ? primaryGreen : "white", // Use primaryGreen for consistency
+                color: filter === "all" ? "white" : primaryGreen,
                 "&:hover": {
                   bgcolor: filter === "all" ? "#004d00" : "#f0f0f0",
                 },
@@ -148,8 +260,8 @@ function BusinessProfile() {
             </Button>
             <Button
               sx={{
-                bgcolor: filter === "new" ? "darkgreen" : "white",
-                color: filter === "new" ? "white" : "darkgreen",
+                bgcolor: filter === "new" ? primaryGreen : "white",
+                color: filter === "new" ? "white" : primaryGreen,
                 "&:hover": {
                   bgcolor: filter === "new" ? "#004d00" : "#f0f0f0",
                 },
@@ -163,8 +275,8 @@ function BusinessProfile() {
             </Button>
             <Button
               sx={{
-                bgcolor: filter === "renew" ? "darkgreen" : "white",
-                color: filter === "renew" ? "white" : "darkgreen",
+                bgcolor: filter === "renew" ? primaryGreen : "white",
+                color: filter === "renew" ? "white" : primaryGreen,
                 "&:hover": {
                   bgcolor: filter === "renew" ? "#004d00" : "#f0f0f0",
                 },
