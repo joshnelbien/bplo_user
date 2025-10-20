@@ -183,7 +183,6 @@ function Treasurers() {
 
   const handleApprove = async (id, csmwoFee) => {
     try {
-      // API call logic (kept original logic)
       await axios.post(`${API}/treasurer/treasurerOffice/approve/${id}`);
 
       setApplicants((prev) =>

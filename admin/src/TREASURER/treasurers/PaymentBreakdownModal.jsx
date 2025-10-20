@@ -7,7 +7,11 @@ import {
   Grid,
   Paper,
   Button,
+  Divider,
+  Box,
 } from "@mui/material";
+import { motion } from "framer-motion";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 
 function PaymentBreakdownModal({ open, onClose, applicant, onConfirm }) {
   if (!applicant) return null;
@@ -17,7 +21,6 @@ function PaymentBreakdownModal({ open, onClose, applicant, onConfirm }) {
   let breakdown = [];
   let label = "";
 
-  // 🧮 Determine breakdown
   if (mode === "quarterly") {
     breakdown = Array(4).fill((businessTaxTotal / 4).toFixed(2));
     label = "Quarter";
@@ -30,51 +33,160 @@ function PaymentBreakdownModal({ open, onClose, applicant, onConfirm }) {
   }
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ fontWeight: "bold" }}>Payment Breakdown</DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="sm"
+      PaperProps={{
+        sx: {
+          borderRadius: 4,
+          boxShadow: 8,
+          backgroundColor: "#fff",
+        },
+      }}
+    >
+      <DialogTitle
+        sx={{
+          fontWeight: "bold",
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          bgcolor: "primary.main",
+          color: "white",
+          py: 2,
+          borderTopLeftRadius: 16,
+          borderTopRightRadius: 16,
+          color: "white",
+        }}
+      >
+        Payment Breakdown
+      </DialogTitle>
 
-      <DialogContent dividers>
+      <DialogContent dividers sx={{ bgcolor: "#fafafa", p: 3 }}>
+        <Box
+          sx={{
+            mb: 3,
+            p: 2.5,
+            borderRadius: 2,
+            backgroundColor: "white",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            sx={{ fontWeight: 600, color: "gray" }}
+          >
+            Mode of Payment
+          </Typography>
+          <Typography
+            variant="h6"
+            sx={{ color: "primary.main", fontWeight: "bold", mb: 1 }}
+          >
+            {applicant.Modeofpayment || "N/A"}
+          </Typography>
+          <Divider sx={{ my: 1 }} />
+          <Typography
+            variant="subtitle1"
+            sx={{ fontWeight: 600, color: "gray" }}
+          >
+            Total Business Tax
+          </Typography>
+          <Typography
+            variant="h5"
+            sx={{ fontWeight: "bold", color: "#2e7d32" }}
+          >
+            ₱
+            {businessTaxTotal.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+            })}
+          </Typography>
+        </Box>
+
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: "bold", mb: 2, color: "text.secondary" }}
+        >
+          Breakdown
+        </Typography>
+
         <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              Mode of Payment:{" "}
-              <span style={{ color: "#2e7d32" }}>
-                {applicant.Modeofpayment || "N/A"}
-              </span>
-            </Typography>
-            <Typography variant="h6" gutterBottom>
-              Total Business Tax:{" "}
-              <span style={{ fontWeight: "bold" }}>
-                ₱{businessTaxTotal.toFixed(2)}
-              </span>
-            </Typography>
-          </Grid>
-
           {breakdown.map((amount, index) => (
-            <Grid item xs={12} key={index}>
-              <Paper
-                elevation={2}
-                sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  backgroundColor: "#f9f9f9",
-                }}
+            <Grid item xs={12} sm={6} key={index}>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
               >
-                <Typography variant="subtitle1" fontWeight="bold">
-                  {label} {index + 1}
-                </Typography>
-                <Typography variant="body1">₱{amount}</Typography>
-              </Paper>
+                <Paper
+                  elevation={3}
+                  sx={{
+                    p: 2.5,
+                    borderRadius: 3,
+                    backgroundColor: "white",
+                    border: "1px solid #e0e0e0",
+                    transition: "0.3s",
+                    "&:hover": {
+                      transform: "translateY(-3px)",
+                      boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                    },
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 600, color: "primary.main" }}
+                  >
+                    {label} {index + 1}
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: "bold", color: "#2e7d32" }}
+                  >
+                    ₱
+                    {parseFloat(amount).toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                    })}
+                  </Typography>
+                </Paper>
+              </motion.div>
             </Grid>
           ))}
         </Grid>
       </DialogContent>
 
-      <DialogActions sx={{ justifyContent: "space-between", px: 3, py: 2 }}>
-        <Button onClick={onClose} variant="outlined" color="error">
+      <DialogActions
+        sx={{
+          justifyContent: "space-between",
+          p: 3,
+          bgcolor: "#f5f5f5",
+          borderBottomLeftRadius: 16,
+          borderBottomRightRadius: 16,
+        }}
+      >
+        <Button
+          onClick={onClose}
+          variant="outlined"
+          color="error"
+          sx={{
+            px: 3,
+            borderRadius: 2,
+            fontWeight: "bold",
+            textTransform: "none",
+          }}
+        >
           Cancel
         </Button>
-        <Button onClick={onConfirm} variant="contained" color="success">
+        <Button
+          onClick={onConfirm}
+          variant="contained"
+          color="success"
+          sx={{
+            px: 3,
+            borderRadius: 2,
+            fontWeight: "bold",
+            textTransform: "none",
+          }}
+        >
           Confirm Payment
         </Button>
       </DialogActions>

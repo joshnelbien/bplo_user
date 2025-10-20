@@ -7,6 +7,7 @@ const AppStatus = require("../db/model/applicantStatusDB");
 const TreasurersOffice = require("../db/model/treasurersOfficeDB");
 const BusinessProfile = require("../db/model/businessProfileDB");
 const File = require("../db/model/files");
+const ClientPayments = require("../db/model/paymentsDB");
 
 router.post("/businessTax/approve/:id", async (req, res) => {
   try {
@@ -40,23 +41,29 @@ router.post("/treasurerOffice/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // 1. Get applicant from Files table
+    // 1️⃣ Get applicant from TreasurersOffice table
     const applicant = await TreasurersOffice.findByPk(id);
     if (!applicant) {
+      return res.status(404).json({ error: "Treasurer applicant not found" });
     }
 
+    // 2️⃣ Get matching record from Files table
     const forRelease = await File.findByPk(id);
     if (!forRelease) {
-      return res.status(404).json({ error: "Applicant not found" });
+      return res
+        .status(404)
+        .json({ error: "Applicant not found in Files table" });
     }
 
-    // 2. Convert to plain object
+    // 3️⃣ Prepare applicant data
     const applicantData = applicant.toJSON();
-
     applicantData.TREASURER = "Approved";
     applicantData.TREASURERtimeStamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
+    // 4️⃣ Move to BusinessProfile
     const created = await BusinessProfile.create(applicantData);
+
+    // 5️⃣ Update applicant + file
     await forRelease.update({
       passtoTreasurer: "Done",
       permitRelease: "Yes",
@@ -66,13 +73,47 @@ router.post("/treasurerOffice/approve/:id", async (req, res) => {
 
     await applicant.update({
       TREASURER: "Approved",
-      TREASURERtimeStamp: applicant.CHOtimeStamp,
+      TREASURERtimeStamp: applicantData.TREASURERtimeStamp,
     });
 
+    // 6️⃣ Compute payment breakdown
+    const businessTaxTotal = parseFloat(applicantData.businessTaxTotal || 0);
+    const mode = applicantData.Modeofpayment?.toLowerCase() || "annual";
+
+    let breakdown = [];
+    if (mode === "quarterly") {
+      breakdown = Array(4).fill((businessTaxTotal / 4).toFixed(2));
+    } else if (mode === "semi-annual") {
+      breakdown = Array(2).fill((businessTaxTotal / 2).toFixed(2));
+    } else {
+      breakdown = [businessTaxTotal.toFixed(2)];
+    }
+
+    const amountDueStr = breakdown.map((v) => `"${v}"`).join(",");
+    const emptyPlaceholders = Array(breakdown.length).fill('""').join(",");
+
+    // 7️⃣ Insert into ClientPayments
+    const paymentRecord = await ClientPayments.create({
+      BIN: applicantData.BIN || "",
+      BusinessType: applicantData.BusinessType || "",
+      dscRegNo: applicantData.dscRegNo || "",
+      businessName: applicantData.businessName || "",
+      tinNo: applicantData.tinNo || "",
+      TradeName: applicantData.TradeName || "",
+      firstName: applicantData.firstName || "",
+      middleName: applicantData.middleName || "",
+      lastName: applicantData.lastName || "",
+      amount_due: amountDueStr,
+      amount_paid: emptyPlaceholders,
+      due_date: emptyPlaceholders,
+    });
+
+    // 8️⃣ Final response
     res.status(201).json({
       message:
-        "Applicant approved, archived in Files, and moved to Business Profile",
-      created,
+        "Applicant approved, archived in Files, added to Business Profile, and payment breakdowns created.",
+      businessProfile: created,
+      paymentRecord,
     });
   } catch (err) {
     console.error("Approve error:", err);

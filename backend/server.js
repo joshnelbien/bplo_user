@@ -38,6 +38,8 @@ const businessProfileRoutes = require("./routes/businessProfileRoutes");
 const AdminAccounts = require("./db/model/adminAccountsDB");
 const AdminAccountRoutes = require("./routes/adminAccountRoutes");
 
+const ClientPayments = require("./db/model/paymentsDB");
+
 const feedback = require("./routes/feedback");
 
 const app = express();
@@ -305,6 +307,7 @@ function watchFSICFile() {
     await AppStatus.sync({ alter: true });
     await TreasurersOffice.sync({ alter: true });
     await BusinessProfile.sync({ alter: true });
+    await ClientPayments.sync({ alter: true });
 
     await importFSICData();
 
