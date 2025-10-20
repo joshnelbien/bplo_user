@@ -206,6 +206,7 @@ function Treasurers() {
     setSelectedApplicant(applicant);
     setIsModalOpen(true);
     console.log(`Business Tax  :`, applicant.businessTaxTotal);
+    console.log(`Mode of Payment  :`, applicant.Modeofpayment);
   };
 
   const closeModal = () => {

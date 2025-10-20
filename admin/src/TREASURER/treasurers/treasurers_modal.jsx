@@ -21,6 +21,8 @@ import DownloadIcon from "@mui/icons-material/Download";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { useState, useEffect } from "react";
+import PaymentBreakdownModal from "./PaymentBreakdownModal";
+
 const API = import.meta.env.VITE_API_BASE;
 // Component to display a normal text field
 const Field = ({
@@ -144,6 +146,7 @@ function TreasurersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
   const [confirmDeclineOpen, setConfirmDeclineOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
 
   useEffect(() => {
     if (applicant) {
@@ -156,7 +159,7 @@ function TreasurersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
   };
 
   const handleApproveClick = () => {
-    setConfirmApproveOpen(true);
+    setPaymentOpen(true);
   };
 
   const handleDeclineClick = () => {
@@ -677,6 +680,15 @@ function TreasurersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
           </Button>
         </Paper>
       </Dialog>
+      <PaymentBreakdownModal
+        open={paymentOpen}
+        onClose={() => setPaymentOpen(false)}
+        applicant={applicant}
+        onConfirm={() => {
+          setPaymentOpen(false);
+          setConfirmApproveOpen(true); // open the existing approval confirm dialog
+        }}
+      />
     </>
   );
 }
