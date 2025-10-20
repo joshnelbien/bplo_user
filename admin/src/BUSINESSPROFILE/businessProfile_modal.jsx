@@ -462,6 +462,8 @@ function BusinessProfileModal({ applicant, isOpen, onClose, baseUrl }) {
               </Paper>
             </Stack>
           </Section>
+
+          <Section title={"Payments"}></Section>
         </DialogContent>
 
         <DialogActions>

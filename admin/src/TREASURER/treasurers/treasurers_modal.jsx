@@ -67,8 +67,8 @@ const Field = ({
 );
 
 // Component to display files as links
-const FileField = ({ label, fileKey, fileData }) => (
-  <Grid item xs={12} sm={6}>
+const FileField = ({ label, fileKey, fileData, sx = {} }) => (
+  <Grid item xs={12} sm={6} sx={sx}>
     <TextField
       label={label}
       value={
@@ -113,7 +113,7 @@ const FileField = ({ label, fileKey, fileData }) => (
             target="_blank"
             rel="noreferrer"
           >
-            <Typography component="span"> View</Typography>
+            <Typography component="span">View</Typography>
             <VisibilityIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -126,7 +126,7 @@ const FileField = ({ label, fileKey, fileData }) => (
             target="_blank"
             rel="noreferrer"
           >
-            <Typography component="span"> Download</Typography>
+            <Typography component="span">Download</Typography>
             <DownloadIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -471,8 +471,9 @@ function TreasurersApplicantModal({
           </Section>
 
           <FileField
+            sx={{ mt: 2 }}
             fileKey="businesstaxComputation"
-            label="Photo (Exterior)"
+            label="Tax Order"
             fileData={applicant}
           />
         </DialogContent>

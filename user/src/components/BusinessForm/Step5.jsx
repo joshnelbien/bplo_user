@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Stack, TextField, Typography, Button } from "@mui/material";
+import { Stack, TextField, Typography, Button, MenuItem } from "@mui/material";
 import { useEffect, useState } from "react";
 
 export default function Step5BusinessDetails({
@@ -10,8 +10,14 @@ export default function Step5BusinessDetails({
 }) {
   const files = [
     { label: "Cedula", name: "cedula" },
-    { label: "Photo of Business Establishment (Interior)", name: "photoOfBusinessEstInt" },
-    { label: "Photo of Business Establishment (Exterior)", name: "photoOfBusinessEstExt" },
+    {
+      label: "Photo of Business Establishment (Interior)",
+      name: "photoOfBusinessEstInt",
+    },
+    {
+      label: "Photo of Business Establishment (Exterior)",
+      name: "photoOfBusinessEstExt",
+    },
   ];
 
   const [selectedFiles, setSelectedFiles] = useState({});
@@ -174,6 +180,22 @@ export default function Step5BusinessDetails({
             </Stack>
           </Stack>
         ))}
+        <TextField
+          select
+          label="Mode of Payment"
+          name="Modeofpayment"
+          value={formData.Modeofpayment || ""}
+          onChange={handleChange}
+          fullWidth
+          variant="outlined"
+          sx={{ minWidth: 300 }}
+          error={!!errors.Modeofpayment}
+          helperText={errors.Modeofpayment}
+        >
+          <MenuItem value="Annual">Annual</MenuItem>
+          <MenuItem value="Semi-Annual">Semi-Annual</MenuItem>
+          <MenuItem value="Quarterly">Quarterly</MenuItem>
+        </TextField>
       </Stack>
     </div>
   );
