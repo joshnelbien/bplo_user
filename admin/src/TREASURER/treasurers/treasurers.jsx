@@ -184,30 +184,13 @@ function Treasurers() {
   const handleApprove = async (id, csmwoFee) => {
     try {
       // API call logic (kept original logic)
-      await axios.post(
-        `${API}/treasurer/treasurerOffice/approve/${id}`
-      );
+      await axios.post(`${API}/treasurer/treasurerOffice/approve/${id}`);
 
       setApplicants((prev) =>
         prev.map((applicant) =>
           applicant.id === id
             ? { ...applicant, CSMWO: "Approved", csmwoFee }
             : applicant
-        )
-      );
-    } catch (error) {
-      console.error("Error approving applicant:", error);
-    }
-  };
-
-  const handleDecline = async (id) => {
-    try {
-      // API call logic (kept original logic)
-      await axios.post(`${API}/backroom/csmwo/decline/${id}`);
-
-      setApplicants((prev) =>
-        prev.map((applicant) =>
-          applicant.id === id ? { ...applicant, CSMWO: "Declined" } : applicant
         )
       );
     } catch (error) {
@@ -269,7 +252,7 @@ function Treasurers() {
         {/* ✅ Button Group Filter */}
         <Box mb={2}>
           <ButtonGroup variant="contained">
-            {["pending", "approved", "declined"].map((status) => (
+            {["pending", "approved"].map((status) => (
               <Button
                 key={status}
                 sx={{
@@ -352,7 +335,6 @@ function Treasurers() {
         isOpen={isModalOpen}
         onClose={closeModal}
         onApprove={handleApprove}
-        onDecline={handleDecline}
       />
     </>
   );

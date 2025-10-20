@@ -135,13 +135,7 @@ const FileField = ({ label, fileKey, fileData, sx = {} }) => (
   </Grid>
 );
 
-function TreasurersApplicantModal({
-  applicant,
-  isOpen,
-  onClose,
-  onApprove,
-  onDecline,
-}) {
+function TreasurersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
   if (!isOpen || !applicant) return null;
 
   const [csmwoFee, setCsmwoFee] = useState("");
