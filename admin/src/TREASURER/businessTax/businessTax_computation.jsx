@@ -227,6 +227,11 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
     .filter((item) => item.label !== "BUSINESS TAX")
     .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
 
+  useEffect(() => {
+    sessionStorage.setItem("businessTaxTotal", total.toString());
+    sessionStorage.setItem("otherChargesTotal", otherChargesTotal.toString());
+  }, [total, otherChargesTotal]);
+
   const formatPeso = (value) =>
     value > 0
       ? `₱ ${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`

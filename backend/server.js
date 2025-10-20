@@ -285,26 +285,26 @@ function watchFSICFile() {
     await sequelize.authenticate();
     console.log(" Database connected");
 
-    await Examiners.sync();
-    await File.sync();
-    await Backroom.sync();
-    await UserAccounts.sync();
-    await Announcements.sync();
-    await BusinessTax.sync();
-    await AppStatus.sync();
-    await TreasurersOffice.sync();
-    await BusinessProfile.sync();
-    await AdminAccounts.sync();
+    // await Examiners.sync();
+    // await File.sync();
+    // await Backroom.sync();
+    // await UserAccounts.sync();
+    // await Announcements.sync();
+    // await BusinessTax.sync();
+    // await AppStatus.sync();
+    // await TreasurersOffice.sync();
+    // await BusinessProfile.sync();
+    // await AdminAccounts.sync();
 
-    // await Examiners.sync({ alter: true });
-    // await File.sync({ alter: true });
-    // await Backroom.sync({ alter: true });
-    // await UserAccounts.sync({ alter: true });
-    // await Announcements.sync({ alter: true });
-    // await BusinessTax.sync({ alter: true });
-    // await AppStatus.sync({ alter: true });
-    // await TreasurersOffice.sync({ alter: true });
-    // await BusinessProfile.sync({ alter: true });
+    await Examiners.sync({ alter: true });
+    await File.sync({ alter: true });
+    await Backroom.sync({ alter: true });
+    await UserAccounts.sync({ alter: true });
+    await Announcements.sync({ alter: true });
+    await BusinessTax.sync({ alter: true });
+    await AppStatus.sync({ alter: true });
+    await TreasurersOffice.sync({ alter: true });
+    await BusinessProfile.sync({ alter: true });
 
     await importFSICData();
 

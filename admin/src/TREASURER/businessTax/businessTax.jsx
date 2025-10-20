@@ -186,6 +186,8 @@ function BusinessTax() {
   const handleApprove = async (id, selectedFiles) => {
     try {
       const formData = new FormData();
+
+      // ✅ 1. Add the uploaded file if it exists
       if (selectedFiles.businessTaxComputation) {
         formData.append(
           "businessTaxComputation",
@@ -193,20 +195,28 @@ function BusinessTax() {
         );
       }
 
+      // ✅ 2. Retrieve total from sessionStorage
+      const businessTaxTotal =
+        sessionStorage.getItem("businessTaxTotal") || "0";
+
+      // ✅ 3. Append the total to the FormData (so it’s sent to the backend)
+      formData.append("businessTaxTotal", businessTaxTotal);
+
+      // ✅ 4. Send the request
       await axios.post(`${API}/businessTax/business/approve/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
+      // ✅ 5. Update local state to mark as approved
       setApplicants((prev) =>
         prev.map((applicant) =>
-          // Note: Logic here doesn't update BUSINESSTAX status in state, 
-          // keeping as is based on provided code structure, but usually 
-          // you'd set BUSINESSTAX: "Approved" here.
-          applicant.id === id ? { ...applicant, BUSINESSTAX: "Approved" } : applicant
+          applicant.id === id
+            ? { ...applicant, BUSINESSTAX: "Approved", total: businessTaxTotal }
+            : applicant
         )
       );
 
-      alert("Applicant approved with file uploaded");
+      alert("Applicant approved with file uploaded and total included");
       closeModal();
     } catch (error) {
       console.error("Error approving applicant:", error);
@@ -355,7 +365,7 @@ function BusinessTax() {
           />
         </Box>
       </Box>
-      
+
       {/* ✅ Modal Component */}
       <BusinessTaxApplicantModal
         applicant={selectedApplicant}
