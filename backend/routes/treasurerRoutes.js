@@ -63,12 +63,6 @@ router.post("/treasurerOffice/approve/:id", async (req, res) => {
     // 4️⃣ Move to BusinessProfile
     const created = await BusinessProfile.create(applicantData);
 
-    await applicant.update({
-      TREASURER: "Approved",
-      TREASURERtimeStamp: applicantData.TREASURERtimeStamp,
-      passtoTreasurer: "Done",
-    });
-
     // 6️⃣ Compute payment breakdown and due dates
     const businessTaxTotal = parseFloat(applicantData.businessTaxTotal || 0);
     const mode = applicantData.Modeofpayment?.toLowerCase() || "annual";
@@ -135,6 +129,15 @@ router.post("/treasurerOffice/approve/:id", async (req, res) => {
       due_date: dueDateStr,
     });
 
+    await applicant.update({
+      TREASURER: "Approved",
+      TREASURERtimeStamp: applicantData.TREASURERtimeStamp,
+      passtoTreasurer: "Done",
+      amount_due: amountDueStr,
+      amount_paid: emptyPlaceholders,
+      due_date: dueDateStr,
+    });
+
     // 8️⃣ Final response
     res.status(201).json({
       message:
@@ -145,6 +148,68 @@ router.post("/treasurerOffice/approve/:id", async (req, res) => {
   } catch (err) {
     console.error("Approve error:", err);
     res.status(500).json({ error: "Failed to approve applicant" });
+  }
+});
+
+router.put("/treasurer-payments/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      amount_paid,
+      index,
+      payment_mode,
+      paymentDate,
+      draweeBank,
+      checkNumber,
+      checkDate,
+    } = req.body;
+
+    const applicant = await TreasurersOffice.findByPk(id);
+    const fileApplicant = await File.findByPk(id);
+
+    if (!applicant || !fileApplicant)
+      return res.status(404).json({ error: "Applicant not found" });
+
+    // Helper function to parse arrays safely
+    const parseArray = (field) =>
+      field ? field.replace(/["']/g, "").split(",") : [];
+
+    // Convert to arrays
+    const oldPaid = parseArray(applicant.amount_paid);
+    const oldMode = parseArray(applicant.payment_mode);
+    const oldPaymentDate = parseArray(applicant.payment_date);
+    const oldDrawee = parseArray(applicant.drawee_bank);
+    const oldCheckNum = parseArray(applicant.check_number);
+    const oldCheckDate = parseArray(applicant.check_date);
+
+    // Update specific installment index
+    oldPaid[index] = amount_paid || "";
+    oldMode[index] = payment_mode || "";
+    oldPaymentDate[index] = paymentDate || "";
+    oldDrawee[index] = draweeBank || "";
+    oldCheckNum[index] = checkNumber || "";
+    oldCheckDate[index] = checkDate || "";
+
+    // Convert arrays back to string for DB storage
+    const toStringField = (arr) => arr.map((v) => `"${v || ""}"`).join(",");
+
+    const updatedFields = {
+      amount_paid: toStringField(oldPaid),
+      payment_mode: toStringField(oldMode),
+      payment_date: toStringField(oldPaymentDate),
+      drawee_bank: toStringField(oldDrawee),
+      check_number: toStringField(oldCheckNum),
+      check_date: toStringField(oldCheckDate),
+    };
+
+    // Update both tables
+    await applicant.update(updatedFields);
+    await fileApplicant.update(updatedFields);
+
+    res.json({ success: true, updated: updatedFields });
+  } catch (error) {
+    console.error("Payment update error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

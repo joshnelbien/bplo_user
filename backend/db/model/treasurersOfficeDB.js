@@ -193,6 +193,27 @@ const TreasurersOffice = sequelize.define(
     TREASURERtimeStamp: { type: DataTypes.STRING },
     application: { type: DataTypes.STRING },
     businessTaxTotal: { type: DataTypes.STRING },
+    payment_mode: {
+      type: DataTypes.STRING,
+    },
+    amount_due: {
+      type: DataTypes.STRING,
+    },
+    amount_paid: {
+      type: DataTypes.STRING,
+    },
+    due_date: {
+      type: DataTypes.STRING,
+    },
+    drawee_bank: {
+      type: DataTypes.STRING,
+    },
+    check_number: {
+      type: DataTypes.STRING,
+    },
+    check_date: {
+      type: DataTypes.STRING,
+    },
   },
 
   {

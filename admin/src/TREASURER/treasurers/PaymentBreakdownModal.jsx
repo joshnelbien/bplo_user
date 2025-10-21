@@ -89,6 +89,18 @@ function PaymentBreakdownModal({ open, onClose, applicant, onConfirm }) {
           >
             {applicant.Modeofpayment || "N/A"}
           </Typography>
+          <Typography
+            variant="subtitle1"
+            sx={{ fontWeight: 600, color: "gray" }}
+          >
+            Application Type
+          </Typography>
+          <Typography
+            variant="h6"
+            sx={{ color: "primary.main", fontWeight: "bold", mb: 1 }}
+          >
+            {applicant.application || "N/A"}
+          </Typography>
           <Divider sx={{ my: 1 }} />
           <Typography
             variant="subtitle1"
@@ -107,68 +119,71 @@ function PaymentBreakdownModal({ open, onClose, applicant, onConfirm }) {
           </Typography>
         </Box>
 
-        {/* Breakdown Section */}
-        <Typography
-          variant="h6"
-          sx={{ fontWeight: "bold", mb: 2, color: "text.secondary" }}
-        >
-          Breakdown & Due Dates
-        </Typography>
+        {applicant.application === "Renew" && (
+          <>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: "bold", mb: 2, color: "text.secondary" }}
+            >
+              Breakdown & Due Dates
+            </Typography>
 
-        <Grid container spacing={2}>
-          {breakdown.map((amount, index) => (
-            <Grid item xs={12} sm={6} key={index}>
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Paper
-                  elevation={3}
-                  sx={{
-                    p: 2.5,
-                    borderRadius: 3,
-                    backgroundColor: "white",
-                    border: "1px solid #e0e0e0",
-                    transition: "0.3s",
-                    "&:hover": {
-                      transform: "translateY(-3px)",
-                      boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                    },
-                  }}
-                >
-                  <Typography
-                    variant="subtitle1"
-                    sx={{ fontWeight: 600, color: "primary.main" }}
+            <Grid container spacing={2}>
+              {breakdown.map((amount, index) => (
+                <Grid item xs={12} sm={6} key={index}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
                   >
-                    {label} {index + 1}
-                  </Typography>
-                  <Typography
-                    variant="h6"
-                    sx={{ fontWeight: "bold", color: "#2e7d32" }}
-                  >
-                    ₱
-                    {parseFloat(amount).toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                    })}
-                  </Typography>
+                    <Paper
+                      elevation={3}
+                      sx={{
+                        p: 2.5,
+                        borderRadius: 3,
+                        backgroundColor: "white",
+                        border: "1px solid #e0e0e0",
+                        transition: "0.3s",
+                        "&:hover": {
+                          transform: "translateY(-3px)",
+                          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                        },
+                      }}
+                    >
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ fontWeight: 600, color: "primary.main" }}
+                      >
+                        {label} {index + 1}
+                      </Typography>
+                      <Typography
+                        variant="h6"
+                        sx={{ fontWeight: "bold", color: "#2e7d32" }}
+                      >
+                        ₱
+                        {parseFloat(amount).toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                        })}
+                      </Typography>
 
-                  {/* Due Date Display */}
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "gray",
-                      mt: 1,
-                      fontStyle: "italic",
-                    }}
-                  >
-                    Due Date: {dueDates[index]}
-                  </Typography>
-                </Paper>
-              </motion.div>
+                      {/* Due Date Display */}
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "gray",
+                          mt: 1,
+                          fontStyle: "italic",
+                        }}
+                      >
+                        Due Date: {dueDates[index]}
+                      </Typography>
+                    </Paper>
+                  </motion.div>
+                </Grid>
+              ))}
             </Grid>
-          ))}
-        </Grid>
+          </>
+        )}
       </DialogContent>
 
       <DialogActions

@@ -196,7 +196,7 @@ function Treasurers() {
       setApplicants((prev) =>
         prev.map((applicant) =>
           applicant.id === id
-            ? { ...applicant, CSMWO: "Approved", csmwoFee }
+            ? { ...applicant, TREASURER: "Approved", csmwoFee }
             : applicant
         )
       );
@@ -252,7 +252,7 @@ function Treasurers() {
         {/* ✅ Button Group Filter */}
         <Box mb={2}>
           <ButtonGroup variant="contained">
-            {["pending", "approved", "payment"].map((status) => (
+            {["pending", "payment"].map((status) => (
               <Button
                 key={status}
                 sx={{
@@ -331,6 +331,7 @@ function Treasurers() {
 
       {/* ✅ Modal Component */}
       <TreasurersApplicantModal
+        filter={filter}
         applicant={selectedApplicant}
         isOpen={isModalOpen}
         onClose={closeModal}

@@ -193,6 +193,9 @@ const File = sequelize.define(
     TREASURERtimeStamp: { type: DataTypes.STRING },
     application: { type: DataTypes.STRING },
     businessTaxTotal: { type: DataTypes.STRING },
+    payment_mode: {
+      type: DataTypes.STRING, // "Cash" or "Check"
+    },
     amount_due: {
       type: DataTypes.STRING,
     },
@@ -200,6 +203,15 @@ const File = sequelize.define(
       type: DataTypes.STRING,
     },
     due_date: {
+      type: DataTypes.STRING,
+    },
+    drawee_bank: {
+      type: DataTypes.STRING,
+    },
+    check_number: {
+      type: DataTypes.STRING,
+    },
+    check_date: {
       type: DataTypes.STRING,
     },
   },

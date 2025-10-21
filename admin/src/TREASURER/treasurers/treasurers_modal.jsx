@@ -22,6 +22,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { useState, useEffect } from "react";
 import PaymentBreakdownModal from "./PaymentBreakdownModal";
+import PaymentModal from "./PaymentModal";
 
 const API = import.meta.env.VITE_API_BASE;
 // Component to display a normal text field
@@ -137,7 +138,13 @@ const FileField = ({ label, fileKey, fileData, sx = {} }) => (
   </Grid>
 );
 
-function TreasurersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
+function TreasurersApplicantModal({
+  applicant,
+  isOpen,
+  onClose,
+  onApprove,
+  filter,
+}) {
   if (!isOpen || !applicant) return null;
 
   const [csmwoFee, setCsmwoFee] = useState("");
@@ -147,6 +154,11 @@ function TreasurersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
   const [successOpen, setSuccessOpen] = useState(false);
   const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [payment, setPayment] = useState(false);
+
+  const handlePaymentClick = () => {
+    setPayment(true);
+  };
 
   useEffect(() => {
     if (applicant) {
@@ -482,22 +494,34 @@ function TreasurersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
             sx={{
               color: "#1c541eff",
               borderColor: "#1c541eff",
-              "&:hover": {
-                borderColor: "#1c541eff",
-              },
+              "&:hover": { borderColor: "#1c541eff" },
               width: "100px",
             }}
           >
             Close
           </Button>
-          <Button
-            onClick={handleApproveClick}
-            variant="contained"
-            color="success"
-            sx={{ width: "100px" }}
-          >
-            Payment
-          </Button>
+
+          {filter === "pending" && (
+            <Button
+              onClick={handleApproveClick}
+              variant="contained"
+              color="success"
+              sx={{ width: "120px" }}
+            >
+              Set Payment
+            </Button>
+          )}
+
+          {filter === "payment" && (
+            <Button
+              onClick={handlePaymentClick} // you can define this function below
+              variant="contained"
+              color="success"
+              sx={{ width: "120px" }}
+            >
+              Payment
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
 
@@ -688,6 +712,11 @@ function TreasurersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
           setPaymentOpen(false);
           setConfirmApproveOpen(true); // open the existing approval confirm dialog
         }}
+      />
+      <PaymentModal
+        open={payment}
+        applicant={applicant}
+        onClose={() => setPayment(false)}
       />
     </>
   );
