@@ -530,6 +530,49 @@ function OboApplicantModal({
               });
             })()}
           </Section>
+          <Section title="Business Requirements">
+            <FileField
+              fileKey="proofOfReg"
+              label="Proof of Registration"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="proofOfRightToUseLoc"
+              label="Proof of Right to Use Location"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="locationPlan"
+              label="Location Plan"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="brgyClearance"
+              label="Barangay Clearance"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="marketClearance"
+              label="Market Clearance"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="occupancyPermit"
+              label="Occupancy Permit"
+              fileData={applicant}
+            />
+            <FileField fileKey="cedula" label="Cedula" fileData={applicant} />
+            <FileField
+              fileKey="photoOfBusinessEstInt"
+              label="Photo (Interior)"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="photoOfBusinessEstExt"
+              label="Photo (Exterior)"
+              fileData={applicant}
+            />
+          </Section>
 
           <Grid item xs={12} sm={6} mt={2}>
             <TextField
