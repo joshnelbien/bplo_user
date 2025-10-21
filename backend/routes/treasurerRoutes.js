@@ -63,14 +63,6 @@ router.post("/treasurerOffice/approve/:id", async (req, res) => {
     // 4️⃣ Move to BusinessProfile
     const created = await BusinessProfile.create(applicantData);
 
-    // 5️⃣ Update applicant + file
-    await forRelease.update({
-      passtoTreasurer: "Done",
-      permitRelease: "Yes",
-      TREASURER: "Approved",
-      TREASURERtimeStamp: applicantData.TREASURERtimeStamp,
-    });
-
     await applicant.update({
       TREASURER: "Approved",
       TREASURERtimeStamp: applicantData.TREASURERtimeStamp,
@@ -127,6 +119,17 @@ router.post("/treasurerOffice/approve/:id", async (req, res) => {
       firstName: applicantData.firstName || "",
       middleName: applicantData.middleName || "",
       lastName: applicantData.lastName || "",
+      amount_due: amountDueStr,
+      amount_paid: emptyPlaceholders,
+      due_date: dueDateStr,
+    });
+
+    // 5️⃣ Update applicant + file
+    await forRelease.update({
+      passtoTreasurer: "Done",
+      permitRelease: "Yes",
+      TREASURER: "Approved",
+      TREASURERtimeStamp: applicantData.TREASURERtimeStamp,
       amount_due: amountDueStr,
       amount_paid: emptyPlaceholders,
       due_date: dueDateStr,

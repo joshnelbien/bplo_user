@@ -193,6 +193,15 @@ const File = sequelize.define(
     TREASURERtimeStamp: { type: DataTypes.STRING },
     application: { type: DataTypes.STRING },
     businessTaxTotal: { type: DataTypes.STRING },
+    amount_due: {
+      type: DataTypes.STRING,
+    },
+    amount_paid: {
+      type: DataTypes.STRING,
+    },
+    due_date: {
+      type: DataTypes.STRING,
+    },
   },
   {
     tableName: "NewApplications",

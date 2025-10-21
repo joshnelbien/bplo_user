@@ -152,7 +152,6 @@ function Examiners() {
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
-        fetchApplicants();
         setApplicants(sortedData);
         // Removed the duplicate setApplicants(res.data);
       } catch (error) {

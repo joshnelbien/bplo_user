@@ -152,7 +152,6 @@ function Obo() {
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
-        fetchApplicants();
         setApplicants(sortedData);
       } catch (error) {
         console.error("Error fetching applicants:", error);
@@ -181,12 +180,14 @@ function Obo() {
     try {
       // NOTE: Original logic maintained
       await axios.post(`${API}/backroom/obo/approve/${id}`, oboFields);
+
       setApplicants((prev) =>
         prev.map((applicant) =>
           applicant.id === id
             ? {
                 ...applicant,
                 ...oboFields,
+                OBO: "Approved",
               }
             : applicant
         )
