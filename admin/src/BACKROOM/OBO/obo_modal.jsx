@@ -531,7 +531,7 @@ function OboApplicantModal({
             })()}
           </Section>
 
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={6} mt={2}>
             <TextField
               label="Building Structure Architectural Presentability"
               value={oboFields.BSAP}
@@ -543,7 +543,7 @@ function OboApplicantModal({
             />
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={6} mt={2}>
             <TextField
               label="Sanitary Requirements"
               value={oboFields.SR}
@@ -555,7 +555,7 @@ function OboApplicantModal({
             />
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={6} mt={2}>
             <TextField
               label="Mechanical"
               value={oboFields.Mechanical}
@@ -569,7 +569,7 @@ function OboApplicantModal({
             />
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={6} mt={2}>
             <TextField
               label="Electrical"
               value={oboFields.Electrical}
@@ -583,7 +583,7 @@ function OboApplicantModal({
             />
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={6} mt={2}>
             <TextField
               label="Signage"
               value={oboFields.Signage}
@@ -597,7 +597,7 @@ function OboApplicantModal({
             />
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={6} mt={2}>
             <TextField
               label="Electronics"
               value={oboFields.Electronics}
@@ -614,7 +614,7 @@ function OboApplicantModal({
 
         <DialogActions>
           {/* Close Button */}
-          
+
           <Button
             onClick={onClose}
             variant="contained"

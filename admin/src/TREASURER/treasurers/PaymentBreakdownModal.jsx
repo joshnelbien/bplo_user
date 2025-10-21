@@ -11,7 +11,6 @@ import {
   Box,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 
 function PaymentBreakdownModal({ open, onClose, applicant, onConfirm }) {
   if (!applicant) return null;
