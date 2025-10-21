@@ -228,7 +228,7 @@ function Cenro() {
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
-
+        fetchApplicants();
         setApplicants(sortedData);
       } catch (error) {
         console.error("Error fetching applicants:", error);

@@ -152,7 +152,7 @@ function Examiners() {
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
-
+        fetchApplicants();
         setApplicants(sortedData);
         // Removed the duplicate setApplicants(res.data);
       } catch (error) {
@@ -227,7 +227,7 @@ function Examiners() {
           p: 3,
           minHeight: "100vh",
           // 🛑 CHANGED: Background set to plain white
-          background: "white", 
+          background: "white",
           // Offset from sidebar (250px)
           marginLeft: { xs: 0, sm: `${SIDE_BAR_WIDTH}px` },
           width: { xs: "100%", sm: `calc(100% - ${SIDE_BAR_WIDTH}px)` },

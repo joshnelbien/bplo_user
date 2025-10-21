@@ -153,7 +153,7 @@ function Treasurers() {
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
-
+        fetchApplicants();
         setApplicants(sortedData);
       } catch (error) {
         console.error("Error fetching applicants:", error);
@@ -170,7 +170,15 @@ function Treasurers() {
           (a) => a.TREASURER !== "Approved" && a.TREASURER !== "Declined"
         )
       : filter === "approved"
-      ? applicants.filter((a) => a.TREASURER === "Approved")
+      ? applicants.filter(
+          (a) =>
+            a.TREASURER === "Approved" &&
+            (!a.passtoTreasurer || a.passtoTreasurer !== "Done")
+        )
+      : filter === "payment"
+      ? applicants.filter(
+          (a) => a.TREASURER === "Approved" && a.passtoTreasurer === "Done"
+        )
       : applicants.filter((a) => a.TREASURER === "Declined");
 
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
@@ -244,7 +252,7 @@ function Treasurers() {
         {/* ✅ Button Group Filter */}
         <Box mb={2}>
           <ButtonGroup variant="contained">
-            {["pending", "approved"].map((status) => (
+            {["pending", "approved", "payment"].map((status) => (
               <Button
                 key={status}
                 sx={{

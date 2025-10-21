@@ -74,23 +74,47 @@ router.post("/treasurerOffice/approve/:id", async (req, res) => {
     await applicant.update({
       TREASURER: "Approved",
       TREASURERtimeStamp: applicantData.TREASURERtimeStamp,
+      passtoTreasurer: "Done",
     });
 
-    // 6️⃣ Compute payment breakdown
+    // 6️⃣ Compute payment breakdown and due dates
     const businessTaxTotal = parseFloat(applicantData.businessTaxTotal || 0);
     const mode = applicantData.Modeofpayment?.toLowerCase() || "annual";
 
     let breakdown = [];
+    let dueDates = [];
+
+    // Get current date and start month (used for adjustments if business starts midyear)
+    const businessStartMonth =
+      moment(applicantData.businessStartDate || new Date()).month() + 1;
+
     if (mode === "quarterly") {
       breakdown = Array(4).fill((businessTaxTotal / 4).toFixed(2));
+      dueDates = ["January 20", "April 20", "July 20", "October 20"];
+
+      // ⏰ Adjust for mid-year business start (e.g., July start)
+      if (businessStartMonth >= 7) {
+        breakdown = breakdown.slice(2); // keep only Q3 and Q4
+        dueDates = dueDates.slice(2);
+      }
     } else if (mode === "semi-annual") {
       breakdown = Array(2).fill((businessTaxTotal / 2).toFixed(2));
+      dueDates = ["January 20", "July 20"];
+
+      // If started in July or later → only 2nd semester
+      if (businessStartMonth >= 7) {
+        breakdown = breakdown.slice(1);
+        dueDates = dueDates.slice(1);
+      }
     } else {
       breakdown = [businessTaxTotal.toFixed(2)];
+      dueDates = ["January 20"];
     }
 
+    // Convert to string for DB storage
     const amountDueStr = breakdown.map((v) => `"${v}"`).join(",");
     const emptyPlaceholders = Array(breakdown.length).fill('""').join(",");
+    const dueDateStr = dueDates.map((v) => `"${v}"`).join(",");
 
     // 7️⃣ Insert into ClientPayments
     const paymentRecord = await ClientPayments.create({
@@ -105,7 +129,7 @@ router.post("/treasurerOffice/approve/:id", async (req, res) => {
       lastName: applicantData.lastName || "",
       amount_due: amountDueStr,
       amount_paid: emptyPlaceholders,
-      due_date: emptyPlaceholders,
+      due_date: dueDateStr,
     });
 
     // 8️⃣ Final response

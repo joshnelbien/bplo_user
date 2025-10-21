@@ -19,16 +19,21 @@ function PaymentBreakdownModal({ open, onClose, applicant, onConfirm }) {
   const mode = applicant.Modeofpayment?.toLowerCase();
   let breakdown = [];
   let label = "";
+  let dueDates = [];
 
+  // Set breakdown and due dates based on mode
   if (mode === "quarterly") {
     breakdown = Array(4).fill((businessTaxTotal / 4).toFixed(2));
     label = "Quarter";
+    dueDates = ["January 20", "April 20", "July 20", "October 20"];
   } else if (mode === "semi-annual") {
     breakdown = Array(2).fill((businessTaxTotal / 2).toFixed(2));
     label = "Semi-Annual";
+    dueDates = ["January 20", "July 20"];
   } else {
     breakdown = [businessTaxTotal.toFixed(2)];
     label = "Annual";
+    dueDates = ["January 20"];
   }
 
   return (
@@ -56,13 +61,13 @@ function PaymentBreakdownModal({ open, onClose, applicant, onConfirm }) {
           py: 2,
           borderTopLeftRadius: 16,
           borderTopRightRadius: 16,
-          color: "white",
         }}
       >
         Payment Breakdown
       </DialogTitle>
 
       <DialogContent dividers sx={{ bgcolor: "#fafafa", p: 3 }}>
+        {/* Summary Section */}
         <Box
           sx={{
             mb: 3,
@@ -102,11 +107,12 @@ function PaymentBreakdownModal({ open, onClose, applicant, onConfirm }) {
           </Typography>
         </Box>
 
+        {/* Breakdown Section */}
         <Typography
           variant="h6"
           sx={{ fontWeight: "bold", mb: 2, color: "text.secondary" }}
         >
-          Breakdown
+          Breakdown & Due Dates
         </Typography>
 
         <Grid container spacing={2}>
@@ -145,6 +151,18 @@ function PaymentBreakdownModal({ open, onClose, applicant, onConfirm }) {
                     {parseFloat(amount).toLocaleString(undefined, {
                       minimumFractionDigits: 2,
                     })}
+                  </Typography>
+
+                  {/* Due Date Display */}
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "gray",
+                      mt: 1,
+                      fontStyle: "italic",
+                    }}
+                  >
+                    Due Date: {dueDates[index]}
                   </Typography>
                 </Paper>
               </motion.div>

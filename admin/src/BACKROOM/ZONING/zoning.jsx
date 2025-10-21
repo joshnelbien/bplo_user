@@ -223,7 +223,7 @@ function Zoning() {
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
-
+        fetchApplicants();
         setApplicants(sortedData);
       } catch (error) {
         console.error("Error fetching applicants:", error);
@@ -349,10 +349,10 @@ function Zoning() {
     <>
       {/* 1. TOP BAR (Fixed Header) */}
       <TopBar />
-      
+
       {/* 2. SIDE BAR (Original Position Maintained) */}
       <Side_bar />
-      
+
       {/* 3. MAIN CONTENT (Padded to clear fixed TopBar and offset by Side_bar) */}
       <Box
         id="main_content"
@@ -388,7 +388,7 @@ function Zoning() {
                 bgcolor: filter === "pending" ? "darkgreen" : "white",
                 color: filter === "pending" ? "white" : "darkgreen",
                 "&:hover": {
-                    bgcolor: filter === "pending" ? "#004d00" : "#f0f0f0",
+                  bgcolor: filter === "pending" ? "#004d00" : "#f0f0f0",
                 },
               }}
               onClick={() => {
@@ -403,7 +403,7 @@ function Zoning() {
                 bgcolor: filter === "approved" ? "darkgreen" : "white",
                 color: filter === "approved" ? "white" : "darkgreen",
                 "&:hover": {
-                    bgcolor: filter === "approved" ? "#004d00" : "#f0f0f0",
+                  bgcolor: filter === "approved" ? "#004d00" : "#f0f0f0",
                 },
               }}
               onClick={() => {
@@ -418,7 +418,7 @@ function Zoning() {
                 bgcolor: filter === "declined" ? "darkgreen" : "white",
                 color: filter === "declined" ? "white" : "darkgreen",
                 "&:hover": {
-                    bgcolor: filter === "declined" ? "#004d00" : "#f0f0f0",
+                  bgcolor: filter === "declined" ? "#004d00" : "#f0f0f0",
                 },
               }}
               onClick={() => {
