@@ -398,6 +398,22 @@ export default function Step6BusinessActivity({
               </CardContent>
             </Card>
           ))}
+          <TextField
+            select
+            label="Mode of Payment"
+            name="Modeofpayment"
+            value={formData.Modeofpayment || ""}
+            onChange={handleChange}
+            fullWidth
+            variant="outlined"
+            sx={{ minWidth: 300 }}
+            error={!!errors.Modeofpayment}
+            helperText={errors.Modeofpayment}
+          >
+            <MenuItem value="Annual">Annual</MenuItem>
+            <MenuItem value="Semi-Annual">Semi-Annual</MenuItem>
+            <MenuItem value="Quarterly">Quarterly</MenuItem>
+          </TextField>
         </Stack>
 
         {/* ✅ Total Capital */}

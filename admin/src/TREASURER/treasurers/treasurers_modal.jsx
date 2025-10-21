@@ -171,7 +171,7 @@ function TreasurersApplicantModal({
   };
 
   const handleApproveClick = () => {
-    setPaymentOpen(true);
+    setPayment(true);
   };
 
   const handleDeclineClick = () => {
@@ -710,7 +710,7 @@ function TreasurersApplicantModal({
         applicant={applicant}
         onConfirm={() => {
           setPaymentOpen(false);
-          setConfirmApproveOpen(true); // open the existing approval confirm dialog
+          setConfirmApproveOpen(true);
         }}
       />
       <PaymentModal

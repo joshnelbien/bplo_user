@@ -37,6 +37,11 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
     setMode("Cash");
     setSelectedIndex(index);
   };
+  const handleTotalPayClick = () => {
+    setForm((prev) => ({ ...prev, amount: applicant.businessTaxTotal }));
+    setMode("Cash");
+    setSelectedIndex(null);
+  };
 
   const handleSubmit = async () => {
     if (!mode) return alert("Select a payment mode first.");
@@ -67,7 +72,7 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
 
       if (res.data.success) {
         alert("Payment recorded successfully!");
-        onConfirm?.(); // optional callback to refresh data
+        onConfirm?.();
         onClose();
       }
     } catch (err) {
@@ -87,6 +92,21 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
   const amountDues = parseValues(applicant?.amount_due);
   const dueDates = parseValues(applicant?.due_date);
   const paidAmounts = parseValues(applicant?.amount_paid);
+
+  // Determine required payment indexes
+  const paymentMode = applicant.Modeofpayment?.toLowerCase();
+  const appType = applicant.application?.toLowerCase();
+  let requiredIndex = [];
+
+  if (appType === "new") {
+    requiredIndex = amountDues.map((_, i) => i);
+  } else if (appType === "renew") {
+    if (paymentMode === "quarterly") {
+      requiredIndex = [0];
+    } else if (paymentMode === "semi-annual" || paymentMode === "annual") {
+      requiredIndex = [0];
+    }
+  }
 
   return (
     <Dialog
@@ -122,7 +142,6 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
           py: 4,
         }}
       >
-        {/* Business Summary */}
         <Paper
           elevation={0}
           sx={{
@@ -140,109 +159,141 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
           >
             Business Summary
           </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Application Type
+          </Typography>
+          <Typography fontWeight={600}>
+            {applicant?.application || "—"}
+          </Typography>
+
           <Divider sx={{ mb: 2 }} />
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <Typography variant="body2" color="text.secondary">
                 Total Tax
               </Typography>
-              <Typography fontWeight={600}>
-                ₱ {applicant?.businessTaxTotal || "—"}
-              </Typography>
+              <Box display="flex" alignItems="center" gap={1}>
+                <Typography fontWeight={600}>
+                  ₱ {applicant?.businessTaxTotal || "—"}
+                </Typography>
+
+                {/* Only show Pay button for NEW applications */}
+                {applicant?.application?.toLowerCase() === "new" && (
+                  <Button
+                    size="small"
+                    variant="contained"
+                    onClick={handleTotalPayClick}
+                    sx={{
+                      backgroundColor: "#1c541e",
+                      fontWeight: 600,
+                      px: 2.5,
+                      py: 0.7,
+                      borderRadius: 2,
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                      "&:hover": {
+                        backgroundColor: "#174617",
+                        boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+                      },
+                      textTransform: "none",
+                    }}
+                  >
+                    Pay
+                  </Button>
+                )}
+              </Box>
             </Grid>
           </Grid>
         </Paper>
 
-        {/* Payment Schedule */}
-        {(amountDues.length > 0 || dueDates.length > 0) && (
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2.5,
-              mb: 3,
-              borderRadius: 3,
-              backgroundColor: "white",
-              border: "1px solid #e0e0e0",
-            }}
-          >
-            <Typography
-              variant="subtitle2"
+        {applicant?.application?.toLowerCase() === "renew" &&
+          (amountDues.length > 0 || dueDates.length > 0) && (
+            <Paper
+              elevation={0}
               sx={{
-                fontWeight: 600,
-                mb: 1.5,
-                color: "#1c541e",
+                p: 2.5,
+                mb: 3,
+                borderRadius: 3,
+                backgroundColor: "white",
+                border: "1px solid #e0e0e0",
               }}
             >
-              Payment Schedule
-            </Typography>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 600,
+                  mb: 1.5,
+                  color: "#1c541e",
+                }}
+              >
+                Payment Schedule
+              </Typography>
 
-            {amountDues.map((amount, index) => {
-              const paid =
-                paidAmounts[index] && paidAmounts[index] !== ""
-                  ? `₱ ${paidAmounts[index]}`
-                  : "Pending";
-              const dueDate = dueDates[index] || "—";
+              {amountDues.map((amount, index) => {
+                const paid =
+                  paidAmounts[index] && paidAmounts[index] !== ""
+                    ? `₱ ${paidAmounts[index]}`
+                    : "Pending";
+                const dueDate = dueDates[index] || "—";
+                const isRequired = requiredIndex.includes(index);
 
-              return (
-                <Box
-                  key={index}
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  sx={{
-                    p: 1.5,
-                    mb: 1,
-                    borderRadius: 2,
-                    transition: "all 0.3s ease",
-                    backgroundColor:
-                      selectedIndex === index ? "#edf7ed" : "#fafafa",
-                    "&:hover": {
-                      backgroundColor: "#edf7ed",
-                    },
-                  }}
-                >
-                  <Box>
-                    <Typography variant="body2" fontWeight={500}>
-                      ₱ {amount} — {dueDate}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color={paid === "Pending" ? "error.main" : "success.main"}
-                    >
-                      {paid === "Pending" ? "Pending" : `Paid: ${paid}`}
-                    </Typography>
+                return (
+                  <Box
+                    key={index}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    sx={{
+                      p: 1.5,
+                      mb: 1,
+                      borderRadius: 2,
+                      transition: "all 0.3s ease",
+                      backgroundColor:
+                        selectedIndex === index ? "#edf7ed" : "#fafafa",
+                      opacity: isRequired ? 1 : 0.5,
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="body2" fontWeight={500}>
+                        ₱ {amount} — {dueDate}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color={
+                          paid === "Pending" ? "error.main" : "success.main"
+                        }
+                      >
+                        {paid === "Pending" ? "Pending" : `Paid: ${paid}`}
+                      </Typography>
+                    </Box>
+
+                    {paid === "Pending" && isRequired && (
+                      <Button
+                        size="small"
+                        variant="contained"
+                        onClick={() => handlePayClick(amount, index)}
+                        sx={{
+                          backgroundColor: "#1c541e",
+                          fontWeight: 600,
+                          px: 2.5,
+                          py: 0.7,
+                          borderRadius: 2,
+                          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                          "&:hover": {
+                            backgroundColor: "#174617",
+                            boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+                          },
+                          textTransform: "none",
+                        }}
+                      >
+                        Pay
+                      </Button>
+                    )}
                   </Box>
+                );
+              })}
+            </Paper>
+          )}
 
-                  {paid === "Pending" && (
-                    <Button
-                      size="small"
-                      variant="contained"
-                      onClick={() => handlePayClick(amount, index)}
-                      sx={{
-                        backgroundColor: "#1c541e",
-                        fontWeight: 600,
-                        px: 2.5,
-                        py: 0.7,
-                        borderRadius: 2,
-                        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                        "&:hover": {
-                          backgroundColor: "#174617",
-                          boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-                        },
-                        textTransform: "none",
-                      }}
-                    >
-                      Pay
-                    </Button>
-                  )}
-                </Box>
-              );
-            })}
-          </Paper>
-        )}
-
-        {/* Payment Details Section */}
-        {/* Payment Details Section */}
         {mode && (
           <Fade in={mode !== ""}>
             <Box>
@@ -263,7 +314,6 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
                   Payment Details
                 </Typography>
 
-                {/* Reusable Payment Mode Selector */}
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} sm={6}>
                     <TextField
@@ -280,7 +330,6 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
                     </TextField>
                   </Grid>
 
-                  {/* ============== CASH MODE ============== */}
                   {mode === "Cash" && (
                     <>
                       <Grid item xs={12} sm={6}>
@@ -295,7 +344,6 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
                           onChange={handleChange}
                         />
                       </Grid>
-
                       <Grid item xs={12}>
                         <TextField
                           label="Amount Paid"
@@ -309,10 +357,8 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
                     </>
                   )}
 
-                  {/* ============== CHECK MODE ============== */}
                   {mode === "Check" && (
                     <>
-                      {/* Row 1 */}
                       <Grid item xs={12} sm={6}>
                         <TextField
                           label="Drawee Bank"
@@ -322,8 +368,6 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
                           onChange={handleChange}
                         />
                       </Grid>
-
-                      {/* Row 2 */}
                       <Grid item xs={12} sm={6}>
                         <TextField
                           label="Check Number"
@@ -333,7 +377,6 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
                           onChange={handleChange}
                         />
                       </Grid>
-
                       <Grid item xs={12} sm={6}>
                         <TextField
                           label="Check Date"
@@ -346,8 +389,6 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
                           sx={{ width: "225px" }}
                         />
                       </Grid>
-
-                      {/* Row 3 */}
                       <Grid item xs={12}>
                         <TextField
                           label="Amount"

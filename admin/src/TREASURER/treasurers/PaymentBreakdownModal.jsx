@@ -36,6 +36,19 @@ function PaymentBreakdownModal({ open, onClose, applicant, onConfirm }) {
     dueDates = ["January 20"];
   }
 
+  // Determine required payments based on application type
+  let requiredPayments = [];
+
+  if (applicant.application === "New") {
+    requiredPayments = breakdown.map((_, i) => i); // All required
+  } else if (applicant.application === "Renew") {
+    if (mode === "quarterly") {
+      requiredPayments = [0]; // Only first quarter required
+    } else if (mode === "semi-annual" || mode === "annual") {
+      requiredPayments = [0]; // Only first semi or annual
+    }
+  }
+
   return (
     <Dialog
       open={open}
@@ -67,7 +80,6 @@ function PaymentBreakdownModal({ open, onClose, applicant, onConfirm }) {
       </DialogTitle>
 
       <DialogContent dividers sx={{ bgcolor: "#fafafa", p: 3 }}>
-        {/* Summary Section */}
         <Box
           sx={{
             mb: 3,
@@ -81,18 +93,6 @@ function PaymentBreakdownModal({ open, onClose, applicant, onConfirm }) {
             variant="subtitle1"
             sx={{ fontWeight: 600, color: "gray" }}
           >
-            Mode of Payment
-          </Typography>
-          <Typography
-            variant="h6"
-            sx={{ color: "primary.main", fontWeight: "bold", mb: 1 }}
-          >
-            {applicant.Modeofpayment || "N/A"}
-          </Typography>
-          <Typography
-            variant="subtitle1"
-            sx={{ fontWeight: 600, color: "gray" }}
-          >
             Application Type
           </Typography>
           <Typography
@@ -101,6 +101,17 @@ function PaymentBreakdownModal({ open, onClose, applicant, onConfirm }) {
           >
             {applicant.application || "N/A"}
           </Typography>
+          {applicant?.application?.toLowerCase() === "renew" && (
+            <>
+              <Typography variant="body2" color="text.secondary">
+                Mode of Payment
+              </Typography>
+              <Typography fontWeight={600}>
+                {/* Try both keys just in case */}
+                {applicant?.modeOfPayment || applicant?.Modeofpayment || "—"}
+              </Typography>
+            </>
+          )}
           <Divider sx={{ my: 1 }} />
           <Typography
             variant="subtitle1"
@@ -142,12 +153,11 @@ function PaymentBreakdownModal({ open, onClose, applicant, onConfirm }) {
                         p: 2.5,
                         borderRadius: 3,
                         backgroundColor: "white",
-                        border: "1px solid #e0e0e0",
+                        border: requiredPayments.includes(index)
+                          ? "1px solid #2e7d32"
+                          : "1px solid #ccc",
+                        opacity: requiredPayments.includes(index) ? 1 : 0.6,
                         transition: "0.3s",
-                        "&:hover": {
-                          transform: "translateY(-3px)",
-                          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                        },
                       }}
                     >
                       <Typography
@@ -165,15 +175,9 @@ function PaymentBreakdownModal({ open, onClose, applicant, onConfirm }) {
                           minimumFractionDigits: 2,
                         })}
                       </Typography>
-
-                      {/* Due Date Display */}
                       <Typography
                         variant="body2"
-                        sx={{
-                          color: "gray",
-                          mt: 1,
-                          fontStyle: "italic",
-                        }}
+                        sx={{ color: "gray", mt: 1, fontStyle: "italic" }}
                       >
                         Due Date: {dueDates[index]}
                       </Typography>
@@ -209,7 +213,7 @@ function PaymentBreakdownModal({ open, onClose, applicant, onConfirm }) {
           Cancel
         </Button>
         <Button
-          onClick={onConfirm}
+          onClick={() => onConfirm(requiredPayments)}
           variant="contained"
           color="success"
           sx={{
