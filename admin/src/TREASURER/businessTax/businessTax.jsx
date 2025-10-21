@@ -207,7 +207,6 @@ function BusinessTax() {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // ✅ 5. Update local state to mark as approved
       setApplicants((prev) =>
         prev.map((applicant) =>
           applicant.id === id
@@ -216,7 +215,6 @@ function BusinessTax() {
         )
       );
 
-      alert("Applicant approved with file uploaded and total included");
       closeModal();
     } catch (error) {
       console.error("Error approving applicant:", error);
