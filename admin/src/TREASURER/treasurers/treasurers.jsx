@@ -123,17 +123,13 @@ function TopBar() {
           display: { xs: "none", sm: "block" },
         }}
       >
-        {/* 🛑 CHANGED: Title updated to TREASURER'S OFFICE */}
         TREASURER'S OFFICE
       </Typography>
 
-      {/* 3. RIGHT ALIGNED: Placeholder (keeping structure) */}
       <Box sx={{ mr: 4 }} />
     </Box>
   );
 }
-
-/* ================== MAIN COMPONENT ================== */
 
 function Treasurers() {
   const [applicants, setApplicants] = useState([]);

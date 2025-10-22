@@ -27,22 +27,34 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
     checkNumber: "",
     checkDate: "",
   });
+  const getToday = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handlePayClick = (amount, index) => {
-    setForm((prev) => ({ ...prev, amount }));
+    setForm({
+      ...form,
+      amount,
+      paymentDate: getToday(),
+    });
     setMode("Cash");
     setSelectedIndex(index);
   };
+
   const handleTotalPayClick = () => {
-    setForm((prev) => ({ ...prev, amount: applicant.businessTaxTotal }));
+    setForm({
+      ...form,
+      amount: applicant.businessTaxTotal,
+      paymentDate: getToday(),
+    });
     setMode("Cash");
     setSelectedIndex(null);
   };
-
   const handleSubmit = async () => {
     if (!mode) return alert("Select a payment mode first.");
 
@@ -166,6 +178,17 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
             {applicant?.application || "—"}
           </Typography>
 
+          {applicant?.application === "Renew" && (
+            <>
+              <Typography variant="body2" color="text.secondary">
+                Mode of Payment
+              </Typography>
+              <Typography fontWeight={600}>
+                {applicant?.Modeofpayment || "—"}
+              </Typography>
+            </>
+          )}
+
           <Divider sx={{ mb: 2 }} />
           <Grid container spacing={2}>
             <Grid item xs={6}>
@@ -177,122 +200,251 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
                   ₱ {applicant?.businessTaxTotal || "—"}
                 </Typography>
 
-                {/* Only show Pay button for NEW applications */}
-                {applicant?.application?.toLowerCase() === "new" && (
-                  <Button
-                    size="small"
-                    variant="contained"
-                    onClick={handleTotalPayClick}
-                    sx={{
-                      backgroundColor: "#1c541e",
-                      fontWeight: 600,
-                      px: 2.5,
-                      py: 0.7,
-                      borderRadius: 2,
-                      boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                      "&:hover": {
-                        backgroundColor: "#174617",
-                        boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-                      },
-                      textTransform: "none",
-                    }}
-                  >
-                    Pay
-                  </Button>
-                )}
+                {applicant?.application?.toLowerCase() === "new" &&
+                  applicant?.TREASURER !== "Approved" && (
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={handleTotalPayClick}
+                      sx={{
+                        backgroundColor: "#1c541e",
+                        fontWeight: 600,
+                        px: 2.5,
+                        py: 0.7,
+                        borderRadius: 2,
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                        "&:hover": {
+                          backgroundColor: "#174617",
+                          boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+                        },
+                        textTransform: "none",
+                      }}
+                    >
+                      Pay
+                    </Button>
+                  )}
               </Box>
             </Grid>
           </Grid>
         </Paper>
 
-        {applicant?.application?.toLowerCase() === "renew" &&
-          (amountDues.length > 0 || dueDates.length > 0) && (
-            <Paper
-              elevation={0}
-              sx={{
-                p: 2.5,
-                mb: 3,
-                borderRadius: 3,
-                backgroundColor: "white",
-                border: "1px solid #e0e0e0",
-              }}
-            >
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  fontWeight: 600,
-                  mb: 1.5,
-                  color: "#1c541e",
-                }}
-              >
-                Payment Schedule
-              </Typography>
+        {/* ✅ If RENEW Application — show Payment Schedule */}
+        {applicant.TREASURER?.trim().toLowerCase() === "pending" && (
+          <>
+            {applicant?.application?.toLowerCase() === "renew" && (
+              <>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: "bold",
+                    mb: 2,
+                    color: "text.secondary",
+                    mt: 1,
+                  }}
+                >
+                  Payment Breakdown & Due Dates
+                </Typography>
 
-              {amountDues.map((amount, index) => {
-                const paid =
-                  paidAmounts[index] && paidAmounts[index] !== ""
-                    ? `₱ ${paidAmounts[index]}`
-                    : "Pending";
-                const dueDate = dueDates[index] || "—";
-                const isRequired = requiredIndex.includes(index);
+                {(() => {
+                  const businessTaxTotal = parseFloat(
+                    applicant.businessTaxTotal
+                  );
+                  const mode = applicant.Modeofpayment?.toLowerCase();
+                  let breakdown = [];
+                  let label = "";
+                  let dueDates = [];
 
-                return (
-                  <Box
-                    key={index}
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    sx={{
-                      p: 1.5,
-                      mb: 1,
-                      borderRadius: 2,
-                      transition: "all 0.3s ease",
-                      backgroundColor:
-                        selectedIndex === index ? "#edf7ed" : "#fafafa",
-                      opacity: isRequired ? 1 : 0.5,
-                    }}
-                  >
-                    <Box>
-                      <Typography variant="body2" fontWeight={500}>
-                        ₱ {amount} — {dueDate}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color={
-                          paid === "Pending" ? "error.main" : "success.main"
-                        }
-                      >
-                        {paid === "Pending" ? "Pending" : `Paid: ${paid}`}
-                      </Typography>
-                    </Box>
+                  if (mode === "quarterly") {
+                    breakdown = Array(4).fill(
+                      (businessTaxTotal / 4).toFixed(2)
+                    );
+                    label = "Quarter";
+                    dueDates = [
+                      "January 20",
+                      "April 20",
+                      "July 20",
+                      "October 20",
+                    ];
+                  } else if (mode === "semi-annual") {
+                    breakdown = Array(2).fill(
+                      (businessTaxTotal / 2).toFixed(2)
+                    );
+                    label = "Semi-Annual";
+                    dueDates = ["January 20", "July 20"];
+                  } else {
+                    breakdown = [businessTaxTotal.toFixed(2)];
+                    label = "Annual";
+                    dueDates = ["January 20"];
+                  }
 
-                    {paid === "Pending" && isRequired && (
-                      <Button
-                        size="small"
-                        variant="contained"
-                        onClick={() => handlePayClick(amount, index)}
-                        sx={{
-                          backgroundColor: "#1c541e",
-                          fontWeight: 600,
-                          px: 2.5,
-                          py: 0.7,
-                          borderRadius: 2,
-                          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                          "&:hover": {
-                            backgroundColor: "#174617",
-                            boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-                          },
-                          textTransform: "none",
-                        }}
-                      >
-                        Pay
-                      </Button>
-                    )}
+                  const requiredPayments =
+                    applicant.application === "Renew"
+                      ? mode === "quarterly" ||
+                        mode === "semi-annual" ||
+                        mode === "annual"
+                        ? [0] // first only
+                        : []
+                      : breakdown.map((_, i) => i); // all if new
+
+                  return (
+                    <Grid container spacing={2}>
+                      {breakdown.map((amount, index) => {
+                        const isPaid = false; // you can change logic later
+                        const isRequired = requiredPayments.includes(index);
+
+                        return (
+                          <Grid item xs={12} sm={6} key={index}>
+                            <Paper
+                              elevation={3}
+                              sx={{
+                                p: 2.5,
+                                borderRadius: 3,
+                                backgroundColor: "white",
+                                border: isRequired
+                                  ? "1px solid #2e7d32"
+                                  : "1px solid #ccc",
+                                opacity: isRequired ? 1 : 0.6,
+                                transition: "0.3s",
+                              }}
+                            >
+                              <Typography
+                                variant="subtitle1"
+                                sx={{
+                                  fontWeight: 600,
+                                  color: "primary.main",
+                                }}
+                              >
+                                {label} {index + 1}
+                              </Typography>
+                              <Typography
+                                variant="h6"
+                                sx={{
+                                  fontWeight: "bold",
+                                  color: "#2e7d32",
+                                }}
+                              >
+                                ₱{" "}
+                                {parseFloat(amount).toLocaleString(undefined, {
+                                  minimumFractionDigits: 2,
+                                })}
+                              </Typography>
+
+                              {applicant.Modeofpayment !== "Annual" && (
+                                <>
+                                  <Typography
+                                    variant="body2"
+                                    sx={{
+                                      color: "gray",
+                                      mt: 1,
+                                      fontStyle: "italic",
+                                    }}
+                                  >
+                                    Due Date: {dueDates[index]}
+                                  </Typography>
+                                </>
+                              )}
+
+                              <Divider sx={{ my: 1.5 }} />
+
+                              <Box display="flex" justifyContent="flex-end">
+                                <Button
+                                  size="small"
+                                  variant="contained"
+                                  disabled={!isRequired || isPaid}
+                                  onClick={() => handlePayClick(amount, index)}
+                                  sx={{
+                                    backgroundColor: "#1c541e",
+                                    fontWeight: 600,
+                                    px: 2.5,
+                                    py: 0.7,
+                                    borderRadius: 2,
+                                    textTransform: "none",
+                                    "&:hover": {
+                                      backgroundColor: "#174617",
+                                    },
+                                  }}
+                                >
+                                  Pay
+                                </Button>
+                              </Box>
+                            </Paper>
+                          </Grid>
+                        );
+                      })}
+                    </Grid>
+                  );
+                })()}
+              </>
+            )}
+          </>
+        )}
+
+        {applicant.TREASURER === "Approved" && (
+          <>
+            {amountDues.map((amount, index) => {
+              const paid =
+                paidAmounts[index] && paidAmounts[index] !== ""
+                  ? `₱ ${paidAmounts[index]}`
+                  : "Pending";
+              const dueDate = dueDates[index] || "—";
+
+              return (
+                <Box
+                  key={index}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  sx={{
+                    p: 1.5,
+                    mb: 1.5,
+                    borderRadius: 2,
+                    border: "1px solid #e0e0e0",
+                    backgroundColor: "#fff",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                  }}
+                >
+                  {/* LEFT SIDE */}
+                  <Box>
+                    <Typography variant="body2" fontWeight={500}>
+                      ₱ {amount} — {dueDate}
+                    </Typography>
+
+                    <Typography
+                      variant="body2"
+                      color={paid === "Pending" ? "error.main" : "success.main"}
+                      sx={{ fontWeight: 500 }}
+                    >
+                      {paid === "Pending" ? "Pending" : `Paid: ${paid}`}
+                    </Typography>
                   </Box>
-                );
-              })}
-            </Paper>
-          )}
+
+                  {/* RIGHT SIDE BUTTON */}
+                  {paid === "Pending" && (
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => handlePayClick(amount, index)}
+                      sx={{
+                        backgroundColor: "#1c541e",
+                        color: "#fff",
+                        fontWeight: 600,
+                        borderRadius: 2,
+                        textTransform: "none",
+                        px: 2.5,
+                        py: 0.7,
+                        "&:hover": {
+                          backgroundColor: "#174617",
+                        },
+                      }}
+                    >
+                      Pay
+                    </Button>
+                  )}
+                </Box>
+              );
+            })}
+          </>
+        )}
 
         {mode && (
           <Fade in={mode !== ""}>
@@ -340,8 +492,8 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
                           name="paymentDate"
                           sx={{ width: "225px" }}
                           InputLabelProps={{ shrink: true }}
-                          value={form.paymentDate}
-                          onChange={handleChange}
+                          value={form.paymentDate || getToday()}
+                          disabled
                         />
                       </Grid>
                       <Grid item xs={12}>

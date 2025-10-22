@@ -166,7 +166,6 @@ router.put("/treasurer-payments/:id", async (req, res) => {
 
     console.log("Received payment update:", req.body);
 
-    // Find applicant and file
     const applicant = await TreasurersOffice.findByPk(id);
     const fileApplicant = await File.findByPk(id);
 
@@ -174,71 +173,118 @@ router.put("/treasurer-payments/:id", async (req, res) => {
       return res.status(404).json({ error: "Applicant not found" });
     }
 
-    // Helper: parse JSON arrays from DB, or initialize empty
+    const isRenew = applicant.application?.toLowerCase() === "renew";
+    const isNew = applicant.application?.toLowerCase() === "new";
+
+    // Parse CSV-like strings (no brackets)
     const parseArray = (field) => {
       if (!field) return [];
-      try {
-        return JSON.parse(field);
-      } catch (err) {
-        // fallback if DB has old CSV string
-        return field.replace(/["']/g, "").split(",");
+      return field
+        .replace(/["']/g, "")
+        .split(",")
+        .map((v) => v.trim());
+    };
+
+    // Convert array → "quoted CSV"
+    const toQuotedCSV = (arr) => arr.map((v) => `"${v}"`).join(",");
+
+    let updatedFields = {};
+
+    // === NEW APPLICATION ===
+    if (
+      isNew ||
+      (isRenew && applicant.Modeofpayment?.toLowerCase() === "annual")
+    ) {
+      updatedFields = {
+        amount_paid: `"${amount_paid}"`,
+        payment_mode: `"${payment_mode}"`,
+        payment_date: `"${paymentDate}"`,
+        drawee_bank: `"${draweeBank}"`,
+        check_number: `"${checkNumber}"`,
+        check_date: `"${checkDate}"`,
+        amount_due: `"${applicant.businessTaxTotal}"`,
+        due_date: `""`,
+      };
+    }
+
+    // === RENEWAL APPLICATION ===
+    else if (isRenew) {
+      let oldPaid = parseArray(applicant.amount_paid);
+      let oldMode = parseArray(applicant.payment_mode);
+      let oldPaymentDate = parseArray(applicant.payment_date);
+      let oldDrawee = parseArray(applicant.drawee_bank);
+      let oldCheckNum = parseArray(applicant.check_number);
+      let oldCheckDate = parseArray(applicant.check_date);
+      let oldDueDates = parseArray(applicant.due_date);
+      let oldAmountDue = parseArray(applicant.amount_due);
+
+      const paymentMode = applicant.Modeofpayment?.toLowerCase();
+      const totalAmount = parseFloat(applicant.businessTaxTotal || "0");
+
+      let perSlot = 0;
+      let slots = 0;
+      let dueDates = [];
+
+      if (paymentMode === "quarterly") {
+        slots = 4;
+        perSlot = totalAmount / 4;
+        dueDates = ["January 20", "April 20", "July 20", "October 20"];
+      } else if (paymentMode === "semi-annual") {
+        slots = 2;
+        perSlot = totalAmount / 2;
+        dueDates = ["January 20", "June 20"];
+      } else if (paymentMode === "annual") {
+        slots = 1;
+        perSlot = totalAmount;
+        dueDates = [""];
       }
-    };
 
-    let oldPaid = parseArray(applicant.amount_paid);
-    let oldMode = parseArray(applicant.payment_mode);
-    let oldPaymentDate = parseArray(applicant.payment_date);
-    let oldDrawee = parseArray(applicant.drawee_bank);
-    let oldCheckNum = parseArray(applicant.check_number);
-    let oldCheckDate = parseArray(applicant.check_date);
+      // Fill or expand arrays
+      const ensureLength = (arr, len) => {
+        while (arr.length < len) arr.push("");
+        return arr.slice(0, len);
+      };
 
-    // Ensure arrays have at least 10 slots (or max installments)
-    const ensureLength = (arr, length = 4) => {
-      while (arr.length < length) arr.push("");
-      return arr;
-    };
+      oldPaid = ensureLength(oldPaid, slots);
+      oldMode = ensureLength(oldMode, slots);
+      oldPaymentDate = ensureLength(oldPaymentDate, slots);
+      oldDrawee = ensureLength(oldDrawee, slots);
+      oldCheckNum = ensureLength(oldCheckNum, slots);
+      oldCheckDate = ensureLength(oldCheckDate, slots);
+      oldDueDates = ensureLength(oldDueDates, slots);
+      oldAmountDue = ensureLength(oldAmountDue, slots);
 
-    oldPaid = ensureLength(oldPaid);
-    oldMode = ensureLength(oldMode);
-    oldPaymentDate = ensureLength(oldPaymentDate);
-    oldDrawee = ensureLength(oldDrawee);
-    oldCheckNum = ensureLength(oldCheckNum);
-    oldCheckDate = ensureLength(oldCheckDate);
+      // Fill missing due dates and amounts
+      for (let i = 0; i < slots; i++) {
+        if (oldDueDates[i] === "") oldDueDates[i] = dueDates[i];
+        if (oldAmountDue[i] === "") oldAmountDue[i] = perSlot.toFixed(2);
+      }
 
-    // Determine which index to update
-    const i = index !== null && index !== undefined ? Number(index) : 0;
+      // Update selected slot
+      const i = index !== null && index !== undefined ? Number(index) : 0;
+      oldPaid[i] = amount_paid || "";
+      oldMode[i] = payment_mode || "";
+      oldPaymentDate[i] = paymentDate || "";
+      oldDrawee[i] = draweeBank || "";
+      oldCheckNum[i] = checkNumber || "";
+      oldCheckDate[i] = checkDate || "";
 
-    // Update specific installment
-    oldPaid[i] = amount_paid || "";
-    oldMode[i] = payment_mode || "";
-    oldPaymentDate[i] = paymentDate || "";
-    oldDrawee[i] = draweeBank || "";
-    oldCheckNum[i] = checkNumber || "";
-    oldCheckDate[i] = checkDate || "";
-
-    console.log("Updated arrays:", {
-      oldPaid,
-      oldMode,
-      oldPaymentDate,
-      oldDrawee,
-      oldCheckNum,
-      oldCheckDate,
-    });
-
-    const updatedFields = {
-      amount_paid: JSON.stringify(oldPaid),
-      payment_mode: JSON.stringify(oldMode),
-      payment_date: JSON.stringify(oldPaymentDate),
-      drawee_bank: JSON.stringify(oldDrawee),
-      check_number: JSON.stringify(oldCheckNum),
-      check_date: JSON.stringify(oldCheckDate),
-    };
+      updatedFields = {
+        amount_paid: toQuotedCSV(oldPaid),
+        payment_mode: toQuotedCSV(oldMode),
+        payment_date: toQuotedCSV(oldPaymentDate),
+        drawee_bank: toQuotedCSV(oldDrawee),
+        check_number: toQuotedCSV(oldCheckNum),
+        check_date: toQuotedCSV(oldCheckDate),
+        amount_due: toQuotedCSV(oldAmountDue),
+        due_date: toQuotedCSV(oldDueDates),
+      };
+    }
 
     console.log("Final fields to save:", updatedFields);
 
-    // Update both tables
-    await applicant.update({ updatedFields, TREASURER: "Approved" });
-    await fileApplicant.update(updatedFields);
+    await applicant.update({ ...updatedFields, TREASURER: "Approved" });
+    await fileApplicant.update({ ...updatedFields });
 
     res.json({ success: true, updated: updatedFields });
   } catch (error) {
