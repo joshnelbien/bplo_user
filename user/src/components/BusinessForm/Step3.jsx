@@ -10,7 +10,7 @@ import {
   useTheme,
   Button,
 } from "@mui/material";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -137,10 +137,10 @@ export default function Step3AddressInfo({
   ];
 
   // Uppercase handler
-  const handleUppercaseChange = (e) => {
+  const handleUppercaseChange = useCallback((e) => {
     const value = (e.target.value || "").toUpperCase();
     handleChange({ target: { name: e.target.name, value } });
-  };
+  }, [handleChange]);
 
   // File selection handler
   const handleFileSelect = (e) => {
@@ -149,28 +149,35 @@ export default function Step3AddressInfo({
       ...prev,
       [name]: files[0] ? files[0].name : "",
     }));
-    handleFileChange(e); // call parent handler
+    handleFileChange(e);
   };
 
-  // Geocode barangay
+  // ✅ GEOCODE BARANGAY FUNCTION - IMPROVED
   const geocodeBarangay = useMemo(
     () =>
       debounce(async (barangay) => {
-        if (!barangay) return;
+        if (!barangay) {
+          setMapCenter(defaultPosition);
+          handleChange({ target: { name: "pinAddress", value: `${defaultPosition[0]},${defaultPosition[1]}` } });
+          return;
+        }
 
+        console.log("🔍 Geocoding barangay:", barangay);
+
+        // ✅ FIRST: Check fallback coordinates (FASTEST)
         if (barangayCoordinatesFallback[barangay]) {
           const [lat, lon] = barangayCoordinatesFallback[barangay];
           const newCoords = `${lat},${lon}`;
           handleChange({ target: { name: "pinAddress", value: newCoords } });
           setMapCenter([lat, lon]);
+          console.log("✅ Used fallback coordinates for", barangay);
           return;
         }
 
+        // ✅ SECOND: Try API geocoding
         try {
           const fullQuery = `${barangay}, San Pablo City, Laguna, Philippines`;
-          const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            fullQuery
-          )}`;
+          const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullQuery)}`;
 
           const response = await axios.get(url, {
             headers: {
@@ -184,22 +191,31 @@ export default function Step3AddressInfo({
             const newCoords = `${lat},${lon}`;
             handleChange({ target: { name: "pinAddress", value: newCoords } });
             setMapCenter([lat, lon]);
+            console.log("✅ API geocoding success for", barangay);
           } else {
-            console.warn(
-              "Barangay location not found via API. Defaulting to city center."
-            );
-            const [lat, lon] = defaultPosition;
+            // ✅ THIRD: Fallback to city center
+            console.warn("⚠️ API returned no results for", barangay);
             handleChange({
-              target: { name: "pinAddress", value: `${lat},${lon}` },
+              target: { name: "pinAddress", value: `${defaultPosition[0]},${defaultPosition[1]}` },
             });
             setMapCenter(defaultPosition);
           }
         } catch (error) {
-          console.error("Error during geocoding search:", error);
+          console.error("❌ Geocoding error for", barangay, ":", error);
+          // Fallback to city center on error
+          handleChange({
+            target: { name: "pinAddress", value: `${defaultPosition[0]},${defaultPosition[1]}` },
+          });
+          setMapCenter(defaultPosition);
         }
-      }, 500),
+      }, 300),
     [handleChange, barangayCoordinatesFallback]
   );
+
+  // ✅ CRITICAL: TRIGGER GEOCODING WHEN BARANGAY CHANGES
+  useEffect(() => {
+    geocodeBarangay(formData.barangay);
+  }, [formData.barangay, geocodeBarangay]);
 
   // Fix Leaflet default marker
   const defaultIcon = new L.Icon({
@@ -233,13 +249,13 @@ export default function Step3AddressInfo({
     const map = useMap();
     useEffect(() => {
       if (center) {
-        map.setView(center, map.getZoom());
+        map.setView(center, 15); // Zoom to barangay level
       }
     }, [center, map]);
     return null;
   }
 
-  // Force map to refresh after load (fixes blank/grey tiles)
+  // Force map to refresh after load
   function ResizeHandler() {
     const map = useMap();
     useEffect(() => {
@@ -267,14 +283,13 @@ export default function Step3AddressInfo({
     }
   }, [formData, handleChange]);
 
-  // Trigger geocoding when barangay changes
+  // Fetch barangays
   useEffect(() => {
     const fetchBarangays = async () => {
       try {
-        const response = await fetch("/barangaylist.json"); // ✅ path under /public
+        const response = await fetch("/barangaylist.json");
         const data = await response.json();
         if (data.barangays) setBarangays(data.barangays);
-        else console.warn("No 'barangays' array found in JSON");
       } catch (error) {
         console.error("Error fetching barangay list:", error);
       }
@@ -282,6 +297,13 @@ export default function Step3AddressInfo({
 
     fetchBarangays();
   }, []);
+
+  // Cleanup debounced function
+  useEffect(() => {
+    return () => {
+      geocodeBarangay.cancel();
+    };
+  }, [geocodeBarangay]);
 
   return (
     <div style={{ marginBottom: 20 }}>
@@ -299,6 +321,7 @@ export default function Step3AddressInfo({
           fullWidth
         />
 
+        {/* ✅ BARANGAY SELECT - Now triggers auto-pinning */}
         <FormControl fullWidth error={!!errors.barangay}>
           <InputLabel id="barangay-label">Barangay</InputLabel>
           <Select
@@ -336,7 +359,7 @@ export default function Step3AddressInfo({
 
         <div>
           <Typography variant="subtitle1" gutterBottom>
-            Pin Address (Click on the map)
+            📍 Pin Address (Auto-pins to selected barangay)
           </Typography>
           <MapContainer
             center={mapCenter}
@@ -365,6 +388,7 @@ export default function Step3AddressInfo({
           />
         </div>
 
+        {/* Rest of your form remains the same */}
         <FormControl fullWidth sx={{ minWidth: 300 }} error={!!errors.ownPlace}>
           <InputLabel id="own-place-label">Own Place</InputLabel>
           <Select
@@ -400,7 +424,7 @@ export default function Step3AddressInfo({
 
         {formData.ownPlace === "NO" && (
           <Stack spacing={3}>
-            <Typography variant="subtitle1">Owner’s Address</Typography>
+            <Typography variant="subtitle1">Owner's Address</Typography>
             <TextField
               label="Lessor's Name"
               name="lessorName"
@@ -422,7 +446,6 @@ export default function Step3AddressInfo({
               helperText={errors.monthlyRent}
               type="number"
             />
-
             <TextField
               label="Tax Declaration No."
               name="taxdec"
