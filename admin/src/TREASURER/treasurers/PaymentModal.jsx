@@ -388,6 +388,13 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
                   : "Pending";
               const dueDate = dueDates[index] || "—";
 
+              // ✅ Determine if previous payments are completed
+              const allPreviousPaid = paidAmounts
+                .slice(0, index)
+                .every((val) => val && val !== "");
+
+              const canPay = paid === "Pending" && allPreviousPaid;
+
               return (
                 <Box
                   key={index}
@@ -423,9 +430,10 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
                     <Button
                       size="small"
                       variant="contained"
+                      disabled={!canPay} // ✅ Disable until previous payments are done
                       onClick={() => handlePayClick(amount, index)}
                       sx={{
-                        backgroundColor: "#1c541e",
+                        backgroundColor: canPay ? "#1c541e" : "#ccc",
                         color: "#fff",
                         fontWeight: 600,
                         borderRadius: 2,
@@ -433,7 +441,7 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
                         px: 2.5,
                         py: 0.7,
                         "&:hover": {
-                          backgroundColor: "#174617",
+                          backgroundColor: canPay ? "#174617" : "#ccc",
                         },
                       }}
                     >
