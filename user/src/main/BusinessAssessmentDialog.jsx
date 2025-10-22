@@ -337,9 +337,15 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
                 }}
               >
                 <Typography variant="h6" fontWeight="bold">
-                  Total Estimated Fee:
+                  Estimated Fee:
                 </Typography>
                 <Box textAlign="right">
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "gray", fontStyle: "italic", lineHeight: 1 }}
+                  >
+                    ±₱1,000
+                  </Typography>
                   <Typography
                     variant="h6"
                     sx={{ color: "#1B5E20", fontWeight: "bold" }}
@@ -349,12 +355,7 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
                       minimumFractionDigits: 2,
                     })}
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ color: "gray", fontStyle: "italic", lineHeight: 1 }}
-                  >
-                    ±₱1,000
-                  </Typography>
+               
                 </Box>
               </Box>
             </Box>
