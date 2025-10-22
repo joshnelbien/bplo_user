@@ -164,46 +164,80 @@ router.put("/treasurer-payments/:id", async (req, res) => {
       checkDate,
     } = req.body;
 
+    console.log("Received payment update:", req.body);
+
+    // Find applicant and file
     const applicant = await TreasurersOffice.findByPk(id);
     const fileApplicant = await File.findByPk(id);
 
-    if (!applicant || !fileApplicant)
+    if (!applicant || !fileApplicant) {
       return res.status(404).json({ error: "Applicant not found" });
+    }
 
-    // Helper function to parse arrays safely
-    const parseArray = (field) =>
-      field ? field.replace(/["']/g, "").split(",") : [];
-
-    // Convert to arrays
-    const oldPaid = parseArray(applicant.amount_paid);
-    const oldMode = parseArray(applicant.payment_mode);
-    const oldPaymentDate = parseArray(applicant.payment_date);
-    const oldDrawee = parseArray(applicant.drawee_bank);
-    const oldCheckNum = parseArray(applicant.check_number);
-    const oldCheckDate = parseArray(applicant.check_date);
-
-    // Update specific installment index
-    oldPaid[index] = amount_paid || "";
-    oldMode[index] = payment_mode || "";
-    oldPaymentDate[index] = paymentDate || "";
-    oldDrawee[index] = draweeBank || "";
-    oldCheckNum[index] = checkNumber || "";
-    oldCheckDate[index] = checkDate || "";
-
-    // Convert arrays back to string for DB storage
-    const toStringField = (arr) => arr.map((v) => `"${v || ""}"`).join(",");
-
-    const updatedFields = {
-      amount_paid: toStringField(oldPaid),
-      payment_mode: toStringField(oldMode),
-      payment_date: toStringField(oldPaymentDate),
-      drawee_bank: toStringField(oldDrawee),
-      check_number: toStringField(oldCheckNum),
-      check_date: toStringField(oldCheckDate),
+    // Helper: parse JSON arrays from DB, or initialize empty
+    const parseArray = (field) => {
+      if (!field) return [];
+      try {
+        return JSON.parse(field);
+      } catch (err) {
+        // fallback if DB has old CSV string
+        return field.replace(/["']/g, "").split(",");
+      }
     };
 
+    let oldPaid = parseArray(applicant.amount_paid);
+    let oldMode = parseArray(applicant.payment_mode);
+    let oldPaymentDate = parseArray(applicant.payment_date);
+    let oldDrawee = parseArray(applicant.drawee_bank);
+    let oldCheckNum = parseArray(applicant.check_number);
+    let oldCheckDate = parseArray(applicant.check_date);
+
+    // Ensure arrays have at least 10 slots (or max installments)
+    const ensureLength = (arr, length = 4) => {
+      while (arr.length < length) arr.push("");
+      return arr;
+    };
+
+    oldPaid = ensureLength(oldPaid);
+    oldMode = ensureLength(oldMode);
+    oldPaymentDate = ensureLength(oldPaymentDate);
+    oldDrawee = ensureLength(oldDrawee);
+    oldCheckNum = ensureLength(oldCheckNum);
+    oldCheckDate = ensureLength(oldCheckDate);
+
+    // Determine which index to update
+    const i = index !== null && index !== undefined ? Number(index) : 0;
+
+    // Update specific installment
+    oldPaid[i] = amount_paid || "";
+    oldMode[i] = payment_mode || "";
+    oldPaymentDate[i] = paymentDate || "";
+    oldDrawee[i] = draweeBank || "";
+    oldCheckNum[i] = checkNumber || "";
+    oldCheckDate[i] = checkDate || "";
+
+    console.log("Updated arrays:", {
+      oldPaid,
+      oldMode,
+      oldPaymentDate,
+      oldDrawee,
+      oldCheckNum,
+      oldCheckDate,
+    });
+
+    const updatedFields = {
+      amount_paid: JSON.stringify(oldPaid),
+      payment_mode: JSON.stringify(oldMode),
+      payment_date: JSON.stringify(oldPaymentDate),
+      drawee_bank: JSON.stringify(oldDrawee),
+      check_number: JSON.stringify(oldCheckNum),
+      check_date: JSON.stringify(oldCheckDate),
+    };
+
+    console.log("Final fields to save:", updatedFields);
+
     // Update both tables
-    await applicant.update(updatedFields);
+    await applicant.update({ updatedFields, TREASURER: "Approved" });
     await fileApplicant.update(updatedFields);
 
     res.json({ success: true, updated: updatedFields });
