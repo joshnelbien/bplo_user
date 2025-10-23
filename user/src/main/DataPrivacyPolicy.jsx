@@ -4,24 +4,27 @@ import { Box, Button, Typography, Slide, Paper } from "@mui/material";
 export default function DataPrivacyPolicy() {
   const [open, setOpen] = useState(false);
   const [isGray, setIsGray] = useState(false);
+  const [blockClicks, setBlockClicks] = useState(false);
 
   // 🔹 Check storage on page load
   useEffect(() => {
+    localStorage.removeItem("privacyRejected");
+
     const accepted = sessionStorage.getItem("privacyAccepted");
     const rejected = localStorage.getItem("privacyRejected");
 
     if (accepted === "true") {
-      // Already accepted → no popup, no grayscale
       setOpen(false);
       setIsGray(false);
+      setBlockClicks(false);
     } else if (rejected === "true") {
-      // Rejected before → show popup again, keep grayscale
       setOpen(true);
       setIsGray(true);
+      setBlockClicks(true); // grayscale and block clicks after reject
     } else {
-      // First time visiting → show popup
       setOpen(true);
-      setIsGray(true);
+      setIsGray(false);
+      setBlockClicks(true); // first visit → block page until user chooses
     }
   }, []);
 
@@ -30,6 +33,7 @@ export default function DataPrivacyPolicy() {
     sessionStorage.setItem("privacyAccepted", "true");
     localStorage.removeItem("privacyRejected");
     setIsGray(false);
+    setBlockClicks(false);
     setOpen(false);
   };
 
@@ -37,36 +41,36 @@ export default function DataPrivacyPolicy() {
   const handleReject = () => {
     localStorage.setItem("privacyRejected", "true");
     setIsGray(true);
-    setOpen(false); // hide snackbar
+    setBlockClicks(true);
+    setOpen(false);
   };
 
   // 🔹 Overlay effect (grayscale + disable clicks)
   useEffect(() => {
     let overlay = document.getElementById("grayOverlay");
 
-    if (isGray) {
-      if (!overlay) {
-        overlay = document.createElement("div");
-        overlay.id = "grayOverlay";
-        overlay.style.position = "fixed";
-        overlay.style.top = "0";
-        overlay.style.left = "0";
-        overlay.style.width = "100%";
-        overlay.style.height = "100%";
-        overlay.style.background = "rgba(255, 255, 255, 0.30)";
-        overlay.style.backdropFilter = "grayscale(1)";
-        overlay.style.zIndex = "9998";
-        overlay.style.pointerEvents = "all"; // block all clicks
-        document.body.appendChild(overlay);
-      }
-    } else {
-      if (overlay) overlay.remove();
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "grayOverlay";
+      overlay.style.position = "fixed";
+      overlay.style.top = "0";
+      overlay.style.left = "0";
+      overlay.style.width = "100%";
+      overlay.style.height = "100%";
+      overlay.style.zIndex = "9998";
+      document.body.appendChild(overlay);
     }
+
+    overlay.style.background = isGray
+      ? "rgba(255, 255, 255, 0.30)"
+      : "transparent";
+    overlay.style.backdropFilter = isGray ? "grayscale(1)" : "none";
+    overlay.style.pointerEvents = blockClicks ? "all" : "none";
 
     return () => {
       if (overlay) overlay.remove();
     };
-  }, [isGray]);
+  }, [isGray, blockClicks]);
 
   return (
     <Slide
@@ -74,7 +78,7 @@ export default function DataPrivacyPolicy() {
       in={open}
       mountOnEnter
       unmountOnExit
-      timeout={{ enter: 1000, exit: 300 }} // longer for better visibility
+      timeout={{ enter: 1000, exit: 300 }}
     >
       <Paper
         elevation={6}
@@ -88,19 +92,19 @@ export default function DataPrivacyPolicy() {
           p: 3,
           zIndex: 9999,
           display: "flex",
-          justifyContent: "center", // center content horizontally
+          justifyContent: "center",
         }}
       >
         <Box
           sx={{
             display: "flex",
-            flexDirection: { xs: "column", md: "row" }, // stack on mobile, inline on desktop
-            alignItems: { xs: "stretch", md: "center" }, // stretch buttons on mobile
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: { xs: "stretch", md: "center" },
             justifyContent: "space-between",
             gap: 2,
             width: "100%",
-            maxWidth: "1200px", // optional: limit max width on desktop
-            mx: "auto", // center horizontally on desktop
+            maxWidth: "1200px",
+            mx: "auto",
             mt: { xs: 2, md: 0 },
           }}
         >
@@ -128,12 +132,12 @@ export default function DataPrivacyPolicy() {
           <Box
             sx={{
               display: "flex",
-              flexDirection: { xs: "column", sm: "row" }, // stacked on mobile, inline on desktop
+              flexDirection: { xs: "column", sm: "row" },
               gap: 2,
               mt: { xs: 2, md: 0 },
               alignItems: "center",
-              minWidth: { md: "200px" }, // optional: make desktop buttons container a bit wider
-              justifyContent: { md: "flex-end" }, // push buttons to right on desktop
+              minWidth: { md: "200px" },
+              justifyContent: { md: "flex-end" },
             }}
           >
             <Button
@@ -143,7 +147,7 @@ export default function DataPrivacyPolicy() {
                 borderColor: "#09360D",
                 color: "#09360D",
                 "&:hover": { backgroundColor: "#f5f5f5" },
-                width: { xs: "100%", sm: "auto" }, // full width on mobile
+                width: { xs: "100%", sm: "auto" },
               }}
             >
               Reject All
@@ -154,7 +158,7 @@ export default function DataPrivacyPolicy() {
               sx={{
                 backgroundColor: "#09360D",
                 "&:hover": { backgroundColor: "#07270a" },
-                width: { xs: "100%", sm: "auto" }, // full width on mobile
+                width: { xs: "100%", sm: "auto" },
               }}
             >
               Accept All
