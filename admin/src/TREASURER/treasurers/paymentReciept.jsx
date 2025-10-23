@@ -2,7 +2,6 @@ import React, { useRef, useMemo } from "react";
 import { Modal, Box, Typography, Button } from "@mui/material";
 import { useReactToPrint } from "react-to-print";
 
-/* ✅ Convert Number to Words (₱ → Pesos) */
 const numberToWords = (num) => {
   const a = [
     "",
