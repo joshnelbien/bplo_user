@@ -253,7 +253,7 @@ function App() {
                 mb: 3,
               }}
             >
-              BUSINESS REGISTRATION
+              BUSINESS PERMIT AND LICENSING
             </Typography>
           </Fade>
         </Slide>
@@ -370,6 +370,7 @@ function App() {
                 color: "#09360D",
                 "&:hover": { borderColor: "#07270a", color: "#07270a" },
                 m: 1,
+                mt: 5,
               }}
               onClick={() => setIsAssessmentOpen(true)}
             >

@@ -15,11 +15,13 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import axios from "axios";
+import PaymentReciept from "./paymentReciept";
 
 export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
   const API = import.meta.env.VITE_API_BASE;
   const [mode, setMode] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(null);
+  const [showReceipt, setShowReceipt] = useState(false);
   const [form, setForm] = useState({
     amount: "",
     paymentDate: "",
@@ -27,21 +29,14 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
     checkNumber: "",
     checkDate: "",
   });
-  const getToday = () => {
-    const today = new Date();
-    return today.toISOString().split("T")[0];
-  };
 
-  const handleChange = (e) => {
+  const getToday = () => new Date().toISOString().split("T")[0];
+
+  const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
   const handlePayClick = (amount, index) => {
-    setForm({
-      ...form,
-      amount,
-      paymentDate: getToday(),
-    });
+    setForm({ ...form, amount, paymentDate: getToday() });
     setMode("Cash");
     setSelectedIndex(index);
   };
@@ -55,7 +50,9 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
     setMode("Cash");
     setSelectedIndex(null);
   };
-  const handleSubmit = async () => {
+
+  // ✅ Instead of submitting immediately, first show the receipt
+  const handleSubmit = () => {
     if (!mode) return alert("Select a payment mode first.");
 
     const finalAmount = form.amount === "" ? "0" : form.amount;
@@ -68,29 +65,13 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
     )
       return alert("Please fill all Check fields.");
 
-    try {
-      const res = await axios.put(
-        `${API}/treasurer/treasurer-payments/${applicant.id}`,
-        {
-          amount_paid: finalAmount,
-          index: selectedIndex,
-          payment_mode: mode,
-          paymentDate: form.paymentDate,
-          draweeBank: form.draweeBank,
-          checkNumber: form.checkNumber,
-          checkDate: form.checkDate,
-        }
-      );
+    // Show receipt first
+    setShowReceipt(true);
+  };
 
-      if (res.data.success) {
-        alert("Payment recorded successfully!");
-        onConfirm?.();
-        onClose();
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error updating payment.");
-    }
+  // ✅ Call this AFTER receipt is closed
+  const handleReceiptClose = () => {
+    setShowReceipt(false);
   };
 
   const parseValues = (value) => {
@@ -567,6 +548,44 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
           </Fade>
         )}
       </DialogContent>
+
+      <PaymentReciept
+        open={showReceipt}
+        applicant={applicant}
+        onClose={() => setShowReceipt(false)}
+        receiptData={{
+          amount: form.amount,
+          paymentDate: form.paymentDate,
+          mode,
+          draweeBank: form.draweeBank,
+          checkNumber: form.checkNumber,
+          checkDate: form.checkDate,
+        }}
+        onPrint={async () => {
+          try {
+            const res = await axios.put(
+              `${API}/treasurer/treasurer-payments/${applicant.id}`,
+              {
+                amount_paid: form.amount,
+                index: selectedIndex,
+                payment_mode: mode,
+                paymentDate: form.paymentDate,
+                draweeBank: form.draweeBank,
+                checkNumber: form.checkNumber,
+                checkDate: form.checkDate,
+              }
+            );
+            if (res.data.success) {
+              onConfirm?.(); // refresh parent if needed
+              setShowReceipt(false);
+              onClose();
+            }
+          } catch (err) {
+            console.error(err);
+            alert("Error updating payment.");
+          }
+        }}
+      />
 
       <DialogActions
         sx={{
