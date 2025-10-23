@@ -53,7 +53,7 @@ export default function DataPrivacyPolicy() {
         overlay.style.left = "0";
         overlay.style.width = "100%";
         overlay.style.height = "100%";
-        overlay.style.background = "rgba(255,255,255,0.5)";
+        overlay.style.background = "rgba(255, 255, 255, 0.30)";
         overlay.style.backdropFilter = "grayscale(1)";
         overlay.style.zIndex = "9998";
         overlay.style.pointerEvents = "all"; // block all clicks
@@ -95,10 +95,12 @@ export default function DataPrivacyPolicy() {
           sx={{
             display: "flex",
             flexDirection: { xs: "column", md: "row" }, // stack on mobile, inline on desktop
-            alignItems: { xs: "stretch", md: "center" }, // stretch buttons full width on mobile
+            alignItems: { xs: "stretch", md: "center" }, // stretch buttons on mobile
             justifyContent: "space-between",
             gap: 2,
             width: "100%",
+            maxWidth: "1200px", // optional: limit max width on desktop
+            mx: "auto", // center horizontally on desktop
             mt: { xs: 2, md: 0 },
           }}
         >
@@ -126,10 +128,12 @@ export default function DataPrivacyPolicy() {
           <Box
             sx={{
               display: "flex",
-              flexDirection: { xs: "column", sm: "row" }, // stack on mobile, inline on desktop
+              flexDirection: { xs: "column", sm: "row" }, // stacked on mobile, inline on desktop
               gap: 2,
               mt: { xs: 2, md: 0 },
               alignItems: "center",
+              minWidth: { md: "200px" }, // optional: make desktop buttons container a bit wider
+              justifyContent: { md: "flex-end" }, // push buttons to right on desktop
             }}
           >
             <Button
