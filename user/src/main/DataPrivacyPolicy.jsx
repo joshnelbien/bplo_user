@@ -69,7 +69,13 @@ export default function DataPrivacyPolicy() {
   }, [isGray]);
 
   return (
-    <Slide direction="up" in={open} mountOnEnter unmountOnExit>
+    <Slide
+      direction="up"
+      in={open}
+      mountOnEnter
+      unmountOnExit
+      timeout={{ enter: 1000, exit: 300 }} // longer for better visibility
+    >
       <Paper
         elevation={6}
         sx={{
@@ -92,7 +98,13 @@ export default function DataPrivacyPolicy() {
             gap: 2,
           }}
         >
-          <Box>
+          <Box
+            sx={{
+              p: 2,
+              flex: { xs: "1 1 100%", md: "1 1 auto" },
+              textAlign: { xs: "left", md: "left" },
+            }}
+          >
             <Typography variant="h6" fontWeight="bold">
               Data Privacy Policy
             </Typography>
@@ -114,9 +126,12 @@ export default function DataPrivacyPolicy() {
           <Box
             sx={{
               display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              gap: 1,
-              minWidth: { md: 220 },
+              flexDirection: "row",
+              gap: 2,
+              flexWrap: "wrap",
+              justifyContent: "center",
+              ml: 8,
+              mt: { xs: 2, md: 0 },
             }}
           >
             <Button
