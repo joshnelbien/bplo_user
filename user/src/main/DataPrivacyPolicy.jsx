@@ -86,25 +86,24 @@ export default function DataPrivacyPolicy() {
           backgroundColor: "#fff",
           borderTop: "1px solid #ddd",
           p: 3,
-          zIndex: 9999, // above overlay
+          zIndex: 9999,
+          display: "flex",
+          justifyContent: "center", // center content horizontally
         }}
       >
         <Box
           sx={{
             display: "flex",
-            flexDirection: { xs: "column", md: "row" },
+            flexDirection: { xs: "column", md: "row" }, // stack on mobile, inline on desktop
+            alignItems: { xs: "stretch", md: "center" }, // stretch buttons full width on mobile
             justifyContent: "space-between",
-            alignItems: { xs: "flex-start", md: "center" },
             gap: 2,
+            width: "100%",
+            mt: { xs: 2, md: 0 },
           }}
         >
-          <Box
-            sx={{
-              p: 2,
-              flex: { xs: "1 1 100%", md: "1 1 auto" },
-              textAlign: { xs: "left", md: "left" },
-            }}
-          >
+          {/* Text */}
+          <Box sx={{ flex: 1, textAlign: { xs: "center", md: "left" } }}>
             <Typography variant="h6" fontWeight="bold">
               Data Privacy Policy
             </Typography>
@@ -123,15 +122,14 @@ export default function DataPrivacyPolicy() {
             </Typography>
           </Box>
 
+          {/* Buttons */}
           <Box
             sx={{
               display: "flex",
-              flexDirection: "row",
+              flexDirection: { xs: "column", sm: "row" }, // stack on mobile, inline on desktop
               gap: 2,
-              flexWrap: "wrap",
-              justifyContent: "center",
-              ml: 8,
               mt: { xs: 2, md: 0 },
+              alignItems: "center",
             }}
           >
             <Button
@@ -141,6 +139,7 @@ export default function DataPrivacyPolicy() {
                 borderColor: "#09360D",
                 color: "#09360D",
                 "&:hover": { backgroundColor: "#f5f5f5" },
+                width: { xs: "100%", sm: "auto" }, // full width on mobile
               }}
             >
               Reject All
@@ -151,6 +150,7 @@ export default function DataPrivacyPolicy() {
               sx={{
                 backgroundColor: "#09360D",
                 "&:hover": { backgroundColor: "#07270a" },
+                width: { xs: "100%", sm: "auto" }, // full width on mobile
               }}
             >
               Accept All
