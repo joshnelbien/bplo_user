@@ -27,7 +27,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import MuiAlert from "@mui/material/Alert";
 import axios from "axios";
 import { CircularProgress } from "@mui/material";
-import BusinessAssessmentDialog from "./BusinessAssessmentDialog"; // ✅ Imported new dialog
+import BusinessAssessmentDialog from "./BusinessAssessmentDialog";
+import DataPrivacyPolicy from "./DataPrivacyPolicy";
 
 const SearchBar = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -529,6 +530,7 @@ function App() {
           {snackbar.message}
         </MuiAlert>
       </Snackbar>
+      <DataPrivacyPolicy />
     </Box>
   );
 }
