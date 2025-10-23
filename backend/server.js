@@ -37,6 +37,7 @@ const businessProfileRoutes = require("./routes/businessProfileRoutes");
 
 const AdminAccounts = require("./db/model/adminAccountsDB");
 const AdminAccountRoutes = require("./routes/adminAccountRoutes");
+const ExistingBusinessProfile = require("./db/model/BusinessProfileExisting");
 
 const ClientPayments = require("./db/model/paymentsDB");
 
@@ -90,6 +91,45 @@ const clean = (val) => {
   const v = val.replace(/^\uFEFF/, "").trim();
   return v === "" ? null : v;
 };
+
+async function importBusinesses() {
+  try {
+    const csvFilePath = path.join(__dirname, "public", "businesses.csv");
+
+    if (!fs.existsSync(csvFilePath)) {
+      console.warn(
+        `⚠️ CSV file not found at ${csvFilePath}. Skipping business import.`
+      );
+      return;
+    }
+
+    const businesses = [];
+
+    await new Promise((resolve, reject) => {
+      fs.createReadStream(csvFilePath)
+        .pipe(csv())
+        .on("data", (row) => {
+          businesses.push(row);
+        })
+        .on("end", resolve)
+        .on("error", reject);
+    });
+
+    console.log(`✅ Read ${businesses.length} business records from CSV file.`);
+
+    // Ensure table exists
+    await ExistingBusinessProfile.sync();
+
+    // Bulk insert
+    await ExistingBusinessProfile.bulkCreate(businesses, {
+      ignoreDuplicates: true,
+    });
+
+    console.log("🎉 Business profiles successfully imported to database!");
+  } catch (error) {
+    console.error("❌ Error importing businesses:", error);
+  }
+}
 
 async function parseCsvFile(csvFilePath) {
   return new Promise((resolve, reject) => {
@@ -308,11 +348,11 @@ function watchFSICFile() {
     await TreasurersOffice.sync({ alter: true });
     await BusinessProfile.sync({ alter: true });
     await ClientPayments.sync({ alter: true });
+    await ExistingBusinessProfile.sync({ alter: true });
 
     await importFSICData();
-
+    await importBusinesses();
     watchFSICFile();
-
     console.log(" Database ready");
   } catch (err) {
     console.error(" Startup error:", err);
