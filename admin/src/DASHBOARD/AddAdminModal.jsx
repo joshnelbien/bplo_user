@@ -53,7 +53,7 @@ function AddAdminModal({ open, onClose }) {
     "CENRO",
     "ZONING",
     "CHO",
-    "OTHERS",
+    "SUPERADMIN",
   ];
 
   const handleChange = (e) => {
