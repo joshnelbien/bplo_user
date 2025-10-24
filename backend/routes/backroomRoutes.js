@@ -5,6 +5,7 @@ const File = require("../db/model/files");
 const AppStatus = require("../db/model/applicantStatusDB");
 const router = express.Router();
 const moment = require("moment");
+const authenticateJWT = require("../middleware/authMiddleware");
 
 const upload = multer({ storage: multer.memoryStorage() });
 

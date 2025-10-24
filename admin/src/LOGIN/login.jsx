@@ -35,15 +35,16 @@ function Login() {
       });
 
       if (response.status === 200) {
-        const admin = response.data.admin;
+        const { token, admin } = response.data; // 🔹 destructure token
 
         // Store admin data for future use
         localStorage.setItem("adminData", JSON.stringify(admin));
+        localStorage.setItem("token", token); // 🔹 store JWT
 
         // Show success dialog
         setOpenSuccessDialog(true);
 
-        // 🔹 Redirect based on office
+        // Redirect based on office
         const officeRoutes = {
           BPLO: "/dashboard",
           EXAMINERS: "/examiners",
@@ -56,7 +57,6 @@ function Login() {
           CHO: "/cho",
         };
 
-        // Default route if office doesn’t match
         const redirectPath =
           officeRoutes[admin.Office?.toUpperCase()] || "/dashboard";
 
