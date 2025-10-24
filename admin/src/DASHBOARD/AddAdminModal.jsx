@@ -53,6 +53,7 @@ function AddAdminModal({ open, onClose }) {
     "CENRO",
     "ZONING",
     "CHO",
+    "OTHERS",
   ];
 
   const handleChange = (e) => {

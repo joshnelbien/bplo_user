@@ -101,12 +101,23 @@ const departmentItems = [
 // Treasurers dropdown items
 const treasurers = [
   {
-    text: "Treasurer's Office",
+    text: "TREASURER",
+    label: "Treasurer’s Office",
     path: "/treasurers",
     icon: <AccountBalanceIcon />,
   },
-  { text: "Examiner's Office", path: "/examiners", icon: <ReceiptLongIcon /> },
-  { text: "Business Tax", path: "/businessTax", icon: <CalculateIcon /> },
+  {
+    text: "EXAMINERS",
+    label: "Examiner’s Office",
+    path: "/examiners",
+    icon: <ReceiptLongIcon />,
+  },
+  {
+    text: "BUSINESS TAX",
+    label: "Business Tax",
+    path: "/businessTax",
+    icon: <CalculateIcon />,
+  },
 ];
 
 const drawerWidth = 270;
@@ -130,6 +141,12 @@ const modalStyle = {
 function Side_bar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const adminData = JSON.parse(localStorage.getItem("adminData"));
+  const userOffice = adminData?.Office?.toUpperCase() || "";
+  const userPosition = adminData?.Position?.toUpperCase() || "";
+  const isSuperAdmin = userPosition === "SUPERADMIN";
+  const isBPLO = userOffice === "BPLO";
+
   const [openDrawer, setOpenDrawer] = useState(false);
   // Removed: const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [openDept, setOpenDept] = useState(false);
@@ -191,33 +208,55 @@ function Side_bar() {
 
       <List sx={{ p: 2, flexGrow: 1 }}>
         {/* Main Menu */}
-        {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton
-              onClick={() => {
-                navigate(item.path);
-                if (isMobile) setOpenDrawer(false);
-              }}
-              sx={
-                location.pathname === item.path
-                  ? activeListItemStyle
-                  : listItemStyle
-              }
-            >
-              <ListItemIcon
+        {menuItems.map((item) => {
+          const allowedBPLOPaths = [
+            "/dashboard",
+            "/new_records",
+            "/renew_records",
+            "/businessProfile",
+            "/announcement",
+          ];
+
+          // 🔹 Only SuperAdmin and BPLO can access these
+          const isAllowed =
+            isSuperAdmin || (isBPLO && allowedBPLOPaths.includes(item.path));
+
+          const isDisabled = item.path === "/announcement" ? false : !isAllowed;
+
+          return (
+            <ListItem key={item.text} disablePadding>
+              <ListItemButton
+                disabled={isDisabled}
                 sx={{
-                  // Setting icon color to white
-                  color: WHITE_COLOR,
-                  transition: "transform 0.3s",
-                  "&:hover": { transform: "scale(1.1)" },
+                  opacity: isDisabled ? 0.4 : 1,
+                  cursor: isDisabled ? "not-allowed" : "pointer",
+                  ...(location.pathname === item.path
+                    ? activeListItemStyle
+                    : listItemStyle),
+                }}
+                onClick={() => {
+                  if (!isDisabled) {
+                    navigate(item.path);
+                    if (isMobile) setOpenDrawer(false);
+                  }
                 }}
               >
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+                <ListItemIcon
+                  sx={{
+                    color: WHITE_COLOR,
+                    transition: "transform 0.3s",
+                    "&:hover": {
+                      transform: isDisabled ? "none" : "scale(1.1)",
+                    },
+                  }}
+                >
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
 
         {/* Backroom Dropdown */}
         <ListItemButton
@@ -239,34 +278,44 @@ function Side_bar() {
 
         <Collapse in={openDept} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            {departmentItems.map((dept) => (
-              <ListItem key={dept.text} disablePadding>
-                <ListItemButton
-                  sx={{
-                    pl: 4,
-                    ...(location.pathname === dept.path
-                      ? activeListItemStyle
-                      : listItemStyle),
-                  }}
-                  onClick={() => {
-                    navigate(dept.path);
-                    if (isMobile) setOpenDrawer(false);
-                  }}
-                >
-                  <ListItemIcon
+            {departmentItems.map((dept) => {
+              const isDisabled =
+                !isSuperAdmin && dept.text.toUpperCase() !== userOffice;
+              return (
+                <ListItem key={dept.text} disablePadding>
+                  <ListItemButton
+                    disabled={isDisabled}
                     sx={{
-                      // Setting icon color to white
-                      color: WHITE_COLOR,
-                      transition: "transform 0.3s",
-                      "&:hover": { transform: "scale(1.1)" },
+                      pl: 4,
+                      opacity: isDisabled ? 0.4 : 1,
+                      cursor: isDisabled ? "not-allowed" : "pointer",
+                      ...(location.pathname === dept.path
+                        ? activeListItemStyle
+                        : listItemStyle),
+                    }}
+                    onClick={() => {
+                      if (!isDisabled) {
+                        navigate(dept.path);
+                        if (isMobile) setOpenDrawer(false);
+                      }
                     }}
                   >
-                    {dept.icon}
-                  </ListItemIcon>
-                  <ListItemText primary={dept.text} />
-                </ListItemButton>
-              </ListItem>
-            ))}
+                    <ListItemIcon
+                      sx={{
+                        color: WHITE_COLOR,
+                        transition: "transform 0.3s",
+                        "&:hover": {
+                          transform: isDisabled ? "none" : "scale(1.1)",
+                        },
+                      }}
+                    >
+                      {dept.icon}
+                    </ListItemIcon>
+                    <ListItemText primary={dept.text} />
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
           </List>
         </Collapse>
 
@@ -290,34 +339,52 @@ function Side_bar() {
 
         <Collapse in={openTreasurers} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            {treasurers.map((tre) => (
-              <ListItem key={tre.text} disablePadding>
-                <ListItemButton
-                  sx={{
-                    pl: 4,
-                    ...(location.pathname === tre.path
-                      ? activeListItemStyle
-                      : listItemStyle),
-                  }}
-                  onClick={() => {
-                    navigate(tre.path);
-                    if (isMobile) setOpenDrawer(false);
-                  }}
-                >
-                  <ListItemIcon
+            {treasurers.map((tre) => {
+              const normalize = (str) =>
+                str
+                  ?.replace(/[’‘]/g, "'")
+                  .replace(/\s+/g, " ")
+                  .trim()
+                  .toUpperCase();
+
+              const isDisabled =
+                !isSuperAdmin && normalize(tre.text) !== normalize(userOffice);
+
+              return (
+                <ListItem key={tre.text} disablePadding>
+                  <ListItemButton
+                    disabled={isDisabled}
                     sx={{
-                      // Setting icon color to white
-                      color: WHITE_COLOR,
-                      transition: "transform 0.3s",
-                      "&:hover": { transform: "scale(1.1)" },
+                      pl: 4,
+                      opacity: isDisabled ? 0.4 : 1,
+                      cursor: isDisabled ? "not-allowed" : "pointer",
+                      ...(location.pathname === tre.path
+                        ? activeListItemStyle
+                        : listItemStyle),
+                    }}
+                    onClick={() => {
+                      if (!isDisabled) {
+                        navigate(tre.path);
+                        if (isMobile) setOpenDrawer(false);
+                      }
                     }}
                   >
-                    {tre.icon}
-                  </ListItemIcon>
-                  <ListItemText primary={tre.text} />
-                </ListItemButton>
-              </ListItem>
-            ))}
+                    <ListItemIcon
+                      sx={{
+                        color: WHITE_COLOR,
+                        transition: "transform 0.3s",
+                        "&:hover": {
+                          transform: isDisabled ? "none" : "scale(1.1)",
+                        },
+                      }}
+                    >
+                      {tre.icon}
+                    </ListItemIcon>
+                    <ListItemText primary={tre.label} />
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
           </List>
         </Collapse>
       </List>

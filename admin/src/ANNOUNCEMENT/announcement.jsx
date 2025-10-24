@@ -112,7 +112,7 @@ function LiveClock() {
 
 /* ================== TOP BAR (TITLE & BUTTON) ================== */
 
-function TopBar({ onNewAnnouncementClick }) {
+function TopBar({ onNewAnnouncementClick, isSuperAdmin }) {
   return (
     <Box
       sx={{
@@ -122,7 +122,7 @@ function TopBar({ onNewAnnouncementClick }) {
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-between", // Spread content across
+        justifyContent: "space-between",
         p: 2,
         boxSizing: "border-box",
         color: "white",
@@ -155,24 +155,24 @@ function TopBar({ onNewAnnouncementClick }) {
       </Typography>
 
       {/* 3. RIGHT ALIGNED: NEW ANNOUNCEMENT BUTTON */}
-      <Box sx={{ mr: 4 }}>
-        <Button
-          variant="contained"
-          sx={{
-            bgcolor: "#fff", // White button
-            color: primaryGreen, // Green text
-            fontWeight: "bold",
-            "&:hover": {
-              bgcolor: alpha("#fff", 0.85), // Slightly darker on hover
-            },
-            borderRadius: "8px",
-          }}
-          startIcon={<AddIcon />}
-          onClick={onNewAnnouncementClick}
-        >
-          New Announcement
-        </Button>
-      </Box>
+      {isSuperAdmin && (
+        <Box sx={{ mr: 4 }}>
+          <Button
+            variant="contained"
+            sx={{
+              bgcolor: "#fff",
+              color: primaryGreen,
+              fontWeight: "bold",
+              "&:hover": { bgcolor: alpha("#fff", 0.85) },
+              borderRadius: "8px",
+            }}
+            startIcon={<AddIcon />}
+            onClick={onNewAnnouncementClick}
+          >
+            New Announcement
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 }
@@ -189,6 +189,11 @@ const Announcement = () => {
     createdBy: "Admin",
     attachedImageBlob: null,
   });
+
+  const adminData = JSON.parse(localStorage.getItem("adminData"));
+  const userPosition = adminData?.Position?.toUpperCase() || "";
+  const isSuperAdmin = userPosition === "SUPERADMIN";
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentId, setCurrentId] = useState(null);
@@ -206,13 +211,13 @@ const Announcement = () => {
     setError(null);
     try {
       // NOTE: Using window.fetch as in original code
-      const response = await fetch("/api/announcements"); 
+      const response = await fetch("/api/announcements");
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
       // Reverse array so latest is at the top
-      setAnnouncements(data.reverse()); 
+      setAnnouncements(data.reverse());
     } catch (e) {
       console.error("Failed to fetch announcements:", e);
       setError("Failed to load announcements. Please try again.");
@@ -349,21 +354,18 @@ const Announcement = () => {
   };
 
   const handleNewAnnouncementClick = () => {
-    confirmActionHandler(
-      "Do you want to create a new announcement?",
-      () => {
-        setIsEditing(false);
-        setCurrentId(null);
-        setNewAnnouncement({
-          text: "",
-          startDate: "",
-          endDate: "",
-          createdBy: "Admin",
-          attachedImageBlob: null,
-        });
-        setIsModalOpen(true);
-      }
-    );
+    confirmActionHandler("Do you want to create a new announcement?", () => {
+      setIsEditing(false);
+      setCurrentId(null);
+      setNewAnnouncement({
+        text: "",
+        startDate: "",
+        endDate: "",
+        createdBy: "Admin",
+        attachedImageBlob: null,
+      });
+      setIsModalOpen(true);
+    });
   };
 
   const handleSnackbarClose = (_, reason) => {
@@ -374,7 +376,10 @@ const Announcement = () => {
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", background: "white" }}>
       {/* 1. TOP BAR */}
-      <TopBar onNewAnnouncementClick={handleNewAnnouncementClick} />
+      <TopBar
+        onNewAnnouncementClick={handleNewAnnouncementClick}
+        isSuperAdmin={isSuperAdmin}
+      />
 
       {/* 2. SIDE BAR */}
       <Side_bar />

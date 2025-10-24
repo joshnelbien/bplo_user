@@ -96,7 +96,7 @@ function LiveClock() {
 /* ================== TOP BAR COMPONENTS ================== */
 
 // The TopBar component itself
-function TopBar({ onAddAdminClick }) {
+function TopBar({ onAddAdminClick, isSuperAdmin }) {
   const TOP_BAR_HEIGHT = 80;
 
   return (
@@ -142,27 +142,27 @@ function TopBar({ onAddAdminClick }) {
       </Typography>
 
       {/* 3. RIGHT ALIGNED: ADD ADMIN BUTTON (Replaced 'ml: 215' with alignment) */}
-      <Button
-        variant="contained"
-        onClick={onAddAdminClick}
-        startIcon={<PersonAdd sx={{ color: primaryGreen }} />}
-        sx={{
-          background: "#ffffff",
-          color: primaryGreen,
-          "&:hover": { background: alpha("#ffffff", 0.8) },
-          borderRadius: 20,
-          py: 1,
-          textTransform: "none",
-          fontWeight: "bold",
-          boxShadow: `0 4px 12px ${alpha(primaryGreen, 0.5)}`,
-          // Use ml: 'auto' to push the button to the far right.
-          // Since the Title is position: absolute, this works well with the clock on the left.
-          ml: "auto", 
-          mr: 2, // Add a bit of right margin from the edge
-        }}
-      >
-        Add Admin
-      </Button>
+      {isSuperAdmin && (
+        <Button
+          variant="contained"
+          onClick={onAddAdminClick}
+          startIcon={<PersonAdd sx={{ color: primaryGreen }} />}
+          sx={{
+            background: "#ffffff",
+            color: primaryGreen,
+            "&:hover": { background: alpha("#ffffff", 0.8) },
+            borderRadius: 20,
+            py: 1,
+            textTransform: "none",
+            fontWeight: "bold",
+            boxShadow: `0 4px 12px ${alpha(primaryGreen, 0.5)}`,
+            ml: "auto",
+            mr: 2,
+          }}
+        >
+          Add Admin
+        </Button>
+      )}
     </Box>
   );
 }
@@ -179,6 +179,27 @@ function Dashboard() {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
   const [openModal, setOpenModal] = useState(false);
   const TOP_BAR_HEIGHT = 80;
+  const primaryGreen = "#034d06ff";
+
+  const [adminData, setAdminData] = useState(null);
+
+  useEffect(() => {
+    const storedAdmin = localStorage.getItem("adminData");
+    if (storedAdmin) {
+      setAdminData(JSON.parse(storedAdmin));
+    }
+  }, []);
+  const userOffice = adminData?.Office?.toUpperCase() || "";
+  const isSuperAdmin = userOffice === "SUPERADMIN";
+
+  const onAddAdminClick = () => {
+    if (!isSuperAdmin) {
+      alert("Only SuperAdmin can add new admins.");
+      return;
+    }
+    console.log("Opening Add Admin dialog...");
+    // your dialog or navigation logic here
+  };
 
   // Sample data for metrics
   const metrics = {
@@ -229,7 +250,7 @@ function Dashboard() {
       }}
     >
       {/* 1. TOP BAR (Fixed at the top) */}
-      <TopBar onAddAdminClick={handleOpenModal} />
+      <TopBar onAddAdminClick={handleOpenModal} isSuperAdmin={isSuperAdmin} />
 
       {/* 2. SIDE BAR AND MAIN CONTENT WRAPPER */}
       <Box
@@ -313,7 +334,11 @@ function Dashboard() {
                       <Chip
                         label="+12% from last month"
                         size="small"
-                        sx={{ mt: 3, background: lightGreen, color: primaryGreen }}
+                        sx={{
+                          mt: 3,
+                          background: lightGreen,
+                          color: primaryGreen,
+                        }}
                       />
                     </Box>
                     <Avatar
@@ -375,7 +400,11 @@ function Dashboard() {
                       <Chip
                         label="+8% from last month"
                         size="small"
-                        sx={{ mt: 3, background: lightGreen, color: primaryGreen }}
+                        sx={{
+                          mt: 3,
+                          background: lightGreen,
+                          color: primaryGreen,
+                        }}
                       />
                     </Box>
                     <Avatar
@@ -500,7 +529,11 @@ function Dashboard() {
                       <Chip
                         label="+18% YoY"
                         size="small"
-                        sx={{ mt: 3, background: lightGreen, color: primaryGreen }}
+                        sx={{
+                          mt: 3,
+                          background: lightGreen,
+                          color: primaryGreen,
+                        }}
                       />
                     </Box>
                     <Avatar
@@ -563,7 +596,11 @@ function Dashboard() {
                     width={600} // Set a new default width (though parent's styles override if set to 100% in sx)
                     height={300} // Set a new default height
                     series={[
-                      { data: revenueValues, label: "Revenue", color: primaryGreen },
+                      {
+                        data: revenueValues,
+                        label: "Revenue",
+                        color: primaryGreen,
+                      },
                     ]}
                     xAxis={[{ scaleType: "point", data: xLabels }]}
                     sx={{
