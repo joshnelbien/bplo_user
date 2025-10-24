@@ -283,8 +283,12 @@ router.put("/treasurer-payments/:id", async (req, res) => {
 
     console.log("Final fields to save:", updatedFields);
 
-    await applicant.update({ ...updatedFields, TREASURER: "Approved" });
-    await fileApplicant.update({ ...updatedFields });
+    await applicant.update({
+      ...updatedFields,
+      TREASURER: "Approved",
+      passtoTreasurer: "Done",
+    });
+    await fileApplicant.update({ ...updatedFields, passtoTreasurer: "Done" });
 
     res.json({ success: true, updated: updatedFields });
   } catch (error) {
