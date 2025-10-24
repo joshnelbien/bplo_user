@@ -29,22 +29,46 @@ function Login() {
     setError("");
 
     try {
+      // 🔹 Temporary hardcoded SuperAdmin login
+      if (email === "superadmin@gmail.com" && password === "adminpassword") {
+        const superAdmin = {
+          Email: "superadmin@gmail.com",
+          Office: "SUPERADMIN",
+          Role: "SUPERADMIN",
+          Name: "System Administrator",
+        };
+
+        const fakeToken = "superadmin-token-123";
+
+        // Save to localStorage
+        localStorage.setItem("adminData", JSON.stringify(superAdmin));
+        localStorage.setItem("token", fakeToken);
+
+        setOpenSuccessDialog(true);
+
+        // Redirect to SuperAdmin dashboard (you can change this path)
+        setTimeout(() => {
+          setOpenSuccessDialog(false);
+          navigate("/dashboard");
+        }, 2000);
+
+        return; // ✅ Stop here, no backend call needed
+      }
+
+      // 🔹 Otherwise, continue with backend authentication
       const response = await axios.post(`${API}/adminAccounts/admin-login`, {
         Email: email,
         Password: password,
       });
 
       if (response.status === 200) {
-        const { token, admin } = response.data; // 🔹 destructure token
+        const { token, admin } = response.data;
 
-        // Store admin data for future use
         localStorage.setItem("adminData", JSON.stringify(admin));
-        localStorage.setItem("token", token); // 🔹 store JWT
+        localStorage.setItem("token", token);
 
-        // Show success dialog
         setOpenSuccessDialog(true);
 
-        // Redirect based on office
         const officeRoutes = {
           BPLO: "/dashboard",
           EXAMINERS: "/examiners",
