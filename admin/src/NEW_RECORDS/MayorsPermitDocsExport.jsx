@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 10,
     padding: 5,
-    border: "0.5pt solid black", 
+    border: "0.5pt solid black",
     backgroundColor: "#F5F5F5",
   },
   infoTableCell: { padding: 5, border: "0.5pt solid black", fontSize: 8 }, // <<< MODIFIED TO 8
@@ -66,17 +66,44 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 10,
     padding: 5,
-    border: "0.5pt solid black", 
+    border: "0.5pt solid black",
     backgroundColor: "#F5F5F5",
   },
   collectionCell: { padding: 5, border: "0.5pt solid black", fontSize: 10 }, // KEPT AS 10 for Collections
   wordsRow: { flexDirection: "row", border: "0.5pt solid black" },
-  wordsLabel: { width: "30%", padding: 5, border: "0.5pt solid black", fontSize: 10, fontWeight: "bold" },
-  wordsValue: { width: "70%", padding: 5, border: "0.5pt solid black", fontSize: 10 },
+  wordsLabel: {
+    width: "30%",
+    padding: 5,
+    border: "0.5pt solid black",
+    fontSize: 10,
+    fontWeight: "bold",
+  },
+  wordsValue: {
+    width: "70%",
+    padding: 5,
+    border: "0.5pt solid black",
+    fontSize: 10,
+  },
   // *** NEW/MODIFIED STYLES FOR TOTAL/AMOUNT IN WORDS FONT SIZE 8 ***
-  totalCell: { padding: 5, border: "0.5pt solid black", fontSize: 8, fontWeight: "bold" },
-  wordsLabelSmall: { width: "30%", padding: 5, border: "0.5pt solid black", fontSize: 8, fontWeight: "bold" },
-  wordsValueSmall: { width: "70%", padding: 5, border: "0.5pt solid black", fontSize: 8 },
+  totalCell: {
+    padding: 5,
+    border: "0.5pt solid black",
+    fontSize: 8,
+    fontWeight: "bold",
+  },
+  wordsLabelSmall: {
+    width: "30%",
+    padding: 5,
+    border: "0.5pt solid black",
+    fontSize: 8,
+    fontWeight: "bold",
+  },
+  wordsValueSmall: {
+    width: "70%",
+    padding: 5,
+    border: "0.5pt solid black",
+    fontSize: 8,
+  },
 });
 
 async function loadImageAsBase64(imagePath) {
@@ -93,62 +120,93 @@ async function loadImageAsBase64(imagePath) {
     console.error("Error loading image:", error);
     return null;
   }
-  
-}// Helper function to convert number to words (Philippine Pesos style)
+} // Helper function to convert number to words (Philippine Pesos style)
 function numberToWords(num) {
-  if (num === 0) return 'ZERO PESOS AND ZERO CENTAVOS';
+  if (num === 0) return "ZERO PESOS AND ZERO CENTAVOS";
 
-  const ones = ['', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE', 'TEN', 'ELEVEN', 'TWELVE', 'THIRTEEN', 'FOURTEEN', 'FIFTEEN', 'SIXTEEN', 'SEVENTEEN', 'EIGHTEEN', 'NINETEEN'];
-  const tens = ['', '', 'TWENTY', 'THIRTY', 'FORTY', 'FIFTY', 'SIXTY', 'SEVENTY', 'EIGHTY', 'NINETY'];
-  const scales = ['', 'THOUSAND', 'MILLION', 'BILLION'];
+  const ones = [
+    "",
+    "ONE",
+    "TWO",
+    "THREE",
+    "FOUR",
+    "FIVE",
+    "SIX",
+    "SEVEN",
+    "EIGHT",
+    "NINE",
+    "TEN",
+    "ELEVEN",
+    "TWELVE",
+    "THIRTEEN",
+    "FOURTEEN",
+    "FIFTEEN",
+    "SIXTEEN",
+    "SEVENTEEN",
+    "EIGHTEEN",
+    "NINETEEN",
+  ];
+  const tens = [
+    "",
+    "",
+    "TWENTY",
+    "THIRTY",
+    "FORTY",
+    "FIFTY",
+    "SIXTY",
+    "SEVENTY",
+    "EIGHTY",
+    "NINETY",
+  ];
+  const scales = ["", "THOUSAND", "MILLION", "BILLION"];
 
   const pesos = Math.floor(num);
   const centavos = Math.round((num - pesos) * 100);
 
   function convertGroup(n) {
-    let str = '';
+    let str = "";
     if (n >= 100) {
-      str += ones[Math.floor(n / 100)] + ' HUNDRED ';
+      str += ones[Math.floor(n / 100)] + " HUNDRED ";
       n %= 100;
     }
     if (n >= 20) {
-      str += tens[Math.floor(n / 10)] + ' ';
+      str += tens[Math.floor(n / 10)] + " ";
       n %= 10;
     }
     if (n > 0) {
-      str += ones[n] + ' ';
+      str += ones[n] + " ";
     }
     return str.trim();
   }
 
   function convertNumber(n) {
-    if (n === 0) return '';
-    let str = '';
+    if (n === 0) return "";
+    let str = "";
     let scaleIndex = 0;
     while (n > 0) {
       const group = n % 1000;
       if (group > 0) {
         let groupStr = convertGroup(group);
         if (scaleIndex > 0) {
-          groupStr += ' ' + scales[scaleIndex] + ' ';
+          groupStr += " " + scales[scaleIndex] + " ";
         } else if (groupStr) {
-          groupStr += ' ';
+          groupStr += " ";
         }
         str = groupStr + str;
       }
       n = Math.floor(n / 1000);
       scaleIndex++;
     }
-    return str.trim().replace(/\s+/g, ' ');
+    return str.trim().replace(/\s+/g, " ");
   }
 
-  let words = convertNumber(pesos) + ' PESOS';
+  let words = convertNumber(pesos) + " PESOS";
   if (centavos > 0) {
-    words += ' AND ' + convertNumber(centavos) + ' CENTAVOS';
+    words += " AND " + convertNumber(centavos) + " CENTAVOS";
   } else {
-    words += ' AND ZERO CENTAVOS';
+    words += " AND ZERO CENTAVOS";
   }
-  return words.trim().replace(/\s+/g, ' ');
+  return words.trim().replace(/\s+/g, " ");
 }
 
 function MayorsPermit({ applicant, collections, total, otherChargesTotal }) {
@@ -176,7 +234,7 @@ function MayorsPermit({ applicant, collections, total, otherChargesTotal }) {
       applicant.cityOrMunicipality || ""
     }`; // Adjust fields as needed
 
-    const amountInWords = total > 0 ? numberToWords(total) : '';
+    const amountInWords = total > 0 ? numberToWords(total) : "";
 
     const PdfDocument = () => (
       <Document>
@@ -253,7 +311,7 @@ function MayorsPermit({ applicant, collections, total, otherChargesTotal }) {
                 ],
                 [
                   "KIND OF ORGANIZATION:",
-                  applicant?.kindOfOrganization || "___________",
+                  applicant?.BusinessType || "___________",
                 ],
                 ["BUSINESS ADDRESS:", businessAddress],
               ].map(([label, value]) => (
@@ -321,8 +379,12 @@ function MayorsPermit({ applicant, collections, total, otherChargesTotal }) {
                     </Text>
                   </View>
                   <View style={styles.wordsRow}>
-                    <Text style={styles.wordsLabelSmall}>AMOUNT IN WORDS:</Text> {/* Use wordsLabelSmall for size 8 */}
-                    <Text style={styles.wordsValueSmall}>{amountInWords}</Text> {/* Use wordsValueSmall for size 8 */}
+                    <Text style={styles.wordsLabelSmall}>AMOUNT IN WORDS:</Text>{" "}
+                    {/* Use wordsLabelSmall for size 8 */}
+                    <Text style={styles.wordsValueSmall}>
+                      {amountInWords}
+                    </Text>{" "}
+                    {/* Use wordsValueSmall for size 8 */}
                   </View>
                 </>
               )}

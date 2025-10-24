@@ -273,6 +273,14 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
     );
   };
 
+  const oboTotal =
+    (Number(applicant.BSAP) || 0) +
+    (Number(applicant.SR) || 0) +
+    (Number(applicant.Mechanical) || 0) +
+    (Number(applicant.Electrical) || 0) +
+    (Number(applicant.Signage) || 0) +
+    (Number(applicant.Electronics) || 0) +
+    (Number(applicant.otherFee) || 0);
   // ✅ Collections data - customize based on your applicant fields (e.g., fees from backroom sections)
   // This is a placeholder; map real fields like applicant.zoningFee, applicant.choFee, etc.
   const collections = [
@@ -280,6 +288,9 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
     { label: "Sanitary Fee", amount: applicant.choFee || 0 },
     { label: "Solid Waste Fee", amount: applicant.csmwoFee || 0 },
     { label: "Environment Fee", amount: applicant.cenroFee || 0 },
+
+    { label: "OBO", amount: oboTotal },
+
     // Add more as needed, e.g., { label: "Other Charge", amount: applicant.someOtherFee }
   ].filter((item) => item.amount > 0);
 
@@ -384,7 +395,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
       <DialogContent dividers>
         {/* Business Info */}
         <Section title="Business Information">
-          <Field label="Status" value={applicant.status} />
+          <Field label="Status" value={applicant.BPLO} />
           <Field label="Mode of Payment" value={applicant.Modeofpayment} />
           <Field label="ID" value={applicant.id} />
           <Field label="Business Type" value={applicant.BusinessType} />
@@ -660,7 +671,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
           />
         </Section>
         {/* Backroom Section */}
-        {applicant.status !== "pending" && (
+        {applicant.BPLO === "Approved" && (
           <Section title="Backroom">
             <Stack spacing={2}>
               {/* ✅ Zoning */}
