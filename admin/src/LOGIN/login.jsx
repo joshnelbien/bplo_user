@@ -34,7 +34,7 @@ function Login() {
         const superAdmin = {
           Email: "superadmin@gmail.com",
           Office: "SUPERADMIN",
-          Role: "SUPERADMIN",
+          Position: "SUPERADMIN",
           Name: "System Administrator",
         };
 
