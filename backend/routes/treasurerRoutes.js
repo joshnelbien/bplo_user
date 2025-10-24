@@ -287,8 +287,13 @@ router.put("/treasurer-payments/:id", async (req, res) => {
       ...updatedFields,
       TREASURER: "Approved",
       passtoTreasurer: "Done",
+      permitRelease: "Yes",
     });
-    await fileApplicant.update({ ...updatedFields, passtoTreasurer: "Done" });
+    await fileApplicant.update({
+      ...updatedFields,
+      passtoTreasurer: "Done",
+      permitRelease: "Yes",
+    });
 
     res.json({ success: true, updated: updatedFields });
   } catch (error) {

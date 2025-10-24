@@ -49,7 +49,7 @@ router.post(
     try {
       const { id } = req.params;
       const file = req.file;
-      const { businessTaxTotal } = req.body; // ✅ Get total from FormData
+      const { businessTaxTotal } = req.body;
 
       const applicant = await BusinessTax.findByPk(id);
       if (!applicant)

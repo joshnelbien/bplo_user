@@ -3,6 +3,7 @@ const multer = require("multer");
 const File = require("../db/model/files");
 const AppStatus = require("../db/model/applicantStatusDB");
 const UserAccounts = require("../db/model/userAccounts");
+const BusinessProfile = require("../db/model/businessProfileDB");
 const { where } = require("sequelize");
 const { v4: uuidv4 } = require("uuid");
 const { sequelize } = require("../db/sequelize");
@@ -110,16 +111,32 @@ router.get("/files/:id", async (req, res) => {
 // ✅ Corrected route
 router.put("/appDone/:id", async (req, res) => {
   try {
-    const { id } = req.params; // get the id from the URL
+    const { id } = req.params;
 
+    // ✅ Find the record in File table
     const file = await File.findByPk(id);
     if (!file) return res.status(404).send("File not found");
 
+    // ✅ Convert to plain object to reuse the data
+    const applicantData = file.toJSON();
+
+    // ✅ Update permitRelease in File table
     await file.update({ permitRelease: "Done" });
 
-    res.status(200).send("Permit marked as released");
+    // ✅ Create a copy of that record in BusinessProfile
+    const created = await BusinessProfile.create({
+      ...applicantData,
+      permitRelease: "Done",
+    });
+
+    // ✅ Send back response
+    res.status(200).json({
+      message:
+        "Applicant approved, archived in Files, added to Business Profile, and payment breakdowns created.",
+      businessProfile: created,
+    });
   } catch (err) {
-    console.error(err);
+    console.error("❌ Error in /appDone route:", err);
     res.status(500).send("Server error");
   }
 });

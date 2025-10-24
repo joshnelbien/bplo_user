@@ -125,4 +125,14 @@ router.get("/businessProfiles/export", async (req, res) => {
   }
 });
 
+router.post("/businesses", async (req, res) => {
+  try {
+    const newBusiness = await BusinessProfile.create(req.body);
+    res.status(201).json(newBusiness);
+  } catch (err) {
+    console.error("🔥 Error creating business profile:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;
