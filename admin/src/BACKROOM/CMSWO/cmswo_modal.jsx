@@ -589,15 +589,18 @@ function CmswoApplicantModal({
           >
             Close
           </Button>
-          <Button
-            onClick={handleApproveClick}
-            variant="contained"
-            color="success"
-            sx={{ width: "100px" }}
-          >
-            Approve
-          </Button>
-
+          {applicant.CSMWO !== "Approved" && (
+            <>
+              <Button
+                onClick={handleApproveClick}
+                variant="contained"
+                color="success"
+                sx={{ width: "100px" }}
+              >
+                Approve
+              </Button>
+            </>
+          )}
           <Button
             onClick={handleDeclineClick}
             variant="contained"

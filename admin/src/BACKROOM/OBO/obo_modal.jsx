@@ -671,13 +671,17 @@ function OboApplicantModal({
           >
             Close
           </Button>
-          <Button
-            onClick={handleApproveClick}
-            variant="contained"
-            color="success"
-          >
-            Approve
-          </Button>
+          {applicant.OBO !== "Approved" && (
+            <>
+              <Button
+                onClick={handleApproveClick}
+                variant="contained"
+                color="success"
+              >
+                Approve
+              </Button>
+            </>
+          )}
 
           <Button
             onClick={handleDeclineClick}

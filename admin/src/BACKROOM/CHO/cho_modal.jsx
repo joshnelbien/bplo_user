@@ -688,13 +688,18 @@ function ChoApplicantModal({
           >
             Close
           </Button>
-          <Button
-            onClick={handleApproveClick}
-            variant="contained"
-            color="success"
-          >
-            Approve
-          </Button>
+          {applicant.CHO !== "Approved" && (
+            <>
+              <Button
+                onClick={handleApproveClick}
+                variant="contained"
+                color="success"
+              >
+                Approve
+              </Button>
+            </>
+          )}
+
           <Button
             onClick={handleDeclineClick}
             variant="contained"

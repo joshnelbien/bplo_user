@@ -371,6 +371,7 @@ function Cho() {
         onDecline={handleDecline}
         handleFileChange={handleFileChange}
         selectedFiles={selectedFiles}
+        baseUrl={`${API}/newApplication/files`}
       />
     </>
   );

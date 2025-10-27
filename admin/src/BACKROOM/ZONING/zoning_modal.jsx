@@ -618,14 +618,17 @@ function ZoningApplicantModal({
               >
                 Close
               </Button>
-              <Button
-                onClick={handleApproveClick}
-                variant="contained"
-                color="success"
-              >
-                Approve
-              </Button>
-
+              {applicant.ZONING !== "Approved" && (
+                <>
+                  <Button
+                    onClick={handleApproveClick}
+                    variant="contained"
+                    color="success"
+                  >
+                    Approve
+                  </Button>
+                </>
+              )}
               <Button
                 onClick={handleDeclineClick}
                 variant="contained"

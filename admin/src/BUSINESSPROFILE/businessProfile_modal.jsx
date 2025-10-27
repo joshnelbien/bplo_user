@@ -146,7 +146,7 @@ function BusinessProfileModal({ applicant, isOpen, onClose, baseUrl }) {
   return (
     <>
       <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
-        <DialogTitle>Applicant Details</DialogTitle>
+        <DialogTitle>Business Details</DialogTitle>
         <DialogContent dividers>
           {/* Business Info */}
           <Section title="Business Information">
