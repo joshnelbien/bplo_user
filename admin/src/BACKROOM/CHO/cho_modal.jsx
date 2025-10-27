@@ -118,7 +118,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`${API}/examiners/examiners/${fileData.id}/${fileKey}`}
+            href={`${API}/newApplication/files/${fileData.id}/${fileKey}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -130,7 +130,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`${API}/examiners/examiners/${fileData.id}/${fileKey}/download`}
+            href={`${API}/newApplication/files/${fileData.id}/${fileKey}/download`}
             target="_blank"
             rel="noreferrer"
           >
@@ -622,56 +622,71 @@ function ChoApplicantModal({
               fileData={applicant}
             />
           </Section>
-
-          <TextField
-            label="Sanitary Fee"
-            value={formatCurrency(choFee)}
-            onChange={(e) => {
-              const cleanValue = e.target.value.replace(/,/g, "");
-              setChoFee(cleanValue);
-              setValidationErrors((prev) => ({ ...prev, choFee: false }));
-            }}
-            fullWidth
-            size="small"
-            sx={{ mt: 2 }}
-            error={validationErrors.choFee}
-            helperText={
-              validationErrors.choFee &&
-              "Sanitary Fee is required for approval."
-            }
-          />
-          <Grid container spacing={1} sx={{ mt: 1 }}>
-            <Grid item>
-              <Button
-                variant="contained"
-                component="label"
-                size="small"
-                color="success"
-                sx={{ minWidth: 120 }}
-              >
-                Choose File
-                <input
-                  type="file"
-                  name="choCert"
-                  hidden
-                  onChange={handleFileSelect}
+          {applicant.CHO === "Approved" && (
+            <>
+              <Section title={"Attachments"}>
+                <FileField
+                  fileKey="choCert"
+                  label="CHO Cert"
+                  fileData={applicant}
                 />
-              </Button>
-            </Grid>
-            <Grid item xs>
+              </Section>
+            </>
+          )}
+          {applicant.CHO !== "Approved" && (
+            <>
               <TextField
-                value={selectedFiles.choCert?.name || ""}
-                placeholder="No file selected"
-                size="small"
+                label="Sanitary Fee"
+                value={formatCurrency(choFee)}
+                onChange={(e) => {
+                  const cleanValue = e.target.value.replace(/,/g, "");
+                  setChoFee(cleanValue);
+                  setValidationErrors((prev) => ({ ...prev, choFee: false }));
+                }}
                 fullWidth
-                InputProps={{ readOnly: true }}
-                error={validationErrors.choCert}
+                size="small"
+                sx={{ mt: 2 }}
+                error={validationErrors.choFee}
                 helperText={
-                  validationErrors.choCert && "A file is required for approval."
+                  validationErrors.choFee &&
+                  "Sanitary Fee is required for approval."
                 }
               />
-            </Grid>
-          </Grid>
+              <Grid container spacing={1} sx={{ mt: 1 }}>
+                <Grid item>
+                  <Button
+                    variant="contained"
+                    component="label"
+                    size="small"
+                    color="success"
+                    sx={{ minWidth: 120 }}
+                  >
+                    Choose File
+                    <input
+                      type="file"
+                      name="choCert"
+                      hidden
+                      onChange={handleFileSelect}
+                    />
+                  </Button>
+                </Grid>
+                <Grid item xs>
+                  <TextField
+                    value={selectedFiles.choCert?.name || ""}
+                    placeholder="No file selected"
+                    size="small"
+                    fullWidth
+                    InputProps={{ readOnly: true }}
+                    error={validationErrors.choCert}
+                    helperText={
+                      validationErrors.choCert &&
+                      "A file is required for approval."
+                    }
+                  />
+                </Grid>
+              </Grid>
+            </>
+          )}
         </DialogContent>
         <DialogActions>
           {/* Close Button */}

@@ -22,7 +22,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { useState, useEffect } from "react";
 
-const API = "/your/api/base/url";
+const API = import.meta.env.VITE_API_BASE;
 
 const formatNumber = (value) => {
   if (!value) return "—";
@@ -125,7 +125,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`${API}/examiners/examiners/${fileData.id}/${fileKey}`}
+            href={`${API}/newApplication/files/${fileData.id}/${fileKey}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -138,7 +138,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`${API}/examiners/examiners/${fileData.id}/${fileKey}/download`}
+            href={`${API}/newApplication/files/${fileData.id}/${fileKey}/download`}
             target="_blank"
             rel="noreferrer"
           >
@@ -525,53 +525,69 @@ function CmswoApplicantModal({
               fileData={applicant}
             />
           </Section>
-
-          {/* Solid Waste Fee Input */}
-          <TextField
-            label="Solid Waste Fee"
-            value={formatCurrency(csmwoFee)}
-            onChange={(e) => {
-              const rawValue = e.target.value.replace(/,/g, "");
-              handleChange("csmwoFee", rawValue);
-            }}
-            fullWidth
-            size="small"
-            sx={{ mt: 2 }}
-            required
-            error={feeError}
-            helperText={feeError && "Solid Waste Fee is required for approval."}
-          />
-
-          {files.map((file) => (
-            <Grid container spacing={1} key={file.name} sx={{ mt: 1 }}>
-              <Grid item>
-                <Button
-                  variant="contained"
-                  component="label"
-                  size="small"
-                  color="success"
-                  sx={{ minWidth: 120 }}
-                >
-                  Choose File
-                  <input
-                    type="file"
-                    name={file.name}
-                    hidden
-                    onChange={handleFileSelect}
-                  />
-                </Button>
-              </Grid>
-              <Grid item xs>
-                <TextField
-                  value={selectedFiles[file.name]?.name || ""}
-                  placeholder="No file selected"
-                  size="small"
-                  fullWidth
-                  InputProps={{ readOnly: true }}
+          {applicant.CSMWO === "Approved" && (
+            <>
+              <Section title={"Attachments"}>
+                <FileField
+                  fileKey="cswmoCert"
+                  label="Solid Waste Cert"
+                  fileData={applicant}
                 />
-              </Grid>
-            </Grid>
-          ))}
+              </Section>
+            </>
+          )}
+          {applicant.CSMWO !== "Approved" && (
+            <>
+              {/* Solid Waste Fee Input */}
+              <TextField
+                label="Solid Waste Fee"
+                value={formatCurrency(csmwoFee)}
+                onChange={(e) => {
+                  const rawValue = e.target.value.replace(/,/g, "");
+                  handleChange("csmwoFee", rawValue);
+                }}
+                fullWidth
+                size="small"
+                sx={{ mt: 2 }}
+                required
+                error={feeError}
+                helperText={
+                  feeError && "Solid Waste Fee is required for approval."
+                }
+              />
+
+              {files.map((file) => (
+                <Grid container spacing={1} key={file.name} sx={{ mt: 1 }}>
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      component="label"
+                      size="small"
+                      color="success"
+                      sx={{ minWidth: 120 }}
+                    >
+                      Choose File
+                      <input
+                        type="file"
+                        name={file.name}
+                        hidden
+                        onChange={handleFileSelect}
+                      />
+                    </Button>
+                  </Grid>
+                  <Grid item xs>
+                    <TextField
+                      value={selectedFiles[file.name]?.name || ""}
+                      placeholder="No file selected"
+                      size="small"
+                      fullWidth
+                      InputProps={{ readOnly: true }}
+                    />
+                  </Grid>
+                </Grid>
+              ))}
+            </>
+          )}
         </DialogContent>
 
         <DialogActions>

@@ -119,7 +119,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`${API}/examiners/examiners/${fileData.id}/${fileKey}`}
+            href={`${API}/newApplication/files/${fileData.id}/${fileKey}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -132,7 +132,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`${API}/examiners/examiners/${fileData.id}/${fileKey}/download`}
+            href={`${API}/newApplication/files/${fileData.id}/${fileKey}/download`}
             target="_blank"
             rel="noreferrer"
           >
@@ -600,24 +600,25 @@ function ZoningApplicantModal({
           )}
         </DialogContent>
         {/* ✅ Cleaned Up Actions */}
+
         <DialogActions>
+          {/* Close Button */}
+          <Button
+            onClick={onClose}
+            variant="contained"
+            sx={{
+              backgroundColor: "#70706fff",
+              color: "white",
+              "&:hover": { backgroundColor: "#acababff" },
+              width: "100px",
+              border: "none",
+            }}
+          >
+            Close
+          </Button>
           {/* Only show Approve/Decline if not yet approved and not viewing cert */}
           {!showCert && applicant.ZONING !== "Approved" && (
             <>
-              {/* Close Button */}
-              <Button
-                onClick={onClose}
-                variant="contained"
-                sx={{
-                  backgroundColor: "#70706fff",
-                  color: "white",
-                  "&:hover": { backgroundColor: "#acababff" },
-                  width: "100px",
-                  border: "none",
-                }}
-              >
-                Close
-              </Button>
               {applicant.ZONING !== "Approved" && (
                 <>
                   <Button

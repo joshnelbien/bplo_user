@@ -27,7 +27,7 @@ import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { styled } from "@mui/system";
 
 // The API base URL is hardcoded as a placeholder since environment variables cannot be accessed.
-const API = "https://api.example.com";
+const API = import.meta.env.VITE_API_BASE;
 
 // Component to display a normal text field
 const Field = ({
@@ -114,7 +114,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`${API}/examiners/examiners/${fileData.id}/${fileKey}`}
+            href={`${API}/newApplication/files/${fileData.id}/${fileKey}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -127,7 +127,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`${API}/examiners/examiners/${fileData.id}/${fileKey}/download`}
+            href={`${API}/newApplication/files/${fileData.id}/${fileKey}/download`}
             target="_blank"
             rel="noreferrer"
           >
@@ -560,58 +560,72 @@ function CenroApplicantModal({
               fileData={applicant}
             />
           </Section>
-
-          {/* CENRO Fee input */}
-          <TextField
-            label="Environmental Fee"
-            value={formatCurrency(cenroField.cenroFee)}
-            onChange={(e) => handleChange("cenroFee", e.target.value)}
-            fullWidth
-            size="small"
-            sx={{ mt: 2 }}
-            error={validationErrors.cenroFee}
-            helperText={
-              validationErrors.cenroFee &&
-              "Environmental Fee is required for approval."
-            }
-          />
-
-          {/* File Upload */}
-          {files.map((file) => (
-            <Grid container spacing={1} sx={{ mt: 1 }}>
-              <Grid item>
-                <Button
-                  variant="contained"
-                  component="label"
-                  size="small"
-                  color="success"
-                  sx={{ minWidth: 120 }}
-                >
-                  Choose File
-                  <input
-                    type="file"
-                    name={file.name}
-                    hidden
-                    onChange={handleFileSelect}
-                  />
-                </Button>
-              </Grid>
-              <Grid item xs>
-                <TextField
-                  value={selectedFiles[file.name]?.name || ""}
-                  placeholder="No file selected"
-                  size="small"
-                  fullWidth
-                  InputProps={{ readOnly: true }}
-                  error={validationErrors.cenroCert}
-                  helperText={
-                    validationErrors.cenroCert &&
-                    "A file is required for approval."
-                  }
+          {applicant.CENRO === "Approved" && (
+            <>
+              <Section title={"Attachments"}>
+                <FileField
+                  fileKey="cenroCert"
+                  label="Cenro Certificate"
+                  fileData={applicant}
                 />
-              </Grid>
-            </Grid>
-          ))}
+              </Section>
+            </>
+          )}
+          {applicant.CENRO !== "Approved" && (
+            <>
+              {/* CENRO Fee input */}
+              <TextField
+                label="Environmental Fee"
+                value={formatCurrency(cenroField.cenroFee)}
+                onChange={(e) => handleChange("cenroFee", e.target.value)}
+                fullWidth
+                size="small"
+                sx={{ mt: 2 }}
+                error={validationErrors.cenroFee}
+                helperText={
+                  validationErrors.cenroFee &&
+                  "Environmental Fee is required for approval."
+                }
+              />
+
+              {/* File Upload */}
+              {files.map((file) => (
+                <Grid container spacing={1} sx={{ mt: 1 }}>
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      component="label"
+                      size="small"
+                      color="success"
+                      sx={{ minWidth: 120 }}
+                    >
+                      Choose File
+                      <input
+                        type="file"
+                        name={file.name}
+                        hidden
+                        onChange={handleFileSelect}
+                      />
+                    </Button>
+                  </Grid>
+                  <Grid item xs>
+                    <TextField
+                      value={selectedFiles[file.name]?.name || ""}
+                      placeholder="No file selected"
+                      size="small"
+                      fullWidth
+                      InputProps={{ readOnly: true }}
+                      error={validationErrors.cenroCert}
+                      helperText={
+                        validationErrors.cenroCert &&
+                        "A file is required for approval."
+                      }
+                    />
+                  </Grid>
+                </Grid>
+              ))}
+            </>
+          )}
         </DialogContent>
 
         <DialogActions>
