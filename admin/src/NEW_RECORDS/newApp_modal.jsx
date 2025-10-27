@@ -830,6 +830,19 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
             </Stack>
           </Section>
         )}
+
+        {applicant.passtoBusinessTax === "Done" && (
+          <>
+            <Section title={"Tax Order"}>
+              <FileField
+                fileKey="businesstaxComputation"
+                label="Tax Order"
+                fileData={applicant}
+                baseUrl={baseUrl}
+              />
+            </Section>
+          </>
+        )}
       </DialogContent>
 
       {/* ✅ Actions */}
