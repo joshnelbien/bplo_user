@@ -82,7 +82,12 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
-  introText: { fontSize: 8, marginBottom: 5, textAlign: "justify" },
+  introText: {
+    fontSize: 8,
+    marginBottom: 5,
+    textAlign: "center",
+    paddingBottom: 5,
+  },
 
   infoTableRow: { flexDirection: "row", border: "0.5pt solid black" },
   infoTableHeader: {
@@ -123,14 +128,12 @@ const styles = StyleSheet.create({
   },
   bottomText: {
     position: "absolute",
-    bottom: 50, // 👈 moves it just above the footer bar
+    bottom: 35, // stays above footer bar
     left: 20,
-    right: 20,
-    fontSize: 8,
-    textAlign: "justify",
-    justifyContent: "center",
-    margin: 0,
-    padding: 0,
+    right: 20, // 👈 add right padding
+    fontSize: 10,
+    textAlign: "center", // 👈 centers the lines
+    lineHeight: 1.4,
   },
 });
 
@@ -250,12 +253,14 @@ function MayorsPermit({ applicant, collections, total }) {
               <View style={styles.col25}>
                 <Image
                   src={bagongPilipinasSrc}
-                  style={{ width: 35, height: 35 }}
+                  style={{ width: 45, height: 45 }}
                 />
               </View>
               <View style={[styles.col50, { alignItems: "center" }]}>
-                <Image src={spcLogoSrc} style={{ width: 35, height: 35 }} />
-                <Text style={{ fontSize: 12, fontWeight: "bold" }}>
+                <Image src={spcLogoSrc} style={{ width: 45, height: 45 }} />
+                <Text
+                  style={{ fontSize: 12, fontWeight: "bold", paddingTop: 5 }}
+                >
                   OFFICE OF THE MAYOR
                 </Text>
                 <Text style={{ fontSize: 10 }}>
@@ -274,7 +279,7 @@ function MayorsPermit({ applicant, collections, total }) {
               </View>
             </View>
             <View style={styles.banner}>
-              <Text style={[styles.bannerText, { fontSize: 14 }]}>
+              <Text style={[styles.bannerText, { fontSize: 18 }]}>
                 MAYOR'S PERMIT
               </Text>
             </View>
@@ -413,7 +418,7 @@ function MayorsPermit({ applicant, collections, total }) {
               <Text style={{ fontWeight: "bold" }}>
                 January 20, {new Date().getFullYear() + 1}
               </Text>
-              .{"\n\n"}
+              .{"\n"}
               <Text style={{ fontWeight: "bold", fontSize: 10 }}>
                 IMPORTANT:
               </Text>{" "}
@@ -422,13 +427,13 @@ function MayorsPermit({ applicant, collections, total }) {
               Pablo", as amended, shall cause revocation of this permit and
               forfeiture of all sums paid for rights granted in addition to the
               penalties provided for.
-              {"\n\n"}
+              {"\n"}
               <Text style={{ fontWeight: "bold" }}>
                 ITO AY DAPAT IPASIKIL SA HAYAG NA POOK NG KALAKALAN AT DAPAT
                 IPAKITA SA SANDALING HINGIN NG MGA KINAUUKULAN MAY
                 KAPANGYARIHAN.
               </Text>
-              {"\n\n"}
+              {"\n"}
               This must be posted in a conspicuous place and presented upon
               demand by proper authorities.
             </Text>
@@ -438,11 +443,11 @@ function MayorsPermit({ applicant, collections, total }) {
                 style={[
                   styles.whiteText,
                   styles.center,
-                  { fontWeight: "bold", fontSize: 6 },
+                  { fontWeight: "bold", fontSize: 10 },
                 ]}
               >
                 ANY ALTERATION AND/OR ERASURE WILL INVALIDATE THIS PERMIT.
-                {"\n\n"}
+                {"\n"}
                 "CONTINUITY AND GOOD GOVERNANCE FOR STRONGER UNITY AND PROGRESS"
               </Text>
             </View>
