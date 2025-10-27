@@ -27,6 +27,15 @@ const handleDone = async (id) => {
 // 🟢 Shrunk, tighter layout for one-page fit
 const styles = StyleSheet.create({
   page: { padding: 15, fontFamily: "Helvetica" },
+  pageWatermark: {
+    position: "absolute",
+    top: "15%",
+    left: "5%",
+    width: "90%",
+    height: "60%",
+    opacity: 0.05, // 👈 very light
+    zIndex: -1,
+  },
   frame: {
     border: "8pt solid #1D5A2E",
     margin: 0,
@@ -235,6 +244,7 @@ function MayorsPermit({ applicant, collections, total }) {
     const PdfDocument = () => (
       <Document>
         <Page size="A4" style={styles.page}>
+          <Image src={spcLogoSrc} style={styles.pageWatermark} />
           <View style={styles.frame}>
             <View style={styles.row}>
               <View style={styles.col25}>
