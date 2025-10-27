@@ -162,6 +162,16 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
 
   // Initialize collections
   useEffect(() => {
+    const sanitary = Number(applicant?.SR) || 0;
+    const building = Number(applicant?.BSAP) || 0;
+    const mechanical = Number(applicant?.Mechanical) || 0;
+    const electrical = Number(applicant?.Electrical) || 0;
+    const signage = Number(applicant?.Signage) || 0;
+    const electronic = Number(applicant?.Electronics) || 0;
+
+    const oboTotal =
+      sanitary + building + mechanical + electrical + signage + electronic;
+
     setCollections([
       { label: "BUSINESS TAX", amount: String(businessTax) },
       { label: "MAYOR’S PERMIT", amount: "" },
@@ -172,7 +182,8 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
       { label: "OCCUPATIONAL TAX", amount: String(occupationalTax) },
       { label: "HEALTH, CER & SSF", amount: String(applicant?.choFee || "") },
       { label: "SWM GARBAGE FEE", amount: String(applicant?.csmwoFee || "") },
-      { label: "OBO", amount: "" },
+
+      { label: "OBO", amount: String(oboTotal) },
       { label: "SANITARY INSPECTION", amount: String(applicant?.SR || "") },
       { label: "BUILDING INSPECTION", amount: String(applicant?.BSAP || "") },
       {
