@@ -29,8 +29,11 @@ const styles = StyleSheet.create({
   page: { padding: 15, fontFamily: "Helvetica" },
   frame: {
     border: "8pt solid #1D5A2E",
-    margin: 6, // ⬅️ closer to page edge; you can reduce to 0 for edge-to-edge
-    padding: 15, // ⬅️ keeps content spacing the same
+    margin: 0,
+    padding: 20,
+    height: "100%",
+    position: "relative",
+    justifyContent: "flex-start",
   },
   darkGreen: { backgroundColor: "#1D5A2E" },
   whiteText: { color: "white" },
@@ -42,7 +45,18 @@ const styles = StyleSheet.create({
   col50: { width: "50%" },
   col70: { width: "70%", border: "0.5pt solid black", padding: 3 },
   col30: { width: "30%", border: "0.5pt solid black", padding: 3 },
-  banner: { backgroundColor: "#1D5A2E", padding: 6, marginVertical: 4 },
+
+  banner: {
+    backgroundColor: "#1D5A2E",
+    paddingVertical: 6,
+    paddingHorizontal: 0,
+    marginVertical: 4,
+    position: "relative",
+    left: 0,
+    right: 0,
+    width: "100%",
+    textAlign: "center",
+  },
   bannerText: {
     color: "white",
     fontSize: 9,
@@ -51,7 +65,14 @@ const styles = StyleSheet.create({
   },
   spacer: { height: 4 },
   signatureCol: { width: "50%", alignItems: "center", marginTop: 8 },
-  footerGreenBar: { backgroundColor: "#1D5A2E", padding: 6, marginTop: 8 },
+  footerGreenBar: {
+    backgroundColor: "#1D5A2E",
+    padding: 6,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
   introText: { fontSize: 8, marginBottom: 5, textAlign: "justify" },
 
   infoTableRow: { flexDirection: "row", border: "0.5pt solid black" },
@@ -90,6 +111,17 @@ const styles = StyleSheet.create({
     padding: 3,
     border: "0.5pt solid black",
     fontSize: 7,
+  },
+  bottomText: {
+    position: "absolute",
+    bottom: 50, // 👈 moves it just above the footer bar
+    left: 20,
+    right: 20,
+    fontSize: 8,
+    textAlign: "justify",
+    justifyContent: "center",
+    margin: 0,
+    padding: 0,
   },
 });
 
@@ -213,29 +245,34 @@ function MayorsPermit({ applicant, collections, total }) {
               </View>
               <View style={[styles.col50, { alignItems: "center" }]}>
                 <Image src={spcLogoSrc} style={{ width: 35, height: 35 }} />
-                <Text style={{ fontSize: 9, fontWeight: "bold" }}>
+                <Text style={{ fontSize: 12, fontWeight: "bold" }}>
                   OFFICE OF THE MAYOR
                 </Text>
-                <Text style={{ fontSize: 7 }}>
+                <Text style={{ fontSize: 10 }}>
                   BUSINESS PERMIT AND LICENSING DIVISION
                 </Text>
               </View>
               <View style={[styles.col25, { alignItems: "flex-end" }]}>
-                <Text style={{ fontSize: 12, fontWeight: "bold" }}>2025</Text>
-                <Text style={{ fontSize: 9, fontWeight: "bold" }}>
+                <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                  {" "}
+                  {new Date().getFullYear()}
+                </Text>
+                <Text style={{ fontSize: 14, fontWeight: "bold" }}>
                   {applicant?.PermitNumber || "00000"}
                 </Text>
                 <Text style={{ fontSize: 6 }}>PERMIT NUMBER</Text>
               </View>
             </View>
-
             <View style={styles.banner}>
-              <Text style={styles.bannerText}>MAYOR'S PERMIT</Text>
+              <Text style={[styles.bannerText, { fontSize: 14 }]}>
+                MAYOR'S PERMIT
+              </Text>
             </View>
 
             <Text style={styles.introText}>
-              Pursuant to City Ordinance No. 2012-40, s. of 2012, BUSINESS
-              LICENSE and MAYOR'S PERMIT is hereby granted to:
+              Pursuant to City Ordinance No. 2012-40, s. of 2012,also knwon as
+              the "2012 Revenue Code if the City of San Pablo", as amended.
+              BUSINESS LICENSE and MAYOR'S PERMIT is hereby granted to:
             </Text>
 
             <Text style={{ fontWeight: "bold", fontSize: 8 }}>
@@ -243,6 +280,10 @@ function MayorsPermit({ applicant, collections, total }) {
             </Text>
             <Text style={{ fontWeight: "bold", fontSize: 8 }}>
               REFERENCE NO: {applicant?.referenceNo || ""}
+            </Text>
+
+            <Text style={{ fontWeight: "bold", fontSize: 8 }}>
+              APPLICATION TYPE: {applicant?.application || ""}
             </Text>
 
             <View style={{ marginVertical: 6 }}>
@@ -355,14 +396,31 @@ function MayorsPermit({ applicant, collections, total }) {
               </View>
             </View>
 
-            <Text style={{ fontSize: 6, marginTop: 8, textAlign: "justify" }}>
+            <Text style={styles.bottomText}>
               This Permit shall take effect upon approval until December 31,
-              2025 unless sooner revoked. Violation of any provision of the
-              "2012 REVISED REVENUE CODE OF THE CITY OF SAN PABLO" shall cause
-              revocation of this permit and forfeiture of sums paid.{"\n\n"}
+              2025 unless sooner revoked for cause and shall be renewed on or
+              before{" "}
               <Text style={{ fontWeight: "bold" }}>
-                ITO AY DAPAT IPASIKIL SA HAYAG NA POOK NG KALAKALAN.
+                January 20, {new Date().getFullYear() + 1}
               </Text>
+              .{"\n\n"}
+              <Text style={{ fontWeight: "bold", fontSize: 10 }}>
+                IMPORTANT:
+              </Text>{" "}
+              Violation of any provision of ordinance No.: 2012 - 40 s. 2012,
+              otherwise known as the "2012 Revenue Code of the City of San
+              Pablo", as amended, shall cause revocation of this permit and
+              forfeiture of all sums paid for rights granted in addition to the
+              penalties provided for.
+              {"\n\n"}
+              <Text style={{ fontWeight: "bold" }}>
+                ITO AY DAPAT IPASIKIL SA HAYAG NA POOK NG KALAKALAN AT DAPAT
+                IPAKITA SA SANDALING HINGIN NG MGA KINAUUKULAN MAY
+                KAPANGYARIHAN.
+              </Text>
+              {"\n\n"}
+              This must be posted in a conspicuous place and presented upon
+              demand by proper authorities.
             </Text>
 
             <View style={styles.footerGreenBar}>
@@ -374,6 +432,8 @@ function MayorsPermit({ applicant, collections, total }) {
                 ]}
               >
                 ANY ALTERATION AND/OR ERASURE WILL INVALIDATE THIS PERMIT.
+                {"\n\n"}
+                "CONTINUITY AND GOOD GOVERNANCE FOR STRONGER UNITY AND PROGRESS"
               </Text>
             </View>
           </View>
