@@ -81,6 +81,91 @@ router.post(
   }
 );
 
+router.post(
+  "/files-renewal",
+  upload.fields([
+    { name: "proofOfReg" },
+    { name: "proofOfRightToUseLoc" },
+    { name: "locationPlan" },
+    { name: "brgyClearance" },
+    { name: "marketClearance" },
+    { name: "occupancyPermit" },
+    { name: "cedula" },
+    { name: "photoOfBusinessEstInt" },
+    { name: "photoOfBusinessEstExt" },
+    { name: "tIGEfiles" },
+  ]),
+  async (req, res) => {
+    const t = await sequelize.transaction();
+    try {
+      const { files, body } = req;
+      const sharedId = uuidv4();
+
+      // ✅ Ensure `userId` exists
+      if (!body.userId) {
+        return res.status(400).json({ error: "Missing userId in form data." });
+      }
+
+      const userId = body.userId;
+
+      // ✅ Extract file info into fileData object
+      const fileData = {};
+      if (files && Object.keys(files).length > 0) {
+        Object.entries(files).forEach(([key, fileArray]) => {
+          const file = fileArray[0];
+          fileData[key] = file.buffer;
+          fileData[`${key}_filename`] = file.originalname;
+          fileData[`${key}_mimetype`] = file.mimetype;
+          fileData[`${key}_size`] = file.size;
+        });
+      }
+
+      // ✅ Create File record
+      const createdFile = await File.create(
+        {
+          id: sharedId,
+          userId,
+          ...body, // includes all form fields (business info, etc.)
+          ...fileData, // includes uploaded file binary + metadata
+          applicationType: "Renewal",
+          submittedAt: new Date(),
+        },
+        { transaction: t }
+      );
+
+      // ✅ Create corresponding AppStatus record
+      const createdStatus = await AppStatus.create(
+        {
+          id: sharedId,
+          userId,
+          status: "Submitted",
+          remarks: "Renewal Application Submitted",
+          updatedAt: new Date(),
+        },
+        { transaction: t }
+      );
+
+      // ✅ Commit the transaction
+      await t.commit();
+
+      return res.status(201).json({
+        success: true,
+        message: "Renewal application submitted successfully!",
+        file: createdFile,
+        status: createdStatus,
+        sharedId,
+      });
+    } catch (err) {
+      console.error("❌ Upload failed:", err);
+      await t.rollback();
+      return res.status(500).json({
+        success: false,
+        error: "Internal server error during upload.",
+      });
+    }
+  }
+);
+
 // List files
 
 router.get("/files", async (req, res) => {

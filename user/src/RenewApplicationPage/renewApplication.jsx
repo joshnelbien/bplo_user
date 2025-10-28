@@ -420,63 +420,109 @@ function RenewApplicationPage() {
 
     setIsSubmitting(true);
 
-    const formData = new FormData();
-    formData.append("userId", id);
-
-    if (businessLines.length > 0) {
-      formData.append(
-        "lineOfBusiness",
-        businessLines.map((b) => b.lineOfBusiness).join(",")
-      );
-      formData.append(
-        "productService",
-        businessLines.map((b) => b.productService).join(",")
-      );
-      formData.append("Units", businessLines.map((b) => b.Units).join(","));
-      formData.append("capital", businessLines.map((b) => b.capital).join(","));
-    }
-
-    Object.keys(formDataState).forEach((key) => {
-      if (formDataState[key]) formData.append(key, formDataState[key]);
-    });
-
-    Object.keys(filesState).forEach((key) => {
-      if (filesState[key]) formData.append(key, filesState[key]);
-    });
-
     try {
-      await axios.post(`${API}/newApplication/files`, formData, {
-        id,
+      // 🧩 Prepare your clean payload for text fields
+      const payload = {
+        userId: id,
+        bin: formDataState.bin,
+        firstName: formDataState.incharge_first_name,
+        middleName: formDataState.incharge_middle_name,
+        lastName: formDataState.incharge_last_name,
+        extName: formDataState.incharge_extension_name,
+        sex: formDataState.incharge_sex,
+        email: formDataState.email_address,
+        mobileNo: formDataState.cellphone_no,
+        BusinessType: formDataState.business_type,
+        dscRegNo: formDataState.dscRegNo,
+        businessName: formDataState.business_name,
+        tinNo: formDataState.tin_no,
+        TradeName: formDataState.trade_name,
+        telNo: formDataState.telephone_no,
+        region: formDataState.region,
+        province: formDataState.province,
+        cityOrMunicipality: formDataState.cityOrMunicipality,
+        barangay: formDataState.barangay,
+        addressLine1: formDataState.addressLine1,
+        zipCode: formDataState.zipCode,
+        Taxregion: formDataState.Taxregion,
+        Taxprovince: formDataState.Taxprovince,
+        TaxcityOrMunicipality: formDataState.TaxcityOrMunicipality,
+        Taxbarangay: formDataState.Taxbarangay,
+        TaxaddressLine1: formDataState.TaxaddressLine1,
+        TaxzipCode: formDataState.TaxzipCode,
+        totalFloorArea: formDataState.totalFloorArea,
+        numberOfEmployee: formDataState.numberOfEmployee,
+        maleEmployee: formDataState.maleEmployee,
+        femaleEmployee: formDataState.femaleEmployee,
+        numNozzle: formDataState.numNozzle,
+        weighScale: formDataState.weighScale,
+        totalDeliveryVehicle: formDataState.totalDeliveryVehicle,
+        tIGE: formDataState.tIGE,
+        officeType: formDataState.officeType,
+        officeTypeOther: formDataState.officeTypeOther,
+        totalCapital: formDataState.totalCapital,
+        lineOfBusiness: businessLines.map((b) => b.lineOfBusiness).join(","),
+        productService: businessLines.map((b) => b.productService).join(","),
+        Units: businessLines.map((b) => b.Units).join(","),
+        capital: businessLines.map((b) => b.capital).join(","),
+        application: "Renew",
+      };
+
+      // 🧩 Now combine files + text payload into FormData
+      const formData = new FormData();
+      Object.entries(payload).forEach(([key, value]) => {
+        formData.append(key, value == null ? "" : String(value));
+      });
+
+      // 🧠 Append all your files (only if not null)
+      const fileKeys = [
+        "proofOfReg",
+        "proofOfRightToUseLoc",
+        "locationPlan",
+        "brgyClearance",
+        "marketClearance",
+        "occupancyPermit",
+        "cedula",
+        "photoOfBusinessEstInt",
+        "photoOfBusinessEstExt",
+        "tIGEfiles",
+      ];
+
+      fileKeys.forEach((key) => {
+        if (filesState[key]) {
+          formData.append(key, filesState[key]); // File object (from input)
+        }
+      });
+
+      console.log("🚀 Submitting renewal with files:", formData);
+
+      // 📤 Submit to your backend
+      await axios.post(`${API}/newApplication/files-renewal`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
+      // ✅ Cleanup after success
       localStorage.removeItem("formDataState");
       localStorage.removeItem("filesState");
       localStorage.removeItem("businessLines");
       localStorage.removeItem("formStep");
 
       setSuccessDialogOpen(true);
-
-      if (paperRef.current) {
+      if (paperRef.current)
         paperRef.current.scrollIntoView({ behavior: "smooth" });
-      } else {
-        window.scrollTo({
-          top: 0,
-          left: 0,
-          behavior: "smooth",
-        });
-      }
+      else window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
 
       setTimeout(() => {
         navigate(`/appTracker/${id}`);
       }, 2000);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error("❌ Renewal submission failed:", error);
       setSnackbarState({
         open: true,
         message: "Submission failed. Please try again.",
         severity: "error",
       });
+    } finally {
       setIsSubmitting(false);
     }
   };
