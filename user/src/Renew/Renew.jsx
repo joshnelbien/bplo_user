@@ -15,7 +15,7 @@ function Renewal() {
   const { id } = useParams();
   const [renewals, setRenewals] = useState([]);
   const [form, setForm] = useState({
-    businessName: "",
+    business_name: "",
     bin: "", // ✅ lowercase for consistency
   });
 
@@ -47,9 +47,8 @@ function Renewal() {
     fetchRenewals();
   }, [API]);
 
-  // ✅ Format BIN to 0000000-0000-0000000 while typing
   const formatBIN = (value) => {
-    const digits = value.replace(/\D/g, "").slice(0, 18); // max 18 digits (7+4+7)
+    const digits = value.replace(/\D/g, "").slice(0, 18);
     if (digits.length <= 7) {
       return digits;
     } else if (digits.length <= 11) {
@@ -85,11 +84,12 @@ function Renewal() {
 
     console.log(" Searching for EXACT record with:");
     console.log("   BIN:", form.bin);
-    console.log("   Business Name:", form.businessName);
+    console.log("   Business Name:", form.business_name);
 
     // ✅ Exact match
     const matchedRecord = renewals.find(
-      (item) => item.BIN === form.bin && item.businessName === form.businessName
+      (item) =>
+        item.bin === form.bin && item.business_name === form.business_name
     );
 
     if (matchedRecord) {
@@ -130,8 +130,8 @@ function Renewal() {
         >
           <TextField
             label="Business Name"
-            name="businessName"
-            value={form.businessName}
+            name="business_name"
+            value={form.business_name}
             onChange={handleChange}
             required
             fullWidth

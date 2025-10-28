@@ -145,7 +145,7 @@ router.post("/register-renew", async (req, res) => {
       business_name: businessName || null,
       tin_no: tinNo || null,
       trade_name: TradeName || null,
-      application_type: "New",
+      application_type: "Renew",
       DataPrivacy: "True",
     });
 
