@@ -106,7 +106,7 @@ router.post("/register", async (req, res) => {
 router.post("/register-renew", async (req, res) => {
   try {
     const {
-      BIN,
+      bin,
       firstName,
       middleName,
       lastName,
@@ -131,7 +131,7 @@ router.post("/register-renew", async (req, res) => {
 
     // Insert user into DB
     const user = await UserAccounts.create({
-      BIN,
+      bin,
       firstName,
       middleName: middleName || null,
       lastName,
@@ -149,7 +149,7 @@ router.post("/register-renew", async (req, res) => {
       DataPrivacy: "True",
     });
 
-    console.log("✅ User inserted:", user.id, user.BIN);
+    console.log("✅ User inserted:", user.id, user.bin);
 
     // Send success response immediately
     res.status(200).json({
@@ -162,7 +162,7 @@ router.post("/register-renew", async (req, res) => {
   <p>Hello <b>${firstName} ${lastName}</b>,</p>
   <p>We are pleased to inform you that you may now proceed with your <b>Business Renewal Application.</b></p>
   <p>Please click the link below to continue with your application process:</p>
-  <a href="${process.env.VITE_API_BASE}/renewPage/${user.id}/${user.BIN}"
+  <a href="${process.env.VITE_API_BASE}/renewPage/${user.id}/${user.bin}"
      style="display:inline-block; padding:10px 16px; background-color:#144C22; color:white; 
             text-decoration:none; border-radius:4px; font-weight:bold;">
     View Application

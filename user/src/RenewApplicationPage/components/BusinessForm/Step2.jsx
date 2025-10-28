@@ -80,114 +80,145 @@ export default function Step2PersonalInfo({
         {/* First Name */}
         <TextField
           label="First Name"
-          name="firstName"
-          value={formData.firstName || ""}
+          name="incharge_first_name"
+          value={formData.incharge_first_name || ""}
           onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
-          error={!!errors.firstName}
-          helperText={errors.firstName}
+          error={!!errors.incharge_first_name}
+          helperText={errors.incharge_first_name}
         />
 
         {/* Middle Name */}
         <TextField
           label="Middle Name"
-          name="middleName"
-          value={formData.middleName || ""}
+          name="incharge_middle_name"
+          value={formData.incharge_middle_name || ""}
           onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
-          error={!!errors.middleName}
-          helperText={errors.middleName}
+          error={!!errors.incharge_middle_name}
+          helperText={errors.incharge_middle_name}
         />
 
         {/* Last Name */}
         <TextField
           label="Last Name"
-          name="lastName"
-          value={formData.lastName || ""}
+          name="incharge_last_name"
+          value={formData.incharge_last_name || ""}
           onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
-          error={!!errors.lastName}
-          helperText={errors.lastName}
+          error={!!errors.incharge_last_name}
+          helperText={errors.incharge_last_name}
         />
 
         {/* Ext. Name */}
         <TextField
           label="Ext. Name"
-          name="extName"
-          value={formData.extName || ""}
+          name="incharge_extension_name"
+          value={formData.incharge_extension_name || ""}
           onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
-          error={!!errors.extName}
-          helperText={errors.extName}
+          error={!!errors.incharge_extension_name}
+          helperText={errors.incharge_extension_name}
         />
 
         {/* Gender */}
-        <FormControl fullWidth sx={{ minWidth: 300 }} error={!!errors.sex}>
-          <InputLabel id="sex-label">Gender</InputLabel>
+        <FormControl
+          fullWidth
+          sx={{ minWidth: 300 }}
+          error={!!errors.incharge_sex}
+        >
+          <InputLabel id="incharge_sex">Gender</InputLabel>
           <Select
-            labelId="sex-label"
-            name="sex"
-            value={formData.sex || ""}
-            onChange={handleUppercaseChange}
+            labelId="incharge_sex"
+            name="incharge_sex"
+            value={
+              formData.incharge_sex === "M"
+                ? "M"
+                : formData.incharge_sex === "F"
+                ? "F"
+                : ""
+            }
+            onChange={(e) => {
+              const value = e.target.value;
+              handleChange({
+                target: {
+                  name: "incharge_sex",
+                  value: value === "M" ? "M" : value === "F" ? "F" : "",
+                },
+              });
+            }}
             label="Gender"
           >
             <MenuItem value="">Select</MenuItem>
-            <MenuItem value="MALE">Male</MenuItem>
-            <MenuItem value="FEMALE">Female</MenuItem>
+            <MenuItem value="M">Male</MenuItem>
+            <MenuItem value="F">Female</MenuItem>
           </Select>
-          {!!errors.sex && (
+          {!!errors.incharge_sex && (
             <Typography variant="caption" color="error">
-              {errors.sex}
+              {errors.incharge_sex}
             </Typography>
           )}
         </FormControl>
 
-        {/* Email */}
         <TextField
           label="Email"
           type="email"
-          name="eMailAdd"
-          value={formData.eMailAdd || ""}
-          onChange={handleEmailChange} // ✅ validate email
+          name="email_address"
+          value={formData.email_address || ""}
+          onChange={(e) => {
+            const value = e.target.value.toLowerCase();
+            handleChange({ target: { name: e.target.name, value } });
+
+            // ✅ Simple live validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (value && !emailRegex.test(value)) {
+              setErrors((prev) => ({
+                ...prev,
+                email_address: "Please enter a valid email address.",
+              }));
+            } else {
+              setErrors((prev) => ({ ...prev, email_address: "" }));
+            }
+          }}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
-          error={!!errors.eMailAdd}
-          helperText={errors.eMailAdd}
+          error={!!errors.email_address}
+          helperText={errors.email_address || "Example: name@example.com"}
         />
 
         {/* Telephone No. */}
         <TextField
           label="Telephone No."
-          name="telNo"
-          value={formData.telNo || ""}
+          name="telephone_no"
+          value={formData.telephone_no || ""}
           onChange={handleTelNumberInput}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
-          error={!!errors.telNo}
-          helperText={errors.telNo}
+          error={!!errors.telephone_no}
+          helperText={errors.telephone_no}
         />
 
         {/* Mobile No. */}
         <TextField
           label="Mobile No."
-          name="mobileNo"
-          value={formData.mobileNo || ""}
+          name="cellphone_no"
+          value={formData.cellphone_no || ""}
           onChange={handlePhoneNumberInput}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
-          error={!!errors.mobileNo}
-          helperText={errors.mobileNo}
+          error={!!errors.cellphone_no}
+          helperText={errors.cellphone_no}
           placeholder="+63"
         />
       </Stack>

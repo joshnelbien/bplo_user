@@ -1,6 +1,6 @@
 import { MenuItem, Stack, TextField, Typography } from "@mui/material";
 
-export default function Step1BusinessInfo({ formData, handleChange, errors }) {
+export default function Step1BusinessInfo({ formData, handleChange }) {
   const regLabelMap = {
     "Sole Proprietorship": "DTI Registration No.",
     Corporation: "SEC Registration No.",
@@ -9,7 +9,7 @@ export default function Step1BusinessInfo({ formData, handleChange, errors }) {
     Cooperative: "CDA Registration No.",
   };
 
-  const regLabel = regLabelMap[formData.BusinessType] || "Registration No.";
+  const regLabel = regLabelMap[formData.business_type] || "Registration No.";
 
   // ✅ Convert text to uppercase before saving
   const handleUppercaseChange = (e) => {
@@ -25,22 +25,24 @@ export default function Step1BusinessInfo({ formData, handleChange, errors }) {
 
   // ✅ Corrected TIN input: 9 digits, formatted as XXX-XX-XXXX
   const handleTINInput = (e) => {
-    // Extract only digits from the input and limit to 9
-    let digits = e.target.value.replace(/[^0-9]/g, "").slice(0, 9);
+    // Extract only digits and limit to 12
+    let digits = e.target.value.replace(/[^0-9]/g, "").slice(0, 12);
 
-    // Build the formatted string
+    // Build formatted string
     let formatted = "";
-    if (digits.length > 0) {
+    if (digits.length >= 1) {
       formatted = digits.slice(0, 3);
-    }
-    if (digits.length > 3) {
-      formatted += "-" + digits.slice(3, 5);
-    }
-    if (digits.length > 5) {
-      formatted += "-" + digits.slice(5, 9);
+      if (digits.length >= 4) {
+        formatted += "-" + digits.slice(3, 6);
+        if (digits.length >= 7) {
+          formatted += "-" + digits.slice(6, 9);
+          if (digits.length >= 10) {
+            formatted += "-" + digits.slice(9, 12);
+          }
+        }
+      }
     }
 
-    // Update the form data with the new formatted value
     handleChange({ target: { name: e.target.name, value: formatted } });
   };
 
@@ -54,28 +56,24 @@ export default function Step1BusinessInfo({ formData, handleChange, errors }) {
         {/* Business Type Dropdown */}
         <TextField
           label="BIN"
-          name="BIN"
-          value={formData.BIN || ""}
+          name="bin"
+          value={formData.bin || ""}
           onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
-          error={!!errors.BIN}
-          helperText={errors.BIN}
         />
 
         <TextField
           select
           label="Business Type"
-          name="BusinessType"
-          value={formData.BusinessType || ""}
+          name="business_type"
+          value={formData.business_type || ""}
           onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
           // Add error props
-          error={!!errors.BusinessType}
-          helperText={errors.BusinessType}
         >
           <MenuItem value="">Select Business Type</MenuItem>
           <MenuItem value="SOLE PROPRIETORSHIP">Sole Proprietorship</MenuItem>
@@ -96,23 +94,18 @@ export default function Step1BusinessInfo({ formData, handleChange, errors }) {
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
-          // Add error props (assuming this isn't required by default)
-          error={!!errors.dscRegNo}
-          helperText={errors.dscRegNo}
         />
 
         {/* Business Name */}
         <TextField
           label="Business Name"
-          name="businessName"
-          value={formData.businessName || ""}
+          name="business_name"
+          value={formData.business_name || ""}
           onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
           // Add error props
-          error={!!errors.businessName}
-          helperText={errors.businessName}
         />
 
         {/* TIN No. (numbers only, no uppercase conversion needed) */}
@@ -120,28 +113,25 @@ export default function Step1BusinessInfo({ formData, handleChange, errors }) {
         {/* TIN No. (numbers only, not editable) */}
         <TextField
           label="TIN No."
-          name="tinNo"
-          value={formData.tinNo || ""}
+          name="tin_no"
+          value={formData.tin_no || ""}
           onChange={handleTINInput}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
-          error={!!errors.tinNo}
-          helperText={errors.tinNo}
+
           // This will gray out the field and make it un-editable
         />
         {/* Trade Name */}
         <TextField
           label="Trade Name"
-          name="TradeName"
-          value={formData.TradeName || ""}
+          name="trade_name"
+          value={formData.trade_name || ""}
           onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
           // Add error props
-          error={!!errors.TradeName}
-          helperText={errors.TradeName}
         />
       </Stack>
     </div>
