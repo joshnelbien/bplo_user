@@ -50,20 +50,20 @@ export default function RenewalFormStepper() {
 
       // 📝 Prepare clean payload (map fields to backend)
       const payload = {
-        BIN: formData.BIN,
-        firstName: formData.firstName,
-        middleName: formData.middleName,
-        lastName: formData.lastName,
-        extName: formData.extName,
-        sex: formData.sex,
-        email: formData.eMailAdd, // from Step2PersonalInfo
-        mobileNo: formData.mobileNo,
-        BusinessType: formData.BusinessType,
+        BIN: formData.bin,
+        firstName: formData.incharge_first_name,
+        middleName: formData.incharge_middle_name,
+        lastName: formData.incharge_last_name,
+        extName: formData.incharge_extension_name,
+        sex: formData.incharge_sex,
+        email: formData.email_address,
+        mobileNo: formData.cellphone_no,
+        BusinessType: formData.business_type,
         dscRegNo: formData.dscRegNo,
-        businessName: formData.businessName,
-        tinNo: formData.tinNo,
-        TradeName: formData.TradeName,
-        telNo: formData.telNo,
+        businessName: formData.business_name,
+        tinNo: formData.tin_no,
+        TradeName: formData.trade_name,
+        telNo: formData.telephone_no,
       };
 
       console.log("🚀 Submitting Renewal Payload:", payload);

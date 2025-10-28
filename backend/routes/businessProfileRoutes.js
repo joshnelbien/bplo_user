@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const moment = require("moment");
 const BusinessProfile = require("../db/model/businessProfileDB");
+const ExistingBusinessProfile = require("../db/model/BusinessProfileExisting");
 const { Parser } = require("json2csv");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
@@ -33,7 +34,7 @@ function encryptData(buffer) {
 
 router.get("/businessProfiles", async (req, res) => {
   try {
-    const files = await BusinessProfile.findAll({});
+    const files = await ExistingBusinessProfile.findAll({});
     res.json(files);
   } catch (err) {
     console.error(err);
