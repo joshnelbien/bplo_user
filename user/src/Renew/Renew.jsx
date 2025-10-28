@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  CircularProgress,
   Paper,
   TextField,
   Typography,
@@ -16,21 +17,20 @@ function Renewal() {
   const [renewals, setRenewals] = useState([]);
   const [form, setForm] = useState({
     business_name: "",
-    bin: "", // ✅ lowercase for consistency
+    bin: "",
   });
+  const [loading, setLoading] = useState(false); // ✅ Processing state
 
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_BASE;
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // ✅ Fetch existing records (no loading state)
+  // ✅ Fetch existing records
   useEffect(() => {
     const fetchRenewals = async () => {
       try {
         const res = await axios.get(`${API}/businessProfile/businessProfiles`);
-
         if (Array.isArray(res.data)) {
           const sortedData = res.data.sort(
             (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
@@ -43,30 +43,23 @@ function Renewal() {
         console.error("❌ Error fetching renewals:", error);
       }
     };
-
     fetchRenewals();
   }, [API]);
 
   const formatBIN = (value) => {
     const digits = value.replace(/\D/g, "").slice(0, 18);
-    if (digits.length <= 7) {
-      return digits;
-    } else if (digits.length <= 11) {
-      return `${digits.slice(0, 7)}-${digits.slice(7)}`;
-    } else {
-      return `${digits.slice(0, 7)}-${digits.slice(7, 11)}-${digits.slice(
-        11,
-        18
-      )}`;
-    }
+    if (digits.length <= 7) return digits;
+    if (digits.length <= 11) return `${digits.slice(0, 7)}-${digits.slice(7)}`;
+    return `${digits.slice(0, 7)}-${digits.slice(7, 11)}-${digits.slice(
+      11,
+      18
+    )}`;
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     if (name === "bin") {
-      const formatted = formatBIN(value);
-      setForm({ ...form, bin: formatted });
+      setForm({ ...form, bin: formatBIN(value) });
     } else {
       setForm({ ...form, [name]: value });
     }
@@ -82,26 +75,36 @@ function Renewal() {
       return;
     }
 
-    console.log(" Searching for EXACT record with:");
-    console.log("   BIN:", form.bin);
-    console.log("   Business Name:", form.business_name);
+    setLoading(true); // ✅ Start processing
 
-    // ✅ Exact match
-    const matchedRecord = renewals.find(
-      (item) =>
-        item.bin === form.bin && item.business_name === form.business_name
-    );
+    try {
+      console.log("🔍 Searching for EXACT record with:");
+      console.log("BIN:", form.bin);
+      console.log("Business Name:", form.business_name);
 
-    if (matchedRecord) {
-      console.log(" Exact Matching Record Found:", matchedRecord);
-
-      navigate(`/renewal-form/step1`, {
-        state: { record: matchedRecord },
-      });
-    } else {
-      console.warn(
-        "⚠️ No exact matching record found for BIN and Business Name."
+      const matchedRecord = renewals.find(
+        (item) =>
+          item.bin === form.bin && item.business_name === form.business_name
       );
+
+      if (matchedRecord) {
+        console.log("✅ Exact Matching Record Found:", matchedRecord);
+        navigate(`/renewal-form/step1`, {
+          state: { record: matchedRecord },
+        });
+      } else {
+        console.warn(
+          "⚠️ No exact matching record found for BIN and Business Name."
+        );
+        alert(
+          "No matching record found. Please check your BIN and Business Name."
+        );
+      }
+    } catch (error) {
+      console.error("❌ Error processing renewal:", error);
+      alert("An error occurred while processing. Please try again.");
+    } finally {
+      setLoading(false); // ✅ End processing
     }
   };
 
@@ -140,7 +143,7 @@ function Renewal() {
 
           <TextField
             label="Business Identification Number (BIN)"
-            name="bin" // ✅ fixed name to lowercase
+            name="bin"
             value={form.bin}
             onChange={handleChange}
             required
@@ -154,14 +157,32 @@ function Renewal() {
             type="submit"
             variant="contained"
             color="success"
+            disabled={loading} // ✅ Disable while processing
             sx={{
               mt: 2,
               borderRadius: 2,
               textTransform: "none",
               fontWeight: "bold",
+              position: "relative",
             }}
           >
-            Process Renewal
+            {loading ? (
+              <>
+                <CircularProgress
+                  size={24}
+                  sx={{
+                    color: "white",
+                    position: "absolute",
+                    left: "50%",
+                    top: "50%",
+                    transform: "translate(-50%, -50%)",
+                  }}
+                />
+                <span style={{ visibility: "hidden" }}>Processing...</span>
+              </>
+            ) : (
+              "Process Renewal"
+            )}
           </Button>
         </Box>
       </Paper>
