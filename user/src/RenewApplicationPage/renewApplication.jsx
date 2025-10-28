@@ -54,8 +54,8 @@ const Alert = forwardRef(function Alert(props, ref) {
 });
 
 function RenewApplicationPage() {
-  const { BIN } = useParams();
-  const { id } = useParams();
+  const { bin, id } = useParams();
+
   const API = import.meta.env.VITE_API_BASE;
   const navigate = useNavigate();
   const theme = useTheme();
@@ -149,37 +149,37 @@ function RenewApplicationPage() {
   }, [step]); // Trigger on step change
 
   useEffect(() => {
-    if (!BIN) return; // ✅ Prevent API call if BIN is not set
+    if (!bin) return; // ✅ Prevent API call if bin is not set
 
     const fetchUserData = async () => {
       try {
-        const res = await axios.get(`${API}/businessProfile/${BIN}`);
+        const res = await axios.get(`${API}/businessProfile/${id}/${bin}`);
         const userData = res.data;
         console.log("✅ Fetched user data:", userData);
-        console.log("📌 raw businessLines:", userData.lineOfBusiness);
-        console.log("📌 raw businessLines:", userData.productService);
-        console.log("📌 raw businessLines:", userData.Units);
-        console.log("📌 raw businessLines:", userData.capital);
 
         // 📝 Populate all form fields by step
         setFormDataState((prev) => ({
           ...prev,
 
           // 📝 Step 1 - Business Profile
-          BIN: userData.BIN || prev.BIN,
-          BusinessType: userData.BusinessType || prev.BusinessType,
+          bin: userData.bin || prev.bin,
+          business_type: userData.business_type || prev.business_type,
           dscRegNo: userData.dscRegNo || prev.dscRegNo,
-          businessName: userData.businessName || prev.businessName,
-          tinNo: userData.tinNo || prev.tinNo,
-          TradeName: userData.TradeName || prev.TradeName,
-          firstName: userData.firstName || prev.firstName,
-          middleName: userData.middleName || prev.middleName,
-          lastName: userData.lastName || prev.lastName,
-          extName: userData.extName || prev.extName,
-          sex: userData.sex || prev.sex,
-          eMailAdd: userData.eMailAdd || prev.eMailAdd,
-          telNo: userData.telNo || prev.telNo,
-          mobileNo: userData.mobileNo || prev.mobileNo,
+          business_name: userData.business_name || prev.business_name,
+          tin_no: userData.tin_no || prev.tin_no,
+          trade_name: userData.trade_name || prev.trade_name,
+          incharge_first_name:
+            userData.incharge_first_name || prev.incharge_first_name,
+          incharge_middle_name:
+            userData.incharge_middle_name || prev.incharge_middle_name,
+          incharge_last_name:
+            userData.incharge_last_name || prev.incharge_last_name,
+          incharge_extension_name:
+            userData.incharge_extension_name || prev.incharge_extension_name,
+          incharge_sex: userData.incharge_sex || prev.incharge_sex,
+          email_address: userData.email_address || prev.email_address,
+          telephone_no: userData.telephone_no || prev.telephone_no,
+          cellphone_no: userData.cellphone_no || prev.cellphone_no,
 
           // 🧭 Step 3 - Business Address
           region: userData.region || prev.region || "",
@@ -255,7 +255,7 @@ function RenewApplicationPage() {
     };
 
     fetchUserData();
-  }, [BIN, API]);
+  }, [bin, API]);
 
   const [filesState, setFilesState] = useState(
     savedFiles || {
@@ -312,7 +312,7 @@ function RenewApplicationPage() {
   const validateStep = () => {
     const newErrors = {};
     const requiredFields = {
-      1: ["BusinessType", "businessName", "tinNo", "TradeName"],
+      1: ["business_type", "business_name", "tin_no", "trade_name"],
       2: ["firstName", "lastName", "sex", "eMailAdd", "mobileNo"],
       3: [
         "region",
@@ -395,15 +395,7 @@ function RenewApplicationPage() {
   };
 
   const handleNextClick = () => {
-    if (validateStep()) {
-      setDialogOpen(true);
-    } else {
-      setSnackbarState({
-        open: true,
-        message: "Please fill in all required fields correctly",
-        severity: "error",
-      });
-    }
+    setDialogOpen(true);
   };
 
   const handleDialogConfirm = () => {

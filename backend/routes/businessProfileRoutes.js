@@ -42,14 +42,20 @@ router.get("/businessProfiles", async (req, res) => {
   }
 });
 
-router.get("/:BIN", async (req, res) => {
+router.get("/:id/:bin", async (req, res) => {
   try {
-    const user = await BusinessProfile.findOne({
-      where: { BIN: req.params.BIN },
+    const { bin } = req.params; // ✅ Only use BIN, ignore ID
+
+    console.log("🔍 Fetching business by BIN:", bin);
+
+    const user = await ExistingBusinessProfile.findOne({
+      where: { bin },
     });
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+
     res.json(user);
   } catch (err) {
     console.error("🔥 Error fetching user:", err);

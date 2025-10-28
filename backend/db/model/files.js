@@ -9,7 +9,7 @@ const File = sequelize.define(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    BIN: {
+    bin: {
       type: DataTypes.STRING,
     },
     userId: { type: DataTypes.UUID, allowNull: false },
