@@ -202,7 +202,14 @@ export default function Step6BusinessActivity({
                     variant="contained"
                     component="label"
                     size="small"
-                    color="success"
+                    sx={{
+                      backgroundColor: "#1d5236",
+                      color: "white",
+                      width: "180px",
+                      "&:hover": {
+                        backgroundColor: "#072b0b",
+                      },
+                    }}
                   >
                     Choose File
                     <input
@@ -212,6 +219,7 @@ export default function Step6BusinessActivity({
                       onChange={handleFileSelect}
                     />
                   </Button>
+
                   <TextField
                     value={selectedFiles[file.name] || ""}
                     placeholder="NO FILE SELECTED"
@@ -348,7 +356,13 @@ export default function Step6BusinessActivity({
         <Button
           variant="contained"
           onClick={addBusinessLine}
-          style={{ backgroundColor: "#4caf50", color: "#fff" }}
+          sx={{
+            backgroundColor: "#1d5236",
+            color: "white",
+            "&:hover": {
+              backgroundColor: "#072b0b",
+            },
+          }}
         >
           {editingIndex !== null ? "SAVE CHANGES" : "ADD LINE OF BUSINESS"}
         </Button>
