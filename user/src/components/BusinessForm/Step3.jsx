@@ -472,8 +472,8 @@ export default function Step3AddressInfo({
                 size="small"
                 sx={{
                   minWidth: 120,
-                  backgroundColor: "#4caf50",
-                  "&:hover": { backgroundColor: "#15400d" },
+                  backgroundColor: "#1d5236",
+                  "&:hover": { backgroundColor: "#072b0b" },
                 }}
               >
                 Choose File

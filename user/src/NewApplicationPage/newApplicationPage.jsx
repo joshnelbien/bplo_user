@@ -20,7 +20,7 @@ import axios from "axios";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import HomeIcon from '@mui/icons-material/Home'; 
+import HomeIcon from "@mui/icons-material/Home";
 import { useMediaQuery, useTheme } from "@mui/material";
 import Step1BusinessInfo from "../components/BusinessForm/Step1";
 import Step2PersonalInfo from "../components/BusinessForm/Step2";
@@ -34,7 +34,7 @@ import NewAppConfirmation from "./newAppConfirmation"; // NEW IMPORT
 const GreenButton = styled(Button)(({ variant }) => ({
   borderRadius: "8px",
   ...(variant === "contained" && {
-    backgroundColor: "#4caf50", 
+    backgroundColor: "#4caf50",
     color: "#fff",
     boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
     "&:hover": {
@@ -60,9 +60,9 @@ function NewApplicationPage() {
   const API = import.meta.env.VITE_API_BASE;
   const navigate = useNavigate();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md")); 
-  const isExtraSmall = useMediaQuery(theme.breakpoints.down("sm")); 
-  
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isExtraSmall = useMediaQuery(theme.breakpoints.down("sm"));
+
   const savedFormData =
     JSON.parse(localStorage.getItem("formDataState")) || null;
   const savedFiles = JSON.parse(localStorage.getItem("filesState")) || null;
@@ -74,7 +74,7 @@ function NewApplicationPage() {
   const [step, setStep] = useState(savedStep);
   const [businessLines, setBusinessLines] = useState(savedBusinessLines);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const paperRef = useRef(null); 
+  const paperRef = useRef(null);
 
   const [formDataState, setFormDataState] = useState(
     savedFormData || {
@@ -170,7 +170,7 @@ function NewApplicationPage() {
   // Scroll to top when step changes (Now safe to use successDialogOpen)
   useEffect(() => {
     // Only scroll the Paper component if we are not on the success screen
-    if (paperRef.current && !successDialogOpen) { 
+    if (paperRef.current && !successDialogOpen) {
       paperRef.current.scrollIntoView({ behavior: "smooth" });
     } else if (!successDialogOpen) {
       window.scrollTo({
@@ -513,13 +513,13 @@ function NewApplicationPage() {
       {/* AppBar-like Header */}
       <Box
         sx={{
-          backgroundColor: "#1d5236", 
-          py: { xs: 1, sm: 2 }, 
-          boxShadow: 3, 
+          backgroundColor: "#1d5236",
+          py: { xs: 1, sm: 2 },
+          boxShadow: 3,
           width: "100%",
-          position: "sticky", 
-          top: 0, 
-          zIndex: theme.zIndex.appBar, 
+          position: "sticky",
+          top: 0,
+          zIndex: theme.zIndex.appBar,
         }}
       >
         <Typography
@@ -527,10 +527,10 @@ function NewApplicationPage() {
           align="center"
           sx={{
             fontWeight: "bold",
-            color: "#ffffff", 
-            fontSize: { xs: "1.5rem", sm: "2.2rem" }, 
-            mt: 0, 
-            mb: 0, 
+            color: "#ffffff",
+            fontSize: { xs: "1.5rem", sm: "2.2rem" },
+            mt: 0,
+            mb: 0,
           }}
         >
           BUSINESS APPLICATION FORM
@@ -541,31 +541,31 @@ function NewApplicationPage() {
       <Box sx={{ pt: { xs: 2, sm: 4 }, flexGrow: 1 }}>
         <Box
           sx={{
-            width: "100%", 
-            maxWidth: isExtraSmall ? "90%" : 900, 
+            width: "100%",
+            maxWidth: isExtraSmall ? "90%" : 900,
             mx: "auto",
-            px: isExtraSmall ? 1 : 0, 
+            px: isExtraSmall ? 1 : 0,
             mb: 2,
-            display: 'flex', 
-            justifyContent: 'center', 
+            display: "flex",
+            justifyContent: "center",
           }}
         >
           <GreenButton
             onClick={() => navigate(`/homePage/${id}`)}
             variant="contained"
             sx={{
-              backgroundColor: "#1d5236", 
+              backgroundColor: "#1d5236",
               "&:hover": {
-                backgroundColor: "#072b0b", 
+                backgroundColor: "#072b0b",
               },
-              minWidth: { xs: 40, sm: 44 }, 
-              width: { xs: 40, sm: 44 }, 
-              height: { xs: 40, sm: 44 }, 
+              minWidth: { xs: 40, sm: 44 },
+              width: { xs: 40, sm: 44 },
+              height: { xs: 40, sm: 44 },
               p: 0,
-              borderRadius: '50%',
+              borderRadius: "50%",
             }}
           >
-            <HomeIcon sx={{ fontSize: { xs: 24, sm: 28 }, color: '#fff' }} />
+            <HomeIcon sx={{ fontSize: { xs: 24, sm: 28 }, color: "#fff" }} />
           </GreenButton>
         </Box>
 
@@ -575,21 +575,21 @@ function NewApplicationPage() {
           sx={{
             p: { xs: 2, sm: 4 },
             width: "100%",
-            maxWidth: isExtraSmall ? "90%" : 900, 
+            maxWidth: isExtraSmall ? "90%" : 900,
             mx: "auto",
             borderRadius: "16px",
-            mb: 4, 
+            mb: 4,
           }}
         >
           <Stepper
             activeStep={step - 1}
-            orientation={isMobile ? "vertical" : "horizontal"} 
-            alternativeLabel={!isMobile} 
-            connector={isMobile ? null : null} 
+            orientation={isMobile ? "vertical" : "horizontal"}
+            alternativeLabel={!isMobile}
+            connector={isMobile ? null : null}
             sx={{
               mb: 2,
               ...(!isMobile && {
-                flexWrap: "nowrap", 
+                flexWrap: "nowrap",
                 justifyContent: "space-between",
                 "& .MuiStep-root": {
                   p: 0,
@@ -599,7 +599,7 @@ function NewApplicationPage() {
               }),
               ...(isMobile && {
                 "& .MuiStep-root": {
-                  padding: "8px 0", 
+                  padding: "8px 0",
                 },
                 "& .MuiStepLabel-root": {
                   textAlign: "left",
@@ -608,17 +608,17 @@ function NewApplicationPage() {
 
               "& .MuiStepIcon-root": {
                 fontSize: { xs: "1rem", sm: "1.5rem" },
-                color: "gray", 
-                "&.Mui-active": { color: "#1d5236" }, 
-                "&.Mui-completed": { color: "#1d5236" }, 
+                color: "gray",
+                "&.Mui-active": { color: "#1d5236" },
+                "&.Mui-completed": { color: "#1d5236" },
                 "& .MuiStepIcon-text": {
-                  fill: "#ffffff", 
+                  fill: "#ffffff",
                 },
               },
               "& .MuiStepLabel-label": {
-                fontSize: { xs: "0.75rem", sm: "0.75rem" }, 
+                fontSize: { xs: "0.75rem", sm: "0.75rem" },
                 marginTop: 1,
-                textAlign: isMobile ? "left" : "center", 
+                textAlign: isMobile ? "left" : "center",
                 color: "gray",
                 display: "block",
               },
@@ -629,7 +629,7 @@ function NewApplicationPage() {
                 <StepLabel
                   sx={{
                     display: "flex",
-                    flexDirection: isMobile ? "row" : "column", 
+                    flexDirection: isMobile ? "row" : "column",
                     alignItems: isMobile ? "center" : "center",
                   }}
                 >
@@ -652,12 +652,12 @@ function NewApplicationPage() {
               {step > 1 && (
                 <GreenButton
                   type="button"
-                  variant="contained" 
+                  variant="contained"
                   onClick={() => setStep(step - 1)}
                   sx={{
-                    backgroundColor: "#70706fff", 
+                    backgroundColor: "#70706fff",
                     "&:hover": {
-                      backgroundColor: "#acababff", 
+                      backgroundColor: "#acababff",
                     },
                   }}
                 >
@@ -672,7 +672,7 @@ function NewApplicationPage() {
                   sx={{
                     backgroundColor: "#1d5236",
                     "&:hover": {
-                      backgroundColor: "#072b0b", 
+                      backgroundColor: "#072b0b",
                     },
                   }}
                 >
@@ -685,7 +685,16 @@ function NewApplicationPage() {
                   variant="contained"
                   disabled={isSubmitting}
                   onClick={() => setSubmitDialogOpen(true)}
-                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    backgroundColor: "#1d5236",
+                    color: "white",
+                    "&:hover": {
+                      backgroundColor: "#072b0b",
+                    },
+                  }}
                 >
                   {isSubmitting ? (
                     <>
@@ -703,7 +712,7 @@ function NewApplicationPage() {
       </Box>
 
       {/* RENDER NEW CONFIRMATION COMPONENT */}
-      <NewAppConfirmation 
+      <NewAppConfirmation
         dialogOpen={dialogOpen}
         setDialogOpen={setDialogOpen}
         handleDialogConfirm={handleDialogConfirm}
