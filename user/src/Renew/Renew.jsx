@@ -9,42 +9,21 @@ import {
   useTheme,
 } from "@mui/material";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 function Renewal() {
   const { id } = useParams();
-  const [renewals, setRenewals] = useState([]);
   const [form, setForm] = useState({
     business_name: "",
     bin: "",
   });
-  const [loading, setLoading] = useState(false); // ✅ Processing state
+  const [loading, setLoading] = useState(false); // ✅ Show spinner while searching
 
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_BASE;
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  // ✅ Fetch existing records
-  useEffect(() => {
-    const fetchRenewals = async () => {
-      try {
-        const res = await axios.get(`${API}/businessProfile/businessProfiles`);
-        if (Array.isArray(res.data)) {
-          const sortedData = res.data.sort(
-            (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-          );
-          setRenewals(sortedData);
-        } else {
-          console.warn("⚠️ Unexpected response format:", res.data);
-        }
-      } catch (error) {
-        console.error("❌ Error fetching renewals:", error);
-      }
-    };
-    fetchRenewals();
-  }, [API]);
 
   const formatBIN = (value) => {
     const digits = value.replace(/\D/g, "").slice(0, 18);
@@ -65,7 +44,7 @@ function Renewal() {
     }
   };
 
-  // ✅ Submit form
+  // ✅ Submit form — fetch data directly from backend
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -75,36 +54,36 @@ function Renewal() {
       return;
     }
 
-    setLoading(true); // ✅ Start processing
+    setLoading(true); // ✅ Start loading animation
 
     try {
-      console.log("🔍 Searching for EXACT record with:");
-      console.log("BIN:", form.bin);
-      console.log("Business Name:", form.business_name);
+      console.log("🔍 Fetching and searching database for:");
+      console.log("   BIN:", form.bin);
+      console.log("   Business Name:", form.business_name);
 
-      const matchedRecord = renewals.find(
+      const res = await axios.get(`${API}/businessProfile/businessProfiles`);
+
+      const matchedRecord = res.data.find(
         (item) =>
-          item.bin === form.bin && item.business_name === form.business_name
+          item.bin?.trim() === form.bin.trim() &&
+          item.business_name?.trim().toLowerCase() ===
+            form.business_name.trim().toLowerCase()
       );
 
       if (matchedRecord) {
         console.log("✅ Exact Matching Record Found:", matchedRecord);
-        navigate(`/renewal-form/step1`, {
-          state: { record: matchedRecord },
-        });
+        navigate(`/renewal-form/step1`, { state: { record: matchedRecord } });
       } else {
-        console.warn(
-          "⚠️ No exact matching record found for BIN and Business Name."
-        );
+        console.warn("⚠️ No exact matching record found.");
         alert(
           "No matching record found. Please check your BIN and Business Name."
         );
       }
     } catch (error) {
-      console.error("❌ Error processing renewal:", error);
-      alert("An error occurred while processing. Please try again.");
+      console.error("❌ Error searching renewal:", error);
+      alert("An error occurred while searching. Please try again.");
     } finally {
-      setLoading(false); // ✅ End processing
+      setLoading(false); // ✅ Stop loading spinner
     }
   };
 
@@ -157,13 +136,14 @@ function Renewal() {
             type="submit"
             variant="contained"
             color="success"
-            disabled={loading} // ✅ Disable while processing
+            disabled={loading}
             sx={{
               mt: 2,
               borderRadius: 2,
               textTransform: "none",
               fontWeight: "bold",
               position: "relative",
+              height: 40,
             }}
           >
             {loading ? (
