@@ -397,7 +397,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
         <Section title="Business Information">
           <Field label="Status" value={applicant.BPLO} />
           <Field label="Mode of Payment" value={applicant.Modeofpayment} />
-          <Field label="ID" value={applicant.id} />
+          <Field label="BIN" value={applicant.bin} />
           <Field label="Business Type" value={applicant.BusinessType} />
           <Field label="DSC Registration No" value={applicant.dscRegNo} />
           <Field label="Business Name" value={applicant.businessName} />

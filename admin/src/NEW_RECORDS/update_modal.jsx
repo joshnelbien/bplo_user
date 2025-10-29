@@ -175,9 +175,9 @@ function UpdateModal({ applicant, isOpen, onClose, baseUrl }) {
             onChange={handleChange}
           />
           <Field
-            label="ID"
-            name="id"
-            value={formData.id}
+            label="BIN"
+            name="bin"
+            value={formData.bin}
             onChange={handleChange}
           />
           <Field
@@ -633,7 +633,6 @@ function UpdateModal({ applicant, isOpen, onClose, baseUrl }) {
         )}
       </DialogContent>
 
-    
       <DialogActions>
         {/* Close Button */}
         <Button

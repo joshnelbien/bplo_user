@@ -152,7 +152,7 @@ function BusinessProfileModal({ applicant, isOpen, onClose, baseUrl }) {
           <Section title="Business Information">
             <Field label="Status" value={applicant.TREASURER} />
             <Field label="Mode of Payment" value={applicant.Modeofpayment} />
-            <Field label="BIN" value={applicant.BIN} />
+            <Field label="BIN" value={applicant.bin} />
             <Field label="Business Type" value={applicant.BusinessType} />
             <Field label="DSC Registration No" value={applicant.dscRegNo} />
             <Field label="Business Name" value={applicant.businessName} />
