@@ -7,7 +7,7 @@ const ClientPayments = sequelize.define("ClientPayments", {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
-  BIN: {
+  bin: {
     type: DataTypes.STRING,
   },
   BusinessType: DataTypes.STRING,

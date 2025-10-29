@@ -9,7 +9,7 @@ const Backroom = sequelize.define(
       primaryKey: true,
     },
     userId: DataTypes.UUID,
-    BIN: {
+    bin: {
       type: DataTypes.STRING,
       allowNull: false,
     },

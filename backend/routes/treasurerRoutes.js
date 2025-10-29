@@ -104,7 +104,7 @@ router.post("/treasurerOffice/approve/:id", async (req, res) => {
 
     // 7️⃣ Insert into ClientPayments
     const paymentRecord = await ClientPayments.create({
-      BIN: applicantData.BIN || "",
+      bin: applicantData.bin || "",
       BusinessType: applicantData.BusinessType || "",
       dscRegNo: applicantData.dscRegNo || "",
       businessName: applicantData.businessName || "",

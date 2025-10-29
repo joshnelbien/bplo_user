@@ -31,7 +31,7 @@ router.get("/status/:value", async (req, res) => {
     const statuses = await File.findAll({
       where: {
         [Op.or]: [
-          { BIN: value },
+          { bin: value },
           { businessName: value },
           { tinNo: value },
           // ✅ only match userId if it looks like a UUID to avoid DB error

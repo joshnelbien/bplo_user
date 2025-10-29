@@ -156,20 +156,20 @@ router.post("/examiners/approve/:id", async (req, res) => {
     // ✅ Get last BIN from Backroom
     const lastBackroom = await Backroom.findOne({
       order: [["createdAt", "DESC"]],
-      attributes: ["BIN"],
+      attributes: ["bin"],
     });
 
     let newSequence = 403424; // default start
     let newSuffix = 400; // default start
 
-    if (lastBackroom && lastBackroom.BIN) {
-      const [seq, year, suffix] = lastBackroom.BIN.split("-");
+    if (lastBackroom && lastBackroom.bin) {
+      const [seq, year, suffix] = lastBackroom.bin.split("-");
       newSequence = parseInt(seq, 10) + 1;
       newSuffix = parseInt(suffix, 10) + 1;
     }
 
     const year = new Date().getFullYear();
-    const BIN = `${newSequence.toString().padStart(7, "0")}-${year}-${newSuffix
+    const bin = `${newSequence.toString().padStart(7, "0")}-${year}-${newSuffix
       .toString()
       .padStart(7, "0")}`;
 
@@ -177,21 +177,21 @@ router.post("/examiners/approve/:id", async (req, res) => {
     applicantData.Examiners = "Approved";
     applicantData.ExaminerstimeStamp = timestamp;
     applicantData.status = "Approved";
-    applicantData.BIN = BIN;
+    applicantData.bin = bin;
 
     const created = await Backroom.create(applicantData);
 
     await applicantFile.update({
       Examiners: "Approved",
       ExaminerstimeStamp: timestamp,
-      BIN,
+      bin,
     });
 
     await applicant.update({
       Examiners: "Approved",
       ExaminerstimeStamp: timestamp,
       status: "Approved",
-      BIN,
+      bin,
     });
 
     await applicantStatus.update({

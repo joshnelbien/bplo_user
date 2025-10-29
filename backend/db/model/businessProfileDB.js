@@ -8,7 +8,7 @@ const BusinessProfile = sequelize.define(
       type: DataTypes.STRING,
       primaryKey: true,
     },
-    BIN: {
+    bin: {
       type: DataTypes.STRING,
       allowNull: false,
     },

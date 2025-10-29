@@ -8,7 +8,7 @@ const Examiners = sequelize.define(
       type: DataTypes.STRING,
       primaryKey: true,
     },
-    BIN: {
+    bin: {
       type: DataTypes.STRING,
     },
     userId: DataTypes.UUID,
