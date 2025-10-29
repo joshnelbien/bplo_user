@@ -11,7 +11,7 @@ const ExistingBusinessProfile = sequelize.define(
       allowNull: false,
     },
 
-    bin: { type: DataTypes.STRING },
+    bin: { type: DataTypes.STRING, unique: true },
     business_name: { type: DataTypes.STRING },
     trade_name: { type: DataTypes.STRING },
     business_type: { type: DataTypes.STRING },
