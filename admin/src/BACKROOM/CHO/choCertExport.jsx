@@ -95,7 +95,7 @@ const ChoCertExport = ({ applicant }) => {
               letterSpacing: "1px",
             }}
           >
-            SANITARY PERMIT / HEALTH CERTIFICATE
+            C E R T I F I C A T I O N
           </h1>
         </div>
 
@@ -180,7 +180,7 @@ const ChoCertExport = ({ applicant }) => {
                 fontWeight: "bold",
               }}
             >
-              {applicant.choHead || "DR. [NAME]"}
+              {applicant.choHead || "DR. JUAN DELA CRUZ"}
             </div>
             <div style={{ fontSize: "10pt", marginTop: "4px" }}>
               City Health Officer

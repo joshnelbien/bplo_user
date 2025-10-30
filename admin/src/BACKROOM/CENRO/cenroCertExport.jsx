@@ -5,7 +5,7 @@ import html2canvas from "html2canvas";
 
 // Ensure these images are in: public/spclogo.png and public/esignature.png
 const spcLogo = "/spclogo.png";
-const eSignature = "/esignature.png";
+const eSignature = "/samplesig.png";
 
 const CenroCertExport = ({ applicant }) => {
   const certificateRef = useRef();

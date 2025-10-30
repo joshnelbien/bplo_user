@@ -617,10 +617,10 @@ function CmswoApplicantModal({
             disabled={generatingPDF}
             variant="contained"
             sx={{
-              bgcolor: "#1d5236",
+              bgcolor: "#3179d6ff",
               color: "white",
               width: "200px",
-              "&:hover": { bgcolor: "#155233" },
+              "&:hover": { bgcolor: "#0d42a3ff" },
               position: "relative",
             }}
           >

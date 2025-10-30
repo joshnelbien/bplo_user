@@ -311,7 +311,6 @@ function ChoApplicantModal({
 
         <DialogContent dividers sx={{ p: 2 }}>
           <Grid container spacing={2}>
-            {/* All Sections in Full Width */}
             <Grid item xs={12}>
               {/* Business Information */}
               <Section title="Business Information">
@@ -503,38 +502,50 @@ function ChoApplicantModal({
           </Grid>
         </DialogContent>
 
-        {/* Action Buttons */}
-        <DialogActions sx={{ p: 2, justifyContent: "space-between" }}>
-          <Box>
-            <Button onClick={onClose} variant="contained" sx={{ bgcolor: "#70706fff", color: "white", mr: 1 }}>
-              Close
+        {/* ---------- ACTION BUTTONS (aligned right, order: Close → Approve → Decline → Generate) ---------- */}
+        <DialogActions sx={{ p: 2, justifyContent: "flex-end", gap: 1 }}>
+          <Button
+            onClick={onClose}
+            variant="contained"
+            sx={{ bgcolor: "#70706fff", color: "white" }}
+          >
+            Close
+          </Button>
+
+          {applicant.CHO !== "Approved" && (
+            <Button
+              onClick={handleApproveClick}
+              variant="contained"
+              color="success"
+            >
+              Approve
             </Button>
-            {applicant.CHO !== "Approved" && (
-              <Button onClick={handleApproveClick} variant="contained" color="success" sx={{ mr: 1 }}>
-                Approve
-              </Button>
-            )}
-            <Button onClick={handleDeclineClick} variant="contained" color="error">
-              Decline
-            </Button>
-          </Box>
+          )}
+
+          <Button
+            onClick={handleDeclineClick}
+            variant="contained"
+            color="error"
+          >
+            Decline
+          </Button>
 
           <Button
             onClick={() => setCertificatePreviewOpen(true)}
             variant="contained"
             sx={{
-              bgcolor: "#1d5236",
+              bgcolor: "#3179d6ff",
               color: "white",
-              minWidth: "260px",
-              "&:hover": { bgcolor: "#155233" },
+              minWidth: "200px",
+              "&:hover": { bgcolor: "#0d42a3ff" },
             }}
           >
-            Preview & Download Certificate
+            GENERATE CERTIFICATE
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* === Certificate Preview Modal (Only Source of Certificate View) === */}
+      {/* === Certificate Preview Modal === */}
       <Dialog
         open={certificatePreviewOpen}
         onClose={() => setCertificatePreviewOpen(false)}
@@ -542,9 +553,6 @@ function ChoApplicantModal({
         fullWidth
         scroll="paper"
       >
-        <DialogTitle sx={{ backgroundColor: "#1d5236", color: "white", textAlign: "center", py: 2 }}>
-          Certificate Preview
-        </DialogTitle>
         <DialogContent dividers sx={{ p: 3, backgroundColor: "#f9f9f9" }}>
           <Box
             ref={certRef}
@@ -553,8 +561,6 @@ function ChoApplicantModal({
               minHeight: "800px",
               p: 4,
               backgroundColor: "#fff",
-              border: "3px solid #1d5236",
-              borderRadius: 2,
               boxShadow: 3,
             }}
           >

@@ -670,10 +670,13 @@ function CenroApplicantModal({
           <Button
             onClick={() => setCertOpen(true)}
             variant="contained"
-            color="success"
             sx={{
+              backgroundColor: "#3179d6ff",
               color: "white",
               width: "200px",
+              "&:hover": {
+                backgroundColor: "#0d42a3ff",
+              },
             }}
           >
             Generate Certificate
