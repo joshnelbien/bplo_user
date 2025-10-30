@@ -16,18 +16,15 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import axios from "axios";
-import ExaminersApplicantModal from "./examiners_modal";
 
 const API = import.meta.env.VITE_API_BASE;
 
-// ✅ Reusable Text Field
-const Field = ({ label, value, onChange, name, disabled = true }) => (
+// Reusable Text Field (Read-only)
+const Field = ({ label, value, disabled = true }) => (
   <Grid item xs={12} sm={6}>
     <TextField
       label={label}
-      name={name}
       value={value || ""}
-      onChange={onChange}
       fullWidth
       variant="outlined"
       size="small"
@@ -47,7 +44,7 @@ const Field = ({ label, value, onChange, name, disabled = true }) => (
   </Grid>
 );
 
-// ✅ Section Wrapper
+// Section Wrapper
 const Section = ({ title, children }) => (
   <Paper
     elevation={0}
@@ -62,7 +59,7 @@ const Section = ({ title, children }) => (
   </Paper>
 );
 
-// ✅ File Viewer / Downloader
+// File Viewer / Downloader
 const FileField = ({ label, fileKey, fileData }) => (
   <Grid item xs={12} sm={6}>
     <TextField
@@ -126,16 +123,15 @@ function ExaminersApplicantModalUpdate({
 }) {
   const [formData, setFormData] = useState({});
   const [capitalValues, setCapitalValues] = useState([]);
+  const [lineOfBusiness, setLineOfBusiness] = useState([]);
+  const [productService, setProductService] = useState([]);
+  const [units, setUnits] = useState([]);
+  const [natureCode, setNatureCode] = useState([]);
+  const [businessNature, setBusinessNature] = useState([]);
+  const [lineCode, setLineCode] = useState([]);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
-  const [examinersModal, setExaminersModal] = useState(false);
 
-  useEffect(() => {
-    if (applicant) {
-      setFormData({ ...applicant });
-      setCapitalValues(parseCSV(applicant.capital));
-    }
-  }, [applicant]);
-
+  // Helper to parse CSV-like string arrays
   const parseCSV = (text) => {
     if (!text) return [];
     return text
@@ -145,6 +141,20 @@ function ExaminersApplicantModalUpdate({
       .map((val) => val.replace(/^"|"$/g, "").trim())
       .filter((val) => val.length > 0);
   };
+
+  // Initialize all state when applicant changes
+  useEffect(() => {
+    if (applicant) {
+      setFormData({ ...applicant });
+      setCapitalValues(parseCSV(applicant.capital));
+      setLineOfBusiness(parseCSV(applicant.lineOfBusiness));
+      setProductService(parseCSV(applicant.productService));
+      setUnits(parseCSV(applicant.Units));
+      setNatureCode(parseCSV(applicant.natureCode));
+      setBusinessNature(parseCSV(applicant.businessNature));
+      setLineCode(parseCSV(applicant.lineCode));
+    }
+  }, [applicant]);
 
   if (!isOpen || !applicant) return null;
 
@@ -156,11 +166,39 @@ function ExaminersApplicantModalUpdate({
     }));
   };
 
+  // Generic array updater
+  const updateArray = (index, field, value) => {
+    const setters = {
+      capital: setCapitalValues,
+      lineOfBusiness: setLineOfBusiness,
+      productService: setProductService,
+      Units: setUnits,
+      natureCode: setNatureCode,
+      businessNature: setBusinessNature,
+      lineCode: setLineCode,
+    };
+
+    const setter = setters[field];
+    if (setter) {
+      setter((prev) => {
+        const updated = [...prev];
+        updated[index] = value;
+        return updated;
+      });
+    }
+  };
+
   const handleUpdate = async () => {
     try {
       const updatedData = {
         ...formData,
-        capital: JSON.stringify(capitalValues), // send as JSON array string
+        capital: JSON.stringify(capitalValues),
+        lineOfBusiness: JSON.stringify(lineOfBusiness),
+        productService: JSON.stringify(productService),
+        Units: JSON.stringify(units),
+        natureCode: JSON.stringify(natureCode),
+        businessNature: JSON.stringify(businessNature),
+        lineCode: JSON.stringify(lineCode),
       };
 
       const res = await axios.put(
@@ -169,26 +207,33 @@ function ExaminersApplicantModalUpdate({
       );
 
       if (res.status === 200) {
-        console.log("✅ Updated record:", res.data);
+        console.log("Updated record:", res.data);
         setSuccessDialogOpen(true);
 
-        if (onApprove) onApprove(formData, capitalValues);
+        if (onApprove) onApprove(updatedData);
 
-        // wait a bit before closing and refreshing
         setTimeout(() => {
           setSuccessDialogOpen(false);
-          setExaminersModal(false);
           onClose();
-
-          // 🔄 Refresh the whole page
           window.location.reload();
         }, 1500);
       }
     } catch (err) {
-      console.error("❌ Update failed:", err);
+      console.error("Update failed:", err);
       alert("Failed to update applicant details.");
     }
   };
+
+  // Compute max length for rendering
+  const maxLength = Math.max(
+    lineOfBusiness.length,
+    productService.length,
+    units.length,
+    capitalValues.length,
+    natureCode.length,
+    businessNature.length,
+    lineCode.length
+  );
 
   return (
     <>
@@ -227,10 +272,7 @@ function ExaminersApplicantModalUpdate({
           <Section title="Business Address">
             <Field label="Region" value={applicant.region} />
             <Field label="Province" value={applicant.province} />
-            <Field
-              label="City/Municipality"
-              value={applicant.cityOrMunicipality}
-            />
+            <Field label="City/Municipality" value={applicant.cityOrMunicipality} />
             <Field label="Barangay" value={applicant.barangay} />
             <Field label="Address Line 1" value={applicant.addressLine1} />
             <Field label="Zip Code" value={applicant.zipCode} />
@@ -238,9 +280,7 @@ function ExaminersApplicantModalUpdate({
             <Field label="Own Place" value={applicant.ownPlace} />
 
             {applicant.ownPlace === "YES" ? (
-              <>
-                <Field label="Tax Dec. No." value={applicant.taxdec} />
-              </>
+              <Field label="Tax Dec. No." value={applicant.taxdec} />
             ) : (
               <>
                 <Field label="Lessor's Name" value={applicant.lessorName} />
@@ -256,10 +296,7 @@ function ExaminersApplicantModalUpdate({
             <Field label="Employees" value={applicant.numberOfEmployee} />
             <Field label="Male Employees" value={applicant.maleEmployee} />
             <Field label="Female Employees" value={applicant.femaleEmployee} />
-            <Field
-              label="Total Delivery Vehicle"
-              value={applicant.totalDeliveryVehicle}
-            />
+            <Field label="Total Delivery Vehicle" value={applicant.totalDeliveryVehicle} />
             <Field label="No. of Nozzles" value={applicant.numNozzle} />
             <Field label="Weigh Scale" value={applicant.weighScale} />
           </Section>
@@ -268,17 +305,14 @@ function ExaminersApplicantModalUpdate({
           <Section title="Taxpayer Address">
             <Field label="Region" value={applicant.Taxregion} />
             <Field label="Province" value={applicant.Taxprovince} />
-            <Field
-              label="City/Municipality"
-              value={applicant.TaxcityOrMunicipality}
-            />
+            <Field label="City/Municipality" value={applicant.TaxcityOrMunicipality} />
             <Field label="Barangay" value={applicant.Taxbarangay} />
             <Field label="Address Line 1" value={applicant.TaxaddressLine1} />
             <Field label="Zip Code" value={applicant.TaxzipCode} />
             <Field label="Pin Address" value={applicant.TaxpinAddress} />
           </Section>
 
-          {/* Business Activity */}
+          {/* Business Activity & Incentives */}
           <Section title="Business Activity & Incentives">
             <Field label="Tax Incentives" value={applicant.tIGE} />
             {applicant.tIGE === "Yes" && (
@@ -288,183 +322,170 @@ function ExaminersApplicantModalUpdate({
                 fileData={applicant}
               />
             )}
-
             <Field label="Office Type" value={applicant.officeType} />
 
-            {(() => {
-              const parseCSV = (text) => {
-                if (!text) return [];
-                return text
-                  .trim()
-                  .replace(/^\[|\]$/g, "")
-                  .split(/",\s*"?/)
-                  .map((val) => val.replace(/^"|"$/g, "").trim())
-                  .filter((val) => val.length > 0);
-              };
+            {/* Editable Business Lines */}
+            {Array.from({ length: maxLength }).map((_, index) => (
+              <Paper
+                key={index}
+                elevation={2}
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  borderRadius: 2,
+                  backgroundColor: "#f9f9f9",
+                  width: "100%",
+                }}
+              >
+                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                  Business Line {index + 1}
+                </Typography>
 
-              const lobArr = parseCSV(applicant.lineOfBusiness);
-              const productArr = parseCSV(applicant.productService);
-              const unitArr = parseCSV(applicant.Units);
-              const natureCodeArr = parseCSV(applicant.natureCode);
-              const businessNatureArr = parseCSV(applicant.businessNature);
-              const lineCodeArr = parseCSV(applicant.lineCode);
-
-              const maxLength = Math.max(
-                lobArr.length,
-                productArr.length,
-                unitArr.length,
-                capitalValues.length,
-                natureCodeArr.length,
-                businessNatureArr.length,
-                lineCodeArr.length
-              );
-
-              return Array.from({ length: maxLength }).map((_, index) => (
-                <Paper
-                  key={index}
-                  elevation={2}
-                  sx={{
-                    p: 2,
-                    mb: 2,
-                    borderRadius: 2,
-                    backgroundColor: "#f9f9f9",
-                    width: "100%",
-                  }}
-                >
-                  <Typography
-                    variant="subtitle2"
-                    fontWeight="bold"
-                    gutterBottom
-                  >
-                    Business Line {index + 1}
-                  </Typography>
-
-                  <Grid container spacing={2}>
-                    <Field
+                <Grid container spacing={2}>
+                  {/* Line of Business */}
+                  <Grid item xs={12} sm={6}>
+                    <TextField
                       label="Line of Business"
-                      value={lobArr[index] || ""}
+                      value={lineOfBusiness[index] || ""}
+                      onChange={(e) =>
+                        updateArray(index, "lineOfBusiness", e.target.value)
+                      }
                       fullWidth
                       multiline
                       rows={3}
+                      variant="outlined"
+                      size="small"
+                      sx={{ backgroundColor: "#fffbe6" }}
+                      InputLabelProps={{ sx: { color: "black" } }}
                     />
-                    <Grid item xs={12} sm={6}>
-                      <Field
-                        label="Product/Service"
-                        value={productArr[index] || ""}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Field label="Units" value={unitArr[index] || ""} />
-                    </Grid>
-
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        label="Capital"
-                        value={
-                          capitalValues[index]
-                            ? Number(
-                                capitalValues[index]
-                                  .toString()
-                                  .replace(/,/g, "")
-                              ).toLocaleString()
-                            : ""
-                        }
-                        onChange={(e) => {
-                          const rawValue = e.target.value
-                            .replace(/,/g, "")
-                            .replace(/\D/g, "");
-                          const updated = [...capitalValues];
-                          updated[index] = rawValue;
-                          setCapitalValues(updated);
-                        }}
-                        fullWidth
-                        variant="outlined"
-                        size="small"
-                        sx={{
-                          backgroundColor: "#fffbe6",
-                          "& .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "#1c541e",
-                          },
-                          "&:hover .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "#2e7d32",
-                          },
-                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "#1b5e20",
-                          },
-                        }}
-                        InputLabelProps={{
-                          sx: { color: "black" },
-                        }}
-                      />
-                    </Grid>
-
-                    <Grid item xs={12} sm={6}>
-                      <Field
-                        label="Nature Code"
-                        value={natureCodeArr[index] || ""}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Field
-                        label="Business Nature"
-                        value={businessNatureArr[index] || ""}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Field
-                        label="Line Code"
-                        value={lineCodeArr[index] || ""}
-                      />
-                    </Grid>
                   </Grid>
-                </Paper>
-              ));
-            })()}
+
+                  {/* Product/Service */}
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Product/Service"
+                      value={productService[index] || ""}
+                      onChange={(e) =>
+                        updateArray(index, "productService", e.target.value)
+                      }
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      InputLabelProps={{ sx: { color: "black" } }}
+                    />
+                  </Grid>
+
+                  {/* Units */}
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Units"
+                      value={units[index] || ""}
+                      onChange={(e) =>
+                        updateArray(index, "Units", e.target.value)
+                      }
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      InputLabelProps={{ sx: { color: "black" } }}
+                    />
+                  </Grid>
+
+                  {/* Capital */}
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Capital"
+                      value={
+                        capitalValues[index]
+                          ? Number(
+                              capitalValues[index].toString().replace(/,/g, "")
+                            ).toLocaleString()
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const rawValue = e.target.value
+                          .replace(/,/g, "")
+                          .replace(/\D/g, "");
+                        updateArray(index, "capital", rawValue);
+                      }}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        backgroundColor: "#fffbe6",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#1c541e",
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#2e7d32",
+                        },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#1b5e20",
+                        },
+                      }}
+                      InputLabelProps={{ sx: { color: "black" } }}
+                    />
+                  </Grid>
+
+                  {/* Nature Code */}
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Nature Code"
+                      value={natureCode[index] || ""}
+                      onChange={(e) =>
+                        updateArray(index, "natureCode", e.target.value)
+                      }
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      InputLabelProps={{ sx: { color: "black" } }}
+                    />
+                  </Grid>
+
+                  {/* Business Nature */}
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Business Nature"
+                      value={businessNature[index] || ""}
+                      onChange={(e) =>
+                        updateArray(index, "businessNature", e.target.value)
+                      }
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      InputLabelProps={{ sx: { color: "black" } }}
+                    />
+                  </Grid>
+
+                  {/* Line Code */}
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Line Code"
+                      value={lineCode[index] || ""}
+                      onChange={(e) =>
+                        updateArray(index, "lineCode", e.target.value)
+                      }
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      InputLabelProps={{ sx: { color: "black" } }}
+                    />
+                  </Grid>
+                </Grid>
+              </Paper>
+            ))}
           </Section>
 
           {/* Business Requirements */}
           <Section title="Business Requirements">
-            <FileField
-              fileKey="proofOfReg"
-              label="Proof of Registration"
-              fileData={applicant}
-            />
-            <FileField
-              fileKey="proofOfRightToUseLoc"
-              label="Proof of Right to Use Location"
-              fileData={applicant}
-            />
-            <FileField
-              fileKey="locationPlan"
-              label="Location Plan"
-              fileData={applicant}
-            />
-            <FileField
-              fileKey="brgyClearance"
-              label="Barangay Clearance"
-              fileData={applicant}
-            />
-            <FileField
-              fileKey="marketClearance"
-              label="Market Clearance"
-              fileData={applicant}
-            />
-            <FileField
-              fileKey="occupancyPermit"
-              label="Occupancy Permit"
-              fileData={applicant}
-            />
+            <FileField fileKey="proofOfReg" label="Proof of Registration" fileData={applicant} />
+            <FileField fileKey="proofOfRightToUseLoc" label="Proof of Right to Use Location" fileData={applicant} />
+            <FileField fileKey="locationPlan" label="Location Plan" fileData={applicant} />
+            <FileField fileKey="brgyClearance" label="Barangay Clearance" fileData={applicant} />
+            <FileField fileKey="marketClearance" label="Market Clearance" fileData={applicant} />
+            <FileField fileKey="occupancyPermit" label="Occupancy Permit" fileData={applicant} />
             <FileField fileKey="cedula" label="Cedula" fileData={applicant} />
-            <FileField
-              fileKey="photoOfBusinessEstInt"
-              label="Photo (Interior)"
-              fileData={applicant}
-            />
-            <FileField
-              fileKey="photoOfBusinessEstExt"
-              label="Photo (Exterior)"
-              fileData={applicant}
-            />
+            <FileField fileKey="photoOfBusinessEstInt" label="Photo (Interior)" fileData={applicant} />
+            <FileField fileKey="photoOfBusinessEstExt" label="Photo (Exterior)" fileData={applicant} />
           </Section>
         </DialogContent>
 
@@ -478,16 +499,10 @@ function ExaminersApplicantModalUpdate({
         </DialogActions>
       </Dialog>
 
-      {/* ✅ Success Feedback */}
-      <Dialog
-        open={successDialogOpen}
-        onClose={() => setSuccessDialogOpen(false)}
-      >
+      {/* Success Dialog */}
+      <Dialog open={successDialogOpen} onClose={() => setSuccessDialogOpen(false)}>
         <DialogContent sx={{ textAlign: "center", p: 4 }}>
-          <CheckCircleOutlineIcon
-            color="success"
-            sx={{ fontSize: 60, mb: 2 }}
-          />
+          <CheckCircleOutlineIcon color="success" sx={{ fontSize: 60, mb: 2 }} />
           <Typography variant="h6">Updated Successfully!</Typography>
         </DialogContent>
       </Dialog>
