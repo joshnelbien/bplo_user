@@ -461,10 +461,14 @@ function RenewApplicationPage() {
         officeType: formDataState.officeType,
         officeTypeOther: formDataState.officeTypeOther,
         totalCapital: formDataState.totalCapital,
-        lineOfBusiness: businessLines.map((b) => b.lineOfBusiness).join(","),
-        productService: businessLines.map((b) => b.productService).join(","),
-        Units: businessLines.map((b) => b.Units).join(","),
-        capital: businessLines.map((b) => b.capital).join(","),
+        lineOfBusiness: businessLines
+          .map((b) => `"${b.lineOfBusiness}"`)
+          .join(","),
+        productService: businessLines
+          .map((b) => `"${b.productService}"`)
+          .join(","),
+        Units: businessLines.map((b) => `"${b.Units}"`).join(","),
+        capital: businessLines.map((b) => `"${b.capital}"`).join(","),
         application: "Renew",
       };
 
