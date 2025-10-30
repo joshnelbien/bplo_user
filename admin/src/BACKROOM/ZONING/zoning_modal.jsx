@@ -538,14 +538,24 @@ function ZoningApplicantModal({
               </Section>
 
               {/* Zoning Attachments */}
-              <Typography variant="subtitle1" sx={{ mb: 3, pt: 2 }}>
-                ZONING FEE:{" "}
-                <b>
-                  {zoningFee === "Exempted"
-                    ? zoningFee
-                    : `₱${formatCurrency(zoningFee)}`}
-                </b>
-              </Typography>
+              {applicant.application === "New" && (
+                <>
+                  <Typography variant="subtitle1" sx={{ mb: 3, pt: 2 }}>
+                    ZONING FEE:{" "}
+                    <b>
+                      {zoningFee === "Exempted"
+                        ? zoningFee
+                        : `₱${formatCurrency(zoningFee)}`}
+                    </b>
+                  </Typography>
+                </>
+              )}
+
+              {applicant.application === "Renew" && (
+                <>
+                  <Typography py={2}>for Improvement</Typography>
+                </>
+              )}
 
               {applicant.ZONING === "Pending" ? (
                 // ✅ Show upload fields
@@ -588,11 +598,14 @@ function ZoningApplicantModal({
                   ))}
                 </Stack>
               ) : applicant.ZONING === "Approved" ? (
-                <FileField
-                  fileKey="zoningCert"
-                  label="Zoning Certificate"
-                  fileData={applicant}
-                />
+                <Grid item xs={12} sm={6}>
+                  <FileField
+                    fileKey="zoningCert"
+                    label="Zoning Certificate"
+                    fileData={applicant}
+                  />
+                  <Field label="ZONING FEE" value={zoningFee} />
+                </Grid>
               ) : null}
             </>
           ) : (
@@ -639,7 +652,7 @@ function ZoningApplicantModal({
                   width: "100px",
                 }}
               >
-                Decline
+                HOLD
               </Button>
             </>
           )}
