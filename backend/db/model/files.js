@@ -77,6 +77,11 @@ const File = sequelize.define(
     proofOfReg_mimetype: { type: DataTypes.STRING, allowNull: true },
     proofOfReg_size: { type: DataTypes.INTEGER, allowNull: true },
 
+    RecentBusinessPermit: { type: DataTypes.BLOB("long"), allowNull: true },
+    RecentBusinessPermit_filename: { type: DataTypes.STRING, allowNull: true },
+    RecentBusinessPermit_mimetype: { type: DataTypes.STRING, allowNull: true },
+    RecentBusinessPermit_size: { type: DataTypes.INTEGER, allowNull: true },
+
     proofOfRightToUseLoc: { type: DataTypes.BLOB("long"), allowNull: true },
     proofOfRightToUseLoc_filename: { type: DataTypes.STRING, allowNull: true },
     proofOfRightToUseLoc_mimetype: { type: DataTypes.STRING, allowNull: true },

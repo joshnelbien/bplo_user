@@ -490,6 +490,7 @@ function RenewApplicationPage() {
         "photoOfBusinessEstInt",
         "photoOfBusinessEstExt",
         "tIGEfiles",
+        "RecentBusinessPermit",
       ];
 
       fileKeys.forEach((key) => {

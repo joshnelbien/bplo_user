@@ -94,6 +94,7 @@ router.post(
     { name: "photoOfBusinessEstInt" },
     { name: "photoOfBusinessEstExt" },
     { name: "tIGEfiles" },
+    { name: "RecentBusinessPermit" },
   ]),
   async (req, res) => {
     const t = await sequelize.transaction();

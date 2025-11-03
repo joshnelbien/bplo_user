@@ -669,6 +669,13 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
             fileData={applicant}
             baseUrl={baseUrl}
           />
+
+          <FileField
+            fileKey="RecentBusinessPermit"
+            label="Business Permit"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
         </Section>
         {/* Backroom Section */}
         {applicant.BPLO === "Approved" && (
