@@ -8,6 +8,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControlLabel,
+  Checkbox,
   Grid,
   Paper,
   TextField,
@@ -159,6 +161,9 @@ function ZoningApplicantModal({
   const [successOpen, setSuccessOpen] = useState(false);
   const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false);
   const [selectedReasons, setSelectedReasons] = useState([]); // New state for selected reasons
+  const [feeError, setFeeError] = useState(false);
+  const [renewZoningFee, setRenewZoningFee] = useState("");
+  console.log("Applicant Data in Modal:", applicant);
 
   const files = [{ label: "Zoning Certificate", name: "zoningCert" }];
 
@@ -186,12 +191,13 @@ function ZoningApplicantModal({
   };
 
   const handleApproveClick = () => {
-    // Check if a file has been selected for zoningCert
     if (!selectedFiles.zoningCert) {
       setValidationError(true);
       return;
     }
-    onApprove(applicant.id);
+
+    // ✅ Pass renewZoningFee to parent so it can be stored before approval modal
+    onApprove(applicant.id, renewZoningFee);
     setSuccessOpen(true);
   };
 
@@ -201,7 +207,7 @@ function ZoningApplicantModal({
   };
 
   const handleDeclineClick = () => {
-    setDeclineConfirmOpen(true); // Open the new dialog
+    setDeclineConfirmOpen(true);
   };
 
   const handleToggleReason = (reason) => {
@@ -214,6 +220,13 @@ function ZoningApplicantModal({
 
   const handleAddReasons = () => {
     setDeclineReason(selectedReasons.join(", "));
+  };
+
+  const handleChange = (field, value) => {
+    setRenewZoningFee(value);
+    if (value.trim() !== "") {
+      setFeeError(false);
+    }
   };
 
   const handleDeclineConfirm = () => {
@@ -551,9 +564,51 @@ function ZoningApplicantModal({
                 </>
               )}
 
-              {applicant.application === "Renew" && (
+              {applicant.ZONING === "Pending" && (
                 <>
-                  <Typography py={2}>for Improvement</Typography>
+                  {applicant.application === "Renew" && (
+                    <>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={
+                              renewZoningFee === "0" || renewZoningFee === 0
+                            }
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                handleChange("renewZoningFee", "0");
+                              } else {
+                                handleChange("renewZoningFee", "");
+                              }
+                            }}
+                          />
+                        }
+                        label="Exempt Zoning Fee"
+                        sx={{ mt: 2 }}
+                      />
+
+                      <TextField
+                        label="Zoning Fee"
+                        value={formatCurrency(renewZoningFee)}
+                        onChange={(e) => {
+                          const rawValue = e.target.value.replace(/,/g, "");
+                          handleChange("renewZoningFee", rawValue);
+                        }}
+                        fullWidth
+                        size="small"
+                        sx={{ mt: 2 }}
+                        required
+                        error={feeError}
+                        helperText={
+                          feeError &&
+                          "Solid Waste Fee is required for approval."
+                        }
+                        disabled={
+                          renewZoningFee === "0" || renewZoningFee === 0
+                        }
+                      />
+                    </>
+                  )}
                 </>
               )}
 
@@ -604,7 +659,7 @@ function ZoningApplicantModal({
                     label="Zoning Certificate"
                     fileData={applicant}
                   />
-                  <Field label="ZONING FEE" value={zoningFee} />
+                  <Field label="ZONING FEE" value={applicant.zoningFee} />
                 </Grid>
               ) : null}
             </>

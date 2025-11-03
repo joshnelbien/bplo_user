@@ -277,7 +277,12 @@ function Zoning() {
     }
   };
 
-  const handleApprove = async (id) => {
+  const handleApprove = (id, renewZoningFee) => {
+    // ✅ store the renew fee in applicants before confirm
+    setApplicants((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, renewZoningFee } : a))
+    );
+
     setConfirmationData(id);
     setIsConfirmModalOpen(true);
   };
@@ -303,7 +308,15 @@ function Zoning() {
         };
 
         const zoningFee = calculateZoningFee(Number(applicant.totalCapital));
-        formData.append("zoningFee", zoningFee);
+
+        const finalZoningFee =
+          applicant.renewZoningFee !== "" &&
+          applicant.renewZoningFee !== undefined &&
+          applicant.renewZoningFee !== null
+            ? applicant.renewZoningFee
+            : zoningFee;
+
+        formData.append("zoningFee", finalZoningFee);
       }
 
       await axios.post(`${API}/backroom/zoning/approve/${id}`, formData, {
