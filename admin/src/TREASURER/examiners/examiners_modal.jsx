@@ -467,6 +467,11 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
               label="Photo (Exterior)"
               fileData={applicant}
             />
+            <FileField
+              fileKey="RecentBusinessPermit"
+              label="Business Permit"
+              fileData={applicant}
+            />
           </Section>
         </DialogContent>
 

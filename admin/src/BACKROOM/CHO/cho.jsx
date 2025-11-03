@@ -339,7 +339,7 @@ function Cho() {
                   sx={{ cursor: "pointer" }}
                   onClick={() => openModal(applicant)}
                 >
-                  <TableCell>{applicant.BIN}</TableCell>
+                  <TableCell>{applicant.bin}</TableCell>
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>
