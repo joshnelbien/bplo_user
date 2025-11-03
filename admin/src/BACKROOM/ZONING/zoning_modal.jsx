@@ -163,7 +163,6 @@ function ZoningApplicantModal({
   const [selectedReasons, setSelectedReasons] = useState([]); // New state for selected reasons
   const [feeError, setFeeError] = useState(false);
   const [renewZoningFee, setRenewZoningFee] = useState("");
-  console.log("Applicant Data in Modal:", applicant);
 
   const files = [{ label: "Zoning Certificate", name: "zoningCert" }];
 
@@ -196,7 +195,6 @@ function ZoningApplicantModal({
       return;
     }
 
-    // ✅ Pass renewZoningFee to parent so it can be stored before approval modal
     onApprove(applicant.id, renewZoningFee);
     setSuccessOpen(true);
   };
@@ -664,7 +662,7 @@ function ZoningApplicantModal({
               ) : null}
             </>
           ) : (
-            <ZoningCert applicant={applicant} />
+            <ZoningCert applicant={applicant} renewZoningFee={renewZoningFee} />
           )}
         </DialogContent>
         {/* ✅ Cleaned Up Actions */}

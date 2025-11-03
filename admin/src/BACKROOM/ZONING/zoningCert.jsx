@@ -53,7 +53,7 @@ const getTextFieldWidth = (value) => {
   return `${Math.max(minWidth, value.length * widthPerChar)}px`;
 };
 
-function ZoningCert({ applicant }) {
+function ZoningCert({ applicant, renewZoningFee }) {
   const today = new Date();
   const day = today.getDate();
   const month = getFilipinoMonth(today.getMonth());
@@ -68,7 +68,10 @@ function ZoningCert({ applicant }) {
     totalCapital: applicant.totalCapital || "150000",
   });
 
-  const zoningFee = calculateZoningFee(Number(form.totalCapital));
+  const zoningFee =
+    applicant.application === "Renew"
+      ? renewZoningFee
+      : calculateZoningFee(Number(form.totalCapital));
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -86,7 +89,14 @@ function ZoningCert({ applicant }) {
     const logoWidth = 30; // mm
     const logoHeight = 30; // mm
     // Center the logo above the text block
-    doc.addImage(logoPath, "PNG", 105 - logoWidth / 2, y, logoWidth, logoHeight);
+    doc.addImage(
+      logoPath,
+      "PNG",
+      105 - logoWidth / 2,
+      y,
+      logoWidth,
+      logoHeight
+    );
     y += logoHeight + 5; // Move Y down past the logo
 
     // --- HEADER ---
@@ -109,8 +119,7 @@ function ZoningCert({ applicant }) {
     doc.setFont("Times", "normal");
 
     // Full paragraph
-    const paragraph1 = 
-      `ITO AY PAGPAPATUNAY na ang isang lugar na lupang matatagpuan sa barangay ${form.barangay}, San Pablo City, nakatala sa pangalan ni ${form.firstName} ${form.lastName} ay nakakasakop sa SONANG nakatalaga sa/o para gamiting RES/COMM/IND/AGRI/INS, dahil dito ang pagtatayo ng ${form.businessType} ay maaaring pahintulutan at pasubaling babawiin o patitigilin sa sandaling mapatunayan naglalagay ng panganib sa PANGMADLANG KALUSUGAN AT KALIGTASAN.`;
+    const paragraph1 = `ITO AY PAGPAPATUNAY na ang isang lugar na lupang matatagpuan sa barangay ${form.barangay}, San Pablo City, nakatala sa pangalan ni ${form.firstName} ${form.lastName} ay nakakasakop sa SONANG nakatalaga sa/o para gamiting RES/COMM/IND/AGRI/INS, dahil dito ang pagtatayo ng ${form.businessType} ay maaaring pahintulutan at pasubaling babawiin o patitigilin sa sandaling mapatunayan naglalagay ng panganib sa PANGMADLANG KALUSUGAN AT KALIGTASAN.`;
 
     doc.text(paragraph1, marginX, y, { maxWidth: 170, textAlign: "justify" });
 
@@ -177,12 +186,12 @@ function ZoningCert({ applicant }) {
               ZONING AND LAND USE DIVISION
             </Typography>
           </Grid>
-        
         </Grid>
 
         {/* --- Certificate Body --- */}
         <Typography paragraph sx={{ textAlign: "justify", mt: 5, mb: 2 }}>
-          ITO AY PAGPAPATUNAY na ang isang lugar na lupang matatagpuan sa barangay{" "}
+          ITO AY PAGPAPATUNAY na ang isang lugar na lupang matatagpuan sa
+          barangay{" "}
           <TextField
             name="barangay"
             value={form.barangay}
@@ -241,7 +250,8 @@ function ZoningCert({ applicant }) {
           />
         </Typography>
         <Typography variant="subtitle1" sx={{ mb: 3 }}>
-          ZONING FEE: <b>{zoningFee === "Exempted" ? zoningFee : `₱${zoningFee}`}</b>
+          ZONING FEE:{" "}
+          <b>{zoningFee === "Exempted" ? zoningFee : `₱${zoningFee}`}</b>
         </Typography>
 
         {/* Signature Section */}
