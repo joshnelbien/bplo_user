@@ -206,6 +206,7 @@ router.post(
         {
           ZONING: "Approved",
           ZONINGtimeStamp: approveTime,
+          zoningFee: zoningFee,
           ZONINGdecline: "",
           zoningCert: req.file ? req.file.buffer : null,
           zoningCert_filename: req.file ? req.file.originalname : null,
