@@ -23,8 +23,10 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import { useState, useEffect } from "react";
 import PaymentBreakdownModal from "./PaymentBreakdownModal";
 import PaymentModal from "./PaymentModal";
+import FeeModal from "./fee"; // <-- Import your FeeModal
 
 const API = import.meta.env.VITE_API_BASE;
+
 // Component to display a normal text field
 const Field = ({
   label,
@@ -144,6 +146,7 @@ function TreasurersApplicantModal({
   onClose,
   onApprove,
   filter,
+  onDecline, // Ensure this is passed from parent
 }) {
   if (!isOpen || !applicant) return null;
 
@@ -155,9 +158,14 @@ function TreasurersApplicantModal({
   const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [payment, setPayment] = useState(false);
+  const [feeModalOpen, setFeeModalOpen] = useState(false); // <-- New state for Fee Modal
 
   const handlePaymentClick = () => {
     setPayment(true);
+  };
+
+  const handleFeeClick = () => {
+    setFeeModalOpen(true);
   };
 
   useEffect(() => {
@@ -233,7 +241,16 @@ function TreasurersApplicantModal({
   return (
     <>
       <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
-        <DialogTitle>Applicant Details</DialogTitle>
+        <DialogTitle
+          sx={{
+            backgroundColor: "#1d5236",
+            color: "white",
+            textAlign: "center",
+          }}
+        >
+          Applicant Details
+        </DialogTitle>
+
         <DialogContent dividers>
           {/* Business Info */}
           <Section title="Business Information">
@@ -332,22 +349,16 @@ function TreasurersApplicantModal({
             <Field label="Office Type" value={applicant.officeType} />
 
             {(() => {
-              // ✅ Utility function to safely parse CSV-like fields with quotes
               const parseCSV = (text) => {
                 if (!text) return [];
                 return text
-
                   .trim()
-
                   .replace(/^\[|\]$/g, "")
-
                   .split(/",\s*"?/)
-
                   .map((val) => val.replace(/^"|"$/g, "").trim())
                   .filter((val) => val.length > 0);
               };
 
-              // ✅ Extract arrays for each field
               const lobArr = parseCSV(applicant.lineOfBusiness);
               const productArr = parseCSV(applicant.productService);
               const unitArr = parseCSV(applicant.Units);
@@ -356,7 +367,6 @@ function TreasurersApplicantModal({
               const businessNatureArr = parseCSV(applicant.businessNature);
               const lineCodeArr = parseCSV(applicant.lineCode);
 
-              // ✅ Find the maximum length among arrays (in case some are shorter)
               const maxLength = Math.max(
                 lobArr.length,
                 productArr.length,
@@ -385,7 +395,7 @@ function TreasurersApplicantModal({
                       mb: 2,
                       borderRadius: 2,
                       backgroundColor: "#f9f9f9",
-                      width: "100%", // 🟩 Ensure Paper itself takes full width
+                      width: "100%",
                     }}
                   >
                     <Typography
@@ -397,13 +407,12 @@ function TreasurersApplicantModal({
                     </Typography>
 
                     <Grid container spacing={2}>
-                      {/* 🟩 Line of Business — full width */}
                       <Field
                         label="Line of Business"
                         value={lob}
                         fullWidth
                         multiline
-                        rows={3} // adjust rows if you want a taller box (e.g., 4 or 5)
+                        rows={3}
                       />
 
                       <Grid item xs={12} sm={6}>
@@ -490,15 +499,31 @@ function TreasurersApplicantModal({
         <DialogActions>
           <Button
             onClick={onClose}
-            variant="outlined"
+            variant="contained"
             sx={{
-              color: "#1c541eff",
-              borderColor: "#1c541eff",
-              "&:hover": { borderColor: "#1c541eff" },
+              color: "white",
+              backgroundColor: "#70706fff",
+              "&:hover": {
+                backgroundColor: "#acababff",
+              },
               width: "100px",
             }}
           >
             Close
+          </Button>
+
+          {/* New Fee Button */}
+          <Button
+            onClick={handleFeeClick}
+            variant="contained"
+            sx={{
+              backgroundColor: "#3179d6ff",
+              color: "white",
+              width: "100px",
+              "&:hover": { backgroundColor: "#0d42a3ff" },
+            }}
+          >
+            Fee
           </Button>
 
           {filter === "pending" && (
@@ -514,10 +539,10 @@ function TreasurersApplicantModal({
 
           {filter === "payment" && (
             <Button
-              onClick={handlePaymentClick} // you can define this function below
+              onClick={handlePaymentClick}
               variant="contained"
               color="success"
-              sx={{ width: "120px" }}
+              sx={{ width: "100px" }}
             >
               Payment
             </Button>
@@ -704,6 +729,8 @@ function TreasurersApplicantModal({
           </Button>
         </Paper>
       </Dialog>
+
+      {/* Existing Modals */}
       <PaymentBreakdownModal
         open={paymentOpen}
         onClose={() => setPaymentOpen(false)}
@@ -717,6 +744,13 @@ function TreasurersApplicantModal({
         open={payment}
         applicant={applicant}
         onClose={() => setPayment(false)}
+      />
+
+      {/* New Fee Modal */}
+      <FeeModal
+        open={feeModalOpen}
+        onClose={() => setFeeModalOpen(false)}
+        applicant={applicant}
       />
     </>
   );
