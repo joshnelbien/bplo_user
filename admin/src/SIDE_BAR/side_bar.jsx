@@ -68,14 +68,9 @@ const activeListItemStyle = {
 const menuItems = [
   { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon /> },
   {
-    text: "New Application",
+    text: "Client Applications",
     path: "/new_records",
     icon: <AssignmentTurnedInIcon />,
-  },
-  {
-    text: "Renew Application",
-    path: "/renew_records",
-    icon: <AutorenewIcon />,
   },
   {
     text: "Business Profile",

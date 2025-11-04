@@ -293,7 +293,7 @@ function Examiners() {
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                 <TableCell>
-                  <strong>Applicant ID</strong>
+                  <strong>Application Type</strong>
                 </TableCell>
                 <TableCell>
                   <strong>Business Name</strong>
@@ -317,7 +317,7 @@ function Examiners() {
                   sx={{ cursor: "pointer" }}
                   onClick={() => openModal(applicant)}
                 >
-                  <TableCell>{applicant.id}</TableCell>
+                  <TableCell>{applicant.application}</TableCell>
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>

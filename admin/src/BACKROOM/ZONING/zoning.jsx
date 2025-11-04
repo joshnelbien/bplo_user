@@ -452,6 +452,9 @@ function Zoning() {
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                 <TableCell>
+                  <strong>Application Type</strong>
+                </TableCell>
+                <TableCell>
                   <strong>BIN</strong>
                 </TableCell>
                 <TableCell>
@@ -476,6 +479,7 @@ function Zoning() {
                   sx={{ cursor: "pointer" }}
                   onClick={() => openModal(applicant)}
                 >
+                  <TableCell>{applicant.application}</TableCell>
                   <TableCell>{applicant.bin}</TableCell>
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
