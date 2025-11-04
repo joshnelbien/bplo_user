@@ -81,17 +81,6 @@ export default function Step1BusinessInfo({ formData, handleChange, errors }) {
         </TextField>
 
         {/* Dynamic Registration No. */}
-        <TextField
-          label={regLabel}
-          name="dscRegNo"
-          value={formData.dscRegNo || ""}
-          onChange={handleUppercaseChange}
-          fullWidth
-          variant="outlined"
-          sx={{ minWidth: 300 }}
-          error={!!errors.dscRegNo}
-          helperText={errors.dscRegNo}
-        />
 
         {/* Business Name */}
         <TextField
@@ -118,7 +107,20 @@ export default function Step1BusinessInfo({ formData, handleChange, errors }) {
           helperText={errors.tin_no}
           // This will gray out the field and make it un-editable
         />
+
+        <TextField
+          label={regLabel}
+          name="dscRegNo"
+          value={formData.dscRegNo || ""}
+          onChange={handleUppercaseChange}
+          fullWidth
+          variant="outlined"
+          sx={{ minWidth: 300 }}
+          error={!!errors.dscRegNo}
+          helperText={errors.dscRegNo}
+        />
         {/* Trade Name */}
+
         <TextField
           label="Trade Name"
           name="trade_name"
