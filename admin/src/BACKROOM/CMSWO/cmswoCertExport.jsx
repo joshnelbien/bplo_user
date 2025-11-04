@@ -1,155 +1,208 @@
 // src/components/cmswoCertExport.jsx
 import React, { useRef } from "react";
-import {
-  Box,
-  Typography,
-  TableContainer,
-  Paper,
-  Button,
-} from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
 const CmswoCertExport = ({ applicant }) => {
   const certRef = useRef();
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "N/A";
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
   const handleDownloadPDF = async () => {
     const element = certRef.current;
-    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: null,
+    });
     const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF("p", "mm", "a4");
-    const imgWidth = 210;
-    const pageHeight = 295;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
+    const width = 210;
+    const height = (canvas.height * width) / canvas.width;
 
-    let position = 0;
-
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-
+    pdf.addImage(imgData, "PNG", 0, 0, width, height);
     pdf.save(`CSWMO_Certificate_${applicant.bin || "Applicant"}.pdf`);
   };
 
+  // Helper to pick the day with ordinal suffix
+  const dayWithSuffix = (day) => {
+    const s = ["th", "st", "nd", "rd"],
+      v = day % 100;
+    return day + (s[(v - 20) % 10] || s[v] || s[0]);
+  };
+
+  const issueDate = applicant.issueDate
+    ? new Date(applicant.issueDate)
+    : new Date();
+  const day = dayWithSuffix(issueDate.getDate());
+  const month = issueDate.toLocaleString("en-US", { month: "long" });
+  const year = issueDate.getFullYear();
+
   return (
     <Box sx={{ p: 3 }}>
-      {/* Hidden printable area */}
+      {/* Printable area */}
       <Box
         ref={certRef}
         sx={{
-          p: 6,
-          backgroundColor: "#fff",
-          borderRadius: 2,
+          position: "relative",
           width: "210mm",
-          minHeight: "297mm",
-          margin: "0 auto",
+          height: "297mm",
+          backgroundImage: `url(/CSWMOwatermark.png)`,
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          backgroundSize: "90%",
           fontFamily: "'Times New Roman', Times, serif",
           color: "#000",
-          "@media print": {
-            size: "A4",
-            margin: 0,
-            body: { margin: 0 },
-          },
+          overflow: "hidden",
+          pageBreakAfter: "always",
         }}
       >
-        {/* Logo */}
-        <Box textAlign="center" mb={2}>
-          <img
-            src="/spclogo.png"
-            alt="San Pablo City Logo"
-            style={{
-              width: "80px",
-              height: "auto",
-              marginBottom: "8px",
-            }}
-          />
-        </Box>
+        {/* Left logo – SMALLER */}
+        <Box
+          component="img"
+          src="/spclogo.png"
+          alt="left logo"
+          sx={{
+            position: "absolute",
+            top: "25mm", // pushed down a bit so it doesn’t touch the header
+            left: "20mm", // a little more margin from edge
+            width: "38mm", // ← 30% smaller (was 55mm)
+            height: "auto",
+            opacity: 0.85,
+            zIndex: 1,
+          }}
+        />
+
+        {/* Right logo – SMALLER & MIRRORED */}
+        <Box
+          component="img"
+          src="/CSWMOlogo.png"
+          alt="right logo"
+          sx={{
+            position: "absolute",
+            top: "25mm",
+            right: "20mm",
+            width: "38mm", // ← same 30% smaller
+            height: "auto",
+            opacity: 0.85,
+            transform: "scaleX(-1)",
+            zIndex: 1,
+          }}
+        />
 
         {/* Header */}
-        <Box textAlign="center" mb={3}>
-          <Typography variant="h5" fontWeight="bold">
-            SAN PABLO CITY
-          </Typography>
-          <Typography variant="h6">Office of the City Solid Waste Management</Typography>
-          <Typography variant="subtitle1" fontStyle="italic">
+        <Box textAlign="center" pt={8}>
+          <Typography variant="h6" fontWeight="bold">
             Republic of the Philippines
           </Typography>
-        </Box>
-
-        <Box textAlign="center" mb={5}>
-          <Typography variant="h4" fontWeight="bold" color="#1d5236">
-            CERTIFICATE OF SOLID WASTE MANAGEMENT COMPLIANCE
+          <Typography variant="h6" fontWeight="bold">
+            City Solid Waste Management Office
+          </Typography>
+          <Typography variant="h5" fontWeight="bold">
+            San Pablo City
           </Typography>
         </Box>
 
-        <Typography variant="body1" paragraph textAlign="justify">
-          This is to certify that:
-        </Typography>
-
-        <Box mx={6} mb={4}>
-          <Typography variant="h6" fontWeight="bold" gutterBottom>
-            {applicant.businessName || "________________________"}
+        {/* Title */}
+        <Box textAlign="center" mt={4} mb={3}>
+          <Typography variant="h5">This</Typography>
+          <Typography
+            variant="h3"
+            fontWeight="bold"
+            sx={{ textTransform: "uppercase", letterSpacing: 2 }}
+          >
+            Certificate of Completion
           </Typography>
+        </Box>
+
+        {/* Body */}
+        <Box px={10} textAlign="center">
+          <Typography variant="h6" gutterBottom>
+            Is hereby given to
+          </Typography>
+
+          {/* Name line */}
+          <Box
+            sx={{
+              borderBottom: "2px solid #000",
+              width: "100%",
+              mx: "auto",
+              py: 1,
+            }}
+          >
+            <Typography
+              variant="h5"
+              fontWeight="bold"
+              sx={{ letterSpacing: 1.5 }}
+            >
+              {applicant.fullName || "JUAN DELA CRUZ"}
+            </Typography>
+          </Box>
+
+          <Typography variant="body1" mt={3} lineHeight={1.8}>
+            for having successfully completed the{" "}
+            <strong>Seminar on Solid Waste Management</strong>, conducted as
+            part of the requirements for securing a Business Permit, in
+            accordance with the provisions of Republic Act No. 9003 (Ecological
+            Solid Waste Management Act of 2000) and City Ordinance No. 2006-27
+            of San Pablo City.
+          </Typography>
+        </Box>
+
+        {/* Date */}
+        <Box textAlign="center" mt={6}>
           <Typography variant="body1">
-            with Business Identification Number (BIN):{" "}
-            <strong>{applicant.bin || "N/A"}</strong>
-          </Typography>
-          <Typography variant="body1" paragraph>
-            located at{" "}
+            Given this{" "}
             <strong>
-              {applicant.addressLine1}, {applicant.barangay},{" "}
-              {applicant.cityOrMunicipality}, {applicant.province}
-            </strong>
-          </Typography>
-
-          <Typography variant="body1" paragraph textAlign="justify">
-            has been inspected and found to be in compliance with the provisions
-            of the City Solid Waste Management Ordinance and related environmental
-            laws and regulations.
-          </Typography>
-
-          <Typography variant="body1" paragraph>
-            This certificate is issued upon payment of the required{" "}
-            <strong>Solid Waste Management Fee</strong> in the amount of{" "}
-            <strong>
-              ₱{parseFloat(applicant.csmwoFee || 0).toLocaleString()}
-            </strong>.
+              {day} day of {month}, {year}
+            </strong>{" "}
+            in the City of San Pablo.
           </Typography>
         </Box>
 
         {/* Signatures */}
-        <Box display="flex" justifyContent="space-between" mt={10} px={6}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            px: 12,
+            mt: 8,
+            position: "relative",
+            zIndex: 2,
+          }}
+        >
+          {/* Left signatory */}
           <Box textAlign="center">
+            <Box
+              component="img"
+              src="/samplesig.png"
+              alt="signature"
+              sx={{ width: "90px", mb: -1 }}
+            />
             <Typography variant="body1" fontWeight="bold">
-              {applicant.inspectorName || "________________________"}
+              CHARLIE B. BELARMINO
             </Typography>
-            <Typography variant="caption">Inspector / Authorized Signatory</Typography>
+            <Typography variant="caption">
+              Public Services Officer IV
+            </Typography>
           </Box>
+
+          {/* Right signatory */}
           <Box textAlign="center">
+            <Box
+              component="img"
+              src="/samplesig.png"
+              alt="signature"
+              sx={{ width: "90px", mb: -1 }}
+            />
             <Typography variant="body1" fontWeight="bold">
-              {applicant.cmoHead || "________________________"}
+              HON. ARACADIO B. GAPANGADA JR, MNSA
             </Typography>
-            <Typography variant="caption">City Solid Waste Management Officer</Typography>
+            <Typography variant="caption">
+              City Mayor of San Pablo City
+            </Typography>
           </Box>
         </Box>
       </Box>
-
     </Box>
   );
 };
