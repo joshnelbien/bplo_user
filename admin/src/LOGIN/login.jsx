@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -23,13 +23,32 @@ function Login() {
   const [error, setError] = useState("");
   const API = import.meta.env.VITE_API_BASE;
 
+  const fetchProfile = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const res = await axios.get(`${API}/adminAccounts/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      console.log("✅ FETCHED PROFILE:", res.data); // 👈 ADD THIS
+      localStorage.setItem("adminData", JSON.stringify(res.data));
+    } catch (err) {
+      console.log("❌ Token invalid. Logging out.", err);
+      localStorage.removeItem("token");
+      localStorage.removeItem("adminData");
+      navigate("/");
+    }
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      // 🔹 Temporary hardcoded SuperAdmin login
+      // ✅ Hardcoded SuperAdmin
       if (email === "superadmin@gmail.com" && password === "adminpassword") {
         const superAdmin = {
           Email: "superadmin@gmail.com",
@@ -38,57 +57,55 @@ function Login() {
           Name: "System Administrator",
         };
 
-        const fakeToken = "superadmin-token-123";
+        const fakeToken = "superadmin-token";
 
-        // Save to localStorage
         localStorage.setItem("adminData", JSON.stringify(superAdmin));
         localStorage.setItem("token", fakeToken);
 
         setOpenSuccessDialog(true);
 
-        // Redirect to SuperAdmin dashboard (you can change this path)
         setTimeout(() => {
           setOpenSuccessDialog(false);
           navigate("/dashboard");
         }, 2000);
 
-        return; // ✅ Stop here, no backend call needed
+        return;
       }
 
-      // 🔹 Otherwise, continue with backend authentication
+      // ✅ Normal login
       const response = await axios.post(`${API}/adminAccounts/admin-login`, {
         Email: email,
         Password: password,
       });
 
-      if (response.status === 200) {
-        const { token, admin } = response.data;
+      const { token, admin } = response.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("adminData", JSON.stringify(admin));
 
-        localStorage.setItem("adminData", JSON.stringify(admin));
-        localStorage.setItem("token", token);
+      // ✅ Fetch latest profile after login
+      await fetchProfile();
 
-        setOpenSuccessDialog(true);
+      setOpenSuccessDialog(true);
 
-        const officeRoutes = {
-          BPLO: "/dashboard",
-          EXAMINERS: "/examiners",
-          "BUSINESS TAX": "/businessTax",
-          TREASURER: "/treasurers",
-          OBO: "/obo",
-          CSWMO: "/cmswo",
-          CENRO: "/cenro",
-          ZONING: "/zoning",
-          CHO: "/cho",
-        };
+      const officeRoutes = {
+        BPLO: "/dashboard",
+        EXAMINERS: "/examiners",
+        "BUSINESS TAX": "/businessTax",
+        TREASURER: "/treasurers",
+        OBO: "/obo",
+        CSWMO: "/cmswo",
+        CENRO: "/cenro",
+        ZONING: "/zoning",
+        CHO: "/cho",
+      };
 
-        const redirectPath =
-          officeRoutes[admin.Office?.toUpperCase()] || "/dashboard";
+      const redirectPath =
+        officeRoutes[admin.Office?.toUpperCase()] || "/dashboard";
 
-        setTimeout(() => {
-          setOpenSuccessDialog(false);
-          navigate(redirectPath);
-        }, 2000);
-      }
+      setTimeout(() => {
+        setOpenSuccessDialog(false);
+        navigate(redirectPath);
+      }, 2000);
     } catch (err) {
       console.error(err);
       if (err.response?.status === 404) setError("Email not found");
@@ -98,6 +115,12 @@ function Login() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // If already logged in, fetch profile
+    const token = localStorage.getItem("token");
+    if (token) fetchProfile();
+  }, []);
 
   return (
     <Box
