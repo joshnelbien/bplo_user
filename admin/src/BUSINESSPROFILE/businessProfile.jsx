@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import Side_bar from "../SIDE_BAR/side_bar";
 import BusinessProfileModal from "./businessProfile_modal";
+import TopBar from "../NAVBAR/nav_bar";
 import {
   Box,
   Button,
@@ -19,114 +20,8 @@ import {
   alpha,
 } from "@mui/material";
 
-/* ================== CONSTANTS ================== */
 const primaryGreen = "#1d5236";
 const TOP_BAR_HEIGHT = 80; // Define height constant
-
-/* ================== LIVE CLOCK ================== */
-
-function LiveClock() {
-  const [currentDateTime, setCurrentDateTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentDateTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  const timeOptions = {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  };
-
-  const dateOptions = {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  };
-
-  const timeString = currentDateTime.toLocaleTimeString("en-US", timeOptions);
-  const dateString = currentDateTime.toLocaleDateString("en-US", dateOptions);
-
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-start",
-        color: "white",
-        pl: 2,
-        ml: -148, // Margin to push it past the side bar area
-      }}
-    >
-      <Typography
-        variant="h5"
-        sx={{
-          fontWeight: "bold",
-          lineHeight: 1,
-          textShadow: `0 0 5px ${alpha("#000000", 0.5)}`,
-        }}
-      >
-        {timeString}
-      </Typography>
-      <Typography variant="body2" sx={{ fontSize: "0.8rem", opacity: 0.8 }}>
-        {dateString}
-      </Typography>
-    </Box>
-  );
-}
-
-/* ================== TOP BAR (TITLE: BUSINESS PROFILE) ================== */
-
-function TopBar() {
-  return (
-    <Box
-      sx={{
-        width: "100%",
-        height: TOP_BAR_HEIGHT,
-        backgroundColor: primaryGreen,
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        p: 2,
-        boxSizing: "border-box",
-        color: "white",
-        boxShadow: 3,
-        zIndex: 1100,
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-      }}
-    >
-      {/* 1. LEFT ALIGNED: LIVE CLOCK */}
-      <LiveClock />
-
-      {/* 2. CENTERED: PAGE TITLE */}
-      <Typography
-        variant="h5"
-        component="div"
-        sx={{
-          fontWeight: "light",
-          textShadow: `0 0 5px ${alpha("#000000", 0.5)}`,
-          position: "absolute",
-          ml: 8,
-          left: "50%",
-          transform: "translateX(-50%)",
-          display: { xs: "none", sm: "block" },
-        }}
-      >
-        BUSINESS PROFILE
-      </Typography>
-    </Box>
-  );
-}
 
 // Renamed the component to follow React conventions (PascalCase)
 function BusinessProfile() {
