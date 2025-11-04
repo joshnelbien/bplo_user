@@ -172,8 +172,12 @@ function Side_bar() {
   const handleLogout = () => setOpenLogoutDialog(true);
 
   const confirmLogout = () => {
-    navigate("/");
+    localStorage.removeItem("adminData"); // remove logged-in session data
+    localStorage.removeItem("token"); // if you stored JWT token
+    localStorage.clear(); // optional: clears everything
+
     setOpenLogoutDialog(false);
+    navigate("/");
   };
 
   const drawer = (
