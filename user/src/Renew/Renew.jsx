@@ -27,7 +27,7 @@ function Renewal() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    setForm({ ...form, [name]: value.toUpperCase() });
   };
 
   const handleSubmit = async (e) => {
