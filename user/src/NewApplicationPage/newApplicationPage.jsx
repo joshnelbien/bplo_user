@@ -318,7 +318,29 @@ function NewApplicationPage() {
 
   const handleFileChange = (e) => {
     const { name, files } = e.target;
-    setFilesState((prev) => ({ ...prev, [name]: files[0] }));
+    const file = files[0];
+
+    if (!file) return;
+
+    // Allowed file types
+    const allowedTypes = [
+      "application/pdf",
+      "image/png",
+      "image/jpg",
+      "image/jpeg",
+      "image/webp",
+    ];
+
+    // Validate file type
+    if (!allowedTypes.includes(file.type)) {
+      alert(
+        "Invalid file type. Only PDF, PNG, JPG, JPEG, and WEBP are allowed."
+      );
+      e.target.value = ""; // Reset input
+      return;
+    }
+
+    setFilesState((prev) => ({ ...prev, [name]: file }));
   };
 
   const handleSnackbarClose = () => {
