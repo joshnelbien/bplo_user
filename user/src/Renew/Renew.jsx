@@ -16,74 +16,52 @@ function Renewal() {
   const { id } = useParams();
   const [form, setForm] = useState({
     business_name: "",
-    bin: "",
+    incharge_last_name: "",
   });
-  const [loading, setLoading] = useState(false); // ✅ Show spinner while searching
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_BASE;
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const formatBIN = (value) => {
-    const digits = value.replace(/\D/g, "").slice(0, 18);
-    if (digits.length <= 7) return digits;
-    if (digits.length <= 11) return `${digits.slice(0, 7)}-${digits.slice(7)}`;
-    return `${digits.slice(0, 7)}-${digits.slice(7, 11)}-${digits.slice(
-      11,
-      18
-    )}`;
-  };
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === "bin") {
-      setForm({ ...form, bin: formatBIN(value) });
-    } else {
-      setForm({ ...form, [name]: value });
-    }
+    setForm({ ...form, [name]: value.toUpperCase() });
   };
 
-  // ✅ Submit form — fetch data directly from backend
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const binDigitsOnly = form.bin.replace(/\D/g, "");
-    if (binDigitsOnly.length !== 18) {
-      alert("BIN must follow the format 0000000-0000-0000000 (18 digits).");
-      return;
-    }
-
-    setLoading(true); // ✅ Start loading animation
+    setLoading(true);
 
     try {
-      console.log("🔍 Fetching and searching database for:");
-      console.log("   BIN:", form.bin);
+      console.log("🔍 Searching for:");
+      console.log("   Last Name:", form.incharge_last_name);
       console.log("   Business Name:", form.business_name);
 
       const res = await axios.get(`${API}/businessProfile/businessProfiles`);
 
       const matchedRecord = res.data.find(
         (item) =>
-          item.bin?.trim() === form.bin.trim() &&
+          item.incharge_last_name?.trim().toLowerCase() ===
+            form.incharge_last_name.trim().toLowerCase() &&
           item.business_name?.trim().toLowerCase() ===
             form.business_name.trim().toLowerCase()
       );
 
       if (matchedRecord) {
-        console.log("✅ Exact Matching Record Found:", matchedRecord);
+        console.log("✅ Matching record found:", matchedRecord);
         navigate(`/renewal-form/step1`, { state: { record: matchedRecord } });
       } else {
-        console.warn("⚠️ No exact matching record found.");
         alert(
-          "No matching record found. Please check your BIN and Business Name."
+          "No matching record found. Please verify the Business Name and Last Name."
         );
       }
     } catch (error) {
       console.error("❌ Error searching renewal:", error);
-      alert("An error occurred while searching. Please try again.");
+      alert("An error occurred. Please try again.");
     } finally {
-      setLoading(false); // ✅ Stop loading spinner
+      setLoading(false);
     }
   };
 
@@ -121,15 +99,13 @@ function Renewal() {
           />
 
           <TextField
-            label="Business Identification Number (BIN)"
-            name="bin"
-            value={form.bin}
+            label="In-Charge Last Name"
+            name="incharge_last_name"
+            value={form.incharge_last_name}
             onChange={handleChange}
             required
             fullWidth
             color="primary"
-            placeholder="0000000-0000-0000000"
-            helperText="BIN must follow the format 0000000-0000-0000000"
           />
 
           <Button

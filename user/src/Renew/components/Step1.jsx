@@ -25,22 +25,14 @@ export default function Step1BusinessInfo({ formData, handleChange, errors }) {
 
   // ✅ Corrected TIN input: 9 digits, formatted as XXX-XX-XXXX
   const handleTINInput = (e) => {
-    // Extract only digits from the input and limit to 9
-    let digits = e.target.value.replace(/[^0-9]/g, "").slice(0, 9);
+    let digits = e.target.value.replace(/[^0-9]/g, "").slice(0, 12);
 
-    // Build the formatted string
     let formatted = "";
-    if (digits.length > 0) {
-      formatted = digits.slice(0, 3);
-    }
-    if (digits.length > 3) {
-      formatted += "-" + digits.slice(3, 5);
-    }
-    if (digits.length > 5) {
-      formatted += "-" + digits.slice(5, 9);
-    }
+    if (digits.length > 0) formatted = digits.slice(0, 3);
+    if (digits.length > 3) formatted += "-" + digits.slice(3, 6);
+    if (digits.length > 6) formatted += "-" + digits.slice(6, 9);
+    if (digits.length > 9) formatted += "-" + digits.slice(9, 12);
 
-    // Update the form data with the new formatted value
     handleChange({ target: { name: e.target.name, value: formatted } });
   };
 
