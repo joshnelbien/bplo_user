@@ -63,28 +63,11 @@ const CmswoCertExport = ({ applicant }) => {
           alt="left logo"
           sx={{
             position: "absolute",
-            top: "25mm", // pushed down a bit so it doesn’t touch the header
+            top: "15mm", // pushed down a bit so it doesn’t touch the header
             left: "20mm", // a little more margin from edge
-            width: "38mm", // ← 30% smaller (was 55mm)
+            width: "28mm", // ← 30% smaller (was 55mm)
             height: "auto",
             opacity: 0.85,
-            zIndex: 1,
-          }}
-        />
-
-        {/* Right logo – SMALLER & MIRRORED */}
-        <Box
-          component="img"
-          src="/CSWMOlogo.png"
-          alt="right logo"
-          sx={{
-            position: "absolute",
-            top: "25mm",
-            right: "20mm",
-            width: "38mm", // ← same 30% smaller
-            height: "auto",
-            opacity: 0.85,
-            transform: "scaleX(-1)",
             zIndex: 1,
           }}
         />
@@ -94,10 +77,10 @@ const CmswoCertExport = ({ applicant }) => {
           <Typography variant="h6" fontWeight="bold">
             Republic of the Philippines
           </Typography>
-          <Typography variant="h6" fontWeight="bold">
+          <Typography variant="h5" fontWeight="bold">
             City Solid Waste Management Office
           </Typography>
-          <Typography variant="h5" fontWeight="bold">
+          <Typography variant="h6" fontWeight="bold">
             San Pablo City
           </Typography>
         </Box>
@@ -106,7 +89,7 @@ const CmswoCertExport = ({ applicant }) => {
         <Box textAlign="center" mt={4} mb={3}>
           <Typography variant="h5">This</Typography>
           <Typography
-            variant="h3"
+            variant="h5"
             fontWeight="bold"
             sx={{ textTransform: "uppercase", letterSpacing: 2 }}
           >
