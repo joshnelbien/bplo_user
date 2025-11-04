@@ -572,11 +572,15 @@ function OboApplicantModal({
               label="Photo (Exterior)"
               fileData={applicant}
             />
-            <FileField
-              fileKey="RecentBusinessPermit"
-              label="Business Permit"
-              fileData={applicant}
-            />
+            {applicant.application === "Renew" && (
+              <>
+                <FileField
+                  fileKey="RecentBusinessPermit"
+                  label="Business Permit"
+                  fileData={applicant}
+                />
+              </>
+            )}
           </Section>
           {applicant.OBO !== "Approved" && (
             <>
