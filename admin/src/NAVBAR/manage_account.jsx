@@ -8,9 +8,13 @@ import {
   Grid,
   Avatar,
   Typography,
+  Box,
+  Divider,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import ZoomInIcon from "@mui/icons-material/ZoomIn";
 
 const API = import.meta.env.VITE_API_BASE;
 
@@ -29,7 +33,9 @@ export default function ManageAccountModal({ open, handleClose }) {
   const [previewProfile, setPreviewProfile] = useState(null);
   const [previewSign, setPreviewSign] = useState(null);
 
-  // ✅ Load current admin data
+  // For viewing images
+  const [viewImage, setViewImage] = useState(null);
+
   useEffect(() => {
     const loadAdmin = async () => {
       try {
@@ -64,9 +70,8 @@ export default function ManageAccountModal({ open, handleClose }) {
     if (open) loadAdmin();
   }, [open]);
 
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
 
   const handleFile = (e) => {
     const { name, files } = e.target;
@@ -78,11 +83,9 @@ export default function ManageAccountModal({ open, handleClose }) {
     if (name === "signatories") setPreviewSign(URL.createObjectURL(file));
   };
 
-  // ✅ Submit
   const handleSubmit = async () => {
     try {
       const token = localStorage.getItem("token");
-
       const fd = new FormData();
       Object.entries(form).forEach(([key, value]) => {
         if (value !== null) fd.append(key, value);
@@ -97,108 +100,187 @@ export default function ManageAccountModal({ open, handleClose }) {
 
       alert("✅ Account updated successfully!");
       handleClose();
-      window.location.reload(); // refresh topbar info
+      window.location.reload();
     } catch (err) {
       console.log("❌ Update error:", err);
       alert("Failed to update account.");
     }
   };
 
+  const btnColor = "#1d5236";
+  const btnHover = "#17452c";
+
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-      <DialogTitle>Manage Account</DialogTitle>
-      <DialogContent dividers>
-        <Grid container spacing={2}>
-          <Grid item xs={6}>
-            <TextField
-              label="First Name"
-              fullWidth
-              name="FirstName"
-              value={form.FirstName}
-              onChange={handleChange}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              label="Middle Name"
-              fullWidth
-              name="MiddleName"
-              value={form.MiddleName}
-              onChange={handleChange}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              label="Last Name"
-              fullWidth
-              name="LastName"
-              value={form.LastName}
-              onChange={handleChange}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              label="Email"
-              fullWidth
-              name="Email"
-              value={form.Email}
-              onChange={handleChange}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              label="Office"
-              fullWidth
-              name="Office"
-              value={form.Office}
-              disabled
-              onChange={handleChange}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              label="Position"
-              fullWidth
-              name="Position"
-              value={form.Position}
-              onChange={handleChange}
-            />
+    <>
+      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+        <DialogTitle
+          sx={{
+            background: btnColor,
+            color: "white",
+            fontWeight: 700,
+            textAlign: "center",
+          }}
+        >
+          Manage Account
+        </DialogTitle>
+
+        <DialogContent dividers sx={{ background: "#f5f7f5" }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ mb: 2, fontWeight: 600, color: btnColor }}
+          >
+            Personal Information
+          </Typography>
+
+          <Grid container spacing={2}>
+            {[
+              ["First Name", "FirstName"],
+              ["Middle Name", "MiddleName"],
+              ["Last Name", "LastName"],
+              ["Email Address", "Email"],
+              ["Office", "Office", true],
+              ["Position", "Position"],
+            ].map(([label, name, disabled]) => (
+              <Grid item xs={6} key={name}>
+                <TextField
+                  label={label}
+                  name={name}
+                  fullWidth
+                  size="small"
+                  disabled={disabled}
+                  value={form[name]}
+                  onChange={handleChange}
+                />
+              </Grid>
+            ))}
           </Grid>
 
-          <Grid item xs={6}>
-            <Typography mb={1}>Profile Photo</Typography>
-            <Avatar
-              src={previewProfile}
-              sx={{ width: 80, height: 80, mb: 1 }}
-            />
-            <input
-              type="file"
-              name="profile"
-              accept="image/*"
-              onChange={handleFile}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <Typography mb={1}>Signatory Image</Typography>
-            <Avatar src={previewSign} sx={{ width: 80, height: 80, mb: 1 }} />
-            <input
-              type="file"
-              name="signatories"
-              accept="image/*"
-              onChange={handleFile}
-            />
-          </Grid>
-        </Grid>
-      </DialogContent>
+          <Divider sx={{ my: 3 }} />
 
-      <DialogActions>
-        <Button onClick={handleClose} color="inherit">
-          Cancel
-        </Button>
-        <Button variant="contained" onClick={handleSubmit}>
-          Save
-        </Button>
-      </DialogActions>
-    </Dialog>
+          <Typography
+            variant="subtitle1"
+            sx={{ mb: 2, fontWeight: 600, color: btnColor }}
+          >
+            Profile & Signatory
+          </Typography>
+
+          <Grid container spacing={2}>
+            {/* Profile */}
+            <Grid item xs={6}>
+              <Box textAlign="center">
+                <Avatar
+                  src={previewProfile}
+                  sx={{
+                    width: 100,
+                    height: 100,
+                    margin: "auto",
+                    border: `3px solid ${btnColor}`,
+                  }}
+                />
+                <Button
+                  variant="contained"
+                  component="label"
+                  startIcon={<PhotoCameraIcon />}
+                  sx={{
+                    mt: 1,
+                    background: btnColor,
+                    "&:hover": { background: btnHover },
+                    textTransform: "none",
+                  }}
+                >
+                  Upload Profile
+                  <input
+                    type="file"
+                    name="profile"
+                    hidden
+                    accept="image/*"
+                    onChange={handleFile}
+                  />
+                </Button>
+
+                {previewProfile && (
+                  <Button
+                    size="small"
+                    startIcon={<ZoomInIcon />}
+                    sx={{ mt: 1, textTransform: "none", color: btnColor }}
+                    onClick={() => setViewImage(previewProfile)}
+                  >
+                    View Photo
+                  </Button>
+                )}
+              </Box>
+            </Grid>
+
+            {/* Signatory */}
+            <Grid item xs={6}>
+              <Box textAlign="center">
+                <Avatar
+                  src={previewSign}
+                  sx={{
+                    width: 100,
+                    height: 100,
+                    margin: "auto",
+                    border: `3px solid ${btnColor}`,
+                  }}
+                />
+                <Button
+                  variant="contained"
+                  component="label"
+                  startIcon={<PhotoCameraIcon />}
+                  sx={{
+                    mt: 1,
+                    background: btnColor,
+                    "&:hover": { background: btnHover },
+                    textTransform: "none",
+                  }}
+                >
+                  Upload Signatory
+                  <input
+                    type="file"
+                    name="signatories"
+                    hidden
+                    accept="image/*"
+                    onChange={handleFile}
+                  />
+                </Button>
+
+                {previewSign && (
+                  <Button
+                    size="small"
+                    startIcon={<ZoomInIcon />}
+                    sx={{ mt: 1, textTransform: "none", color: btnColor }}
+                    onClick={() => setViewImage(previewSign)}
+                  >
+                    View Signature
+                  </Button>
+                )}
+              </Box>
+            </Grid>
+          </Grid>
+        </DialogContent>
+
+        <DialogActions sx={{ background: "#f5f7f5", p: 2 }}>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button
+            variant="contained"
+            sx={{ background: btnColor, "&:hover": { background: btnHover } }}
+            onClick={handleSubmit}
+          >
+            Save Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ✅ View Image Modal */}
+      <Dialog open={Boolean(viewImage)} onClose={() => setViewImage(null)}>
+        <DialogContent>
+          <img
+            src={viewImage}
+            alt="Preview"
+            style={{ width: "100%", borderRadius: "8px" }}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
