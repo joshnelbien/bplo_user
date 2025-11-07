@@ -1,15 +1,22 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@mui/material";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import axios from "axios";
 
 function BusinessTaxPdfExport({ applicant, collections, total }) {
+  const [userSignatory, setUserSignatory] = useState(null);
+  const [defaultSignature, setDefaultSignature] = useState(null);
+  const API = import.meta.env.VITE_API_BASE;
+
+  // Format peso
   const formatPeso = (value) =>
     value > 0
       ? value.toLocaleString(undefined, { minimumFractionDigits: 2 })
       : "";
 
+  // ✅ Convert numbers to words (your original logic)
   function numberToWords(num) {
     if (num === 0) return "zero";
     const belowTwenty = [
@@ -49,10 +56,9 @@ function BusinessTaxPdfExport({ applicant, collections, total }) {
     const thousands = ["", "thousand", "million", "billion"];
     function helper(n) {
       if (n === 0) return "";
-      else if (n < 20) return belowTwenty[n] + " ";
-      else if (n < 100) return tens[Math.floor(n / 10)] + " " + helper(n % 10);
-      else
-        return belowTwenty[Math.floor(n / 100)] + " hundred " + helper(n % 100);
+      if (n < 20) return belowTwenty[n] + " ";
+      if (n < 100) return tens[Math.floor(n / 10)] + " " + helper(n % 10);
+      return belowTwenty[Math.floor(n / 100)] + " hundred " + helper(n % 100);
     }
     let word = "",
       i = 0,
@@ -71,18 +77,16 @@ function BusinessTaxPdfExport({ applicant, collections, total }) {
     const centavos = Math.round((amount - pesos) * 100);
     let words = "";
     if (pesos > 0) words += numberToWords(pesos) + " pesos";
-    if (centavos > 0) {
+    if (centavos > 0)
       words +=
         (pesos > 0 ? " and " : "") + numberToWords(centavos) + " centavos";
-    }
     return words || "zero";
   }
 
+  // Convert local image to base64 (fallback sig)
   const loadImageAsBase64 = async (imagePath) => {
     try {
       const response = await fetch(imagePath);
-      if (!response.ok)
-        throw new Error(`HTTP error! status: ${response.status}`);
       const blob = await response.blob();
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -94,14 +98,44 @@ function BusinessTaxPdfExport({ applicant, collections, total }) {
     }
   };
 
+  // ✅ Load logged-in user's signature from DB
+  useEffect(() => {
+    const loadAdmin = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await axios.get(`${API}/adminAccounts/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.data?.signatories) {
+          setUserSignatory(`data:image/png;base64,${res.data.signatories}`);
+        }
+      } catch (err) {
+        console.error("❌ Failed to load admin", err);
+      }
+    };
+
+    const loadFallbackSig = async () => {
+      const img = await loadImageAsBase64("/samplesig.png");
+      setDefaultSignature(img);
+    };
+
+    loadAdmin();
+    loadFallbackSig();
+  }, [API]);
+
+  // ✅ Export to PDF
   const exportPdf = async () => {
     const validCollections = collections.filter(
       (item) => item.amount && Number(item.amount) > 0
     );
 
     const spcLogoImageData = await loadImageAsBase64("/spclogo.png");
-    const eSignatureImageData = await loadImageAsBase64("/samplesig.png");
-    const oriaSignatureImageData = await loadImageAsBase64("/samplesig.png");
+
+    // ✅ Use uploaded signature if exists, else fallback
+    const signatureToUse = userSignatory || defaultSignature;
 
     const fullName = `${applicant.firstName || ""} ${
       applicant.middleName || ""
@@ -113,21 +147,17 @@ function BusinessTaxPdfExport({ applicant, collections, total }) {
       format: "a4",
     });
 
+    // ---- HEADER ----
     pdf.setFont("helvetica");
     pdf.setFontSize(8);
 
     let yPos = 25;
-
-    // Header Logo
     if (spcLogoImageData) {
       const logoWidth = 60;
-      const logoHeight = 60;
       const xLogo = (pdf.internal.pageSize.getWidth() - logoWidth) / 2;
-      pdf.addImage(spcLogoImageData, "PNG", xLogo, yPos, logoWidth, logoHeight);
+      pdf.addImage(spcLogoImageData, "PNG", xLogo, yPos, logoWidth, logoWidth);
     }
     yPos += 75;
-
-    // Header Texts
     pdf.setFontSize(9);
     pdf.setFont("helvetica", "bold");
     pdf.text(
@@ -143,7 +173,6 @@ function BusinessTaxPdfExport({ applicant, collections, total }) {
     });
     yPos += 20;
 
-    // Title Bar
     autoTable(pdf, {
       startY: yPos,
       theme: "plain",
@@ -153,50 +182,25 @@ function BusinessTaxPdfExport({ applicant, collections, total }) {
         fontSize: 9,
         fontStyle: "bold",
         cellPadding: 4,
-        halign: "center",
       },
       body: [["BUSINESS TAX ORDER OF PAYMENT"]],
-      margin: { left: 50, right: 50 }, // ✅ consistent margin
-      tableWidth: 495, // ✅ fixed width for both tables
+      margin: { left: 50, right: 50 },
+      tableWidth: 495,
     });
     yPos = pdf.lastAutoTable.finalY + 10;
 
-    const formatPeso = (value) =>
-      value && !isNaN(value)
-        ? Number(value).toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })
-        : "";
-    // Info Table
+    // ---- INFO TABLE ----
     const isRenew = applicant?.application?.toLowerCase() === "renew";
-
     const infoBody = [
-      ["NAME OF OWNER:", fullName || "___________"],
-      ["BUSINESS NAME:", applicant?.businessName || "___________"],
-      ["NATURE OF BUSINESS:", applicant?.businessNature || "___________"],
-      ["KIND OF ORG.:", applicant?.BusinessType || "___________"],
-      ["BUSINESS ADDRESS:", applicant?.barangay || "___________"],
-      [
-        "APPLICATION TYPE:",
-        applicant?.application
-          ? applicant.application.trim().toUpperCase()
-          : "___________",
-      ],
-      // ✅ Show either TOTAL GROSS or TOTAL CAPITAL depending on type
+      ["NAME OF OWNER:", fullName],
+      ["BUSINESS NAME:", applicant?.businessName],
+      ["NATURE OF BUSINESS:", applicant?.businessNature],
+      ["KIND OF ORG.:", applicant?.BusinessType],
+      ["BUSINESS ADDRESS:", applicant?.barangay],
+      ["APPLICATION TYPE:", applicant?.application?.toUpperCase()],
       [
         isRenew ? "TOTAL GROSS:" : "TOTAL CAPITAL:",
-        (() => {
-          const value = isRenew
-            ? applicant?.totalCapital
-            : applicant?.totalCapital;
-          return value
-            ? Number(value).toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })
-            : "___________";
-        })(),
+        Number(applicant?.totalCapital)?.toLocaleString(),
       ],
     ];
 
@@ -204,44 +208,34 @@ function BusinessTaxPdfExport({ applicant, collections, total }) {
       startY: yPos,
       body: infoBody,
       theme: "grid",
-      styles: {
-        cellPadding: 3,
-        fontSize: 7,
-        lineWidth: 0.5,
-      },
-      columnStyles: {
-        0: { fontStyle: "bold", cellWidth: 160 }, // ✅ same proportional widths
-        1: { cellWidth: 335 },
-      },
+      styles: { fontSize: 7, cellPadding: 3 },
       margin: { left: 50, right: 50 },
-      tableWidth: 495, // ✅ same width as collections table
+      tableWidth: 495,
     });
     yPos = pdf.lastAutoTable.finalY + 10;
 
-    // Collections Table
+    // ---- COLLECTIONS TABLE ----
     const collectionBody = validCollections.map((item) => [
       item.label,
       { content: formatPeso(Number(item.amount)), styles: { halign: "right" } },
     ]);
 
-    if (total > 0) {
-      collectionBody.push(
-        [
-          { content: "TOTAL", styles: { fontStyle: "bold" } },
-          {
-            content: formatPeso(total),
-            styles: { halign: "right", fontStyle: "bold" },
-          },
-        ],
-        [
-          { content: "AMOUNT IN WORDS", styles: { fontStyle: "bold" } },
-          {
-            content: amountInWords(total).toUpperCase(),
-            styles: { halign: "right" },
-          },
-        ]
-      );
-    }
+    collectionBody.push(
+      [
+        "TOTAL",
+        {
+          content: formatPeso(total),
+          styles: { halign: "right", fontStyle: "bold" },
+        },
+      ],
+      [
+        "AMOUNT IN WORDS",
+        {
+          content: amountInWords(total).toUpperCase(),
+          styles: { halign: "right" },
+        },
+      ]
+    );
 
     autoTable(pdf, {
       startY: yPos,
@@ -249,75 +243,46 @@ function BusinessTaxPdfExport({ applicant, collections, total }) {
       body: collectionBody,
       theme: "grid",
       styles: {
-        cellPadding: 3,
         fontSize: 7,
-        lineWidth: 0.5,
+        cellPadding: 3,
+        fillColor: null, // remove background for body cells
       },
       headStyles: {
-        fillColor: [255, 255, 255],
-        textColor: [0, 0, 0],
+        fillColor: [0, 0, 0],
+        textColor: [255, 255, 255], // black text
         fontStyle: "bold",
+        halign: "center",
       },
-      columnStyles: {
-        0: { cellWidth: 300 }, // ✅ total = 495 when combined with right column
-        1: { halign: "right", cellWidth: 195 },
-      },
+      alternateRowStyles: { fillColor: null }, // remove row stripes
       margin: { left: 50, right: 50 },
-      tableWidth: 495, // ✅ same as info table
+      tableWidth: 495,
     });
     yPos = pdf.lastAutoTable.finalY + 20;
 
-    // Signatures
-    const sigWidth = 120;
-    const sigHeight = 40;
-    const leftX = 70;
-    const rightX = 360;
+    // ---- SIGNATURES ----
+    const sigWidth = 120,
+      sigHeight = 40;
+    const leftX = 70,
+      rightX = 360;
 
-    if (oriaSignatureImageData)
-      pdf.addImage(
-        oriaSignatureImageData,
-        "PNG",
-        leftX,
-        yPos,
-        sigWidth,
-        sigHeight
-      );
-    pdf.setFontSize(8);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("WILLIAM CARTABIO", leftX + sigWidth / 2, yPos + sigHeight + 8, {
-      align: "center",
-    });
-    pdf.setFontSize(7);
-    pdf.text("COMPUTED BY", leftX + sigWidth / 2, yPos + sigHeight + 18, {
+    // Clerk Signature (You)
+    if (signatureToUse)
+      pdf.addImage(signatureToUse, "PNG", leftX, yPos, sigWidth, sigHeight);
+    pdf.text("COMPUTED BY", leftX + sigWidth / 2, yPos + sigHeight + 20, {
       align: "center",
     });
 
-    if (eSignatureImageData)
-      pdf.addImage(
-        eSignatureImageData,
-        "PNG",
-        rightX,
-        yPos,
-        sigWidth,
-        sigHeight
-      );
-    pdf.setFontSize(8);
-    pdf.text(
-      "LUCIO GERALDO G. CIOLO",
-      rightX + sigWidth / 2,
-      yPos + sigHeight + 8,
-      { align: "center" }
-    );
-    pdf.setFontSize(7);
+    // Treasurer Fixed
+    if (defaultSignature)
+      pdf.addImage(defaultSignature, "PNG", rightX, yPos, sigWidth, sigHeight);
     pdf.text(
       "ACTING CITY TREASURER",
       rightX + sigWidth / 2,
-      yPos + sigHeight + 18,
+      yPos + sigHeight + 20,
       { align: "center" }
     );
 
-    const blob = pdf.output("blob");
-    saveAs(blob, `${applicant.lastName}_Business_Tax_ORDER.pdf`);
+    saveAs(pdf.output("blob"), `${applicant.lastName}_Business_Tax_ORDER.pdf`);
   };
 
   return (

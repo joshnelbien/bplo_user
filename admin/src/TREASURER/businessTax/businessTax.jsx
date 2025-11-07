@@ -251,6 +251,7 @@ function BusinessTax() {
                     onClick={() => openModal(applicant)}
                   >
                     <TableCell>{applicant.application}</TableCell>
+                    <TableCell>{applicant.bin}</TableCell>
                     <TableCell>{applicant.businessName}</TableCell>
                     <TableCell>{applicant.firstName}</TableCell>
                     <TableCell>{applicant.lastName}</TableCell>
