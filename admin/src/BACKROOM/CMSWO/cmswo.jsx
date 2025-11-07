@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Side_bar from "../../SIDE_BAR/side_bar";
 import CmswoApplicantModal from "./cmswo_modal";
 import TopBar from "../../NAVBAR/nav_bar";
+import { CircularProgress } from "@mui/material";
 
 import {
   Box,
@@ -36,6 +37,7 @@ function Cmswo() {
   const recordsPerPage = 20;
   const [selectedFiles, setSelectedFiles] = useState({});
   const API = import.meta.env.VITE_API_BASE;
+  const [loading, setLoading] = useState(false);
   // NOTE: removed unused setValidationErrors and handleFileSelect from the original code
   // as they were incomplete/unnecessary in the Cmswo component logic provided.
 
@@ -48,6 +50,7 @@ function Cmswo() {
 
   useEffect(() => {
     const fetchApplicants = async () => {
+      setLoading(true);
       try {
         const res = await axios.get(`${API}/backroom/backrooms`);
 
@@ -58,6 +61,8 @@ function Cmswo() {
         setApplicants(sortedData);
       } catch (error) {
         console.error("Error fetching applicants:", error);
+      } finally {
+        setLoading(false); // stop loading
       }
     };
 
@@ -254,21 +259,36 @@ function Cmswo() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {currentRecords.map((applicant) => (
-                <TableRow
-                  key={applicant.id}
-                  hover
-                  sx={{ cursor: "pointer" }}
-                  onClick={() => openModal(applicant)}
-                >
-                  <TableCell>{applicant.application}</TableCell>
-                  <TableCell>{applicant.bin}</TableCell>
-                  <TableCell>{applicant.businessName}</TableCell>
-                  <TableCell>{applicant.firstName}</TableCell>
-                  <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.CSMWO}</TableCell>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                    <CircularProgress size={40} thickness={4} />
+                    <Typography mt={1}>Loading data...</Typography>
+                  </TableCell>
                 </TableRow>
-              ))}
+              ) : currentRecords.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                    <Typography>No records found</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                currentRecords.map((applicant) => (
+                  <TableRow
+                    key={applicant.id}
+                    hover
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => openModal(applicant)}
+                  >
+                    <TableCell>{applicant.application}</TableCell>
+                    <TableCell>{applicant.bin}</TableCell>
+                    <TableCell>{applicant.businessName}</TableCell>
+                    <TableCell>{applicant.firstName}</TableCell>
+                    <TableCell>{applicant.lastName}</TableCell>
+                    <TableCell>{applicant.CSMWO}</TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>

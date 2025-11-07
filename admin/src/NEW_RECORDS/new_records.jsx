@@ -4,6 +4,7 @@ import Side_bar from "../SIDE_BAR/side_bar.jsx";
 import ApplicantModal from "./newApp_modal.jsx";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
+import { CircularProgress } from "@mui/material";
 import {
   IconButton,
   Tooltip,
@@ -111,12 +112,15 @@ function New_records() {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [confirmationData, setConfirmationData] = useState(null);
 
+  const [loading, setLoading] = useState(false);
+
   // REMOVED: [isAddAdminModalOpen, setIsAddAdminModalOpen] state
 
   const recordsPerPage = 20;
 
   /* ✅ Fetch applicants */
   const fetchApplicants = async () => {
+    setLoading(true); // start loading
     try {
       const res = await axios.get(`${API}/newApplication/files`);
       const sorted = res.data.sort(
@@ -125,6 +129,8 @@ function New_records() {
       setApplicants(sorted);
     } catch (error) {
       console.error("❌ Error fetching applicants:", error);
+    } finally {
+      setLoading(false); // stop loading
     }
   };
 
@@ -384,52 +390,75 @@ function New_records() {
             </TableHead>
 
             <TableBody>
-              {currentRecords.map((applicant) => (
-                <TableRow key={applicant.id} hover>
-                  <TableCell>{applicant.businessName}</TableCell>
-                  <TableCell>{applicant.firstName}</TableCell>
-                  <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.application}</TableCell>
-
-                  {filter === "nobplostatus" && (
-                    <>
-                      <TableCell>{applicant.BIN}</TableCell>
-                      <TableCell>
-                        {applicant.BPLO}
-                        <br />
-                        <small style={{ color: "gray" }}>
-                          {applicant.BPLOtimeStamp}
-                        </small>
-                      </TableCell>
-                      <TableCell>{applicant.Examiners}</TableCell>
-                      <TableCell>{applicant.CENRO}</TableCell>
-                      <TableCell>{applicant.CHO}</TableCell>
-                      <TableCell>{applicant.ZONING}</TableCell>
-                      <TableCell>{applicant.CSMWO}</TableCell>
-                      <TableCell>{applicant.OBO}</TableCell>
-                    </>
-                  )}
-
-                  <TableCell align="center">
-                    <Tooltip title="View">
-                      <IconButton
-                        color="primary"
-                        onClick={() => openModal(applicant)}
-                      >
-                        <VisibilityIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Update">
-                      <IconButton
-                        color="secondary"
-                        onClick={() => openUpdateModal(applicant)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
+              {loading ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={filter === "nobplostatus" ? 12 : 5}
+                    align="center"
+                    sx={{ py: 4 }}
+                  >
+                    <CircularProgress size={40} thickness={4} />
+                    <Typography mt={1}>Loading data...</Typography>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : currentRecords.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={filter === "nobplostatus" ? 12 : 5}
+                    align="center"
+                  >
+                    <Typography sx={{ py: 3 }}>No records found</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                currentRecords.map((applicant) => (
+                  <TableRow key={applicant.id} hover>
+                    <TableCell>{applicant.businessName}</TableCell>
+                    <TableCell>{applicant.firstName}</TableCell>
+                    <TableCell>{applicant.lastName}</TableCell>
+                    <TableCell>{applicant.application}</TableCell>
+
+                    {filter === "nobplostatus" && (
+                      <>
+                        <TableCell>{applicant.BIN}</TableCell>
+                        <TableCell>
+                          {applicant.BPLO}
+                          <br />
+                          <small style={{ color: "gray" }}>
+                            {applicant.BPLOtimeStamp}
+                          </small>
+                        </TableCell>
+                        <TableCell>{applicant.Examiners}</TableCell>
+                        <TableCell>{applicant.CENRO}</TableCell>
+                        <TableCell>{applicant.CHO}</TableCell>
+                        <TableCell>{applicant.ZONING}</TableCell>
+                        <TableCell>{applicant.CSMWO}</TableCell>
+                        <TableCell>{applicant.OBO}</TableCell>
+                      </>
+                    )}
+
+                    <TableCell align="center">
+                      <Tooltip title="View">
+                        <IconButton
+                          color="primary"
+                          onClick={() => openModal(applicant)}
+                        >
+                          <VisibilityIcon />
+                        </IconButton>
+                      </Tooltip>
+
+                      <Tooltip title="Update">
+                        <IconButton
+                          color="secondary"
+                          onClick={() => openUpdateModal(applicant)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
