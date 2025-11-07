@@ -4,6 +4,7 @@ import Side_bar from "../../SIDE_BAR/side_bar";
 import ZoningApplicantModal from "./zoning_modal";
 import { CheckCircleOutline } from "@mui/icons-material";
 import TopBar from "../../NAVBAR/nav_bar";
+import { CircularProgress } from "@mui/material";
 import {
   Box,
   Button,
@@ -99,6 +100,7 @@ function Zoning() {
   const recordsPerPage = 20;
   const [selectedFiles, setSelectedFiles] = useState({});
   const API = import.meta.env.VITE_API_BASE;
+  const [loading, setLoading] = useState(false);
 
   // Confirmation & Success state
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -107,6 +109,7 @@ function Zoning() {
 
   useEffect(() => {
     const fetchApplicants = async () => {
+      setLoading(true);
       try {
         const res = await axios.get(`${API}/backroom/backrooms`);
 
@@ -117,6 +120,8 @@ function Zoning() {
         setApplicants(sortedData);
       } catch (error) {
         console.error("Error fetching applicants:", error);
+      } finally {
+        setLoading(false); // stop loading
       }
     };
 
@@ -363,21 +368,36 @@ function Zoning() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {currentRecords.map((applicant) => (
-                <TableRow
-                  key={applicant.id}
-                  hover
-                  sx={{ cursor: "pointer" }}
-                  onClick={() => openModal(applicant)}
-                >
-                  <TableCell>{applicant.application}</TableCell>
-                  <TableCell>{applicant.bin}</TableCell>
-                  <TableCell>{applicant.businessName}</TableCell>
-                  <TableCell>{applicant.firstName}</TableCell>
-                  <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.ZONING}</TableCell>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                    <CircularProgress size={40} thickness={4} />
+                    <Typography mt={1}>Loading data...</Typography>
+                  </TableCell>
                 </TableRow>
-              ))}
+              ) : currentRecords.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                    <Typography>No records found</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                currentRecords.map((applicant) => (
+                  <TableRow
+                    key={applicant.id}
+                    hover
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => openModal(applicant)}
+                  >
+                    <TableCell>{applicant.application}</TableCell>
+                    <TableCell>{applicant.bin}</TableCell>
+                    <TableCell>{applicant.businessName}</TableCell>
+                    <TableCell>{applicant.firstName}</TableCell>
+                    <TableCell>{applicant.lastName}</TableCell>
+                    <TableCell>{applicant.ZONING}</TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
