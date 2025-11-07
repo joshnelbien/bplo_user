@@ -1,0 +1,10 @@
+sanitary permit - automatic generate and upload (can edit information)
+one acc. but inside account different name
+export permit and sanitary permit
+daily report can export
+
+CSWMO
+- list of violators in renewal
+
+
+CENRO- auto save and daily report converted into docs autosave  
