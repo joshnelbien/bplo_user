@@ -4,6 +4,7 @@ const AdminAccounts = require("../db/model/adminAccountsDB");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const authenticateJWT = require("../middleware/authMiddleware");
+const upload = require("../middleware/upload");
 
 // ✅ REGISTER (already exists)
 router.post("/admin-register", async (req, res) => {
@@ -75,16 +76,65 @@ router.get("/protected-data", authenticateJWT, async (req, res) => {
 // ✅ Get logged-in user profile
 router.get("/me", authenticateJWT, async (req, res) => {
   try {
-    const admin = await AdminAccounts.findByPk(req.user.id, {
-      attributes: { exclude: ["Password"] },
+    const user = await AdminAccounts.findByPk(req.user.id);
+
+    const profileBase64 = user.profile ? user.profile.toString("base64") : null;
+
+    const signBase64 = user.signatories
+      ? user.signatories.toString("base64")
+      : null;
+
+    res.json({
+      ...user.toJSON(),
+      profile: profileBase64,
+      signatories: signBase64,
     });
-
-    if (!admin) return res.status(404).json({ message: "User not found" });
-
-    res.json(admin);
   } catch (err) {
-    res.status(500).json({ message: "Error fetching user data" });
+    res.status(500).json({ error: "Failed to fetch user" });
   }
 });
+
+router.put(
+  "/update",
+  authenticateJWT,
+  upload.fields([
+    { name: "profile", maxCount: 1 },
+    { name: "signatories", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    try {
+      const userId = req.user.id; // Token has user id
+
+      const { FirstName, MiddleName, LastName, Email, Office, Position } =
+        req.body;
+
+      const updateData = {
+        FirstName,
+        MiddleName,
+        LastName,
+        Email,
+        Office,
+        Position,
+      };
+
+      // ✅ If profile image uploaded, save buffer to BLOB
+      if (req.files.profile) {
+        updateData.profile = req.files.profile[0].buffer;
+      }
+
+      // ✅ If signatory uploaded
+      if (req.files.signatories) {
+        updateData.signatories = req.files.signatories[0].buffer;
+      }
+
+      await AdminAccounts.update(updateData, { where: { id: userId } });
+
+      res.json({ message: "Account updated successfully ✅" });
+    } catch (error) {
+      console.error("Update Error:", error);
+      res.status(500).json({ error: "Failed to update account" });
+    }
+  }
+);
 
 module.exports = router;

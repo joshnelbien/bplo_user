@@ -1,5 +1,9 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Box, Typography, alpha, Avatar, Button } from "@mui/material";
+import axios from "axios";
+import ManageAccountModal from "./manage_account";
+
+const API = import.meta.env.VITE_API_BASE;
 
 function LiveClock() {
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
@@ -56,69 +60,86 @@ function LiveClock() {
   );
 }
 
-function TopBar() {
+export default function TopBar() {
+  const [user, setUser] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await axios.get(`${API}/adminAccounts/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setUser(res.data);
+        localStorage.setItem("adminData", JSON.stringify(res.data));
+      } catch (err) {
+        console.log("❌ Failed to fetch user:", err);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
   return (
     <Box
       sx={{
         width: "100%",
-        height: "90px",
+        height: "60px",
         backgroundColor: "#1d5236",
         display: "flex",
-        flexDirection: "row",
         alignItems: "center",
         p: 2,
-        boxSizing: "border-box",
         color: "white",
-        boxShadow: 3,
-        zIndex: 1100,
         position: "fixed",
         top: 0,
-        left: 0,
-        right: 35,
+        zIndex: 1100,
       }}
     >
-      {" "}
-      {/* LEFT - Clock */} <LiveClock /> {/* Spacer */}{" "}
-      <Box sx={{ flexGrow: 1 }} /> {/* RIGHT - Email, Button, Avatar */}{" "}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pr: 2 }}>
-        {" "}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
-          }}
-        >
-          {" "}
-          <Typography sx={{ fontWeight: 500, lineHeight: 1 }}>
-            {" "}
-            example@gmail.com{" "}
-          </Typography>{" "}
-          {/* Added Button */}{" "}
+      <LiveClock />
+      <Box sx={{ flexGrow: 1 }} />
+
+      <Box
+        sx={{ display: "flex", alignItems: "center", gap: 1.5, pr: 2, mr: 5 }}
+      >
+        <Box sx={{ textAlign: "center" }}>
+          <Typography sx={{ fontWeight: 500 }}>
+            {user?.Email || "..."}
+          </Typography>
+
           <Button
             variant="contained"
             size="small"
             sx={{
               mt: 0.5,
-              mx: 2,
+              mx: 1,
               fontSize: "0.7rem",
               padding: "2px 8px",
               backgroundColor: "#296f48",
               "&:hover": { backgroundColor: "#1e5635" },
             }}
+            onClick={() => setOpenModal(true)}
           >
-            {" "}
-            View Details{" "}
-          </Button>{" "}
-        </Box>{" "}
+            Manage Account
+          </Button>
+        </Box>
+
         <Avatar
-          alt="User Pic"
-          src="https://i.pravatar.cc/40"
-          sx={{ width: 38, height: 38, border: "2px solid white" }}
-        />{" "}
-      </Box>{" "}
+          src={
+            user?.profile
+              ? `data:image/png;base64,${user.profile}`
+              : "https://i.pravatar.cc/40"
+          }
+        />
+      </Box>
+
+      <ManageAccountModal
+        open={openModal}
+        handleClose={() => setOpenModal(false)}
+      />
     </Box>
   );
 }
-
-export default TopBar;
