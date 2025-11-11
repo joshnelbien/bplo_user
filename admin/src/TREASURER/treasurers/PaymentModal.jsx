@@ -331,7 +331,7 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
                                 <Button
                                   size="small"
                                   variant="contained"
-                                  disabled={!isRequired || isPaid}
+                                  // disabled={!isRequired || isPaid}
                                   onClick={() => handlePayClick(amount, index)}
                                   sx={{
                                     backgroundColor: "#1c541e",

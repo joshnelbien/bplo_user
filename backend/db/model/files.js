@@ -220,6 +220,9 @@ const File = sequelize.define(
       type: DataTypes.STRING,
     },
     //other charges
+    businessTaxFee: { type: DataTypes.STRING },
+    occupationalTax: { type: DataTypes.STRING },
+    barangayFee: { type: DataTypes.STRING },
     mayorsPermit: { type: DataTypes.STRING },
     deliveryVehicle: { type: DataTypes.STRING },
     surcharge: { type: DataTypes.STRING },

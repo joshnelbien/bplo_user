@@ -89,7 +89,7 @@ function BusinessTax() {
 
       // 2. Retrieve all collection amounts from sessionStorage
       const map = {
-        "BUSINESS TAX": "businessTax",
+        "BUSINESS TAX": "businessTaxFee",
         "MAYOR’S PERMIT": "mayorsPermit",
         "BARANGAY FEE": "barangayFee",
         "OCCUPATIONAL TAX": "occupationalTax",

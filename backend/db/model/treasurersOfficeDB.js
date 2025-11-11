@@ -221,6 +221,9 @@ const TreasurersOffice = sequelize.define(
     },
 
     //other charges
+    businessTaxFee: { type: DataTypes.STRING },
+    occupationalTax: { type: DataTypes.STRING },
+    barangayFee: { type: DataTypes.STRING },
     mayorsPermit: { type: DataTypes.STRING },
     deliveryVehicle: { type: DataTypes.STRING },
     surcharge: { type: DataTypes.STRING },

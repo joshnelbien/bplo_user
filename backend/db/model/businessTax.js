@@ -126,7 +126,7 @@ const BusinessTax = sequelize.define(
 
     CSMWO: { type: DataTypes.STRING, defaultValue: "Pending" },
     CSMWOtimeStamp: { type: DataTypes.STRING },
-    csmwoFee: { type: DataTypes.STRING },
+
     cswmoCert: { type: DataTypes.BLOB("long"), allowNull: true },
     cswmoCert_filename: { type: DataTypes.STRING, allowNull: true },
     cswmoCert_mimetype: { type: DataTypes.STRING, allowNull: true },
@@ -163,7 +163,7 @@ const BusinessTax = sequelize.define(
 
     CENRO: { type: DataTypes.STRING, defaultValue: "Pending" },
     CENROtimeStamp: { type: DataTypes.STRING },
-    cenroFee: { type: DataTypes.STRING },
+
     cenroCert: { type: DataTypes.BLOB("long"), allowNull: true },
     cenroCert_filename: { type: DataTypes.STRING, allowNull: true },
     cenroCert_mimetype: { type: DataTypes.STRING, allowNull: true },
@@ -171,7 +171,7 @@ const BusinessTax = sequelize.define(
 
     ZONING: { type: DataTypes.STRING, defaultValue: "Pending" },
     ZONINGtimeStamp: { type: DataTypes.STRING },
-    zoningFee: { type: DataTypes.STRING },
+
     zoningCert: { type: DataTypes.BLOB("long"), allowNull: true },
     zoningCert_filename: { type: DataTypes.STRING, allowNull: true },
     zoningCert_mimetype: { type: DataTypes.STRING, allowNull: true },
@@ -198,21 +198,28 @@ const BusinessTax = sequelize.define(
     application: { type: DataTypes.STRING },
     businessTaxTotal: { type: DataTypes.STRING },
 
+    businessTaxFee: { type: DataTypes.STRING }, //B.T
+    occupationalTax: { type: DataTypes.STRING }, //OT
+    barangayFee: { type: DataTypes.STRING }, //BF
+    mayorsPermit: { type: DataTypes.STRING }, //MP
+    deliveryVehicle: { type: DataTypes.STRING }, //DV
+    surcharge: { type: DataTypes.STRING }, //SURC
+    interest: { type: DataTypes.STRING }, //INT
+    zoningFee: { type: DataTypes.STRING }, //ZF
+    cenroFee: { type: DataTypes.STRING }, //EF
+    csmwoFee: { type: DataTypes.STRING }, //SWF
+    choFee: { type: DataTypes.STRING }, //SF
+    tinplateStickerFee: { type: DataTypes.STRING }, //T.P
+    verificationFee: { type: DataTypes.STRING }, //VF
+    veterinaryFee: { type: DataTypes.STRING }, //VETF
+    fixedTax: { type: DataTypes.STRING }, //FT
     //other charges
-    mayorsPermit: { type: DataTypes.STRING },
-    deliveryVehicle: { type: DataTypes.STRING },
-    surcharge: { type: DataTypes.STRING },
-    interest: { type: DataTypes.STRING },
-    tinplateStickerFee: { type: DataTypes.STRING },
-    verificationFee: { type: DataTypes.STRING },
-    veterinaryFee: { type: DataTypes.STRING },
-    fixedTax: { type: DataTypes.STRING },
-    videokeFee: { type: DataTypes.STRING }, // VIDEOKE / CARABET / DANCEHALL
-    cigarettes: { type: DataTypes.STRING },
-    liquor: { type: DataTypes.STRING },
-    billiards: { type: DataTypes.STRING },
-    boardAndLogging: { type: DataTypes.STRING },
-    fsicFee: { type: DataTypes.STRING },
+    videokeFee: { type: DataTypes.STRING }, //OC
+    cigarettes: { type: DataTypes.STRING }, //OC
+    liquor: { type: DataTypes.STRING }, //OC
+    billiards: { type: DataTypes.STRING }, //OC
+    boardAndLogging: { type: DataTypes.STRING }, //OC
+    fsicFee: { type: DataTypes.STRING }, //FSIC
   },
 
   {

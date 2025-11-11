@@ -76,6 +76,10 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
   const capital = Number(applicant?.totalCapital) || 0;
   const businessTax = capital * 0.5 * 0.01;
 
+  const totalExcludingOBO = collections
+    .filter((item) => item.label !== "OBO")
+    .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
   const nonEditableFields = new Set([
     "BUSINESS TAX",
     "BARANGAY FEE",
@@ -241,7 +245,7 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
 
   useEffect(() => {
     // Store total and other charges
-    sessionStorage.setItem("businessTaxTotal", total.toString());
+    sessionStorage.setItem("businessTaxTotal", totalExcludingOBO.toString());
     sessionStorage.setItem("otherChargesTotal", otherChargesTotal.toString());
 
     // Store each individual collection amount
@@ -362,7 +366,7 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
             <Typography>
               Other Charges total: {formatPeso(otherChargesTotal)}
             </Typography>
-            <Typography>Total: {formatPeso(total)}</Typography>
+            <Typography>Total : {formatPeso(totalExcludingOBO)}</Typography>
           </Box>
           {/* Footer */}
           <Box mt={4}>
