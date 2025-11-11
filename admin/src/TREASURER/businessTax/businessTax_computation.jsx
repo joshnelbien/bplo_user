@@ -20,6 +20,7 @@ import {
 // NOTE: You will need to make sure the updated BusinessTaxDocxExport is in a separate file
 // or update the function in this file (which is done in the next section).
 import BusinessTaxDocxExport from "./BusinessTaxDocxExport";
+import BusinessTaxApplicantModal from "./businessTax_modal";
 
 // 1. Import the logos from the public folder
 import spcLogo from "/spclogo.png"; // Assuming / is the public folder root
@@ -239,9 +240,17 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
     .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
 
   useEffect(() => {
+    // Store total and other charges
     sessionStorage.setItem("businessTaxTotal", total.toString());
     sessionStorage.setItem("otherChargesTotal", otherChargesTotal.toString());
-  }, [total, otherChargesTotal]);
+
+    // Store each individual collection amount
+    collections.forEach((item) => {
+      // Replace spaces and special characters for safe keys
+      const key = item.label.replace(/\s+/g, "").replace(/[^a-zA-Z0-9]/g, "");
+      sessionStorage.setItem(key, item.amount || "0");
+    });
+  }, [collections, total, otherChargesTotal]);
 
   const formatPeso = (value) =>
     value > 0
@@ -262,20 +271,29 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
             <Grid item xs={12}>
               <Typography>REFERENCE NO: ___________</Typography>
               <Typography>
-                BUSINESS ID: {applicant?.BIN || "___________"}
+                BUSINESS ID: {applicant?.bin || "___________"}
               </Typography>
-              <Typography>
-                CAPITAL:{" "}
-                {capital > 0
-                  ? capital.toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })
-                  : "0.00"}
-              </Typography>
-              <Typography>
-                GROSS: {applicant?.gross || "___________"}
-              </Typography>
+              {applicant?.application === "New" ? (
+                <Typography>
+                  CAPITAL:{" "}
+                  {capital > 0
+                    ? capital.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })
+                    : "0.00"}
+                </Typography>
+              ) : (
+                <Typography>
+                  GROSS:{" "}
+                  {Number(applicant?.gross) > 0
+                    ? Number(applicant?.gross).toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })
+                    : "___________"}
+                </Typography>
+              )}
             </Grid>
           </Grid>
           {/* Business Info */}
@@ -293,7 +311,12 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
             </Typography>
             <Typography>BUSINESS ADDRESS: {applicant?.barangay}</Typography>
             <Typography>
-              NATURE OF BUSINESS: {applicant?.nature || "___________"}
+              NATURE OF BUSINESS:{" "}
+              {applicant?.businessNature
+                ? applicant.businessNature
+                    .replace(/"/g, "")
+                    .replace(/^\([A-Z]\)\s*/, "")
+                : "___________"}
             </Typography>
           </Box>
           {/* Collection Table */}
@@ -360,6 +383,12 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
           collections={collections}
           total={total}
           otherChargesTotal={otherChargesTotal}
+        />
+        <BusinessTaxApplicantModal
+          otherChargesTotal={otherChargesTotal}
+          total={total}
+          collections={collections}
+          applicant={applicant}
         />
       </DialogActions>
     </Dialog>

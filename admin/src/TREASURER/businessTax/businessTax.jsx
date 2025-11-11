@@ -79,26 +79,70 @@ function BusinessTax() {
     try {
       const formData = new FormData();
 
-      // ✅ 1. Add the uploaded file if it exists
-      if (selectedFiles.businessTaxComputation) {
+      // 1. Add uploaded file if there is one
+      if (selectedFiles?.businessTaxComputation) {
         formData.append(
           "businessTaxComputation",
           selectedFiles.businessTaxComputation
         );
       }
 
-      // ✅ 2. Retrieve total from sessionStorage
+      // 2. Retrieve all collection amounts from sessionStorage
+      const map = {
+        "BUSINESS TAX": "businessTax",
+        "MAYOR’S PERMIT": "mayorsPermit",
+        "BARANGAY FEE": "barangayFee",
+        "OCCUPATIONAL TAX": "occupationalTax",
+        "HEALTH, CER & SSF": "choFee",
+        "SWM GARBAGE FEE": "csmwoFee",
+        OBO: "oboTotal",
+        "SANITARY INSPECTION": "sanitaryInspection",
+        "BUILDING INSPECTION": "buildingInspection",
+        "MECHANICAL INSPECTION": "mechanicalInspection",
+        "ELECTRICAL INSPECTION": "electricalInspection",
+        "SIGNBOARD/BILLBOARD": "signage",
+        "ELECTRONIC INSPECTION": "electronics",
+        "DELIVERY VEHICLE": "deliveryVehicle",
+        SURCHARGE: "surcharge",
+        INTEREST: "interest",
+        "TINPLATE/STICKER FEE": "tinplateStickerFee",
+        "VERIFICATION FEE": "verificationFee",
+        "ZONING FEE": "zoningFee",
+        CENRO: "cenroFee",
+        "SWMO CERT": "swmoCert",
+        "VETERNARY FEE": "veterinaryFee",
+        "FIXED TAX": "fixedTax",
+        "VIDEOKE CARABET DANCEHALL": "videokeFee",
+        CIGARETTES: "cigarettes",
+        LIQUOR: "liquor",
+        BILLIARDS: "billiards",
+        "BOARD AND LOGGING": "boardAndLogging",
+        "FSIC FEE": "fsicFee",
+      };
+
+      // Append all collection items from sessionStorage
+      Object.entries(map).forEach(([label, key]) => {
+        const storageKey = label
+          .replace(/\s+/g, "")
+          .replace(/[^a-zA-Z0-9]/g, "");
+        const value = sessionStorage.getItem(storageKey) || "0";
+        formData.append(key, value);
+      });
+
+      // Append totals
       const businessTaxTotal =
         sessionStorage.getItem("businessTaxTotal") || "0";
-
-      // ✅ 3. Append the total to the FormData (so it’s sent to the backend)
+      const otherChargesTotal =
+        sessionStorage.getItem("otherChargesTotal") || "0";
       formData.append("businessTaxTotal", businessTaxTotal);
+      formData.append("otherChargesTotal", otherChargesTotal);
 
-      // ✅ 4. Send the request
+      // 3. Send to backend
       await axios.post(`${API}/businessTax/business/approve/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
+      // 4. Update UI
       setApplicants((prev) =>
         prev.map((applicant) =>
           applicant.id === id
@@ -106,6 +150,16 @@ function BusinessTax() {
             : applicant
         )
       );
+
+      // 5. Clear session storage for these items after success
+      Object.keys(map).forEach((label) => {
+        const storageKey = label
+          .replace(/\s+/g, "")
+          .replace(/[^a-zA-Z0-9]/g, "");
+        sessionStorage.removeItem(storageKey);
+      });
+      sessionStorage.removeItem("businessTaxTotal");
+      sessionStorage.removeItem("otherChargesTotal");
 
       closeModal();
     } catch (error) {

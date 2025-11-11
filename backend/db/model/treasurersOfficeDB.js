@@ -219,6 +219,22 @@ const TreasurersOffice = sequelize.define(
     check_date: {
       type: DataTypes.STRING,
     },
+
+    //other charges
+    mayorsPermit: { type: DataTypes.STRING },
+    deliveryVehicle: { type: DataTypes.STRING },
+    surcharge: { type: DataTypes.STRING },
+    interest: { type: DataTypes.STRING },
+    tinplateStickerFee: { type: DataTypes.STRING },
+    verificationFee: { type: DataTypes.STRING },
+    veterinaryFee: { type: DataTypes.STRING },
+    fixedTax: { type: DataTypes.STRING },
+    videokeFee: { type: DataTypes.STRING }, // VIDEOKE / CARABET / DANCEHALL
+    cigarettes: { type: DataTypes.STRING },
+    liquor: { type: DataTypes.STRING },
+    billiards: { type: DataTypes.STRING },
+    boardAndLogging: { type: DataTypes.STRING },
+    fsicFee: { type: DataTypes.STRING },
   },
 
   {

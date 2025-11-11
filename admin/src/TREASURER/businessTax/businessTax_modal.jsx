@@ -151,6 +151,7 @@ function BusinessTaxApplicantModal({
   handleFileChange,
   onDecline,
   baseUrl,
+  collections,
 }) {
   if (!isOpen || !applicant) return null;
 
@@ -187,7 +188,7 @@ function BusinessTaxApplicantModal({
   // Handle approval confirmation
   const handleConfirmApprove = () => {
     setConfirmOpen(false);
-    onApprove(applicant.id, selectedFiles); // Call the original onApprove
+    onApprove(applicant.id, selectedFiles, collections);
     setSuccessOpen(true); // Show success pop-up
   };
 

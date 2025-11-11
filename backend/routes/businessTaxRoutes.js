@@ -50,6 +50,8 @@ router.post(
       const { id } = req.params;
       const file = req.file;
       const { businessTaxTotal } = req.body;
+      const allFees = { ...req.body };
+      console.log("All fees from request body:", allFees);
 
       const applicant = await BusinessTax.findByPk(id);
       if (!applicant)
@@ -85,6 +87,7 @@ router.post(
         passtoTreasurer: "Yes",
         BUSINESSTAXtimeStamp: timestamp,
         businessTaxTotal: businessTaxTotal || 0, // ✅ Insert total here
+        ...allFees,
         ...(file && {
           businesstaxComputation: file.buffer,
           businesstaxComputation_filename: file.originalname,
@@ -97,6 +100,7 @@ router.post(
         BUSINESSTAX: "Approved",
         BUSINESSTAXtimeStamp: timestamp,
         businessTaxTotal: businessTaxTotal || 0,
+        ...allFees,
         ...(file && {
           businesstaxComputation: file.buffer,
           businesstaxComputation_filename: file.originalname,
@@ -111,6 +115,7 @@ router.post(
 
         BUSINESSTAXtimeStamp: timestamp,
         businessTaxTotal: businessTaxTotal || 0,
+        ...allFees,
         ...(file && {
           businesstaxComputation: file.buffer,
           businesstaxComputation_filename: file.originalname,
