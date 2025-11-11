@@ -208,9 +208,9 @@ const CenroCertExport = ({ applicant }) => {
           variant="contained"
           color="success"
           onClick={handleGeneratePDF}
-          sx={{ width: "300px", padding: "10px" }}
+          sx={{ width: "250px", padding: "10px" }}
         >
-          Download Certification (Legal Size PDF)
+          Download Certification
         </Button>
       </div>
     </>

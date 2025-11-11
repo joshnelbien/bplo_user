@@ -1,15 +1,8 @@
-import {
-  Box,
-  Button,
-  Grid, // ✅ Import Grid for better layout control
-  Paper,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Grid, Paper, TextField, Typography } from "@mui/material";
 import jsPDF from "jspdf";
 import { useState } from "react";
 
-// ✅ Convert month number to Filipino month name
+// Convert month number to Filipino month name
 function getFilipinoMonth(monthIndex) {
   const months = [
     "Enero",
@@ -28,26 +21,17 @@ function getFilipinoMonth(monthIndex) {
   return months[monthIndex];
 }
 
-// ✅ Compute zoning fee based on capital
+// Compute zoning fee based on capital
 function calculateZoningFee(totalCapital) {
-  if (totalCapital <= 5000) {
-    return "Exempted";
-  } else if (totalCapital >= 5001 && totalCapital <= 10000) {
-    return 100;
-  } else if (totalCapital >= 10001 && totalCapital <= 50000) {
-    return 200;
-  } else if (totalCapital >= 50001 && totalCapital <= 100000) {
-    return 300;
-  } else {
-    // Ensure the return value is a string with 2 decimal places for fees
-    return ((totalCapital - 100000) * 0.001 + 500).toFixed(2);
-  }
+  if (totalCapital <= 5000) return "Exempted";
+  if (totalCapital <= 10000) return 100;
+  if (totalCapital <= 50000) return 200;
+  if (totalCapital <= 100000) return 300;
+  return ((totalCapital - 100000) * 0.001 + 500).toFixed(2);
 }
 
-// ✅ Helper to determine TextField width based on content length
+// Dynamic TextField width
 const getTextFieldWidth = (value) => {
-  // Use a minimum width (e.g., 80px) and add more width based on length
-  // Adjust the multiplier (e.g., 8) as needed for your font and size
   const minWidth = 80;
   const widthPerChar = 8;
   return `${Math.max(minWidth, value.length * widthPerChar)}px`;
@@ -59,7 +43,6 @@ function ZoningCert({ applicant, renewZoningFee }) {
   const month = getFilipinoMonth(today.getMonth());
   const year = today.getFullYear();
 
-  // ✅ Make form fields editable
   const [form, setForm] = useState({
     firstName: applicant.firstName || "Juan",
     lastName: applicant.lastName || "Dela Cruz",
@@ -77,58 +60,72 @@ function ZoningCert({ applicant, renewZoningFee }) {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // ✅ Export to PDF (with Logo addition)
+  // === EXPORT TO PDF ===
   const exportPDF = () => {
-    const doc = new jsPDF("p", "mm", "a4"); // A4 page
+    const doc = new jsPDF("p", "mm", "a4");
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const marginX = 20;
     let y = 20;
 
-    // --- LOGO (Added) ---
-    // Ensure 'spclogo.png' is in the public folder
-    const logoPath = "/spclogo.png";
-    const logoWidth = 30; // mm
-    const logoHeight = 30; // mm
-    // Center the logo above the text block
-    doc.addImage(
-      logoPath,
-      "PNG",
-      105 - logoWidth / 2,
-      y,
-      logoWidth,
-      logoHeight
-    );
-    y += logoHeight + 5; // Move Y down past the logo
+    // 1. WATERMARK: FULLY OPAQUE
+    const watermarkPath = "/ZoningWatermark.png";
+    const wmWidth = 160;
+    const wmHeight = 160;
+    const wmX = (pageWidth - wmWidth) / 2;
+    const wmY = (pageHeight - wmHeight) / 2;
+    doc.addImage(watermarkPath, "PNG", wmX, wmY, wmWidth, wmHeight);
 
-    // --- HEADER ---
+    // 2. HEADER: spclogo (left), zoninglogo (right)
+    const logoSize = 28;
+    const logoY = y;
+
+    doc.addImage("/spclogo.png", "PNG", marginX, logoY, logoSize, logoSize);
+    doc.addImage(
+      "/zoninglogo.png",
+      "PNG",
+      pageWidth - marginX - logoSize,
+      logoY,
+      logoSize,
+      logoSize
+    );
+
+    const centerX = pageWidth / 2;
     doc.setFont("Times", "bold");
     doc.setFontSize(16);
-    doc.text("CITY MAYOR'S OFFICE", 105, y, { align: "center" });
+    doc.text("CITY MAYOR'S OFFICE", centerX, y + 8, { align: "center" });
+
     y += 8;
     doc.setFontSize(12);
-    doc.text("San Pablo City", 105, y, { align: "center" });
+    doc.text("San Pablo City", centerX, y + 8, { align: "center" });
+
     y += 8;
     doc.setFontSize(16);
-    doc.text("ZONING AND LAND USE DIVISION", 105, y, { align: "center" });
-    y += 10;
-    doc.setFontSize(14);
-    doc.text("PAGPAPATUNAY", 105, y, { align: "center" });
+    doc.text("ZONING AND LAND USE DIVISION", centerX, y + 8, {
+      align: "center",
+    });
 
-    // --- BODY ---
-    y += 20;
+    y += 12;
+    doc.setFontSize(14);
+    doc.text("PAGPAPATUNAY", centerX, y + 8, { align: "center" });
+
+    // 3. BODY - JUSTIFIED PARAGRAPH
+    y += 25;
     doc.setFontSize(12);
     doc.setFont("Times", "normal");
 
-    // Full paragraph
     const paragraph1 = `ITO AY PAGPAPATUNAY na ang isang lugar na lupang matatagpuan sa barangay ${form.barangay}, San Pablo City, nakatala sa pangalan ni ${form.firstName} ${form.lastName} ay nakakasakop sa SONANG nakatalaga sa/o para gamiting RES/COMM/IND/AGRI/INS, dahil dito ang pagtatayo ng ${form.businessType} ay maaaring pahintulutan at pasubaling babawiin o patitigilin sa sandaling mapatunayan naglalagay ng panganib sa PANGMADLANG KALUSUGAN AT KALIGTASAN.`;
 
-    doc.text(paragraph1, marginX, y, { maxWidth: 170, textAlign: "justify" });
+    doc.text(paragraph1, marginX, y, {
+      maxWidth: 170,
+      align: "justify",
+    });
 
-    // Date line
-    y += 50;
+    y += 45; // Approx height of justified paragraph
+
     const dateText = `Ipinagkaloob ngayon ika-${day} ng ${month}, ${year} kaugnay ng kanyang kahilingan para sa MAYOR'S PERMIT.`;
-    doc.text(dateText, marginX, y, { maxWidth: 170, textAlign: "justify" });
+    doc.text(dateText, marginX, y, { maxWidth: 170, align: "justify" });
 
-    // Capital & Fee
     y += 20;
     doc.setFont("Times", "bold");
     doc.text(`CAPITAL: P ${form.totalCapital}`, marginX, y);
@@ -136,19 +133,30 @@ function ZoningCert({ applicant, renewZoningFee }) {
     const feeText = zoningFee === "Exempted" ? "Exempted" : `P ${zoningFee}`;
     doc.text(`ZONING FEE: ${feeText}`, marginX, y);
 
-    // --- SIGNATURE SECTION (Right aligned) ---
-    y += 40;
-    doc.setFont("Times", "normal");
-    doc.text("For", 150, y, { align: "center" });
+    // 4. SIGNATURE WITH "For:" ABOVE
+    y += 35;
 
-    y += 12;
+    doc.setFont("Times", "normal");
+    doc.text("For:", 150, y, { align: "center" });
+
+    y += 25; // Space before signature
+
+    const sigPath = "/samplesig.png";
+    const sigWidth = 50;
+    const sigHeight = 20;
+    const sigX = 150 - sigWidth / 2;
+    const sigY = y;
+
+    doc.addImage(sigPath, "PNG", sigX, sigY, sigWidth, sigHeight);
+
+    y += sigHeight + 3;
     doc.setFont("Times", "bold");
     doc.text("HON. ARCADIO B. GAPANGADA, MNSA", 150, y, { align: "center" });
+
     y += 7;
     doc.setFont("Times", "normal");
     doc.text("City Mayor", 150, y, { align: "center" });
 
-    // Save file
     doc.save(`ZoningCert_${form.lastName}.pdf`);
   };
 
@@ -162,22 +170,24 @@ function ZoningCert({ applicant, renewZoningFee }) {
           border: "2px solid black",
           borderRadius: 2,
           position: "relative",
+          backgroundImage: `url(/ZoningWatermark.png)`,
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          backgroundSize: "70%",
         }}
       >
-        {/* ✅ Enhanced Header with Logo and Grid for better alignment */}
-        <Grid container spacing={2} alignItems="center" justifyContent="center">
-          {/* Logo on the left (e.g., column 4 of 12) */}
-          <Grid item xs={3} sx={{ textAlign: "center" }}>
-            {/* Logo path relative to the public folder */}
+        {/* === HEADER: spclogo (left), text (center), zoninglogo (right) === */}
+        <Grid container alignItems="center" spacing={2}>
+          <Grid item xs={3} sx={{ textAlign: "left" }}>
             <Box
               component="img"
               src="/spclogo.png"
-              alt="San Pablo City Logo"
-              sx={{ width: 80, height: 80 }}
+              alt="SPC Logo"
+              sx={{ width: 70, height: 70 }}
             />
           </Grid>
-          {/* Text in the center (e.g., column 8 of 12) */}
-          <Grid item xs={9} sx={{ textAlign: "left" }}>
+
+          <Grid item xs={6} sx={{ textAlign: "center" }}>
             <Typography variant="h5" fontWeight="bold">
               CITY MAYOR'S OFFICE
             </Typography>
@@ -186,9 +196,18 @@ function ZoningCert({ applicant, renewZoningFee }) {
               ZONING AND LAND USE DIVISION
             </Typography>
           </Grid>
+
+          <Grid item xs={3} sx={{ textAlign: "right" }}>
+            <Box
+              component="img"
+              src="/zoninglogo.png"
+              alt="Zoning Logo"
+              sx={{ width: 70, height: 70 }}
+            />
+          </Grid>
         </Grid>
 
-        {/* --- Certificate Body --- */}
+        {/* === CERTIFICATE BODY === */}
         <Typography paragraph sx={{ textAlign: "justify", mt: 5, mb: 2 }}>
           ITO AY PAGPAPATUNAY na ang isang lugar na lupang matatagpuan sa
           barangay{" "}
@@ -197,7 +216,6 @@ function ZoningCert({ applicant, renewZoningFee }) {
             value={form.barangay}
             onChange={handleChange}
             variant="standard"
-            // ✅ Dynamic/Auto-expand width
             sx={{ width: getTextFieldWidth(form.barangay) }}
           />{" "}
           , San Pablo City, nakatala sa pangalan ni{" "}
@@ -206,7 +224,6 @@ function ZoningCert({ applicant, renewZoningFee }) {
             value={form.firstName}
             onChange={handleChange}
             variant="standard"
-            // ✅ Dynamic/Auto-expand width
             sx={{ width: getTextFieldWidth(form.firstName) }}
           />{" "}
           <TextField
@@ -214,7 +231,6 @@ function ZoningCert({ applicant, renewZoningFee }) {
             value={form.lastName}
             onChange={handleChange}
             variant="standard"
-            // ✅ Dynamic/Auto-expand width
             sx={{ width: getTextFieldWidth(form.lastName) }}
           />{" "}
           ay nakakasakop sa SONANG nakatalaga sa/o para gamiting{" "}
@@ -227,43 +243,54 @@ function ZoningCert({ applicant, renewZoningFee }) {
             value={form.businessType}
             onChange={handleChange}
             variant="standard"
-            // ✅ Dynamic/Auto-expand width
             sx={{ width: getTextFieldWidth(form.businessType) }}
           />{" "}
-          ay maaaring pahintulutan...
+          ay maaaring pahintulutan at pasubaling babawiin o patitigilin sa
+          sandaling mapatunayan naglalagay ng panganib sa PANGMADLANG KALUSUGAN
+          AT KALIGTASAN.
         </Typography>
 
-        <Typography>
+        <Typography paragraph sx={{ textAlign: "justify" }}>
           Ipinagkaloob ngayon ika-{day} ng {month}, {year} kaugnay ng kanyang
           kahilingan para sa MAYOR'S PERMIT.
         </Typography>
 
         <Typography variant="subtitle1" sx={{ mt: 2 }}>
-          CAPITAL: ₱{" "}
+          CAPITAL: P{" "}
           <TextField
             name="totalCapital"
             value={form.totalCapital}
             onChange={handleChange}
             variant="standard"
-            // ✅ Dynamic/Auto-expand width
             sx={{ width: getTextFieldWidth(form.totalCapital) }}
           />
         </Typography>
+
         <Typography variant="subtitle1" sx={{ mb: 3 }}>
           ZONING FEE:{" "}
-          <b>{zoningFee === "Exempted" ? zoningFee : `₱${zoningFee}`}</b>
+          <b>{zoningFee === "Exempted" ? zoningFee : `P${zoningFee}`}</b>
         </Typography>
 
-        {/* Signature Section */}
-        <Box mt={5} textAlign="right">
-          <Typography variant="body1">For:</Typography>
+        {/* === SIGNATURE WITH "For:" ABOVE === */}
+        <Box mt={5} textAlign="right" sx={{ mr: 10 }}>
+          <Typography variant="body1" sx={{ mb: 3 }}>
+            For:
+          </Typography>
+
+          <Box
+            component="img"
+            src="/samplesig.png"
+            alt="Signature"
+            sx={{ width: 120, height: 50, mb: -1 }}
+          />
+          
           <Typography variant="body1" fontWeight="bold">
             HON. ARCADIO B. GAPANGADA, MNSA
           </Typography>
           <Typography variant="body2">City Mayor</Typography>
         </Box>
 
-        {/* Export PDF Button */}
+        {/* === EXPORT BUTTON === */}
         <Box mt={5} display="flex" justifyContent="center">
           <Button variant="contained" color="primary" onClick={exportPDF}>
             Export to PDF
