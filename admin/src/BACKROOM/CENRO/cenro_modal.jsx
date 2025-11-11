@@ -659,7 +659,7 @@ function CenroApplicantModal({
             variant="contained"
             color="error"
             sx={{
-              color: "white",
+              color: "white", 
               width: "100px",
             }}
           >
