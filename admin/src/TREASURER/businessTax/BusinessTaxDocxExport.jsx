@@ -5,7 +5,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import axios from "axios";
 
-function BusinessTaxPdfExport({ applicant, collections, total }) {
+function BusinessTaxPdfExport({ applicant, collections, totalExcludingOBO }) {
   const [userSignatory, setUserSignatory] = useState(null);
   const [defaultSignature, setDefaultSignature] = useState(null);
   const API = import.meta.env.VITE_API_BASE;
@@ -224,14 +224,14 @@ function BusinessTaxPdfExport({ applicant, collections, total }) {
       [
         "TOTAL",
         {
-          content: formatPeso(total),
+          content: formatPeso(totalExcludingOBO),
           styles: { halign: "right", fontStyle: "bold" },
         },
       ],
       [
         "AMOUNT IN WORDS",
         {
-          content: amountInWords(total).toUpperCase(),
+          content: amountInWords(totalExcludingOBO).toUpperCase(),
           styles: { halign: "right" },
         },
       ]

@@ -94,7 +94,6 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
     "ELECTRONIC INSPECTION",
     "ZONING FEE",
     "CENRO",
-    "SWMO CERT",
   ]);
 
   const feeRanges = {
@@ -214,7 +213,6 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
       { label: "VERIFICATION FEE", amount: "" },
       { label: "ZONING FEE", amount: String(applicant?.zoningFee || "") },
       { label: "CENRO", amount: String(applicant?.cenroFee || "") },
-      { label: "SWMO CERT", amount: String(applicant?.cenroFee || "") },
       { label: "VETERNARY FEE", amount: "" },
       { label: "FIXED TAX", amount: "" },
       { label: "VIDEOKE CARABET DANCEHALL", amount: "" },
@@ -385,7 +383,7 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
         <BusinessTaxDocxExport
           applicant={applicant}
           collections={collections}
-          total={total}
+          totalExcludingOBO={totalExcludingOBO}
           otherChargesTotal={otherChargesTotal}
         />
         <BusinessTaxApplicantModal

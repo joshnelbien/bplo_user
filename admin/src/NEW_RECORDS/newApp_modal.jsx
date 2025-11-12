@@ -282,20 +282,40 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
     (Number(applicant.Electronics) || 0) +
     (Number(applicant.otherFee) || 0);
   // ✅ Collections data - customize based on your applicant fields (e.g., fees from backroom sections)
+  const otherCharges =
+    (Number(applicant.videokeFee) || 0) +
+    (Number(applicant.cigarettes) || 0) +
+    (Number(applicant.liquor) || 0) +
+    (Number(applicant.billiards) || 0) +
+    (Number(applicant.deliveryVehicle) || 0) +
+    (Number(applicant.boardAndLogging) || 0);
+
   // This is a placeholder; map real fields like applicant.zoningFee, applicant.choFee, etc.
   const collections = [
+    { label: "Business Tax", amount: applicant.businessTaxFee || 0 },
+    { label: "Mayor's Permit", amount: applicant.mayorsPermit || 0 },
+    { label: "Occupational Tax", amount: applicant.occupationalTax || 0 },
+    { label: "Barangay Fee", amount: applicant.barangayFee || 0 },
+    { label: "Surcharge", amount: applicant.surcharge || 0 },
+    { label: "interest", amount: applicant.interest || 0 },
     { label: "Zoning Fee", amount: applicant.zoningFee || 0 },
     { label: "Sanitary Fee", amount: applicant.choFee || 0 },
     { label: "Solid Waste Fee", amount: applicant.csmwoFee || 0 },
     { label: "Environment Fee", amount: applicant.cenroFee || 0 },
-
     { label: "OBO", amount: oboTotal },
-
-    // Add more as needed, e.g., { label: "Other Charge", amount: applicant.someOtherFee }
+    {
+      label: "Tin Plate/ Sticker Fee",
+      amount: applicant.tinplateStickerFee || 0,
+    },
+    { label: "Verification Fee", amount: applicant.verificationFee || 0 },
+    { label: "Veterinary Fee", amount: applicant.veterinaryFee || 0 },
+    { label: "Fixed Tax", amount: applicant.fixedTax || 0 },
+    { label: "Other Charges", amount: otherCharges },
+    { label: "FSIC", amount: applicant.fsicFee },
   ].filter((item) => item.amount > 0);
 
   const total = collections.reduce((sum, item) => sum + Number(item.amount), 0);
-  const otherChargesTotal = 0; // If you have separate other charges, calculate here
+  const otherChargesTotal = 0;
 
   const handlePassToBusinessTax = async () => {
     try {

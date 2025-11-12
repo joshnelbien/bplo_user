@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     border: "0.5pt solid black",
     backgroundColor: "#F5F5F5",
   },
-  collectionCell: { padding: 3, border: "0.5pt solid black", fontSize: 7 },
+  collectionCell: { padding: 3, border: "0.5pt solid black", fontSize: 5 },
   totalCell: {
     padding: 3,
     border: "0.5pt solid black",
@@ -291,7 +291,7 @@ function MayorsPermit({ applicant, collections, total }) {
             </Text>
 
             <Text style={{ fontWeight: "bold", fontSize: 8 }}>
-              BUSINESS ID: {applicant?.BIN || "__________"}
+              BUSINESS ID: {applicant?.bin || "__________"}
             </Text>
             <Text style={{ fontWeight: "bold", fontSize: 8 }}>
               REFERENCE NO: {applicant?.referenceNo || ""}
