@@ -29,11 +29,11 @@ const styles = StyleSheet.create({
   page: { padding: 15, fontFamily: "Helvetica" },
   pageWatermark: {
     position: "absolute",
-    top: "15%",
+    top: "22%",
     left: "5%",
     width: "90%",
     height: "60%",
-    opacity: 0.05, // 👈 very light
+    opacity: 0.1, // 👈 very light
     zIndex: -1,
   },
   frame: {
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   },
   wordsRow: { flexDirection: "row", border: "0.5pt solid black" },
   wordsLabelSmall: {
-    width: "30%",
+    width: "40%",
     padding: 3,
     border: "0.5pt solid black",
     fontSize: 7,
@@ -253,13 +253,13 @@ function MayorsPermit({ applicant, collections, total }) {
               <View style={styles.col25}>
                 <Image
                   src={bagongPilipinasSrc}
-                  style={{ width: 45, height: 45 }}
+                  style={{ width: 65, height: 65 }}
                 />
               </View>
               <View style={[styles.col50, { alignItems: "center" }]}>
-                <Image src={spcLogoSrc} style={{ width: 45, height: 45 }} />
+                <Image src={spcLogoSrc} style={{ width: 65, height: 65 }} />
                 <Text
-                  style={{ fontSize: 12, fontWeight: "bold", paddingTop: 5 }}
+                  style={{ fontSize: 16, fontWeight: "bold", paddingTop: 5 }}
                 >
                   OFFICE OF THE MAYOR
                 </Text>
@@ -268,18 +268,18 @@ function MayorsPermit({ applicant, collections, total }) {
                 </Text>
               </View>
               <View style={[styles.col25, { alignItems: "flex-end" }]}>
-                <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                <Text style={{ fontSize: 26, fontWeight: "bold" }}>
                   {" "}
                   {new Date().getFullYear()}
                 </Text>
-                <Text style={{ fontSize: 14, fontWeight: "bold" }}>
+                <Text style={{ fontSize: 26, fontWeight: "bold" }}>
                   {applicant?.PermitNumber || "00000"}
                 </Text>
-                <Text style={{ fontSize: 6 }}>PERMIT NUMBER</Text>
+                <Text style={{ fontSize: 8 }}>PERMIT NUMBER</Text>
               </View>
             </View>
             <View style={styles.banner}>
-              <Text style={[styles.bannerText, { fontSize: 18 }]}>
+              <Text style={[styles.bannerText, { fontSize: 26 }]}>
                 MAYOR'S PERMIT
               </Text>
             </View>
@@ -340,74 +340,108 @@ function MayorsPermit({ applicant, collections, total }) {
               ))}
             </View>
 
-            <View>
-              <View style={styles.row}>
-                <Text style={[styles.collectionHeader, { width: "30%" }]}>
-                  NATURE OF COLLECTION
-                </Text>
-                <Text
-                  style={[
-                    styles.collectionHeader,
-                    { width: "70%", textAlign: "center" },
-                  ]}
-                >
-                  AMOUNT
-                </Text>
-              </View>
-              {validCollections.map((item) => (
-                <View style={styles.row} key={item.label}>
-                  <Text style={[styles.collectionCell, { width: "30%" }]}>
-                    {item.label}
+            <View style={[styles.row, { marginTop: 8 }]}>
+              {/* Left 50% Table */}
+              <View style={{ width: "70%" }}>
+                <View style={styles.row}>
+                  <Text style={[styles.collectionHeader, { width: "40%" }]}>
+                    NATURE OF COLLECTION
                   </Text>
                   <Text
                     style={[
-                      styles.collectionCell,
-                      { width: "70%", textAlign: "left" },
+                      styles.collectionHeader,
+                      { width: "70%", textAlign: "center" },
                     ]}
                   >
-                    {formatPeso(Number(item.amount))}
+                    AMOUNT
                   </Text>
                 </View>
-              ))}
-              {total > 0 && (
-                <>
-                  <View style={styles.row}>
-                    <Text style={[styles.totalCell, { width: "30%" }]}>
-                      TOTAL
+
+                {validCollections.map((item) => (
+                  <View style={styles.row} key={item.label}>
+                    <Text style={[styles.collectionCell, { width: "40%" }]}>
+                      {item.label}
                     </Text>
                     <Text
                       style={[
-                        styles.totalCell,
+                        styles.collectionCell,
                         { width: "70%", textAlign: "left" },
                       ]}
                     >
-                      {formatPeso(total)}
+                      {formatPeso(Number(item.amount))}
                     </Text>
                   </View>
-                  <View style={styles.wordsRow}>
-                    <Text style={styles.wordsLabelSmall}>AMOUNT IN WORDS:</Text>
-                    <Text style={styles.wordsValueSmall}>{amountInWords}</Text>
-                  </View>
-                </>
-              )}
-            </View>
+                ))}
 
-            <View style={styles.row}>
-              <View style={styles.signatureCol}>
-                <Image src={oSig} style={{ width: 40, height: 40 }} />
-                <Text style={{ fontWeight: "bold", fontSize: 8 }}>
-                  ORIA M. BAÑAGALE
-                </Text>
-                <Text style={{ fontSize: 7 }}>
-                  LICENSING OFFICER IV, CHIEF, BPLO
-                </Text>
+                {total > 0 && (
+                  <>
+                    <View style={styles.row}>
+                      <Text style={[styles.totalCell, { width: "40%" }]}>
+                        TOTAL
+                      </Text>
+                      <Text
+                        style={[
+                          styles.totalCell,
+                          { width: "70%", textAlign: "left" },
+                        ]}
+                      >
+                        {formatPeso(total)}
+                      </Text>
+                    </View>
+
+                    <View style={styles.wordsRow}>
+                      <Text style={styles.wordsLabelSmall}>
+                        AMOUNT IN WORDS:
+                      </Text>
+                      <Text style={styles.wordsValueSmall}>
+                        {amountInWords}
+                      </Text>
+                    </View>
+                  </>
+                )}
               </View>
-              <View style={styles.signatureCol}>
-                <Image src={eSig} style={{ width: 40, height: 40 }} />
-                <Text style={{ fontWeight: "bold", fontSize: 8 }}>
-                  HON. ARCADIO B. GAPANGADA JR., MNSA
-                </Text>
-                <Text style={{ fontSize: 7 }}>CITY MAYOR</Text>
+
+              {/* Right side stacked signatures */}
+              <View style={{ width: "50%", paddingLeft: 10 }}>
+                <View
+                  style={{
+                    alignItems: "center",
+                    marginBottom: 10,
+                    marginTop: 20,
+                  }}
+                >
+                  <Image
+                    src={oSig}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      marginBottom: -10,
+                      marginTop: 25,
+                    }}
+                  />
+                  <Text style={{ fontWeight: "bold", fontSize: 10 }}>
+                    ORIA M. BAÑAGALE
+                  </Text>
+                  <Text style={{ fontSize: 8 }}>
+                    LICENSING OFFICER IV, CHIEF, BPLO
+                  </Text>
+                </View>
+
+                <View style={{ alignItems: "center" }}>
+                  <Image
+                    src={eSig}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      marginBottom: -10,
+                      marginTop: 50,
+                    }}
+                  />
+                  <Text style={{ fontWeight: "bold", fontSize: 10 }}>
+                    HON. ARCADIO B. GAPANGADA JR., MNSA
+                  </Text>
+                  <Text style={{ fontSize: 8 }}>CITY MAYOR</Text>
+                </View>
               </View>
             </View>
 
