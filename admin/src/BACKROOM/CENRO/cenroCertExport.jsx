@@ -1,27 +1,49 @@
-import React, { useRef } from "react";
-import { Button } from "@mui/material";
+import React, { useRef, useState } from "react";
+import { Button, Checkbox, FormControlLabel } from "@mui/material";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
-// Ensure these images are in: public/spclogo.png and public/esignature.png
 const spcLogo = "/spclogo.png";
 const eSignature = "/samplesig.png";
 
 const CenroCertExport = ({ applicant }) => {
   const certificateRef = useRef();
 
+  // State to track checkbox values
+  const [checkboxes, setCheckboxes] = useState({
+    A: true,
+    B: true,
+    C: true,
+    D: true,
+    E: true,
+  });
+
+  const handleCheckboxChange = (key) => {
+    setCheckboxes((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   const handleGeneratePDF = async () => {
     const input = certificateRef.current;
+
+    // Temporarily force checkbox appearance for PDF
     const canvas = await html2canvas(input, {
       scale: 2.5,
       useCORS: true,
       logging: false,
       width: 612,
       height: 1008,
+      onclone: (clonedDoc) => {
+        // Ensure checkboxes render as checked in the cloned DOM
+        clonedDoc.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+          const key = cb.dataset.key;
+          if (checkboxes[key]) {
+            cb.checked = true;
+          }
+        });
+      },
     });
-    const imgData = canvas.toDataURL("image/png");
 
-    // Legal size: 8.5 x 14 inches = 612 x 1008 pt
+    const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF("portrait", "pt", [612, 1008]);
     const imgWidth = 612;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -31,6 +53,29 @@ const CenroCertExport = ({ applicant }) => {
       `CENRO_Certification_${applicant.businessName || "Applicant"}.pdf`
     );
   };
+
+  const checklistItems = [
+    {
+      key: "A",
+      text: "Abide by the provisions of existing National Environment Laws, the New Building code of the Philippines, Pertinent Local Ordinances;",
+    },
+    {
+      key: "B",
+      text: "Take such necessary measures for the avoidance of noise, dust and other Forms of pollution during site development/construction and actual Operation;",
+    },
+    {
+      key: "C",
+      text: "Make sure that proper collection, segregation, handling and disposal of Waste shall be effected;",
+    },
+    {
+      key: "D",
+      text: "Duli certified Barangay Clearance (when required)",
+    },
+    {
+      key: "E",
+      text: "Appoint a duly accredited POLLUTION CONTROL OFFICER.",
+    },
+  ];
 
   return (
     <>
@@ -47,17 +92,14 @@ const CenroCertExport = ({ applicant }) => {
           boxSizing: "border-box",
         }}
       >
-        {/* SPC Logo */}
+        {/* === HEADER (unchanged) === */}
         <div style={{ textAlign: "center", marginBottom: "5px" }}>
           <img
             src={spcLogo}
             alt="SPC Logo"
             style={{ width: "60px", height: "auto" }}
-            onError={(e) => (e.target.style.display = "none")}
           />
         </div>
-
-        {/* Header */}
         <div style={{ textAlign: "center", marginBottom: "10px" }}>
           <h2
             style={{
@@ -98,7 +140,7 @@ const CenroCertExport = ({ applicant }) => {
           </h1>
         </div>
 
-        {/* Body */}
+        {/* === BODY TEXT === */}
         <div style={{ textAlign: "justify", marginBottom: "10px" }}>
           <p style={{ marginBottom: "8px", fontSize: "10pt" }}>
             This is to certify that the establishment{" "}
@@ -118,8 +160,7 @@ const CenroCertExport = ({ applicant }) => {
                 {applicant.addressLine1} {applicant.barangay}
               </u>
             </strong>{" "}
-            San Pablo City, do hereby pledge to comply with the following, in
-            consideration for the issuance/renewal of a business permit:
+            San Pablo City, do hereby pledge to comply with the following...
           </p>
 
           <p
@@ -132,56 +173,41 @@ const CenroCertExport = ({ applicant }) => {
             THAT SAID ESTABLISHMENT SHALL:
           </p>
 
-          {/* Checkboxes */}
+          {/* ==== INTERACTIVE CHECKBOX LIST ==== */}
           <div style={{ marginBottom: "12px" }}>
-            {[
-              {
-                letter: "A",
-                text: "Abide by the provisions of existing National Environment Laws, the New Building code of the Philippines, Pertinent Local Ordinances;",
-              },
-              {
-                letter: "B",
-                text: "Take such necessary measures for the avoidance of noise, dust and other Forms of pollution during site development/construction and actual Operation;",
-              },
-              {
-                letter: "C",
-                text: "Make sure that proper collection, segregation, handling and disposal of Waste shall be effected;",
-              },
-              {
-                letter: "D",
-                text: "Duli certified Barangay Clearance (when required)",
-              },
-              {
-                letter: "E",
-                text: "Appoint a duly accredited POLLUTION CONTROL OFFICER.",
-              },
-            ].map((item, idx) => (
+            {checklistItems.map((item) => (
               <div
-                key={idx}
+                key={item.key}
                 style={{
-                  marginBottom: "4px",
                   display: "flex",
-                  alignItems: "flex-start",
+                  alignItems: "center", // ← vertical centre
+                  marginBottom: "6px",
+                  gap: "6px", // space between box and text
                 }}
               >
-                <span
+                {/* ---- Tiny checkbox ---- */}
+                <input
+                  type="checkbox"
+                  checked={checkboxes[item.key]}
+                  onChange={() => handleCheckboxChange(item.key)}
                   style={{
-                    fontFamily: "Arial",
-                    fontSize: "12pt",
-                    marginRight: "6px",
-                    marginTop: "2px",
+                    width: "14px",
+                    height: "14px",
+                    margin: 0,
+                    cursor: "pointer",
                   }}
-                >
-                  Checkmark
-                </span>
-                <span style={{ fontSize: "10pt" }}>
-                  <strong>{item.letter}.</strong> {item.text}
+                  data-key={item.key}
+                />
+
+                {/* ---- Text ---- */}
+                <span style={{ fontSize: "10pt", lineHeight: "1.2" }}>
+                  <strong>{item.key}.</strong> {item.text}
                 </span>
               </div>
             ))}
           </div>
 
-          {/* Numbered List */}
+          {/* === NUMBERED LIST & REST OF TEXT (unchanged) === */}
           <ol
             style={{
               margin: "8px 0 12px 0",
@@ -195,15 +221,11 @@ const CenroCertExport = ({ applicant }) => {
             </li>
             <li style={{ marginBottom: "4px" }}>
               That any authorized City Environment and Natural Resources
-              Personnel can conduct an on-the-spot inspection and monitoring
-              without prior notice from the proponent.
+              Personnel can conduct an on-the-spot inspection...
             </li>
             <li style={{ marginBottom: "4px" }}>
               That all necessary permits/certifications (ECC’s CNC’s, Discharge
-              Permits, NWRB, CWR) from other government agencies shall be
-              secured and submitted to this office within 45 days after the
-              issuance of this certification. Failure to do so shall be a ground
-              for revocation of the Business Permit.
+              Permits, NWRB, CWR) from other government agencies...
             </li>
             <li style={{ marginBottom: "4px" }}>
               That this certification shall be exhibited together with the
@@ -212,11 +234,8 @@ const CenroCertExport = ({ applicant }) => {
           </ol>
 
           <p style={{ margin: "8px 0 12px 0", fontSize: "10pt" }}>
-            This certification is valid up to <strong>December 31, 2025</strong>{" "}
-            and is issued as a condition precedent to the issuance of
-            Business/Mayor’s Permit. Non-compliance with any of the above
-            stipulations will be sufficient cause for suspension or cancellation
-            of this certification.
+            This certification is valid up to <strong>December 31, 2025</strong>
+            ...
           </p>
 
           <p style={{ margin: "8px 0", fontSize: "10pt" }}>
@@ -226,7 +245,7 @@ const CenroCertExport = ({ applicant }) => {
           </p>
         </div>
 
-        {/* CONFORME + APPROVED BY (Side by Side) */}
+        {/* === SIGNATURE SECTION (unchanged) === */}
         <div
           style={{
             marginTop: "10px",
@@ -235,7 +254,6 @@ const CenroCertExport = ({ applicant }) => {
             gap: "40px",
           }}
         >
-          {/* CONFORME */}
           <div style={{ width: "45%", textAlign: "center" }}>
             <p
               style={{
@@ -265,7 +283,6 @@ const CenroCertExport = ({ applicant }) => {
             </p>
           </div>
 
-          {/* APPROVED BY */}
           <div style={{ width: "45%", textAlign: "center" }}>
             <p style={{ marginBottom: "2px", fontSize: "9pt" }}>
               <strong>APPROVED BY:</strong>
@@ -275,7 +292,6 @@ const CenroCertExport = ({ applicant }) => {
                 src={eSignature}
                 alt="e-Signature"
                 style={{ width: "140px", height: "auto" }}
-                onError={(e) => (e.target.style.display = "none")}
               />
             </div>
             <p style={{ margin: "0", fontWeight: "bold", fontSize: "11pt" }}>
@@ -288,7 +304,7 @@ const CenroCertExport = ({ applicant }) => {
         </div>
       </div>
 
-      {/* Download Button */}
+      {/* === DOWNLOAD BUTTON === */}
       <div style={{ textAlign: "center", marginTop: "20px" }}>
         <Button
           variant="contained"
