@@ -117,7 +117,9 @@ const FileField = ({ label, fileKey, fileData }) => (
       }}
     />
     {fileData[fileKey] && (
-      <Typography sx={{ mt: 0.5, display: "flex", gap: 1, alignItems: "center" }}>
+      <Typography
+        sx={{ mt: 0.5, display: "flex", gap: 1, alignItems: "center" }}
+      >
         <Tooltip title="View File">
           <IconButton
             size="small"
@@ -147,15 +149,49 @@ const FileField = ({ label, fileKey, fileData }) => (
 
 // Confirmation Dialog
 const ConfirmDialog = ({ open, title, onConfirm, onCancel, confirmColor }) => (
-  <Dialog open={open} onClose={onCancel} sx={{ "& .MuiDialog-paper": { borderRadius: "10px", width: "400px" } }}>
-    <DialogTitle align="center" sx={{ py: 3, px: 4, fontWeight: "bold", fontSize: "1.25rem", color: confirmColor }}>
+  <Dialog
+    open={open}
+    onClose={onCancel}
+    sx={{ "& .MuiDialog-paper": { borderRadius: "10px", width: "400px" } }}
+  >
+    <DialogTitle
+      align="center"
+      sx={{
+        py: 3,
+        px: 4,
+        fontWeight: "bold",
+        fontSize: "1.25rem",
+        color: confirmColor,
+      }}
+    >
       {title}
     </DialogTitle>
-    <DialogActions sx={{ display: "flex", justifyContent: "center", gap: 2, pb: 2 }}>
-      <Button onClick={onConfirm} variant="contained" color={confirmColor} sx={{ fontWeight: "bold", textTransform: "uppercase", minWidth: "100px" }}>
+    <DialogActions
+      sx={{ display: "flex", justifyContent: "center", gap: 2, pb: 2 }}
+    >
+      <Button
+        onClick={onConfirm}
+        variant="contained"
+        color={confirmColor}
+        sx={{
+          fontWeight: "bold",
+          textTransform: "uppercase",
+          minWidth: "100px",
+        }}
+      >
         Yes
       </Button>
-      <Button onClick={onCancel} variant="outlined" sx={{ fontWeight: "bold", textTransform: "uppercase", minWidth: "100px", color: confirmColor, borderColor: confirmColor }}>
+      <Button
+        onClick={onCancel}
+        variant="outlined"
+        sx={{
+          fontWeight: "bold",
+          textTransform: "uppercase",
+          minWidth: "100px",
+          color: confirmColor,
+          borderColor: confirmColor,
+        }}
+      >
         No
       </Button>
     </DialogActions>
@@ -164,11 +200,32 @@ const ConfirmDialog = ({ open, title, onConfirm, onCancel, confirmColor }) => (
 
 // Success/Decline Status Dialog
 const StatusDialog = ({ open, onClose, icon, title, color }) => (
-  <Dialog open={open} onClose={onClose} TransitionComponent={Fade} maxWidth="xs">
-    <Paper elevation={6} sx={{ p: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, color }}>
+  <Dialog
+    open={open}
+    onClose={onClose}
+    TransitionComponent={Fade}
+    maxWidth="xs"
+  >
+    <Paper
+      elevation={6}
+      sx={{
+        p: 4,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+        color,
+      }}
+    >
       {icon}
-      <Typography variant="h5" fontWeight="bold">{title}</Typography>
-      <Button onClick={onClose} variant="contained" sx={{ backgroundColor: color, "&:hover": { backgroundColor: color } }}>
+      <Typography variant="h5" fontWeight="bold">
+        {title}
+      </Typography>
+      <Button
+        onClick={onClose}
+        variant="contained"
+        sx={{ backgroundColor: color, "&:hover": { backgroundColor: color } }}
+      >
         OK
       </Button>
     </Paper>
@@ -179,10 +236,14 @@ const StatusDialog = ({ open, onClose, icon, title, color }) => (
 const Section = ({ title, children }) => (
   <Accordion>
     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-      <Typography variant="subtitle1" fontWeight="bold">{title}</Typography>
+      <Typography variant="subtitle1" fontWeight="bold">
+        {title}
+      </Typography>
     </AccordionSummary>
     <AccordionDetails>
-      <Grid container spacing={2}>{children}</Grid>
+      <Grid container spacing={2}>
+        {children}
+      </Grid>
     </AccordionDetails>
   </Accordion>
 );
@@ -201,7 +262,10 @@ function ChoApplicantModal({
   const [declineReason, setDeclineReason] = useState("");
   const [selectedReasons, setSelectedReasons] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState({});
-  const [validationErrors, setValidationErrors] = useState({ choFee: false, choCert: false });
+  const [validationErrors, setValidationErrors] = useState({
+    choFee: false,
+    choCert: false,
+  });
   const [approveConfirmOpen, setApproveConfirmOpen] = useState(false);
   const [declineConfirmOpen, setDeclineConfirmOpen] = useState(false);
   const [successStatusOpen, setSuccessStatusOpen] = useState(false);
@@ -255,14 +319,18 @@ function ChoApplicantModal({
 
   const handleToggleReason = (reason) => {
     setSelectedReasons((prev) =>
-      prev.includes(reason) ? prev.filter((r) => r !== reason) : [...prev, reason]
+      prev.includes(reason)
+        ? prev.filter((r) => r !== reason)
+        : [...prev, reason]
     );
   };
 
   const handleAddReasons = () => {
     if (selectedReasons.length > 0) {
       const reasonsText = selectedReasons.join(", ");
-      setDeclineReason((prev) => (prev ? `${prev}, ${reasonsText}` : reasonsText));
+      setDeclineReason((prev) =>
+        prev ? `${prev}, ${reasonsText}` : reasonsText
+      );
     }
   };
 
@@ -292,7 +360,9 @@ function ChoApplicantModal({
       const imgWidth = 210;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-      pdf.save(`CHO_Certificate_${applicant.bin || applicant.id || "Unknown"}.pdf`);
+      pdf.save(
+        `CHO_Certificate_${applicant.bin || applicant.id || "Unknown"}.pdf`
+      );
     } catch (error) {
       console.error("PDF generation failed:", error);
       alert(`PDF generation failed: ${error.message}`);
@@ -304,8 +374,21 @@ function ChoApplicantModal({
   return (
     <>
       {/* Main Modal - Full Width Applicant Details */}
-      <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="lg" scroll="paper">
-        <DialogTitle sx={{ backgroundColor: "#1d5236", color: "white", textAlign: "center", py: 2 }}>
+      <Dialog
+        open={isOpen}
+        onClose={onClose}
+        fullWidth
+        maxWidth="lg"
+        scroll="paper"
+      >
+        <DialogTitle
+          sx={{
+            backgroundColor: "#1d5236",
+            color: "white",
+            textAlign: "center",
+            py: 2,
+          }}
+        >
           Applicant Details
         </DialogTitle>
 
@@ -315,7 +398,10 @@ function ChoApplicantModal({
               {/* Business Information */}
               <Section title="Business Information">
                 <Field label="Status" value={applicant.CHO} />
-                <Field label="Mode of Payment" value={applicant.Modeofpayment} />
+                <Field
+                  label="Mode of Payment"
+                  value={applicant.Modeofpayment}
+                />
                 <Field label="BIN" value={applicant.bin} />
                 <Field label="Business Type" value={applicant.BusinessType} />
                 <Field label="DSC Registration No" value={applicant.dscRegNo} />
@@ -341,7 +427,10 @@ function ChoApplicantModal({
               <Section title="Business Address">
                 <Field label="Region" value={applicant.region} />
                 <Field label="Province" value={applicant.province} />
-                <Field label="City/Municipality" value={applicant.cityOrMunicipality} />
+                <Field
+                  label="City/Municipality"
+                  value={applicant.cityOrMunicipality}
+                />
                 <Field label="Barangay" value={applicant.barangay} />
                 <Field label="Address Line 1" value={applicant.addressLine1} />
                 <Field label="Zip Code" value={applicant.zipCode} />
@@ -352,18 +441,30 @@ function ChoApplicantModal({
                 ) : (
                   <>
                     <Field label="Lessor's Name" value={applicant.lessorName} />
-                    <Field label="Monthly Rent" value={formatCurrency(applicant.monthlyRent)} />
+                    <Field
+                      label="Monthly Rent"
+                      value={formatCurrency(applicant.monthlyRent)}
+                    />
                     <Field label="Tax Dec. No." value={applicant.taxdec} />
                   </>
                 )}
               </Section>
 
               <Section title="Business Operation">
-                <Field label="Total Floor Area" value={applicant.totalFloorArea} />
+                <Field
+                  label="Total Floor Area"
+                  value={applicant.totalFloorArea}
+                />
                 <Field label="Employees" value={applicant.numberOfEmployee} />
                 <Field label="Male Employees" value={applicant.maleEmployee} />
-                <Field label="Female Employees" value={applicant.femaleEmployee} />
-                <Field label="Total Delivery Vehicle" value={applicant.totalDeliveryVehicle} />
+                <Field
+                  label="Female Employees"
+                  value={applicant.femaleEmployee}
+                />
+                <Field
+                  label="Total Delivery Vehicle"
+                  value={applicant.totalDeliveryVehicle}
+                />
                 <Field label="No. of Nozzles" value={applicant.numNozzle} />
                 <Field label="Weigh Scale" value={applicant.weighScale} />
               </Section>
@@ -371,9 +472,15 @@ function ChoApplicantModal({
               <Section title="Taxpayer Address">
                 <Field label="Region" value={applicant.Taxregion} />
                 <Field label="Province" value={applicant.Taxprovince} />
-                <Field label="City/Municipality" value={applicant.TaxcityOrMunicipality} />
+                <Field
+                  label="City/Municipality"
+                  value={applicant.TaxcityOrMunicipality}
+                />
                 <Field label="Barangay" value={applicant.Taxbarangay} />
-                <Field label="Address Line 1" value={applicant.TaxaddressLine1} />
+                <Field
+                  label="Address Line 1"
+                  value={applicant.TaxaddressLine1}
+                />
                 <Field label="Zip Code" value={applicant.TaxzipCode} />
                 <Field label="Pin Address" value={applicant.TaxpinAddress} />
               </Section>
@@ -381,7 +488,11 @@ function ChoApplicantModal({
               <Section title="Business Activity & Incentives">
                 <Field label="Tax Incentives" value={applicant.tIGE} />
                 {applicant.tIGE === "Yes" && (
-                  <FileField fileKey="tIGEfiles" label="Tax Incentives From Government" fileData={applicant} />
+                  <FileField
+                    fileKey="tIGEfiles"
+                    label="Tax Incentives From Government"
+                    fileData={applicant}
+                  />
                 )}
                 <Field label="Office Type" value={applicant.officeType} />
 
@@ -424,18 +535,56 @@ function ChoApplicantModal({
                     const lineCode = lineCodeArr[index] || "";
 
                     return (
-                      <Paper key={index} elevation={2} sx={{ p: 2, mb: 2, borderRadius: 2, backgroundColor: "#f9f9f9", width: "100%" }}>
-                        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                      <Paper
+                        key={index}
+                        elevation={2}
+                        sx={{
+                          p: 2,
+                          mb: 2,
+                          borderRadius: 2,
+                          backgroundColor: "#f9f9f9",
+                          width: "100%",
+                        }}
+                      >
+                        <Typography
+                          variant="subtitle2"
+                          fontWeight="bold"
+                          gutterBottom
+                        >
                           Business Line {index + 1}
                         </Typography>
                         <Grid container spacing={2}>
-                          <Field label="Line of Business" value={lob} fullWidth multiline rows={3} />
-                          <Grid item xs={12} sm={6}><Field label="Product/Service" value={product} /></Grid>
-                          <Grid item xs={12} sm={6}><Field label="Units" value={unit} /></Grid>
-                          <Grid item xs={12} sm={6}><Field label="Capital" value={formatCurrency(capital)} /></Grid>
-                          <Grid item xs={12} sm={6}><Field label="Nature Code" value={natureCode} /></Grid>
-                          <Grid item xs={12} sm={6}><Field label="Business Nature" value={businessNature} /></Grid>
-                          <Grid item xs={12} sm={6}><Field label="Line Code" value={lineCode} /></Grid>
+                          <Field
+                            label="Line of Business"
+                            value={lob}
+                            fullWidth
+                            multiline
+                            rows={3}
+                          />
+                          <Grid item xs={12} sm={6}>
+                            <Field label="Product/Service" value={product} />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Field label="Units" value={unit} />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Field
+                              label="Capital"
+                              value={formatCurrency(capital)}
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Field label="Nature Code" value={natureCode} />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Field
+                              label="Business Nature"
+                              value={businessNature}
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Field label="Line Code" value={lineCode} />
+                          </Grid>
                         </Grid>
                       </Paper>
                     );
@@ -444,20 +593,60 @@ function ChoApplicantModal({
               </Section>
 
               <Section title="Business Requirements">
-                <FileField fileKey="proofOfReg" label="Proof of Registration" fileData={applicant} />
-                <FileField fileKey="proofOfRightToUseLoc" label="Proof of Right to Use Location" fileData={applicant} />
-                <FileField fileKey="locationPlan" label="Location Plan" fileData={applicant} />
-                <FileField fileKey="brgyClearance" label="Barangay Clearance" fileData={applicant} />
-                <FileField fileKey="marketClearance" label="Market Clearance" fileData={applicant} />
-                <FileField fileKey="occupancyPermit" label="Occupancy Permit" fileData={applicant} />
-                <FileField fileKey="cedula" label="Cedula" fileData={applicant} />
-                <FileField fileKey="photoOfBusinessEstInt" label="Photo (Interior)" fileData={applicant} />
-                <FileField fileKey="photoOfBusinessEstExt" label="Photo (Exterior)" fileData={applicant} />
+                <FileField
+                  fileKey="proofOfReg"
+                  label="Proof of Registration"
+                  fileData={applicant}
+                />
+                <FileField
+                  fileKey="proofOfRightToUseLoc"
+                  label="Proof of Right to Use Location"
+                  fileData={applicant}
+                />
+                <FileField
+                  fileKey="locationPlan"
+                  label="Location Plan"
+                  fileData={applicant}
+                />
+                <FileField
+                  fileKey="brgyClearance"
+                  label="Barangay Clearance"
+                  fileData={applicant}
+                />
+                <FileField
+                  fileKey="marketClearance"
+                  label="Market Clearance"
+                  fileData={applicant}
+                />
+                <FileField
+                  fileKey="occupancyPermit"
+                  label="Occupancy Permit"
+                  fileData={applicant}
+                />
+                <FileField
+                  fileKey="cedula"
+                  label="Cedula"
+                  fileData={applicant}
+                />
+                <FileField
+                  fileKey="photoOfBusinessEstInt"
+                  label="Photo (Interior)"
+                  fileData={applicant}
+                />
+                <FileField
+                  fileKey="photoOfBusinessEstExt"
+                  label="Photo (Exterior)"
+                  fileData={applicant}
+                />
               </Section>
 
               {applicant.CHO === "Approved" && (
                 <Section title="Attachments">
-                  <FileField fileKey="choCert" label="CHO Cert" fileData={applicant} />
+                  <FileField
+                    fileKey="choCert"
+                    label="CHO Cert"
+                    fileData={applicant}
+                  />
                 </Section>
               )}
 
@@ -469,19 +658,36 @@ function ChoApplicantModal({
                     onChange={(e) => {
                       const clean = e.target.value.replace(/,/g, "");
                       setChoFee(clean);
-                      setValidationErrors((prev) => ({ ...prev, choFee: false }));
+                      setValidationErrors((prev) => ({
+                        ...prev,
+                        choFee: false,
+                      }));
                     }}
                     fullWidth
                     size="small"
                     sx={{ mt: 2 }}
                     error={validationErrors.choFee}
-                    helperText={validationErrors.choFee && "Sanitary Fee is required for approval."}
+                    helperText={
+                      validationErrors.choFee &&
+                      "Sanitary Fee is required for approval."
+                    }
                   />
                   <Grid container spacing={1} sx={{ mt: 1 }}>
                     <Grid item>
-                      <Button variant="contained" component="label" size="small" color="success" sx={{ minWidth: 120 }}>
+                      <Button
+                        variant="contained"
+                        component="label"
+                        size="small"
+                        color="success"
+                        sx={{ minWidth: 120 }}
+                      >
                         Choose File
-                        <input type="file" name="choCert" hidden onChange={handleFileSelect} />
+                        <input
+                          type="file"
+                          name="choCert"
+                          hidden
+                          onChange={handleFileSelect}
+                        />
                       </Button>
                     </Grid>
                     <Grid item xs>
@@ -492,7 +698,10 @@ function ChoApplicantModal({
                         fullWidth
                         InputProps={{ readOnly: true }}
                         error={validationErrors.choCert}
-                        helperText={validationErrors.choCert && "A file is required for approval."}
+                        helperText={
+                          validationErrors.choCert &&
+                          "A file is required for approval."
+                        }
                       />
                     </Grid>
                   </Grid>
@@ -610,8 +819,18 @@ function ChoApplicantModal({
         confirmColor="success"
       />
 
-      <Dialog open={declineConfirmOpen} onClose={() => setDeclineConfirmOpen(false)}>
-        <DialogTitle sx={{ fontWeight: "bold", backgroundColor: "#053d16ff", color: "white", mb: 2 }}>
+      <Dialog
+        open={declineConfirmOpen}
+        onClose={() => setDeclineConfirmOpen(false)}
+      >
+        <DialogTitle
+          sx={{
+            fontWeight: "bold",
+            backgroundColor: "#053d16ff",
+            color: "white",
+            mb: 2,
+          }}
+        >
           Decline Applicant
         </DialogTitle>
         <DialogContent sx={{ pt: 2, px: 3 }}>
@@ -635,14 +854,25 @@ function ChoApplicantModal({
                     mr: 1,
                     p: 0,
                     borderColor: "#053d16ff",
-                    ...(selectedReasons.includes(reason) && { backgroundColor: "#ffebee" }),
+                    ...(selectedReasons.includes(reason) && {
+                      backgroundColor: "#ffebee",
+                    }),
                   }}
                 >
                   {selectedReasons.includes(reason) && (
-                    <CheckCircleIcon sx={{ fontSize: "1rem", color: "#053d16ff" }} />
+                    <CheckCircleIcon
+                      sx={{ fontSize: "1rem", color: "#053d16ff" }}
+                    />
                   )}
                 </Button>
-                <Typography component="span" sx={{ fontSize: "1.1rem", color: "#000000", verticalAlign: "middle" }}>
+                <Typography
+                  component="span"
+                  sx={{
+                    fontSize: "1.1rem",
+                    color: "#000000",
+                    verticalAlign: "middle",
+                  }}
+                >
                   {reason}
                 </Typography>
               </Grid>
@@ -692,14 +922,20 @@ function ChoApplicantModal({
 
       <StatusDialog
         open={successStatusOpen}
-        onClose={() => { setSuccessStatusOpen(false); onClose(); }}
+        onClose={() => {
+          setSuccessStatusOpen(false);
+          onClose();
+        }}
         icon={<CheckCircleIcon sx={{ fontSize: "5rem", color: "#4caf50" }} />}
         title="Successfully Approved!"
         color="#4caf50"
       />
       <StatusDialog
         open={declineStatusOpen}
-        onClose={() => { setDeclineStatusOpen(false); onClose(); }}
+        onClose={() => {
+          setDeclineStatusOpen(false);
+          onClose();
+        }}
         icon={<CancelIcon sx={{ fontSize: "5rem", color: "#d32f2f" }} />}
         title="Successfully Declined!"
         color="#d32f2f"

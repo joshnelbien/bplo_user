@@ -15,9 +15,8 @@ const ChoCertExport = ({ applicant }) => {
     });
   };
 
-  const today = new Date();
-  const issueDate = new Date("2025-10-22");
-  const expiryDate = new Date("2025-12-31");
+  const today = new Date(); // Issued date = today
+  const endOfYear = new Date(today.getFullYear(), 11, 31);
 
   const isRenewal = applicant.isRenewal || false;
 
@@ -55,12 +54,17 @@ const ChoCertExport = ({ applicant }) => {
           overflow: "hidden",
         }}
       >
-    
-
         {/* Content */}
         <div style={{ position: "relative", zIndex: 2 }}>
           {/* Header */}
-          <div style={{ display: "flex", alignItems: "center", marginBottom: "15px", marginRight: "170px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "15px",
+              marginRight: "170px",
+            }}
+          >
             <img
               src="/spclogo.png"
               alt="San Pablo City Logo"
@@ -70,7 +74,13 @@ const ChoCertExport = ({ applicant }) => {
               <p style={{ margin: 0, fontWeight: "bold", fontSize: "13pt" }}>
                 Republic of the Philippines
               </p>
-              <p style={{ margin: "3px 0", fontWeight: "bold", fontSize: "13pt" }}>
+              <p
+                style={{
+                  margin: "3px 0",
+                  fontWeight: "bold",
+                  fontSize: "13pt",
+                }}
+              >
                 Office of the City Health Officer
               </p>
               <p style={{ margin: 0, fontWeight: "bold", fontSize: "13pt" }}>
@@ -87,10 +97,18 @@ const ChoCertExport = ({ applicant }) => {
           </div>
 
           {/* Permit Number & Type */}
-          <div style={{ textAlign: "center", marginBottom: "15px", fontSize: "11pt" }}>
+          <div
+            style={{
+              textAlign: "center",
+              marginBottom: "15px",
+              fontSize: "11pt",
+            }}
+          >
             <strong>No. 8461-2025</strong>&nbsp;&nbsp;&nbsp;
             <span>
-              ☑ New &nbsp;&nbsp; ☐ Renewal
+              {applicant.application === "New"
+                ? "☑ New   ☐ Renewal"
+                : "☐ New   ☑ Renewal"}
             </span>
           </div>
 
@@ -104,61 +122,148 @@ const ChoCertExport = ({ applicant }) => {
           {/* Issued To */}
           <div style={{ textAlign: "center", marginBottom: "25px" }}>
             <div style={{ display: "inline-block", textAlign: "center" }}>
-              <p style={{ margin: "0 0 8px", fontWeight: "bold", borderBottom: "1px solid #000", paddingBottom: "3px", width: "380px" }}>
-                JUAN DELA CRUZ
+              <p
+                style={{
+                  margin: "0 0 8px",
+                  fontWeight: "bold",
+                  borderBottom: "1px solid #000",
+                  paddingBottom: "3px",
+                  width: "380px",
+                }}
+              >
+                {applicant.lastName}, {applicant.firstName}{" "}
+                {applicant.middleName}
               </p>
-              <p style={{ margin: "0 0 15px", fontStyle: "italic", fontSize: "10pt" }}>
+              <p
+                style={{
+                  margin: "0 0 15px",
+                  fontStyle: "italic",
+                  fontSize: "10pt",
+                }}
+              >
                 (Registered Name)
               </p>
 
-              <p style={{ margin: "0 0 8px", fontWeight: "bold", borderBottom: "1px solid #000", paddingBottom: "3px", width: "380px" }}>
-                
+              <p
+                style={{
+                  margin: "0 0 8px",
+                  fontWeight: "bold",
+                  borderBottom: "1px solid #000",
+                  paddingBottom: "3px",
+                  width: "380px",
+                }}
+              >
+                {applicant.businessName}
               </p>
-              <p style={{ margin: "0 0 15px", fontStyle: "italic", fontSize: "10pt" }}>
+              <p
+                style={{
+                  margin: "0 0 15px",
+                  fontStyle: "italic",
+                  fontSize: "10pt",
+                }}
+              >
                 (Business Name)
               </p>
-
-              <p style={{ margin: "0 0 8px", fontWeight: "bold", borderBottom: "1px solid #000", paddingBottom: "3px", width: "380px" }}>
-                
-              </p>
-              <p style={{ margin: "0 0 20px", fontStyle: "italic", fontSize: "10pt" }}>
+              {applicant.officeType}
+              <p
+                style={{
+                  margin: "0 0 8px",
+                  fontWeight: "bold",
+                  borderBottom: "1px solid #000",
+                  paddingBottom: "3px",
+                  width: "380px",
+                }}
+              ></p>
+              <p
+                style={{
+                  margin: "0 0 20px",
+                  fontStyle: "italic",
+                  fontSize: "10pt",
+                }}
+              >
                 (Type of Establishment)
               </p>
 
               <p style={{ margin: "0 0 8px", fontWeight: "bold" }}>
                 <strong>Address:</strong>&nbsp;
-                <span style={{ borderBottom: "1px solid #000", paddingBottom: "3px", display: "inline-block", width: "320px" }}>
-                 
+                <span
+                  style={{
+                    borderBottom: "1px solid #000",
+                    paddingBottom: "3px",
+                    display: "inline-block",
+                    width: "320px",
+                  }}
+                >
+                  {applicant.addressLine1} {applicant.barangay}
                 </span>
               </p>
             </div>
           </div>
 
           {/* Dates */}
-          <div style={{ display: "flex", justifyContent: "space-between", margin: "30px 0", fontSize: "11pt" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              margin: "30px 0",
+              fontSize: "11pt",
+            }}
+          >
             <div style={{ textAlign: "center", flex: 1 }}>
               <strong>Date Issued:</strong>
-              <div style={{ borderBottom: "1px solid #000", width: "180px", margin: "5px auto 0", paddingBottom: "3px" }}>
-                {formatDate(issueDate)}
+              <div
+                style={{
+                  borderBottom: "1px solid #000",
+                  width: "180px",
+                  margin: "5px auto 0",
+                  paddingBottom: "3px",
+                }}
+              >
+                {formatDate(today)}
               </div>
             </div>
             <div style={{ textAlign: "center", flex: 1 }}>
               <strong>Date of Expiration:</strong>
-              <div style={{ borderBottom: "1px solid #000", width: "180px", margin: "5px auto 0", paddingBottom: "3px" }}>
-                {formatDate(expiryDate)}
+              <div
+                style={{
+                  borderBottom: "1px solid #000",
+                  width: "180px",
+                  margin: "5px auto 0",
+                  paddingBottom: "3px",
+                }}
+              >
+                {formatDate(endOfYear)}
               </div>
             </div>
           </div>
 
           {/* Legal Note */}
-          <p style={{ fontSize: "10pt", textAlign: "justify", margin: "25px 0", lineHeight: "1.5" }}>
-            This permit is <strong>not transferable</strong> and will be <strong>revoked</strong> for violation of Sanitary Laws, Rules or Regulation of PD 522, PD 856 or pertinent City Ordinances.
+          <p
+            style={{
+              fontSize: "10pt",
+              textAlign: "justify",
+              margin: "25px 0",
+              lineHeight: "1.5",
+            }}
+          >
+            This permit is <strong>not transferable</strong> and will be{" "}
+            <strong>revoked</strong> for violation of Sanitary Laws, Rules or
+            Regulation of PD 522, PD 856 or pertinent City Ordinances.
           </p>
 
           {/* Signatures */}
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: "30px", fontSize: "11pt" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginTop: "30px",
+              fontSize: "11pt",
+            }}
+          >
             <div style={{ width: "48%", textAlign: "center" }}>
-              <p style={{ margin: "0 0 5px", fontWeight: "bold" }}>Recommending Approval:</p>
+              <p style={{ margin: "0 0 5px", fontWeight: "bold" }}>
+                Recommending Approval:
+              </p>
               <div style={{ height: "50px" }}></div>
               <div style={{ borderTop: "1px solid #000", paddingTop: "5px" }}>
                 <strong>Sanitary Inspector</strong>
@@ -171,21 +276,56 @@ const ChoCertExport = ({ applicant }) => {
               <div style={{ borderTop: "1px solid #000", paddingTop: "5px" }}>
                 <strong>MERCYDINA AM. CAPONPON, MD. DPPS, MPH</strong>
               </div>
-              <p style={{ margin: "5px 0 0", fontSize: "10pt" }}>City Health Officer</p>
+              <p style={{ margin: "5px 0 0", fontSize: "10pt" }}>
+                City Health Officer
+              </p>
             </div>
           </div>
 
           {/* BY: Authorized */}
-          <div style={{ marginTop: "35px", textAlign: "right", fontSize: "11pt" }}>
-            <p style={{ marginRight: 200, margin: 0, fontWeight: "bold" }}>BY:</p>
-            <div style={{ height: "1px" }}></div>
-            <div style={{ borderTop: "1px solid #000", width: "200px", marginLeft: "auto", paddingTop: "5px", textAlign: "center" }}>
-              <strong>(Authorized Signatory)</strong>
+          <div
+            style={{
+              marginTop: "15px", // adjust vertical spacing
+              display: "flex",
+              justifyContent: "flex-end", // push the block to the right side
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center", // centers text over the line
+                width: "200px", // signature line width
+                gap: "5px",
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  marginBottom: 20,
+                  marginTop: 15,
+                  fontWeight: "bold",
+                }}
+              >
+                BY:
+              </p>
+              <div
+                style={{
+                  borderTop: "1px solid #000",
+                  width: "100%", // full width of container
+                  paddingTop: "5px",
+                  textAlign: "center", // centers "(Authorized Signatory)" text over the line
+                }}
+              >
+                <strong>(Authorized Signatory)</strong>
+              </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div style={{ marginTop: "40px", fontSize: "9pt", textAlign: "center" }}>
+          <div
+            style={{ marginTop: "40px", fontSize: "9pt", textAlign: "center" }}
+          >
             <p style={{ margin: "5px 0", fontWeight: "bold" }}>
               This permit should be displayed in a conspicuous place.
             </p>
