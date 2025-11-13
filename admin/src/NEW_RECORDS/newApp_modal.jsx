@@ -339,10 +339,10 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
     <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle
         sx={{
-          backgroundColor: "#1d5236", // Requested Background Color
-          color: "white", // White text for contrast
-          textAlign: "center", // Center the text
-          py: 2, // Vertical padding
+          backgroundColor: "#1d5236",
+          color: "white",
+          textAlign: "center",
+          py: 2,
         }}
       >
         Applicant Details

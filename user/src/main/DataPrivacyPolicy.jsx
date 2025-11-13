@@ -20,11 +20,11 @@ export default function DataPrivacyPolicy() {
     } else if (rejected === "true") {
       setOpen(true);
       setIsGray(true);
-      setBlockClicks(true); // grayscale and block clicks after reject
+      setBlockClicks(true);
     } else {
       setOpen(true);
       setIsGray(false);
-      setBlockClicks(true); // first visit → block page until user chooses
+      setBlockClicks(true);
     }
   }, []);
 

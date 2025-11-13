@@ -10,6 +10,7 @@ import {
   Box,
   Divider,
   Paper,
+  ButtonGroup,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import barangayBrackets from "../../public/barangay_brackets.json";
@@ -101,6 +102,15 @@ const calculateZoningFee = (totalCapital) => {
   return ((totalCapital - 100000) * 0.001 + 500).toFixed(2);
 };
 
+const getYearOptions = () => {
+  const currentYear = new Date().getFullYear();
+  const years = [];
+  for (let i = currentYear - 80; i <= currentYear + 0; i++) {
+    years.push(i);
+  }
+  return years;
+};
+
 // 🔹 Main Calculator
 const calculateBusinessTax = (capital, employees, barangay) => {
   const c = Number(capital.replace(/,/g, ""));
@@ -114,6 +124,7 @@ const calculateBusinessTax = (capital, employees, barangay) => {
   const zoningFeeValue = zoningFee === "Exempted" ? 0 : Number(zoningFee);
 
   const totalExtraFees = Object.values(extraFees).reduce((a, b) => a + b, 0);
+
   const total =
     businessTax +
     barangayFee +
@@ -142,11 +153,13 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
     employees: "",
   });
   const [result, setResult] = useState(null);
+  const [mode, setMode] = useState("New"); // <-- "New" is default
 
   useEffect(() => {
     if (open) {
       setFormData({ capital: "", barangay: "", employees: "" });
       setResult(null);
+      setMode("New");
     }
   }, [open]);
 
@@ -157,10 +170,28 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === "capital") {
-      setFormData((prev) => ({ ...prev, capital: formatNumber(value) }));
-    } else if (name === "employees") {
-      setFormData((prev) => ({ ...prev, employees: value.replace(/\D/g, "") }));
+
+    // Automatically compute months delayed when quarter changes
+    if (name === "quarter") {
+      const year = Number(formData.year || new Date().getFullYear());
+      let dueDate;
+
+      if (value === "Q1") dueDate = new Date(year, 0, 20); // Jan 20
+      else if (value === "Q2") dueDate = new Date(year, 3, 20); // Apr 20
+      else if (value === "Q3") dueDate = new Date(year, 6, 20); // Jul 20
+      else if (value === "Q4") dueDate = new Date(year, 9, 20); // Oct 20
+
+      const today = new Date();
+      const monthsDiff =
+        (today.getFullYear() - dueDate.getFullYear()) * 12 +
+        (today.getMonth() - dueDate.getMonth());
+      const monthsDelayed = Math.max(0, monthsDiff);
+
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        monthsDelayed,
+      }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -172,70 +203,407 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
       formData.employees,
       formData.barangay
     );
-    setResult(res);
+
+    // 🔹 Compute months delayed (just an example: assume current month vs Jan)
+    const today = new Date();
+    const dueDate = new Date(today.getFullYear(), 0, 20); // Jan 20
+    const monthsDiff =
+      (today.getFullYear() - dueDate.getFullYear()) * 12 +
+      (today.getMonth() - dueDate.getMonth());
+    const monthsDelayed = Math.max(0, monthsDiff);
+
+    // 🔹 Compute surcharge (2% per month, max 72%)
+    const surcharge = Math.min(
+      res.details.total * 0.02 * monthsDelayed,
+      res.details.total * 0.72
+    );
+
+    setResult({
+      ...res,
+      surcharge,
+      monthsDelayed,
+      totalWithSurcharge: res.details.lastPaymentAmount + surcharge,
+    });
   };
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      {/* 🔹 Title + Mode Toggle */}
       <DialogTitle sx={{ color: "#09360D", fontWeight: "bold" }}>
-        Business Fee Assessment For New Businesses
+        Business Fee Assessment
       </DialogTitle>
 
       <DialogContent>
+        {/* 🔹 Mode Button Group */}
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+          <ButtonGroup variant="outlined">
+            <Button
+              variant={mode === "New" ? "contained" : "outlined"}
+              sx={{
+                backgroundColor: mode === "New" ? "#09360D" : "transparent",
+                color: mode === "New" ? "#fff" : "#09360D",
+                "&:hover": {
+                  backgroundColor: mode === "New" ? "#07270a" : "#e8f5e9",
+                },
+              }}
+              onClick={() => setMode("New")}
+            >
+              New
+            </Button>
+            <Button
+              variant={mode === "Renew" ? "contained" : "outlined"}
+              sx={{
+                backgroundColor: mode === "Renew" ? "#09360D" : "transparent",
+                color: mode === "Renew" ? "#fff" : "#09360D",
+                "&:hover": {
+                  backgroundColor: mode === "Renew" ? "#07270a" : "#e8f5e9",
+                },
+              }}
+              onClick={() => setMode("Renew")}
+            >
+              Renew
+            </Button>
+          </ButtonGroup>
+        </Box>
+
+        {/* 🔹 Instruction Text */}
         <Typography variant="body2" gutterBottom>
-          Enter your business details below to estimate your total permit fee.
+          {mode === "New"
+            ? "Enter your business details below to estimate your total permit fee for a new business."
+            : "Enter your details below for renewal (testing fields)."}
         </Typography>
 
-        <TextField
-          name="capital"
-          label="Total Capital Investment (₱)"
-          fullWidth
-          margin="normal"
-          value={formData.capital}
-          onChange={handleChange}
-        />
-        <TextField
-          select
-          name="barangay"
-          label="Select Barangay"
-          fullWidth
-          margin="normal"
-          value={formData.barangay}
-          onChange={handleChange}
-          SelectProps={{ native: true }}
-          InputLabelProps={{ shrink: true }}
-        >
-          <option value="">-- Select Barangay --</option>
-          {barangayList.barangays.map((b, i) => (
-            <option key={i} value={b}>
-              {b}
-            </option>
-          ))}
-        </TextField>
-        <TextField
-          name="employees"
-          label="Total Employees"
-          fullWidth
-          margin="normal"
-          value={formData.employees}
-          onChange={handleChange}
-        />
+        {/* 🔹 Dynamic Form Fields */}
+        {mode === "New" ? (
+          <>
+            <TextField
+              name="capital"
+              label="Total Capital Investment (₱)"
+              fullWidth
+              margin="normal"
+              value={formData.capital}
+              onChange={handleChange}
+            />
+            <TextField
+              select
+              name="barangay"
+              label="Select Barangay"
+              fullWidth
+              margin="normal"
+              value={formData.barangay}
+              onChange={handleChange}
+              SelectProps={{ native: true }}
+              InputLabelProps={{ shrink: true }}
+            >
+              <option value="">-- Select Barangay --</option>
+              {barangayList.barangays.map((b, i) => (
+                <option key={i} value={b}>
+                  {b}
+                </option>
+              ))}
+            </TextField>
+            <TextField
+              name="employees"
+              label="Total Employees"
+              fullWidth
+              margin="normal"
+              value={formData.employees}
+              onChange={handleChange}
+            />
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={handleCompute}
+              disabled={!formData.capital}
+              sx={{
+                mt: 3,
+                backgroundColor: "#09360D",
+                "&:hover": { backgroundColor: "#07270a" },
+              }}
+            >
+              Compute Fee
+            </Button>
+          </>
+        ) : (
+          <>
+            {/* 🔹 Renew Mode — Only Test Fields */}
+            <TextField
+              name="bt"
+              label="Business Tax (₱)"
+              fullWidth
+              margin="normal"
+              type="number"
+              value={formData.bt || ""}
+              onChange={handleChange}
+            />
 
-        <Button
-          variant="contained"
-          fullWidth
-          onClick={handleCompute}
-          disabled={!formData.capital}
-          sx={{
-            mt: 3,
-            backgroundColor: "#09360D",
-            "&:hover": { backgroundColor: "#07270a" },
-          }}
-        >
-          Compute Fee
-        </Button>
+            <TextField
+              name="mp"
+              label="Mayor's Permit (₱)"
+              fullWidth
+              margin="normal"
+              type="number"
+              value={formData.mp || ""}
+              onChange={handleChange}
+            />
 
-        {result?.details && (
+            <TextField
+              name="lastPaymentAmount"
+              label="Business Tax Total Fees"
+              fullWidth
+              margin="normal"
+              type="number"
+              value={formData.lastPaymentAmount || ""}
+              onChange={handleChange}
+            />
+
+            <TextField
+              select
+              name="modeOfPayment"
+              label="Mode of Payment"
+              fullWidth
+              margin="normal"
+              value={formData.modeOfPayment || ""}
+              onChange={handleChange}
+              SelectProps={{ native: true }}
+              InputLabelProps={{ shrink: true }}
+            >
+              <option value="">-- Select Mode of Payment --</option>
+              <option value="Quarterly">Quarterly</option>
+              <option value="Semi-Annually">Semi-Annually</option>
+            </TextField>
+
+            <TextField
+              select
+              name="quarter"
+              label="Latest Quarter of Payment"
+              fullWidth
+              margin="normal"
+              value={formData.quarter || ""}
+              onChange={handleChange}
+              SelectProps={{ native: true }}
+              InputLabelProps={{ shrink: true }}
+            >
+              <option value="">-- Select Quarter --</option>
+              <option value="Q1">Q1 – January 20</option>
+              <option value="Q2">Q2 – April 20</option>
+              <option value="Q3">Q3 – July 20</option>
+              <option value="Q4">Q4 – October 20</option>
+            </TextField>
+
+            <TextField
+              select
+              name="year"
+              label="Year"
+              fullWidth
+              margin="normal"
+              value={formData.year || new Date().getFullYear()}
+              onChange={handleChange}
+              SelectProps={{ native: true }}
+              InputLabelProps={{ shrink: true }}
+            >
+              {getYearOptions().map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </TextField>
+
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={() => {
+                const bt = Number(formData.bt || 0);
+                const mp = Number(formData.mp || 0);
+
+                let lastPaymentAmount = Number(formData.lastPaymentAmount || 0);
+
+                // Adjust lastPaymentAmount based on mode of payment
+                if (formData.modeOfPayment === "Quarterly") {
+                  lastPaymentAmount = lastPaymentAmount / 4;
+                } else if (formData.modeOfPayment === "Semi-Annually") {
+                  lastPaymentAmount = lastPaymentAmount / 2;
+                }
+
+                const totalFees = bt + mp;
+
+                const year = Number(formData.year || new Date().getFullYear());
+                let dueDate;
+
+                // Determine due date based on latest quarter
+                switch (formData.quarter) {
+                  case "Q1":
+                    dueDate = new Date(year, 0, 20); // Jan 20
+                    break;
+                  case "Q2":
+                    dueDate = new Date(year, 3, 20); // Apr 20
+                    break;
+                  case "Q3":
+                    dueDate = new Date(year, 6, 20); // Jul 20
+                    break;
+                  case "Q4":
+                    dueDate = new Date(year, 9, 20); // Oct 20
+                    break;
+                  default:
+                    dueDate = new Date(year, 0, 20);
+                }
+
+                const today = new Date();
+
+                let monthsDelayed =
+                  (today.getFullYear() - dueDate.getFullYear()) * 12 +
+                  (today.getMonth() - dueDate.getMonth());
+                monthsDelayed = Math.max(0, monthsDelayed);
+
+                // Cap months delayed at 36
+                const cappedMonths = Math.min(monthsDelayed, 36);
+
+                // 🔹 Surcharge: 2% per month, max 72%
+                const surcharge = Math.min(
+                  totalFees * 0.02 * cappedMonths,
+                  totalFees * 0.72
+                );
+
+                // 🔹 Total due = lastPaymentAmount + surcharge
+                const totalDue = lastPaymentAmount + surcharge;
+                setResult({
+                  bt,
+                  mp,
+                  totalFees,
+                  surc: surcharge,
+                  lastPaymentAmount,
+                  monthsDelayed,
+                  total: totalDue,
+                  quarter: formData.quarter,
+                  year: formData.year,
+                  modeOfPayment: formData.modeOfPayment,
+                });
+              }}
+              disabled={
+                !formData.bt ||
+                !formData.mp ||
+                !formData.lastPaymentAmount ||
+                !formData.modeOfPayment ||
+                !formData.quarter
+              }
+              sx={{
+                mt: 3,
+                backgroundColor: "#09360D",
+                "&:hover": { backgroundColor: "#07270a" },
+              }}
+            >
+              Compute Renewal Fee
+            </Button>
+
+            {/* 🔹 Renewal Result Display */}
+            {result && (
+              <Paper
+                elevation={3}
+                sx={{
+                  mt: 4,
+                  p: 3,
+                  borderRadius: 2,
+                  backgroundColor: "#f7faf8",
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{ color: "#09360D", fontWeight: "bold", mb: 1 }}
+                >
+                  Renewal Fee Breakdown
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+                <Box sx={{ mt: 2 }}>
+                  <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                    <li
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Typography>Business Tax Total Fees</Typography>
+                      <Typography>
+                        ₱
+                        {result.lastPaymentAmount.toLocaleString("en-PH", {
+                          minimumFractionDigits: 2,
+                        })}
+                      </Typography>
+                    </li>
+
+                    <li
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Typography>Surcharge (2%/month)</Typography>
+                      <Typography>
+                        ₱
+                        {result.surc.toLocaleString("en-PH", {
+                          minimumFractionDigits: 2,
+                        })}
+                      </Typography>
+                    </li>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography variant="h6" fontWeight="bold">
+                        Total Amount Due:
+                      </Typography>
+                      <Typography
+                        variant="h6"
+                        sx={{ color: "#1B5E20", fontWeight: "bold" }}
+                      >
+                        ₱
+                        {result.total.toLocaleString("en-PH", {
+                          minimumFractionDigits: 2,
+                        })}
+                      </Typography>
+                    </Box>
+                  </ul>
+
+                  <Divider sx={{ my: 1.5 }} />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography variant="h6" fontWeight="bold">
+                      Total Amount Due:
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      sx={{ color: "#1B5E20", fontWeight: "bold" }}
+                    >
+                      ₱
+                      {result.total.toLocaleString("en-PH", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </Typography>
+                  </Box>
+
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "gray", mt: 1, fontStyle: "italic" }}
+                  >
+                    Quarter: {result.quarter || "N/A"} • Year: {result.year} •
+                    Months Delayed: {result.monthsDelayed}
+                  </Typography>
+                </Box>
+              </Paper>
+            )}
+          </>
+        )}
+
+        {/* 🔹 Show Result only for New mode */}
+        {mode === "New" && result?.details && (
           <Paper
             elevation={3}
             sx={{
@@ -252,7 +620,6 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
               Assessment Breakdown
             </Typography>
             <Divider sx={{ mb: 2 }} />
-
             <Box sx={{ mt: 2 }}>
               <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                 <li
@@ -355,7 +722,6 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
                       minimumFractionDigits: 2,
                     })}
                   </Typography>
-               
                 </Box>
               </Box>
             </Box>
