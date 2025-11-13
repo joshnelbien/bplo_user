@@ -61,7 +61,7 @@ function BusinessProfile() {
         : a.application === "Renew";
 
     const matchesSearch =
-      a.BIN?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.bin?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       a.businessName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       a.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       a.lastName?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -260,7 +260,7 @@ function BusinessProfile() {
                   sx={{ cursor: "pointer" }}
                   onClick={() => handleRowClick(applicant)}
                 >
-                  <TableCell>{applicant.BIN}</TableCell>
+                  <TableCell>{applicant.bin}</TableCell>
                   <TableCell>{applicant.businessName}</TableCell>
                   <TableCell>{applicant.firstName}</TableCell>
                   <TableCell>{applicant.lastName}</TableCell>

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const moment = require("moment");
+const { Op } = require("sequelize");
 const BusinessProfile = require("../db/model/businessProfileDB");
 const ExistingBusinessProfile = require("../db/model/BusinessProfileExisting");
 const { Parser } = require("json2csv");
@@ -34,7 +35,22 @@ function encryptData(buffer) {
 
 router.get("/businessProfiles", async (req, res) => {
   try {
-    const files = await ExistingBusinessProfile.findAll({});
+    const { search } = req.query;
+
+    // If search query is provided, filter by BusinessName
+    if (search) {
+      const files = await BusinessProfile.findAll({
+        where: {
+          businessName: {
+            [Op.like]: `%${search}%`, // partial match
+          },
+        },
+      });
+      return res.json(files);
+    }
+
+    // Otherwise, return all
+    const files = await BusinessProfile.findAll({});
     res.json(files);
   } catch (err) {
     console.error(err);
