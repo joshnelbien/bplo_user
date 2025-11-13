@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
-  Chip, // Keeping Chip in imports just in case it's used elsewhere, but removing its usage here
   Collapse,
   Divider,
   Drawer,
@@ -18,37 +17,34 @@ import {
   Button,
   Typography,
 } from "@mui/material";
-// Removed: WifiIcon, WifiOffIcon
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
-import RoomIcon from "@mui/icons-material/Room";
+import AccountBoxRoundedIcon from "@mui/icons-material/AccountBoxRounded";
+import CampaignIcon from "@mui/icons-material/Campaign";
+import BusinessIcon from "@mui/icons-material/Business";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
+import RoomIcon from "@mui/icons-material/Room";
 import NatureIcon from "@mui/icons-material/Nature";
-import LogoutIcon from "@mui/icons-material/Logout";
-import CloseIcon from "@mui/icons-material/Close";
-import BusinessIcon from "@mui/icons-material/Business";
-import CampaignIcon from "@mui/icons-material/Campaign";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import CalculateIcon from "@mui/icons-material/Calculate";
-import AccountBoxRoundedIcon from "@mui/icons-material/AccountBoxRounded";
+import LogoutIcon from "@mui/icons-material/Logout";
+import CloseIcon from "@mui/icons-material/Close";
+import MenuIcon from "@mui/icons-material/Menu"; // Added for mobile toggle
 
-// --- Color Constants (FIXED) ---
-const PRIMARY_DARK_GREEN = "#ffffffff";
-// Corrected hexadecimal color for compatibility with alpha()
-const WHITE_COLOR = "#1d5236";
-// Reusing original lighter green for hover/active alpha effect (for better contrast)
-const HOVER_GREEN = "#a2bba6ff";
+// --- Color Constants ---
+const PRIMARY_DARK_GREEN = "#ffffffff"; // White background
+const WHITE_COLOR = "#1d5236";           // Dark green text
+const HOVER_GREEN = "#a2bba6ff";         // Light green hover
 
 // Common style
 const listItemStyle = {
   borderRadius: "8px",
   my: 0.5,
-  color: WHITE_COLOR, // Set text color to white
+  color: WHITE_COLOR,
   "&:hover": {
     backgroundColor: alpha(HOVER_GREEN, 0.5),
   },
@@ -67,21 +63,9 @@ const activeListItemStyle = {
 // Main menu items
 const menuItems = [
   { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon /> },
-  {
-    text: "Client Applications",
-    path: "/new_records",
-    icon: <AssignmentTurnedInIcon />,
-  },
-  {
-    text: "Business Profile",
-    path: "/businessProfile",
-    icon: <AccountBoxRoundedIcon />,
-  },
-  {
-    text: "Announcement",
-    path: "/announcement",
-    icon: <CampaignIcon />,
-  },
+  { text: "Client Applications", path: "/new_records", icon: <AssignmentTurnedInIcon /> },
+  { text: "Business Profile", path: "/businessProfile", icon: <AccountBoxRoundedIcon /> },
+  { text: "Announcement", path: "/announcement", icon: <CampaignIcon /> },
 ];
 
 // Department items
@@ -93,26 +77,11 @@ const departmentItems = [
   { text: "CENRO", path: "/cenro", icon: <NatureIcon /> },
 ];
 
-// Treasurers dropdown items
+// Treasurer's dropdown items
 const treasurers = [
-  {
-    text: "TREASURER",
-    label: "Treasurer’s Office",
-    path: "/treasurers",
-    icon: <AccountBalanceIcon />,
-  },
-  {
-    text: "EXAMINERS",
-    label: "Examiner’s Office",
-    path: "/examiners",
-    icon: <ReceiptLongIcon />,
-  },
-  {
-    text: "BUSINESS TAX",
-    label: "Business Tax",
-    path: "/businessTax",
-    icon: <CalculateIcon />,
-  },
+  { text: "TREASURER", label: "Treasurer’s Office", path: "/treasurers", icon: <AccountBalanceIcon /> },
+  { text: "EXAMINERS", label: "Examiner’s Office", path: "/examiners", icon: <ReceiptLongIcon /> },
+  { text: "BUSINESS TAX", label: "Business Tax", path: "/businessTax", icon: <CalculateIcon /> },
 ];
 
 const drawerWidth = 270;
@@ -143,20 +112,15 @@ function Side_bar() {
   const isBPLO = userOffice === "BPLO";
 
   const [openDrawer, setOpenDrawer] = useState(false);
-  // Removed: const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [openDept, setOpenDept] = useState(false);
   const [openTreasurers, setOpenTreasurers] = useState(false);
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
 
   const isMobile = useMediaQuery("(max-width:768px)");
 
-  // Removed: useEffect hook for tracking online/offline status
-
-  // Auto-open dropdowns if path matches
+  // Auto-open dropdowns based on current path
   useEffect(() => {
-    if (
-      departmentItems.some((dept) => location.pathname.startsWith(dept.path))
-    ) {
+    if (departmentItems.some((dept) => location.pathname.startsWith(dept.path))) {
       setOpenDept(true);
     } else {
       setOpenDept(false);
@@ -172,16 +136,15 @@ function Side_bar() {
   const handleLogout = () => setOpenLogoutDialog(true);
 
   const confirmLogout = () => {
-    localStorage.removeItem("adminData"); // remove logged-in session data
-    localStorage.removeItem("token"); // if you stored JWT token
-    localStorage.clear(); // optional: clears everything
+    localStorage.removeItem("adminData");
+    localStorage.removeItem("token");
+    localStorage.clear();
 
     setOpenLogoutDialog(false);
     navigate("/");
   };
 
   const drawer = (
-    // Setting the background color for the drawer's content
     <Box
       sx={{
         display: "flex",
@@ -216,10 +179,7 @@ function Side_bar() {
             "/announcement",
           ];
 
-          // 🔹 Only SuperAdmin and BPLO can access these
-          const isAllowed =
-            isSuperAdmin || (isBPLO && allowedBPLOPaths.includes(item.path));
-
+          const isAllowed = isSuperAdmin || (isBPLO && allowedBPLOPaths.includes(item.path));
           const isDisabled = item.path === "/announcement" ? false : !isAllowed;
 
           return (
@@ -229,9 +189,7 @@ function Side_bar() {
                 sx={{
                   opacity: isDisabled ? 0.4 : 1,
                   cursor: isDisabled ? "not-allowed" : "pointer",
-                  ...(location.pathname === item.path
-                    ? activeListItemStyle
-                    : listItemStyle),
+                  ...(location.pathname === item.path ? activeListItemStyle : listItemStyle),
                 }}
                 onClick={() => {
                   if (!isDisabled) {
@@ -258,28 +216,18 @@ function Side_bar() {
         })}
 
         {/* Backroom Dropdown */}
-        <ListItemButton
-          onClick={() => setOpenDept(!openDept)}
-          sx={listItemStyle}
-        >
+        <ListItemButton onClick={() => setOpenDept(!openDept)} sx={listItemStyle}>
           <ListItemIcon>
-            {/* Setting icon color to white */}
             <BusinessIcon sx={{ color: WHITE_COLOR }} />
           </ListItemIcon>
           <ListItemText primary="Backroom" />
-          {/* Setting chevron icon color to white */}
-          {openDept ? (
-            <ExpandLess sx={{ color: WHITE_COLOR }} />
-          ) : (
-            <ExpandMore sx={{ color: WHITE_COLOR }} />
-          )}
+          {openDept ? <ExpandLess sx={{ color: WHITE_COLOR }} /> : <ExpandMore sx={{ color: WHITE_COLOR }} />}
         </ListItemButton>
 
         <Collapse in={openDept} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             {departmentItems.map((dept) => {
-              const isDisabled =
-                !isSuperAdmin && dept.text.toUpperCase() !== userOffice;
+              const isDisabled = !isSuperAdmin && dept.text.toUpperCase() !== userOffice;
               return (
                 <ListItem key={dept.text} disablePadding>
                   <ListItemButton
@@ -288,9 +236,7 @@ function Side_bar() {
                       pl: 4,
                       opacity: isDisabled ? 0.4 : 1,
                       cursor: isDisabled ? "not-allowed" : "pointer",
-                      ...(location.pathname === dept.path
-                        ? activeListItemStyle
-                        : listItemStyle),
+                      ...(location.pathname === dept.path ? activeListItemStyle : listItemStyle),
                     }}
                     onClick={() => {
                       if (!isDisabled) {
@@ -319,35 +265,21 @@ function Side_bar() {
         </Collapse>
 
         {/* Treasurer’s Dropdown */}
-        <ListItemButton
-          onClick={() => setOpenTreasurers(!openTreasurers)}
-          sx={listItemStyle}
-        >
+        <ListItemButton onClick={() => setOpenTreasurers(!openTreasurers)} sx={listItemStyle}>
           <ListItemIcon>
-            {/* Setting icon color to white */}
             <AccountBalanceIcon sx={{ color: WHITE_COLOR }} />
           </ListItemIcon>
           <ListItemText primary="Treasurer’s Office" />
-          {/* Setting chevron icon color to white */}
-          {openTreasurers ? (
-            <ExpandLess sx={{ color: WHITE_COLOR }} />
-          ) : (
-            <ExpandMore sx={{ color: WHITE_COLOR }} />
-          )}
+          {openTreasurers ? <ExpandLess sx={{ color: WHITE_COLOR }} /> : <ExpandMore sx={{ color: WHITE_COLOR }} />}
         </ListItemButton>
 
         <Collapse in={openTreasurers} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             {treasurers.map((tre) => {
               const normalize = (str) =>
-                str
-                  ?.replace(/[’‘]/g, "'")
-                  .replace(/\s+/g, " ")
-                  .trim()
-                  .toUpperCase();
+                str?.replace(/[’‘]/g, "'").replace(/\s+/g, " ").trim().toUpperCase();
 
-              const isDisabled =
-                !isSuperAdmin && normalize(tre.text) !== normalize(userOffice);
+              const isDisabled = !isSuperAdmin && normalize(tre.text) !== normalize(userOffice);
 
               return (
                 <ListItem key={tre.text} disablePadding>
@@ -357,9 +289,7 @@ function Side_bar() {
                       pl: 4,
                       opacity: isDisabled ? 0.4 : 1,
                       cursor: isDisabled ? "not-allowed" : "pointer",
-                      ...(location.pathname === tre.path
-                        ? activeListItemStyle
-                        : listItemStyle),
+                      ...(location.pathname === tre.path ? activeListItemStyle : listItemStyle),
                     }}
                     onClick={() => {
                       if (!isDisabled) {
@@ -390,7 +320,6 @@ function Side_bar() {
 
       {/* Logout */}
       <Box sx={{ p: 2, pt: 0 }}>
-        {/* Divider remains as it is part of the logout section */}
         <Divider sx={{ my: 1, borderColor: alpha(WHITE_COLOR, 0.2) }} />
         <ListItem disablePadding>
           <ListItemButton
@@ -411,10 +340,7 @@ function Side_bar() {
                 }}
               />
             </ListItemIcon>
-            <ListItemText
-              primary="Logout"
-              sx={{ color: "white", fontWeight: "bold" }}
-            />
+            <ListItemText primary="Logout" sx={{ color: "white", fontWeight: "bold" }} />
           </ListItemButton>
         </ListItem>
       </Box>
@@ -423,13 +349,26 @@ function Side_bar() {
 
   return (
     <Box sx={{ display: "flex" }}>
-      {/* Removed: Status chip Box */}
+      {/* === MOBILE HAMBURGER MENU BUTTON === */}
+      {isMobile && (
+        <IconButton
+          onClick={() => setOpenDrawer(true)}
+          sx={{
+            position: "fixed",
+            top: 16,
+            left: 16,
+            zIndex: 1300,
+            bgcolor: "background.paper",
+            boxShadow: 3,
+            "&:hover": { bgcolor: "grey.100" },
+          }}
+        >
+          <MenuIcon />
+        </IconButton>
+      )}
 
       {/* Drawer */}
-      <Box
-        component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-      >
+      <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}>
         <Drawer
           variant={isMobile ? "temporary" : "permanent"}
           open={isMobile ? openDrawer : true}
@@ -440,7 +379,6 @@ function Side_bar() {
             "& .MuiDrawer-paper": {
               boxSizing: "border-box",
               width: drawerWidth,
-              // Setting the main background color for the drawer's paper
               backgroundColor: PRIMARY_DARK_GREEN,
               boxShadow: "2px 0 5px rgba(0,0,0,0.2)",
               borderRight: "none",
@@ -451,7 +389,7 @@ function Side_bar() {
         </Drawer>
       </Box>
 
-      {/* Logout Modal */}
+      {/* Logout Confirmation Modal */}
       <Modal open={openLogoutDialog} onClose={() => setOpenLogoutDialog(false)}>
         <Box sx={modalStyle}>
           <IconButton
@@ -477,10 +415,7 @@ function Side_bar() {
             <Button variant="contained" color="success" onClick={confirmLogout}>
               Yes
             </Button>
-            <Button
-              variant="outlined"
-              onClick={() => setOpenLogoutDialog(false)}
-            >
+            <Button variant="outlined" onClick={() => setOpenLogoutDialog(false)}>
               No
             </Button>
           </Box>
