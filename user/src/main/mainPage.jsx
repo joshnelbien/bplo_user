@@ -29,6 +29,7 @@ import axios from "axios";
 import { CircularProgress } from "@mui/material";
 import BusinessAssessmentDialog from "./BusinessAssessmentDialog";
 import DataPrivacyPolicy from "./DataPrivacyPolicy";
+import SearchBusinesses from "./SearchBusinesses";
 
 const SearchBar = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -99,7 +100,7 @@ function App() {
     message: "",
     severity: "info",
   });
-
+  const [searchBusiness, setSearchBusinesses] = useState(false);
   const handleSnackbarClose = () => setSnackbar({ ...snackbar, open: false });
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
@@ -109,6 +110,10 @@ function App() {
     if (requirements[type]) {
       setModalData(requirements[type]);
     }
+  };
+
+  const handleSearchBusinesses = () => {
+    setSearchBusinesses(true);
   };
 
   // Track button behavior
@@ -359,6 +364,23 @@ function App() {
               )}
             </Button>
 
+            <Button
+              variant="outlined"
+              sx={{
+                width: "300px",
+
+                fontWeight: "bold",
+                borderColor: "#09360D",
+                color: "#09360D",
+                "&:hover": { borderColor: "#07270a", color: "#07270a" },
+
+                mt: 5,
+              }}
+              onClick={handleSearchBusinesses}
+            >
+              Business Profiles
+            </Button>
+
             {/* Business Assessment */}
             <Button
               variant="outlined"
@@ -370,7 +392,6 @@ function App() {
                 color: "#09360D",
                 "&:hover": { borderColor: "#07270a", color: "#07270a" },
                 m: 1,
-                mt: 5,
               }}
               onClick={() => setIsAssessmentOpen(true)}
             >
@@ -514,6 +535,11 @@ function App() {
       <BusinessAssessmentDialog
         open={isAssessmentOpen}
         onClose={() => setIsAssessmentOpen(false)}
+      />
+
+      <SearchBusinesses
+        open={searchBusiness}
+        onClose={() => setSearchBusinesses(false)}
       />
 
       {/* Snackbar */}
