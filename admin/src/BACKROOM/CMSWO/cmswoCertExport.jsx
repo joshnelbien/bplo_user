@@ -117,7 +117,7 @@ const CmswoCertExport = ({ applicant }) => {
               fontWeight="bold"
               sx={{ letterSpacing: 1.5 }}
             >
-              {applicant.fullName || "JUAN DELA CRUZ"}
+              {applicant.firstName} {applicant.middleName} {applicant.lastName}
             </Typography>
           </Box>
 
