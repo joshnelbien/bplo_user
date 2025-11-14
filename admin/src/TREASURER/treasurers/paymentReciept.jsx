@@ -77,6 +77,7 @@ export default function PaymentReceipt({
   receiptData,
   applicant,
   onPrint,
+  orNo,
 }) {
   const printRef = useRef();
 
@@ -175,6 +176,9 @@ export default function PaymentReceipt({
           </Typography>
 
           <Box sx={{ mt: 2 }}>
+            <Typography variant="body2">
+              <strong>OR No.:</strong> {orNo || "N/A"}
+            </Typography>
             <Typography variant="body2">
               <strong>Barangay:</strong> {applicant?.barangay || "N/A"}
             </Typography>

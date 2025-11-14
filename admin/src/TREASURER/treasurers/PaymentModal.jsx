@@ -27,6 +27,7 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
     paymentDate: "",
     draweeBank: "",
     checkNumber: "",
+    orNo: "",
     checkDate: "",
   });
 
@@ -458,6 +459,14 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} sm={6}>
                     <TextField
+                      label="OR No."
+                      fullWidth
+                      name="orNo"
+                      value={form.orNo}
+                      onChange={handleChange}
+                    />
+
+                    <TextField
                       select
                       label="Payment Mode"
                       fullWidth
@@ -552,9 +561,11 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
       <PaymentReciept
         open={showReceipt}
         applicant={applicant}
+        orNo={form.orNo}
         onClose={() => setShowReceipt(false)}
         receiptData={{
           amount: form.amount,
+          orNo: form.orNo, // <-- use form.orNo
           paymentDate: form.paymentDate,
           mode,
           draweeBank: form.draweeBank,
@@ -569,6 +580,7 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
                 amount_paid: form.amount,
                 index: selectedIndex,
                 payment_mode: mode,
+                orNo: form.orNo, // <-- also here
                 paymentDate: form.paymentDate,
                 draweeBank: form.draweeBank,
                 checkNumber: form.checkNumber,
@@ -576,7 +588,7 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
               }
             );
             if (res.data.success) {
-              onConfirm?.(); // refresh parent if needed
+              onConfirm?.();
               setShowReceipt(false);
               onClose();
             }

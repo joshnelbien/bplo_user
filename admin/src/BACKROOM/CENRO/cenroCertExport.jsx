@@ -11,11 +11,11 @@ const CenroCertExport = ({ applicant }) => {
 
   // State to track checkbox values
   const [checkboxes, setCheckboxes] = useState({
-    A: true,
-    B: true,
-    C: true,
-    D: true,
-    E: true,
+    A: false,
+    B: false,
+    C: false,
+    D: false,
+    E: false,
   });
 
   const handleCheckboxChange = (key) => {
@@ -82,14 +82,15 @@ const CenroCertExport = ({ applicant }) => {
       <div
         ref={certificateRef}
         style={{
-          width: "612px",
-          padding: "30px 40px",
           fontFamily: "'Times New Roman', Times, serif",
           fontSize: "10pt",
           backgroundColor: "white",
           color: "black",
           lineHeight: "1.2",
           boxSizing: "border-box",
+          width: "612px", // ← set your modal width here
+          margin: "0 auto", // ← center horizontally
+          padding: "30px 40px",
         }}
       >
         {/* === HEADER (unchanged) === */}
