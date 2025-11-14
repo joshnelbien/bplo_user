@@ -17,20 +17,24 @@ import {
   TableRow,
   TextField,
   Typography,
-  alpha,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 
 const primaryGreen = "#1d5236";
-const TOP_BAR_HEIGHT = 80; // Define height constant
+const TOP_BAR_HEIGHT = 80;
 
-// Renamed the component to follow React conventions (PascalCase)
 function BusinessProfile() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+
   const [applicants, setApplicants] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [filter, setFilter] = useState("all");
-  const [searchQuery, setSearchQuery] = useState(""); // ✅ NEW: search state
+  const [searchQuery, setSearchQuery] = useState("");
 
   const recordsPerPage = 20;
   const API = import.meta.env.VITE_API_BASE;
@@ -47,11 +51,10 @@ function BusinessProfile() {
         console.error("Error fetching applicants:", error);
       }
     };
-
     fetchApplicants();
   }, [API]);
 
-  // ✅ Filter + Search applicants
+  // Filter + Search
   const filteredApplicants = applicants.filter((a) => {
     const matchesFilter =
       filter === "all"
@@ -79,7 +82,6 @@ function BusinessProfile() {
 
   const handlePageChange = (event, value) => setCurrentPage(value);
 
-  // ✅ Export CSV
   const handleExportCSV = async () => {
     try {
       const res = await axios.get(
@@ -94,9 +96,10 @@ function BusinessProfile() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
       }
     } catch (err) {
-      console.error("❌ Error downloading CSV:", err);
+      console.error("Error downloading CSV:", err);
     }
   };
 
@@ -104,105 +107,83 @@ function BusinessProfile() {
     setSelectedApplicant(applicant);
     setIsModalOpen(true);
   };
+
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedApplicant(null);
   };
-  const marginRightValue = "10000px";
+
   return (
     <>
-      {/* 1. TOP BAR (New component) */}
       <TopBar />
-
-      {/* 2. SIDE BAR */}
       <Side_bar />
 
-      {/* 3. MAIN CONTENT (Updated styles for TopBar clearance and white background) */}
       <Box
-        id="main_content"
         sx={{
-          p: 0,
           minHeight: "100vh",
-          background: "white", // CHANGED: Set background to plain white
-          marginLeft: { xs: 0, sm: "250px" },
-          marginRight: marginRightValue,
-          width: { xs: "100%", sm: "calc(100% - 250px)" },
-          pt: `${TOP_BAR_HEIGHT + 24}px`, // Added padding top to clear the fixed TopBar
+          bgcolor: "#fff",
+          pt: `${TOP_BAR_HEIGHT + 24}px`,
+          px: { xs: 1, sm: 2, md: 3 },
+          ml: { xs: 0, md: "250px" },
+          width: { xs: "100%", md: "calc(100% - 250px)" },
         }}
       >
-        {/* REMOVED: The original <Typography> is now in the TopBar */}
-
-        {/* ✅ Filter, Search, and Export */}
+        {/* FILTER + SEARCH + EXPORT */}
         <Box
-          mb={2}
-          display="flex"
-          ml={5}
-          justifyContent="space-between"
-          alignItems="center"
-          flexWrap="wrap"
-          gap={2}
+          sx={{
+            mb: 3,
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            justifyContent: "space-between",
+            alignItems: { xs: "stretch", sm: "center" },
+            gap: 2,
+            px: { xs: 1, md: 2 },
+          }}
         >
-          <ButtonGroup variant="contained">
-            <Button
-              sx={{
-                bgcolor: filter === "all" ? "darkgreen" : "white",
-                color: filter === "all" ? "white" : "darkgreen",
-
-                bgcolor: filter === "all" ? primaryGreen : "white", // Use primaryGreen for consistency
-                color: filter === "all" ? "white" : primaryGreen,
-                "&:hover": {
-                  bgcolor: filter === "all" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("all");
-                setCurrentPage(1);
-              }}
-            >
-              All
-            </Button>
-            <Button
-              sx={{
-                bgcolor: filter === "new" ? "darkgreen" : "white",
-                color: filter === "new" ? "white" : "darkgreen",
-
-                bgcolor: filter === "new" ? primaryGreen : "white",
-                color: filter === "new" ? "white" : primaryGreen,
-                "&:hover": {
-                  bgcolor: filter === "new" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("new");
-                setCurrentPage(1);
-              }}
-            >
-              New
-            </Button>
-            <Button
-              sx={{
-                bgcolor: filter === "renew" ? "darkgreen" : "white",
-                color: filter === "renew" ? "white" : "darkgreen",
-
-                bgcolor: filter === "renew" ? primaryGreen : "white",
-                color: filter === "renew" ? "white" : primaryGreen,
-                "&:hover": {
-                  bgcolor: filter === "renew" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("renew");
-                setCurrentPage(1);
-              }}
-            >
-              Renew
-            </Button>
+          {/* Filter Buttons */}
+          <ButtonGroup
+            orientation={isMobile ? "vertical" : "horizontal"}
+            variant="contained"
+            fullWidth={isMobile}
+            sx={{ flex: { sm: 1 }, maxWidth: { sm: 400 } }}
+          >
+            {[
+              { key: "all", label: "All" },
+              { key: "new", label: "New" },
+              { key: "renew", label: "Renew" },
+            ].map((btn) => (
+              <Button
+                key={btn.key}
+                onClick={() => {
+                  setFilter(btn.key);
+                  setCurrentPage(1);
+                }}
+                sx={{
+                  bgcolor: filter === btn.key ? primaryGreen : "#fff",
+                  color: filter === btn.key ? "#fff" : primaryGreen,
+                  border: `1px solid ${primaryGreen}`,
+                  "&:hover": {
+                    bgcolor: filter === btn.key ? "#004d00" : "#f0f0f0",
+                  },
+                  flexGrow: 1,
+                }}
+              >
+                {btn.label}
+              </Button>
+            ))}
           </ButtonGroup>
 
-          {/* ✅ Search + Export */}
-          <Box display="flex" alignItems="center">
+          {/* Search + Export */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              gap: 1,
+              width: { xs: "100%", sm: "auto" },
+            }}
+          >
             <TextField
-              label="Search..."
+              label="Search BIN, Name, Business..."
               variant="outlined"
               size="small"
               value={searchQuery}
@@ -210,68 +191,76 @@ function BusinessProfile() {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              sx={{ width: 250 }}
+              sx={{
+                width: { xs: "100%", sm: 280 },
+                "& .MuiOutlinedInput-root": {
+                  fontSize: { xs: "0.875rem" },
+                },
+              }}
             />
             <Button
               variant="outlined"
               color="success"
               onClick={handleExportCSV}
+              sx={{
+                whiteSpace: "nowrap",
+                minWidth: { xs: "100%", sm: "auto" },
+              }}
             >
-              Export to CSV
+              Export CSV
             </Button>
           </Box>
         </Box>
 
-        {/* ✅ Table */}
+        {/* TABLE */}
         <TableContainer
           component={Paper}
           sx={{
             borderRadius: 2,
             boxShadow: 3,
-            maxWidth: "1600px", // ✅ Set your desired max width
-            margin: "0 auto", // ✅ Centers the table horizontally
+            maxWidth: "1600px",
+            mx: "auto",
+            overflowX: "auto",
           }}
         >
-          <Table>
+          <Table size={isMobile ? "small" : "medium"}>
             <TableHead>
-              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell>
-                  <strong>BIN</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Business Name</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>First Name</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Last Name</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Application</strong>
-                </TableCell>
+              <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+                <TableCell><strong>BIN</strong></TableCell>
+                <TableCell><strong>Business Name</strong></TableCell>
+                <TableCell><strong>First Name</strong></TableCell>
+                <TableCell><strong>Last Name</strong></TableCell>
+                <TableCell><strong>Application</strong></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {currentRecords.map((applicant) => (
-                <TableRow
-                  key={applicant.id}
-                  hover
-                  sx={{ cursor: "pointer" }}
-                  onClick={() => handleRowClick(applicant)}
-                >
-                  <TableCell>{applicant.bin}</TableCell>
-                  <TableCell>{applicant.businessName}</TableCell>
-                  <TableCell>{applicant.firstName}</TableCell>
-                  <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.application}</TableCell>
+              {currentRecords.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                    <Typography>No records found</Typography>
+                  </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                currentRecords.map((applicant) => (
+                  <TableRow
+                    key={applicant.id}
+                    hover
+                    onClick={() => handleRowClick(applicant)}
+                    sx={{ cursor: "pointer" }}
+                  >
+                    <TableCell>{applicant.bin || "-"}</TableCell>
+                    <TableCell>{applicant.businessName || "-"}</TableCell>
+                    <TableCell>{applicant.firstName || "-"}</TableCell>
+                    <TableCell>{applicant.lastName || "-"}</TableCell>
+                    <TableCell>{applicant.application || "-"}</TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
 
-        {/* ✅ Pagination */}
+        {/* PAGINATION */}
         <Box display="flex" justifyContent="center" mt={3}>
           <Pagination
             count={totalPages}
@@ -279,11 +268,12 @@ function BusinessProfile() {
             onChange={handlePageChange}
             color="success"
             shape="rounded"
+            size={isMobile ? "small" : "medium"}
           />
         </Box>
       </Box>
 
-      {/* ✅ Modal */}
+      {/* MODAL */}
       {selectedApplicant && (
         <BusinessProfileModal
           applicant={selectedApplicant}

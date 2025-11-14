@@ -14,7 +14,6 @@ import {
   Stack,
   Avatar,
   alpha,
-  IconButton,
 } from "@mui/material";
 import {
   Description,
@@ -31,71 +30,61 @@ import AddAdminModal from "./AddAdminModal";
 const primaryGreen = "#1d5236";
 const lightGreen = alpha(primaryGreen, 0.1);
 const darkGreen = "#0f2a1b";
+const drawerWidth = 270; // Match with side_bar.jsx
 
-/* ================== NEW COMPONENT: LIVE CLOCK ================== */
-
+/* ================== LIVE CLOCK ================== */
 function LiveClock() {
-  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [now, setNow] = useState(new Date());
 
   useEffect(() => {
-    // Update the date and time every second (1000 milliseconds)
-    const timer = setInterval(() => {
-      setCurrentDateTime(new Date());
-    }, 1000);
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
 
-    // Cleanup the interval when the component unmounts
-    return () => clearInterval(timer);
-  }, []); // Empty dependency array ensures this effect runs only once on mount
-
-  // Format time (HH:MM:SS) and date (Day, Month DD, YYYY)
-  const timeOptions = {
+  const time = now.toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-    hour12: false, // 24-hour format
-  };
-
-  const dateOptions = {
+    hour12: false,
+  });
+  const date = now.toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
-  };
-
-  const timeString = currentDateTime.toLocaleTimeString("en-US", timeOptions);
-  const dateString = currentDateTime.toLocaleDateString("en-US", dateOptions);
+  });
 
   return (
     <Box
       sx={{
         display: "flex",
         flexDirection: "column",
-        alignItems: "flex-start", // Left-align text
         color: "white",
-        pl: 2, // Added padding on the left to space it from the edge
-        ml: 33,
+        pl: { xs: 1, md: 3 },          // responsive left padding
+        minWidth: { xs: 130, md: 180 }, // keep it from collapsing
       }}
     >
       <Typography
-        variant="h5"
+        variant="h6"
         sx={{
-          fontWeight: "bold",
-          lineHeight: 1, // Tighter line height
-          textShadow: `0 0 5px ${alpha("#000000", 0.5)}`, // Subtle shadow for contrast
+          fontWeight: 600,
+          lineHeight: 1,
+          textShadow: "0 1px 3px rgba(0,0,0,0.4)",
         }}
       >
-        {timeString}
+        {time}
       </Typography>
-      <Typography variant="body2" sx={{ fontSize: "0.8rem", opacity: 0.8 }}>
-        {dateString}
+      <Typography
+        variant="caption"
+        sx={{ opacity: 0.9, fontSize: { xs: "0.65rem", md: "0.75rem" } }}
+      >
+        {date}
       </Typography>
     </Box>
   );
 }
 
-/* ================== TOP BAR COMPONENTS ================== */
-
-// The TopBar component itself
+/* ================== TOP BAR ================== */
 function TopBar({ onAddAdminClick, isSuperAdmin }) {
   const TOP_BAR_HEIGHT = 80;
 
@@ -106,7 +95,6 @@ function TopBar({ onAddAdminClick, isSuperAdmin }) {
         height: TOP_BAR_HEIGHT,
         backgroundColor: primaryGreen,
         display: "flex",
-        flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
         p: 2,
@@ -120,28 +108,22 @@ function TopBar({ onAddAdminClick, isSuperAdmin }) {
         right: 0,
       }}
     >
-      {/* 1. LEFT ALIGNED: LIVE CLOCK */}
       <LiveClock />
 
-      {/* 2. CENTERED: DASHBOARD TITLE */}
       <Typography
         variant="h5"
-        component="div"
         sx={{
-          fontWeight: "light",
-          textShadow: `0 0 5px ${alpha("#000000", 0.5)}`,
-          // This allows the title to be centered while the other items are at the edges
           position: "absolute",
-          ml: 8,
           left: "50%",
           transform: "translateX(-50%)",
-          display: { xs: "none", sm: "block" }, // Hide on extra small screens if needed
+          fontWeight: "light",
+          textShadow: `0 0 5px ${alpha("#000000", 0.5)}`,
+          display: { xs: "none", sm: "block" },
         }}
       >
         DASHBOARD OVERVIEW
       </Typography>
 
-      {/* 3. RIGHT ALIGNED: ADD ADMIN BUTTON (Replaced 'ml: 215' with alignment) */}
       {isSuperAdmin && (
         <Button
           variant="contained"
@@ -156,7 +138,6 @@ function TopBar({ onAddAdminClick, isSuperAdmin }) {
             textTransform: "none",
             fontWeight: "bold",
             boxShadow: `0 4px 12px ${alpha(primaryGreen, 0.5)}`,
-            ml: "auto",
             mr: 2,
           }}
         >
@@ -167,41 +148,33 @@ function TopBar({ onAddAdminClick, isSuperAdmin }) {
   );
 }
 
-/* ================== DASHBOARD COMPONENTS ================== */
-
-// Custom Peso Icon
+/* ================== PESO ICON ================== */
 const PesoIcon = () => (
   <Typography sx={{ fontWeight: "bold", fontSize: "1.2rem" }}>₱</Typography>
 );
 
+/* ================== MAIN DASHBOARD ================== */
 function Dashboard() {
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const [openModal, setOpenModal] = useState(false);
   const TOP_BAR_HEIGHT = 80;
-  const primaryGreen = "#034d06ff";
 
   const [adminData, setAdminData] = useState(null);
 
   useEffect(() => {
-    const storedAdmin = localStorage.getItem("adminData");
-    if (storedAdmin) {
-      setAdminData(JSON.parse(storedAdmin));
-    }
+    const stored = localStorage.getItem("adminData");
+    if (stored) setAdminData(JSON.parse(stored));
   }, []);
+
   const userOffice = adminData?.Office?.toUpperCase() || "";
   const isSuperAdmin = userOffice === "SUPERADMIN";
 
-  const onAddAdminClick = () => {
-    if (!isSuperAdmin) {
-      alert("Only SuperAdmin can add new admins.");
-      return;
-    }
-    console.log("Opening Add Admin dialog...");
-    // your dialog or navigation logic here
-  };
+  const handleOpenModal = () => setOpenModal(true);
+  const handleCloseModal = () => setOpenModal(false);
 
-  // Sample data for metrics
+  // Sample Data
   const metrics = {
     totalApplications: 1245,
     approvedPermits: 890,
@@ -209,7 +182,6 @@ function Dashboard() {
     revenueCollected: 456789,
   };
 
-  // Sample revenue data for line chart
   const revenueData = [
     { month: "Jan", revenue: 30000 },
     { month: "Feb", revenue: 45000 },
@@ -228,15 +200,10 @@ function Dashboard() {
   const xLabels = revenueData.map((d) => d.month);
   const revenueValues = revenueData.map((d) => d.revenue);
 
-  // Sample data for bar chart (e.g., applications breakdown by category)
   const barData = {
     categories: ["New Apps", "Renewals", "Permits", "Appeals"],
     values: [450, 300, 290, 205],
   };
-
-  // Handlers for modal
-  const handleOpenModal = () => setOpenModal(true);
-  const handleCloseModal = () => setOpenModal(false);
 
   return (
     <Box
@@ -245,329 +212,148 @@ function Dashboard() {
         background: "#f5f5f5",
         minHeight: "100vh",
         flexDirection: "column",
-        justifyContent: "flex-start",
-        alignItems: "flex-start",
       }}
     >
-      {/* 1. TOP BAR (Fixed at the top) */}
+      {/* TOP BAR */}
       <TopBar onAddAdminClick={handleOpenModal} isSuperAdmin={isSuperAdmin} />
 
-      {/* 2. SIDE BAR AND MAIN CONTENT WRAPPER */}
+      {/* MAIN LAYOUT: SIDEBAR + CONTENT */}
       <Box
         sx={{
           display: "flex",
           width: "100%",
           flexGrow: 1,
-          flexDirection: isSmallScreen ? "column" : "row",
-          pt: `${TOP_BAR_HEIGHT}px`, // Add padding to push content down below fixed TopBar
-          px: isSmallScreen ? 2 : 4,
+          pt: `${TOP_BAR_HEIGHT}px`,
+          px: { xs: 2, md: 3 },
           pb: 4,
         }}
       >
-        {/* SIDE BAR */}
-        {!isSmallScreen && <Side_bar />}
+        {/* SIDEBAR - Always rendered */}
+        <Side_bar />
 
         {/* MAIN CONTENT */}
         <Box
           component="main"
           sx={{
             flexGrow: 1,
-            maxWidth: 1400,
+            width: "100%",
+            ml: { md: `${drawerWidth}px` }, // Push content right on md+
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            width: "100%",
-            ml: isSmallScreen ? 0 : 2,
-            mt: 4,
+            mt: 3,
+            px: { xs: 1, sm: 2 },
           }}
         >
-          {/* Summary Metrics Grid */}
-          <Grid
-            container
-            spacing={4}
-            sx={{
-              mb: 6,
-              width: "100%",
-            }}
-          >
-            <Grid item xs={12} sm={6} md={3}>
-              <Card
-                elevation={3}
-                sx={{
-                  background: "#ffffff",
-                  borderRadius: 3,
-                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-8px)",
-                    boxShadow: `0 12px 24px ${alpha(primaryGreen, 0.2)}`,
-                  },
-                  border: `1px solid ${lightGreen}`,
-                  // === HEIGHT ADJUSTMENT HERE ===
-                  height: 180, // Increased height for a taller card
-                  width: 325,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                }}
-              >
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    spacing={2}
-                  >
-                    <Box>
-                      <Typography
-                        color="textSecondary"
-                        gutterBottom
-                        sx={{ fontSize: "1.5rem", color: darkGreen }}
-                      >
-                        Total Applications
-                      </Typography>
-                      <Typography
-                        variant="h5"
-                        sx={{ fontWeight: "bold", color: primaryGreen }}
-                      >
-                        {metrics.totalApplications.toLocaleString()}
-                      </Typography>
-                      <Chip
-                        label="+12% from last month"
-                        size="small"
+          {/* METRICS CARDS */}
+          <Grid container spacing={3} sx={{ mb: 5, width: "100%" }}>
+            {[
+              {
+                title: "Total Applications",
+                value: metrics.totalApplications,
+                chip: "+12% from last month",
+                icon: <Description />,
+              },
+              {
+                title: "Approved Permits",
+                value: metrics.approvedPermits,
+                chip: "+8% from last month",
+                icon: <TrendingUp />,
+              },
+              {
+                title: "Pending Renewals",
+                value: metrics.pendingRenewals,
+                chip: "Urgent: 23",
+                chipColor: "warning",
+                icon: <AccessTime />,
+              },
+              {
+                title: "Revenue Collected",
+                value: `₱${metrics.revenueCollected.toLocaleString()}`,
+                chip: "+18% YoY",
+                icon: <PesoIcon />,
+              },
+            ].map((item, idx) => (
+              <Grid item xs={12} sm={6} md={3} key={idx}>
+                <Card
+                  elevation={3}
+                  sx={{
+                    background: "#ffffff",
+                    borderRadius: 3,
+                    height: 180,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                    "&:hover": {
+                      transform: "translateY(-8px)",
+                      boxShadow: `0 12px 24px ${alpha(primaryGreen, 0.2)}`,
+                    },
+                    border: `1px solid ${lightGreen}`,
+                  }}
+                >
+                  <CardContent sx={{ flexGrow: 1 }}>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Box>
+                        <Typography
+                          color="textSecondary"
+                          gutterBottom
+                          sx={{ fontSize: "1.5rem", color: darkGreen }}
+                        >
+                          {item.title}
+                        </Typography>
+                        <Typography
+                          variant="h5"
+                          sx={{ fontWeight: "bold", color: primaryGreen }}
+                        >
+                          {item.value}
+                        </Typography>
+                        <Chip
+                          label={item.chip}
+                          size="small"
+                          color={item.chipColor || "default"}
+                          sx={{
+                            mt: 2,
+                            background: item.chipColor ? undefined : lightGreen,
+                            color: item.chipColor ? undefined : primaryGreen,
+                          }}
+                        />
+                      </Box>
+                      <Avatar
                         sx={{
-                          mt: 3,
-                          background: lightGreen,
+                          bgcolor: lightGreen,
                           color: primaryGreen,
+                          width: 60,
+                          height: 60,
                         }}
-                      />
-                    </Box>
-                    <Avatar
-                      sx={{
-                        bgcolor: lightGreen,
-                        color: primaryGreen,
-                        width: 65,
-                        height: 65,
-                      }}
-                    >
-                      <Description />
-                    </Avatar>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12} sm={6} md={3}>
-              <Card
-                elevation={3}
-                sx={{
-                  background: "#ffffff",
-                  borderRadius: 3,
-                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-8px)",
-                    boxShadow: `0 12px 24px ${alpha(primaryGreen, 0.2)}`,
-                  },
-                  border: `1px solid ${lightGreen}`,
-                  // === HEIGHT ADJUSTMENT HERE ===
-                  height: 180, // Increased height for a taller
-                  width: 325,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                }}
-              >
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    spacing={2}
-                  >
-                    <Box>
-                      <Typography
-                        color="textSecondary"
-                        gutterBottom
-                        sx={{ fontSize: "1.5rem", color: darkGreen }}
                       >
-                        Approved Permits
-                      </Typography>
-                      <Typography
-                        variant="h5"
-                        sx={{ fontWeight: "bold", color: primaryGreen }}
-                      >
-                        {metrics.approvedPermits.toLocaleString()}
-                      </Typography>
-                      <Chip
-                        label="+8% from last month"
-                        size="small"
-                        sx={{
-                          mt: 3,
-                          background: lightGreen,
-                          color: primaryGreen,
-                        }}
-                      />
-                    </Box>
-                    <Avatar
-                      sx={{
-                        bgcolor: lightGreen,
-                        color: primaryGreen,
-                        width: 65,
-                        height: 65,
-                      }}
-                    >
-                      <TrendingUp />
-                    </Avatar>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12} sm={6} md={3}>
-              <Card
-                elevation={3}
-                sx={{
-                  background: "#ffffff",
-                  borderRadius: 3,
-                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-8px)",
-                    boxShadow: `0 12px 24px ${alpha(primaryGreen, 0.2)}`,
-                  },
-                  border: `1px solid ${lightGreen}`,
-                  // === HEIGHT ADJUSTMENT HERE ===
-                  height: 180, // Increased height for a taller card
-                  width: 325,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                }}
-              >
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    spacing={2}
-                  >
-                    <Box>
-                      <Typography
-                        color="textSecondary"
-                        gutterBottom
-                        sx={{ fontSize: "1.5rem", color: darkGreen }}
-                      >
-                        Pending Renewals
-                      </Typography>
-                      <Typography
-                        variant="h5"
-                        sx={{ fontWeight: "bold", color: primaryGreen }}
-                      >
-                        {metrics.pendingRenewals.toLocaleString()}
-                      </Typography>
-                      <Chip
-                        label="Urgent: 23"
-                        size="small"
-                        color="warning"
-                        sx={{ mt: 3 }}
-                      />
-                    </Box>
-                    <Avatar
-                      sx={{
-                        bgcolor: lightGreen,
-                        color: primaryGreen,
-                        width: 65,
-                        height: 65,
-                      }}
-                    >
-                      <AccessTime />
-                    </Avatar>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12} sm={6} md={3}>
-              <Card
-                elevation={3}
-                sx={{
-                  background: "#ffffff",
-                  borderRadius: 3,
-                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-8px)",
-                    boxShadow: `0 12px 24px ${alpha(primaryGreen, 0.2)}`,
-                  },
-                  border: `1px solid ${lightGreen}`,
-                  // === HEIGHT ADJUSTMENT HERE ===
-                  height: 180, // Increased height for a taller card
-                  width: 320,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                }}
-              >
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    spacing={2}
-                  >
-                    <Box>
-                      <Typography
-                        color="textSecondary"
-                        gutterBottom
-                        sx={{ fontSize: "1.5rem", color: darkGreen }}
-                      >
-                        Revenue Collected
-                      </Typography>
-                      <Typography
-                        variant="h5"
-                        sx={{ fontWeight: "bold", color: primaryGreen }}
-                      >
-                        ₱{metrics.revenueCollected.toLocaleString()}
-                      </Typography>
-                      <Chip
-                        label="+18% YoY"
-                        size="small"
-                        sx={{
-                          mt: 3,
-                          background: lightGreen,
-                          color: primaryGreen,
-                        }}
-                      />
-                    </Box>
-                    <Avatar
-                      sx={{
-                        bgcolor: lightGreen,
-                        color: primaryGreen,
-                        width: 65,
-                        height: 65,
-                      }}
-                    >
-                      <PesoIcon />
-                    </Avatar>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
+                        {item.icon}
+                      </Avatar>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
           </Grid>
 
           <Divider sx={{ my: 4, width: "100%", borderColor: lightGreen }} />
 
-          {/* Charts Section: Line Chart on left, Bar Chart on right in a new Grid */}
+          {/* CHARTS */}
           <Grid container spacing={4} sx={{ width: "100%", mb: 6 }}>
-            {/* Line Chart - Stays at 50% width on md+ screens */}
+            {/* LINE CHART */}
             <Grid item xs={12} md={6}>
               <Paper
                 elevation={3}
                 sx={{
-                  // width: "100%", // Retain 100% width to fill the grid column
                   p: 3,
                   borderRadius: 3,
                   background: "#ffffff",
                   border: `1px solid ${lightGreen}`,
-                  // === HEIGHT ADJUSTMENT HERE ===
-                  height: 400, // Increased height for a taller chart container
+                  height: { xs: 300, sm: 350, md: 400 },
                   display: "flex",
                   flexDirection: "column",
                 }}
@@ -583,18 +369,8 @@ function Dashboard() {
                 >
                   Revenue Trend (Annual)
                 </Typography>
-                <Box
-                  sx={{
-                    flexGrow: 1,
-                    display: "flex",
-                    justifyContet: "center",
-                    alignItems: "center",
-                  }}
-                >
+                <Box sx={{ flexGrow: 1, minHeight: 0 }}>
                   <LineChart
-                    // === WIDTH/HEIGHT ADJUSTMENT ON CHART COMPONENT ===
-                    width={600} // Set a new default width (though parent's styles override if set to 100% in sx)
-                    height={300} // Set a new default height
                     series={[
                       {
                         data: revenueValues,
@@ -604,47 +380,26 @@ function Dashboard() {
                     ]}
                     xAxis={[{ scaleType: "point", data: xLabels }]}
                     sx={{
-                      [`& .${lineElementClasses.root}`]: {
-                        strokeWidth: 3,
-                        strokeDasharray: "0",
-                      },
-                      ".MuiChartsLegend-root": {
-                        color: darkGreen,
-                      },
-                      // This ensures the chart fills the width of its parent box
-                      width: "100% !important",
-                      maxWidth: "100% !important",
+                      [`& .${lineElementClasses.root}`]: { strokeWidth: 3 },
+                      ".MuiChartsLegend-root": { color: darkGreen },
+                      width: "100%",
+                      height: "100%",
                     }}
                   />
                 </Box>
               </Paper>
             </Grid>
 
-            {/* Bar Chart - **ADJUSTED HERE** to align the entire item/paper to the right */}
-            <Grid
-              item
-              xs={12}
-              md={6}
-              sx={{
-                // Using margin-left: auto effectively pushes the item to the right edge
-                marginLeft: { xs: 0, md: "auto" },
-                // Ensure it's a flex container for auto-margin to work on the item
-                display: "flex",
-                // Ensure the Paper fills the space if it has content, and aligns to the end of the Grid cell
-                justifyContent: { xs: "center", md: "flex-end" },
-              }}
-            >
+            {/* BAR CHART */}
+            <Grid item xs={12} md={6}>
               <Paper
                 elevation={3}
                 sx={{
-                  // Retain 100% width to fill the grid column
-                  width: "100%",
                   p: 3,
                   borderRadius: 3,
                   background: "#ffffff",
                   border: `1px solid ${lightGreen}`,
-                  // === HEIGHT ADJUSTMENT HERE ===
-                  height: 400, // Increased height for a taller chart container
+                  height: { xs: 300, sm: 350, md: 400 },
                   display: "flex",
                   flexDirection: "column",
                 }}
@@ -660,31 +415,15 @@ function Dashboard() {
                 >
                   Applications Breakdown
                 </Typography>
-                {/* We keep the BarChart aligned right inside the Paper as well */}
-                <Box
-                  sx={{
-                    flexGrow: 1,
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                  }}
-                >
+                <Box sx={{ flexGrow: 1, minHeight: 0 }}>
                   <BarChart
-                    // === WIDTH/HEIGHT ADJUSTMENT ON CHART COMPONENT ===
-                    width={600} // Set a new default width
-                    height={350} // Set a new default height
                     series={[{ data: barData.values, color: primaryGreen }]}
                     xAxis={[{ scaleType: "band", data: barData.categories }]}
                     sx={{
-                      [`& .${barElementClasses.root}`]: {
-                        fill: primaryGreen,
-                      },
-                      ".MuiChartsLegend-root": {
-                        color: darkGreen,
-                      },
-                      // This ensures the chart fills the width of its parent box
-                      width: "100% !important",
-                      maxWidth: "100% !important",
+                      [`& .${barElementClasses.root}`]: { fill: primaryGreen },
+                      ".MuiChartsLegend-root": { color: darkGreen },
+                      width: "100%",
+                      height: "100%",
                     }}
                   />
                 </Box>
@@ -692,6 +431,7 @@ function Dashboard() {
             </Grid>
           </Grid>
 
+          {/* MODAL */}
           <AddAdminModal open={openModal} onClose={handleCloseModal} />
         </Box>
       </Box>
