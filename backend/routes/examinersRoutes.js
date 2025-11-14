@@ -223,7 +223,23 @@ router.get("/examiners", async (req, res) => {
 router.put("/examiners/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const updates = req.body;
+    const updates = { ...req.body };
+
+    // If capital is included, compute totalCapital
+    if (updates.capital) {
+      try {
+        const capitalArray = updates.capital
+          .split(",")
+          .map((v) => v.replace(/"/g, "").trim());
+        const totalCapital = capitalArray.reduce(
+          (sum, val) => sum + Number(val || 0),
+          0
+        );
+        updates.totalCapital = totalCapital;
+      } catch (error) {
+        console.error("Capital parsing error:", error);
+      }
+    }
 
     // Find the examiner first
     const examiner = await Examiners.findByPk(id);
@@ -232,22 +248,23 @@ router.put("/examiners/:id", async (req, res) => {
     }
 
     // Find related application (if exists)
-    const application = await File.findOne({ where: { id: id } });
+    const application = await File.findOne({ where: { id } });
 
-    // Update both
+    // Update file (if exists)
     if (application) {
       await application.update(updates);
     }
 
+    // Update the examiner
     await examiner.update(updates);
 
     res.json({
-      message: "✅ Examiner and related application updated successfully",
+      message: "Examiner and related application updated successfully",
       examiner,
       application,
     });
   } catch (err) {
-    console.error("❌ Update failed:", err);
+    console.error("Update failed:", err);
     res.status(500).json({ error: "Update failed", details: err.message });
   }
 });

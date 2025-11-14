@@ -188,17 +188,21 @@ function ExaminersApplicantModalUpdate({
     }
   };
 
+  const quoteJoin = (arr) =>
+    Array.isArray(arr) ? arr.map((v) => `"${v}"`).join(",") : arr;
+
   const handleUpdate = async () => {
     try {
       const updatedData = {
         ...formData,
-        capital: JSON.stringify(capitalValues),
-        lineOfBusiness: JSON.stringify(lineOfBusiness),
-        productService: JSON.stringify(productService),
-        Units: JSON.stringify(units),
-        natureCode: JSON.stringify(natureCode),
-        businessNature: JSON.stringify(businessNature),
-        lineCode: JSON.stringify(lineCode),
+
+        capital: quoteJoin(capitalValues),
+        lineOfBusiness: quoteJoin(lineOfBusiness),
+        productService: quoteJoin(productService),
+        Units: quoteJoin(units),
+        natureCode: quoteJoin(natureCode),
+        businessNature: quoteJoin(businessNature),
+        lineCode: quoteJoin(lineCode),
       };
 
       const res = await axios.put(
@@ -224,7 +228,6 @@ function ExaminersApplicantModalUpdate({
     }
   };
 
-  // Compute max length for rendering
   const maxLength = Math.max(
     lineOfBusiness.length,
     productService.length,
@@ -272,7 +275,10 @@ function ExaminersApplicantModalUpdate({
           <Section title="Business Address">
             <Field label="Region" value={applicant.region} />
             <Field label="Province" value={applicant.province} />
-            <Field label="City/Municipality" value={applicant.cityOrMunicipality} />
+            <Field
+              label="City/Municipality"
+              value={applicant.cityOrMunicipality}
+            />
             <Field label="Barangay" value={applicant.barangay} />
             <Field label="Address Line 1" value={applicant.addressLine1} />
             <Field label="Zip Code" value={applicant.zipCode} />
@@ -296,7 +302,10 @@ function ExaminersApplicantModalUpdate({
             <Field label="Employees" value={applicant.numberOfEmployee} />
             <Field label="Male Employees" value={applicant.maleEmployee} />
             <Field label="Female Employees" value={applicant.femaleEmployee} />
-            <Field label="Total Delivery Vehicle" value={applicant.totalDeliveryVehicle} />
+            <Field
+              label="Total Delivery Vehicle"
+              value={applicant.totalDeliveryVehicle}
+            />
             <Field label="No. of Nozzles" value={applicant.numNozzle} />
             <Field label="Weigh Scale" value={applicant.weighScale} />
           </Section>
@@ -305,7 +314,10 @@ function ExaminersApplicantModalUpdate({
           <Section title="Taxpayer Address">
             <Field label="Region" value={applicant.Taxregion} />
             <Field label="Province" value={applicant.Taxprovince} />
-            <Field label="City/Municipality" value={applicant.TaxcityOrMunicipality} />
+            <Field
+              label="City/Municipality"
+              value={applicant.TaxcityOrMunicipality}
+            />
             <Field label="Barangay" value={applicant.Taxbarangay} />
             <Field label="Address Line 1" value={applicant.TaxaddressLine1} />
             <Field label="Zip Code" value={applicant.TaxzipCode} />
@@ -477,15 +489,47 @@ function ExaminersApplicantModalUpdate({
 
           {/* Business Requirements */}
           <Section title="Business Requirements">
-            <FileField fileKey="proofOfReg" label="Proof of Registration" fileData={applicant} />
-            <FileField fileKey="proofOfRightToUseLoc" label="Proof of Right to Use Location" fileData={applicant} />
-            <FileField fileKey="locationPlan" label="Location Plan" fileData={applicant} />
-            <FileField fileKey="brgyClearance" label="Barangay Clearance" fileData={applicant} />
-            <FileField fileKey="marketClearance" label="Market Clearance" fileData={applicant} />
-            <FileField fileKey="occupancyPermit" label="Occupancy Permit" fileData={applicant} />
+            <FileField
+              fileKey="proofOfReg"
+              label="Proof of Registration"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="proofOfRightToUseLoc"
+              label="Proof of Right to Use Location"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="locationPlan"
+              label="Location Plan"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="brgyClearance"
+              label="Barangay Clearance"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="marketClearance"
+              label="Market Clearance"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="occupancyPermit"
+              label="Occupancy Permit"
+              fileData={applicant}
+            />
             <FileField fileKey="cedula" label="Cedula" fileData={applicant} />
-            <FileField fileKey="photoOfBusinessEstInt" label="Photo (Interior)" fileData={applicant} />
-            <FileField fileKey="photoOfBusinessEstExt" label="Photo (Exterior)" fileData={applicant} />
+            <FileField
+              fileKey="photoOfBusinessEstInt"
+              label="Photo (Interior)"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="photoOfBusinessEstExt"
+              label="Photo (Exterior)"
+              fileData={applicant}
+            />
           </Section>
         </DialogContent>
 
@@ -500,9 +544,15 @@ function ExaminersApplicantModalUpdate({
       </Dialog>
 
       {/* Success Dialog */}
-      <Dialog open={successDialogOpen} onClose={() => setSuccessDialogOpen(false)}>
+      <Dialog
+        open={successDialogOpen}
+        onClose={() => setSuccessDialogOpen(false)}
+      >
         <DialogContent sx={{ textAlign: "center", p: 4 }}>
-          <CheckCircleOutlineIcon color="success" sx={{ fontSize: 60, mb: 2 }} />
+          <CheckCircleOutlineIcon
+            color="success"
+            sx={{ fontSize: 60, mb: 2 }}
+          />
           <Typography variant="h6">Updated Successfully!</Typography>
         </DialogContent>
       </Dialog>
