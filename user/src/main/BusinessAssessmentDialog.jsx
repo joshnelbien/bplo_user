@@ -348,8 +348,18 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
             />
 
             <TextField
-              name="lastPaymentAmount"
+              name="GrossSales"
               label="Business Tax Total Fees"
+              fullWidth
+              margin="normal"
+              type="number"
+              value={formData.GrossSales || ""}
+              onChange={handleChange}
+            />
+
+            <TextField
+              name="lastPaymentAmount"
+              label="Gross Sales"
               fullWidth
               margin="normal"
               type="number"
@@ -415,6 +425,7 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
               onClick={() => {
                 const bt = Number(formData.bt || 0);
                 const mp = Number(formData.mp || 0);
+                const GrossSales = Number(formData.GrossSales || 0);
 
                 let lastPaymentAmount = Number(formData.lastPaymentAmount || 0);
 
@@ -430,19 +441,18 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
                 const year = Number(formData.year || new Date().getFullYear());
                 let dueDate;
 
-                // Determine due date based on latest quarter
                 switch (formData.quarter) {
                   case "Q1":
-                    dueDate = new Date(year, 0, 20); // Jan 20
+                    dueDate = new Date(year, 0, 20);
                     break;
                   case "Q2":
-                    dueDate = new Date(year, 3, 20); // Apr 20
+                    dueDate = new Date(year, 3, 20);
                     break;
                   case "Q3":
-                    dueDate = new Date(year, 6, 20); // Jul 20
+                    dueDate = new Date(year, 6, 20);
                     break;
                   case "Q4":
-                    dueDate = new Date(year, 9, 20); // Oct 20
+                    dueDate = new Date(year, 9, 20);
                     break;
                   default:
                     dueDate = new Date(year, 0, 20);
@@ -455,16 +465,13 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
                   (today.getMonth() - dueDate.getMonth());
                 monthsDelayed = Math.max(0, monthsDelayed);
 
-                // Cap months delayed at 36
                 const cappedMonths = Math.min(monthsDelayed, 36);
 
-                // 🔹 Surcharge: 2% per month, max 72%
                 const surcharge = Math.min(
                   totalFees * 0.02 * cappedMonths,
                   totalFees * 0.72
                 );
 
-                // 🔹 Total due = lastPaymentAmount + surcharge
                 const totalDue = lastPaymentAmount + surcharge;
                 setResult({
                   bt,
@@ -472,6 +479,7 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
                   totalFees,
                   surc: surcharge,
                   lastPaymentAmount,
+                  GrossSales,
                   monthsDelayed,
                   total: totalDue,
                   quarter: formData.quarter,
@@ -482,6 +490,7 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
               disabled={
                 !formData.bt ||
                 !formData.mp ||
+                !formData.GrossSales ||
                 !formData.lastPaymentAmount ||
                 !formData.modeOfPayment ||
                 !formData.quarter
@@ -515,6 +524,21 @@ const BusinessAssessmentDialog = ({ open, onClose }) => {
                 <Divider sx={{ mb: 2 }} />
                 <Box sx={{ mt: 2 }}>
                   <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                    <li
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Typography>Gross Sales</Typography>
+                      <Typography>
+                        ₱
+                        {result.GrossSales.toLocaleString("en-PH", {
+                          minimumFractionDigits: 2,
+                        })}
+                      </Typography>
+                    </li>
+
                     <li
                       style={{
                         display: "flex",
