@@ -193,6 +193,45 @@ const BusinessProfile = sequelize.define(
     TREASURERtimeStamp: { type: DataTypes.STRING },
     application: { type: DataTypes.STRING },
     businessTaxTotal: { type: DataTypes.STRING },
+    payment_mode: {
+      type: DataTypes.STRING, // "Cash" or "Check"
+    },
+    amount_due: {
+      type: DataTypes.STRING,
+    },
+    amount_paid: {
+      type: DataTypes.STRING,
+    },
+    due_date: {
+      type: DataTypes.STRING,
+    },
+    drawee_bank: {
+      type: DataTypes.STRING,
+    },
+    check_number: {
+      type: DataTypes.STRING,
+    },
+    check_date: {
+      type: DataTypes.STRING,
+    },
+    //other charges
+    businessTaxFee: { type: DataTypes.STRING },
+    occupationalTax: { type: DataTypes.STRING },
+    barangayFee: { type: DataTypes.STRING },
+    mayorsPermit: { type: DataTypes.STRING },
+    deliveryVehicle: { type: DataTypes.STRING },
+    surcharge: { type: DataTypes.STRING },
+    interest: { type: DataTypes.STRING },
+    tinplateStickerFee: { type: DataTypes.STRING },
+    verificationFee: { type: DataTypes.STRING },
+    veterinaryFee: { type: DataTypes.STRING },
+    fixedTax: { type: DataTypes.STRING },
+    videokeFee: { type: DataTypes.STRING },
+    cigarettes: { type: DataTypes.STRING },
+    liquor: { type: DataTypes.STRING },
+    billiards: { type: DataTypes.STRING },
+    boardAndLogging: { type: DataTypes.STRING },
+    fsicFee: { type: DataTypes.STRING },
   },
 
   {
