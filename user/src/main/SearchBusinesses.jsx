@@ -116,7 +116,7 @@ function SearchBusinesses({ open, onClose }) {
               <InputBase
                 placeholder="Enter Business Name"
                 value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
+                onChange={(e) => setSearchValue(e.target.value.toUpperCase())}
                 sx={{ ml: 2, flex: 1 }}
               />
               <IconButton
