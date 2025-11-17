@@ -148,215 +148,238 @@ function FeeModal({ open, onClose, applicant }) {
     );
 
     printWindow.document.write(`
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Official Receipt - ${orNo || "N/A"}</title>
-  <style>
-    @page {
-      size: 8.5in 11in;
-      margin: 0.3in;
-    }
-    body {
-      font-family: "Courier New", Courier, monospace;
-      font-size: 11pt;
-      margin: 0;
-      padding: 0.2in;
-      line-height: 1.3;
-    }
-    .container {
-      width: 100%;
-      border: 2px solid black;
-      padding: 0.15in;
-      box-sizing: border-box;
-    }
-    .header {
-      text-align: center;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-    .logo {
-      width: 80px;
-      height: 80px;
-      margin: 0 auto 5px;
-      background: #fff;
-      border: 1px solid #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-    }
-    .or-box {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 5px;
-      font-size: 12pt;
-    }
-    .or-no {
-      border: 1px solid black;
-      padding: 2px 8px;
-      font-weight: bold;
-    }
-    .date {
-      text-align: right;
-    }
-    .agency-fund {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 5px;
-      font-size: 11pt;
-    }
-    .payor {
-      border-bottom: 1px solid black;
-      padding-bottom: 2px;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 10px;
-      font-size: 11pt;
-    }
-    th, td {
-      border: 1px solid black;
-      padding: 4px 6px;
-      text-align: left;
-    }
-    th {
-      background-color: #f0f0f0;
-      font-weight: bold;
-    }
-    .text-right {
-      text-align: right;
-    }
-    .total-row td {
-      font-weight: bold;
-      background-color: #e0e0e0;
-    }
-    .amount-words {
-      border: 1px solid black;
-      padding: 5px;
-      margin-bottom: 10px;
-      font-size: 11pt;
-    }
-    .payment-mode {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      font-size: 10pt;
-    }
-    .signature {
-      margin-top: 20px;
-      text-align: center;
-    }
-    .note {
-      font-size: 9pt;
-      margin-top: 15px;
-      text-align: center;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Official Receipt</title>
+
+<style>
+  @page {
+    size: 8.5in 11in;
+    margin: 0;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: "Times New Roman", serif;
+    background: white;
+  }
+
+  /* Center small OR on whole paper */
+  .page-center {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 20px;
+  }
+
+  /* OR actual size (approx 4.5in wide like real OR) */
+  .or-container {
+    width: 4.6in;
+    border: 1px solid #000;
+    padding: 6px;
+    box-sizing: border-box;
+  }
+
+  .header {
+    text-align: center;
+    line-height: 1.1;
+    margin-bottom: 5px;
+  }
+
+  .seal-box {
+    width: 60px;
+    height: 60px;
+    border: 1px solid #000;
+    margin: 0 auto 4px auto;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+
+  .label-line {
+    border-bottom: 1px solid #000;
+    padding-bottom: 2px;
+    font-size: 11px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    margin-top: 4px;
+  }
+
+  th, td {
+    border: 1px solid #000;
+    padding: 3px;
+  }
+
+  th {
+    text-align: center;
+    font-weight: bold;
+    background: #f2f2f2;
+  }
+
+  .amount-right {
+    text-align: right;
+  }
+
+  .total-row td {
+    font-weight: bold;
+    background: #eaeaea;
+  }
+
+  .amount-words {
+    border: 1px solid #000;
+    padding: 4px;
+    font-size: 11px;
+    margin-top: 6px;
+  }
+
+  .payment-box {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 11px;
+  }
+
+  .signature {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 11px;
+  }
+
+  .note {
+    font-size: 9px;
+    margin-top: 10px;
+    text-align: center;
+  }
+</style>
 </head>
+
 <body>
-  <div class="container">
-    <div class="header">
-      <div style="font-size:14pt;">Accountable Form No. 51-C</div>
-      <div style="font-size:10pt;">Revised January, 1992</div>
-      <div style="font-size:10pt; float:right;">(TRIPLICATE)</div>
-    </div>
-    <table width="100%" style="margin-bottom:8px;">
-      <tr>
-        <td width="20%" align="center" valign="middle">
-          <div class="logo">LOGO</div>
-        </td>
-        <td width="60%" align="center">
-          <div style="font-size:16pt;font-weight:bold;">Official Receipt</div>
-          <div style="font-size:13pt;">of the</div>
-          <div style="font-size:14pt;font-weight:bold;">Republic of the Philippines</div>
-        </td>
-        <td width="20%" align="right" valign="top">
-          <div class="or-box">
-            <div>No. <span class="or-no">${orNo || "__________"}</span> V</div>
-          </div>
-          <div class="date">Date ${today}</div>
-        </td>
-      </tr>
-    </table>
+<div class="page-center"> 
+  <div class="or-container">
 
-    <div class="agency-fund">
-      <div>Agency <strong>San Pablo City, Laguna</strong></div>
-      <div>Fund <strong>${fund}</strong></div>
+<div class="header">
+  <div class="seal-box">
+    <img src="/republicofthephilippines.png" alt="Republic of the Philippines Seal" style="width: 100%; height: 100%; object-fit: contain;" />
+  </div>
+  <div style="font-weight:bold; font-size:14px;">OFFICIAL RECEIPT</div>
+  <div style="font-size:11px;">Republic of the Philippines</div>
+</div>
+
+    <!-- FORM NUMBER + ORIGINAL -->
+    <div class="row">
+      <div style="font-size:10px;">
+        Accountable Form No. 51<br/>
+        Revised January, 1992
+      </div>
+
+      <div style="font-size:12px; font-weight:bold;">
+        O R I G I N A L
+      </div>
     </div>
 
-    <div class="payor">Payor <strong>${payor || "______________________________"}</strong></div>
+    <!-- DATE + OR NO -->
+    <div class="row">
+      <div>Date: <span class="label-line">${today}</span></div>
+      <div>No. <span class="label-line">${orNo || "________"}</span></div>
+    </div>
 
+    <!-- Agency + Fund -->
+    <div class="row">
+      <div>Agency: <span class="label-line">San Pablo City, Laguna</span></div>
+      <div>Fund: <span class="label-line">${fund}</span></div>
+    </div>
+
+    <!-- Payor -->
+    <div style="margin-top:5px; font-size:11px;">
+      Payor: <span class="label-line">${payor || "____________________________"}</span>
+    </div>
+
+    <!-- TABLE -->
     <table>
       <thead>
         <tr>
-          <th>Nature of Collection</th>
-          <th>Account Code</th>
-          <th class="text-right">Amount</th>
+          <th style="width: 60%;">NATURE OF COLLECTION</th>
+          <th style="width: 20%;">ACCOUNT CODE</th>
+          <th style="width: 20%;">AMOUNT</th>
         </tr>
       </thead>
       <tbody>
         ${printableFees
           .map(
             ([name, { amount, quantity }]) => `
-            <tr>
-              <td>${name}</td>
-              <td></td>
-              <td class="text-right">₱ ${amount.toFixed(2)} x ${quantity}</td>
-            </tr>`
+          <tr>
+            <td>${name}</td>
+            <td></td>
+            <td class="amount-right">₱ ${(amount * quantity).toFixed(2)}</td>
+          </tr>
+        `
           )
           .join("")}
+
         <tr class="total-row">
-          <td colspan="2"><strong>TOTAL</strong></td>
-          <td class="text-right"><strong>₱ ${total.toFixed(2)}</strong></td>
+          <td colspan="2">TOTAL</td>
+          <td class="amount-right">₱ ${total.toFixed(2)}</td>
         </tr>
       </tbody>
     </table>
 
+    <!-- AMOUNT IN WORDS -->
     <div class="amount-words">
-      <strong>Amount in Words:</strong><br/>
+      <strong>AMOUNT IN WORDS:</strong><br/>
       ${amountInWords}
     </div>
 
-    <div class="payment-mode">
+    <!-- PAYMENT MODE -->
+    <div class="payment-box">
       <div>
-        ${paymentMode === "cash" ? "Check" : "Square"} Cash<br/>
-        ${paymentMode === "check" ? "Check" : "Square"} Check<br/>
-        ${paymentMode === "moneyorder" ? "Check" : "Square"} Money Order
+        <div><input type="checkbox" ${paymentMode === "cash" ? "checked" : ""}/> Cash</div>
+        <div><input type="checkbox" ${paymentMode === "check" ? "checked" : ""}/> Check</div>
+        <div><input type="checkbox" ${paymentMode === "moneyorder" ? "checked" : ""}/> Money Order</div>
       </div>
-      <div>
-        <strong>Drawee Bank</strong><br/>
-        ${checkBank || "_________________"}<br/><br/>
-        <strong>Number</strong><br/>
-        ${checkNumber || "__________"}<br/><br/>
-        <strong>Date</strong><br/>
-        ${checkDate || "__________"}
-      </div>
-    </div>
 
-    <div style="margin-top:15px;">
-      Received the amount stated above.
+      <div style="text-align:right;">
+        Drawee Bank: <span class="label-line">${checkBank || ""}</span><br/>
+        Number: <span class="label-line">${checkNumber || ""}</span><br/>
+        Date: <span class="label-line">${checkDate || ""}</span>
+      </div>
     </div>
 
     <div class="signature">
-      <br/><br/>
-      <strong>_____________________________</strong><br/>
+      Received the amount stated above.<br/><br/><br/>
+      _______________________________<br/>
       <strong>LUCIO GERALDO G. CIOLO</strong><br/>
-      <em>Asst. City Treasurer</em><br/><br/>
-      <strong>Collecting Officer</strong>
+      <em>Asst. City Treasurer</em><br/>
+      Collecting Officer
     </div>
 
     <div class="note">
-      <strong>NOTE:</strong> Write the number and date of this receipt on the back of check or money order received.
+      NOTE: Write the number and date of this receipt at the back of checks or money orders.
     </div>
+
   </div>
+</div>
 </body>
 </html>
-    `);
+`);
+
 
     printWindow.document.close();
     printWindow.focus();
@@ -372,7 +395,7 @@ function FeeModal({ open, onClose, applicant }) {
           textAlign: "center",
           fontWeight: "bold",
         }}
-      >
+      > 
         Official Receipt (Accountable Form No. 51-C)
       </DialogTitle>
       <DialogContent dividers>
