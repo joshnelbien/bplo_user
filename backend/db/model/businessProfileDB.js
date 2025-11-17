@@ -185,6 +185,11 @@ const BusinessProfile = sequelize.define(
     },
     businesstaxComputation_size: { type: DataTypes.INTEGER, allowNull: true },
 
+    businessPermit: { type: DataTypes.BLOB("long"), allowNull: true },
+    businessPermit_filename: { type: DataTypes.STRING, allowNull: true },
+    businessPermit_mimetype: { type: DataTypes.STRING, allowNull: true },
+    businessPermit_size: { type: DataTypes.INTEGER, allowNull: true },
+
     passtoBusinessTax: { type: DataTypes.STRING, defaultValue: "No" },
     passtoTreasurer: { type: DataTypes.STRING, defaultValue: "No" },
     permitRelease: { type: DataTypes.STRING, defaultValue: "No" },

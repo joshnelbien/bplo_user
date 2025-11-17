@@ -434,6 +434,13 @@ function BusinessProfileModal({ applicant, isOpen, onClose, baseUrl }) {
                     fileData={applicant}
                     baseUrl={baseUrl}
                   />
+
+                  <FileField
+                    fileKey="businessPermit"
+                    label="Business Permit"
+                    fileData={applicant}
+                    baseUrl={baseUrl}
+                  />
                 </Grid>
               </Paper>
 
@@ -461,6 +468,21 @@ function BusinessProfileModal({ applicant, isOpen, onClose, baseUrl }) {
                 </Grid>
               </Paper>
             </Stack>
+          </Section>
+
+          {/* Business Requirements */}
+          <Section title="Business Permit & Tax Order">
+            <FileField
+              fileKey="businessPermit"
+              label="Business Permit"
+              fileData={applicant}
+            />
+
+            <FileField
+              fileKey="businesstaxComputation"
+              label="Business Permit"
+              fileData={applicant}
+            />
           </Section>
 
           <Section title="Payments">

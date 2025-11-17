@@ -79,7 +79,21 @@ router.post(
       if (!applicantExaminers)
         return res.status(404).json({ error: "Applicant examiners not found" });
 
+      const backroom = await Backroom.findByPk(id);
+      if (!backroom)
+        return res.status(404).json({ error: "Applicant examiners not found" });
+
       const timestamp = moment().format("DD/MM/YYYY HH:mm:ss");
+
+      await backroom.update({
+        ...allFees,
+        ...(file && {
+          businesstaxComputation: file.buffer,
+          businesstaxComputation_filename: file.originalname,
+          businesstaxComputation_mimetype: file.mimetype,
+          businesstaxComputation_size: file.size,
+        }),
+      });
 
       // ✅ Add businessTaxTotal to all relevant updates
       await applicantbusinessTax.update({

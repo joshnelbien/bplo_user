@@ -185,6 +185,12 @@ const File = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+
+    businessPermit: { type: DataTypes.BLOB("long"), allowNull: true },
+    businessPermit_filename: { type: DataTypes.STRING, allowNull: true },
+    businessPermit_mimetype: { type: DataTypes.STRING, allowNull: true },
+    businessPermit_size: { type: DataTypes.INTEGER, allowNull: true },
+
     businesstaxComputation_mimetype: {
       type: DataTypes.STRING,
       allowNull: true,
