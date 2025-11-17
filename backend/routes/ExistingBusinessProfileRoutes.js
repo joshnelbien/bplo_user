@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const csv = require("csv-parser");
+const { Op } = require("sequelize");
 const { sequelize } = require("../db/sequelize");
 const BusinessProfile = require("../db/model/BusinessProfileExisting");
 const router = require("express").Router();
@@ -12,6 +13,31 @@ router.get("/imported-businesses", async (req, res) => {
   } catch (error) {
     console.error("❌ Error fetching businesses:", error);
     res.status(500).json({ error: "Failed to fetch businesses" });
+  }
+});
+
+router.get("/businessProfiles", async (req, res) => {
+  try {
+    const { search } = req.query;
+
+    // If search query is provided, filter by BusinessName
+    if (search) {
+      const files = await BusinessProfile.findAll({
+        where: {
+          business_name: {
+            [Op.like]: `%${search}%`, // partial match
+          },
+        },
+      });
+      return res.json(files);
+    }
+
+    // Otherwise, return all
+    const files = await BusinessProfile.findAll({});
+    res.json(files);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json([]);
   }
 });
 

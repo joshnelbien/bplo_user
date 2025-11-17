@@ -38,7 +38,7 @@ function SearchBusinesses({ open, onClose }) {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${API}/businessProfile/businessProfiles?search=${encodeURIComponent(
+        `${API}/existing-businesses/businessProfiles?search=${encodeURIComponent(
           searchValue
         )}`
       );
@@ -146,22 +146,17 @@ function SearchBusinesses({ open, onClose }) {
                       </TableCell>
                       <TableCell sx={{ fontWeight: "bold" }}>Owner</TableCell>
                       <TableCell sx={{ fontWeight: "bold" }}>Address</TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>
-                        Application Type
-                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {results.map((item, index) => (
                       <TableRow key={index}>
-                        <TableCell>{item.businessName}</TableCell>
+                        <TableCell>{item.business_name}</TableCell>
                         <TableCell>
-                          {item.lastName} {item.firstName} {item.middleName}
+                          {item.incharge_last_name} {item.incharge_first_name}{" "}
+                          {item.incharge_middle_name}
                         </TableCell>
-                        <TableCell>
-                          {item.addressLine1} {item.barangay}
-                        </TableCell>
-                        <TableCell>{item.application}</TableCell>
+                        <TableCell>{item.incharge_barangay}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
