@@ -141,7 +141,6 @@ function SearchBusinesses({ open, onClose }) {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ fontWeight: "bold" }}>BIN</TableCell>
                       <TableCell sx={{ fontWeight: "bold" }}>
                         Business Name
                       </TableCell>
@@ -155,7 +154,6 @@ function SearchBusinesses({ open, onClose }) {
                   <TableBody>
                     {results.map((item, index) => (
                       <TableRow key={index}>
-                        <TableCell>{item.bin}</TableCell>
                         <TableCell>{item.businessName}</TableCell>
                         <TableCell>
                           {item.lastName} {item.firstName} {item.middleName}

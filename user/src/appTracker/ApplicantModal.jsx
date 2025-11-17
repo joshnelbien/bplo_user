@@ -465,22 +465,23 @@ function ApplicantModal({ applicant, isOpen, onClose, baseUrl }) {
                     baseUrl={baseUrl}
                   />
                 </Grid>
-
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                  BUSINESS TAX
-                </Typography>
-
-                <Grid container spacing={2}>
-                  <FileField
-                    fileKey="businesstaxComputation"
-                    label="Business Tax"
-                    fileData={applicant}
-                    baseUrl={baseUrl}
-                  />
-                </Grid>
               </Paper>
             )}
           </Stack>
+        </Section>
+
+        <Section title="Business Permit & Tax Order">
+          <FileField
+            fileKey="businessPermit"
+            label="Business Permit"
+            fileData={applicant}
+          />
+
+          <FileField
+            fileKey="businesstaxComputation"
+            label="Business Permit"
+            fileData={applicant}
+          />
         </Section>
       </DialogContent>
     </Dialog>

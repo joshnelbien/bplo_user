@@ -1,6 +1,6 @@
-import React from "react";
 import { Button } from "@mui/material";
 import { saveAs } from "file-saver";
+import React, { useState } from "react";
 import axios from "axios";
 import {
   Document,
@@ -13,16 +13,6 @@ import {
 } from "@react-pdf/renderer";
 
 const API = import.meta.env.VITE_API_BASE;
-
-const handleDone = async (id) => {
-  try {
-    const res = await axios.put(`${API}/newApplication/appDone/${id}`);
-    alert("Permit marked as released!");
-  } catch (error) {
-    console.error("Error updating permit:", error);
-    alert("Failed to update permit");
-  }
-};
 
 // 🟢 Shrunk, tighter layout for one-page fit
 const styles = StyleSheet.create({
@@ -222,7 +212,38 @@ function numberToWords(num) {
   return words.trim();
 }
 
-function MayorsPermit({ applicant, collections, total }) {
+function MayorsPermit({ applicant, collections, total, selectedFiles }) {
+  console.log(selectedFiles);
+
+  const handleDone = async (id) => {
+    try {
+      if (!selectedFiles || selectedFiles.length === 0) {
+        alert("No file selected!");
+        return;
+      }
+
+      const fileToUpload = selectedFiles.businessPermit;
+      console.log("Uploading file:", fileToUpload);
+
+      const formData = new FormData();
+
+      formData.append("businessPermit", fileToUpload);
+
+      const res = await axios.put(
+        `${API}/newApplication/appDone/${id}`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+
+      alert("Permit marked as released and file uploaded!");
+    } catch (error) {
+      console.error("Error updating permit:", error);
+      alert("Failed to update permit");
+    }
+  };
+
   const formatPeso = (val) =>
     val > 0 ? val.toLocaleString(undefined, { minimumFractionDigits: 2 }) : "";
 

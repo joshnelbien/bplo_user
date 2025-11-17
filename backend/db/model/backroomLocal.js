@@ -133,6 +133,11 @@ const Backroom = sequelize.define(
     cswmoCert_mimetype: { type: DataTypes.STRING, allowNull: true },
     cswmoCert_size: { type: DataTypes.INTEGER, allowNull: true },
 
+    businessPermit: { type: DataTypes.BLOB("long"), allowNull: true },
+    businessPermit_filename: { type: DataTypes.STRING, allowNull: true },
+    businessPermit_mimetype: { type: DataTypes.STRING, allowNull: true },
+    businessPermit_size: { type: DataTypes.INTEGER, allowNull: true },
+
     OBO: { type: DataTypes.STRING, defaultValue: "Pending" },
     OBOdecline: { type: DataTypes.STRING },
     OBOtimeStamp: { type: DataTypes.STRING },

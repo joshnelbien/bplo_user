@@ -4,6 +4,7 @@ const File = require("../db/model/files");
 const AppStatus = require("../db/model/applicantStatusDB");
 const UserAccounts = require("../db/model/userAccounts");
 const BusinessProfile = require("../db/model/businessProfileDB");
+const Backroom = require("../db/model/backroomLocal");
 const { where } = require("sequelize");
 const { v4: uuidv4 } = require("uuid");
 const { sequelize } = require("../db/sequelize");
@@ -195,37 +196,60 @@ router.get("/files/:id", async (req, res) => {
 });
 
 // ✅ Corrected route
-router.put("/appDone/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
+router.put(
+  "/appDone/:id",
+  upload.single("businessPermit"), // <-- matches the FormData key
+  async (req, res) => {
+    try {
+      const { id } = req.params;
 
-    // ✅ Find the record in File table
-    const file = await File.findByPk(id);
-    if (!file) return res.status(404).send("File not found");
+      // Find the record in File table
+      const file = await File.findByPk(id);
+      if (!file) return res.status(404).send("File not found");
+      const backroom = await Backroom.findByPk(id);
+      if (!backroom) return res.status(404).send("File not found");
 
-    // ✅ Convert to plain object to reuse the data
-    const applicantData = file.toJSON();
+      // Update permitRelease in File table
 
-    // ✅ Update permitRelease in File table
-    await file.update({ permitRelease: "Done" });
+      // Prepare file data if uploaded
+      const { originalname, mimetype, size, buffer } = req.file || {};
 
-    // ✅ Create a copy of that record in BusinessProfile
-    const created = await BusinessProfile.create({
-      ...applicantData,
-      permitRelease: "Done",
-    });
+      await backroom.update({
+        permitRelease: "Done",
+        businessPermit: buffer || null,
+        businessPermit_filename: originalname || null,
+        businessPermit_mimetype: mimetype || null,
+        businessPermit_size: size || null,
+      });
+      await file.update({
+        permitRelease: "Done",
+        businessPermit: buffer || null,
+        businessPermit_filename: originalname || null,
+        businessPermit_mimetype: mimetype || null,
+        businessPermit_size: size || null,
+      });
 
-    // ✅ Send back response
-    res.status(200).json({
-      message:
-        "Applicant approved, archived in Files, added to Business Profile, and payment breakdowns created.",
-      businessProfile: created,
-    });
-  } catch (err) {
-    console.error("❌ Error in /appDone route:", err);
-    res.status(500).send("Server error");
+      // Create a copy in BusinessProfile
+      const created = await BusinessProfile.create({
+        ...file.toJSON(),
+        permitRelease: "Done",
+        businessPermit: buffer || null,
+        businessPermit_filename: originalname || null,
+        businessPermit_mimetype: mimetype || null,
+        businessPermit_size: size || null,
+      });
+
+      res.status(200).json({
+        message:
+          "Applicant approved, archived in Files, uploaded file saved, and added to Business Profile.",
+        businessProfile: created,
+      });
+    } catch (err) {
+      console.error("❌ Error in /appDone route:", err);
+      res.status(500).send("Server error");
+    }
   }
-});
+);
 
 // Preview file
 router.get("/files/:id/:key", async (req, res) => {

@@ -180,6 +180,27 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
   const [expandedSection, setExpandedSection] = useState(false);
   const [businessDetails, setBusinessDetails] = useState([]);
   const [fsicData, setFsicData] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState({});
+
+  const handleFileChange = (name, file) => {
+    setSelectedFiles((prev) => ({
+      ...prev,
+      [name]: file,
+    }));
+  };
+
+  const handleFileSelect = (e) => {
+    const { name, files } = e.target;
+    if (files[0]) {
+      setSelectedFiles((prev) => ({
+        ...prev,
+        [name]: files[0],
+      }));
+      handleFileChange(name, files[0]);
+    }
+  };
+
+  const files = [{ label: "Business Permit", name: "businessPermit" }];
 
   useEffect(() => {
     const fetchFSIC = async () => {
@@ -870,6 +891,43 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
             </Section>
           </>
         )}
+        {applicant.permitRelease === "Yes" && (
+          <>
+            <>
+              {/* File Upload */}
+              {files.map((file) => (
+                <Grid container spacing={1} sx={{ mt: 1 }} key={file.name}>
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      component="label"
+                      size="small"
+                      color="success"
+                      sx={{ minWidth: 120 }}
+                    >
+                      Choose File
+                      <input
+                        type="file"
+                        name={file.name}
+                        hidden
+                        onChange={handleFileSelect}
+                      />
+                    </Button>
+                  </Grid>
+                  <Grid item xs>
+                    <TextField
+                      value={selectedFiles[file.name]?.name || ""}
+                      placeholder="No file selected"
+                      size="small"
+                      fullWidth
+                      InputProps={{ readOnly: true }}
+                    />
+                  </Grid>
+                </Grid>
+              ))}
+            </>
+          </>
+        )}
       </DialogContent>
 
       {/* ✅ Actions */}
@@ -898,6 +956,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
               collections={collections}
               total={total}
               otherChargesTotal={otherChargesTotal}
+              selectedFiles={selectedFiles}
             />
           </>
         ) : applicant.BPLO?.toLowerCase() !== "approved" ? (
