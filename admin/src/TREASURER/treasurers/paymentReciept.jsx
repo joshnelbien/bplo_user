@@ -156,50 +156,33 @@ export default function PaymentReceipt({
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: "3in",
-          height: "7in",
+          width: "4in",
+          height: "8in", // slightly taller to fit buttons
           bgcolor: "background.paper",
           border: "2px solid #000",
           boxShadow: 24,
-          p: 2,
+          p: 1,
           borderRadius: 1,
-          overflow: "hidden",
+          overflow: "visible",
           fontFamily: "'Times New Roman', serif",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between", // ensures buttons at bottom
         }}
       >
-        <style>
-          {`
-    @media print {
-      @page {
-        size: 3in 7in;
-        margin: 0;
-      }
-
-      body {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-
-      /* Hide buttons when printing */
-      .no-print {
-        display: none !important;
-      }
-            .print-outline {
-      outline: 2px solid black !important;
-      padding: 4px !important;
-    }
-    }
-  `}
-        </style>
+        {/* Printable area */}
         <Box
           ref={printRef}
           className="print-outline"
           sx={{
             fontSize: "12px",
+            height: "6in", // adjust height
+            position: "relative", // important for absolute children
             "--pad-xs": "2px",
             "--pad-sm": "4px",
             "--pad-md": "6px",
             "--space": "6px",
+            mb: 1,
           }}
         >
           {/* Top Right: OR + Date */}
@@ -238,7 +221,7 @@ export default function PaymentReceipt({
 
           {/* Payor */}
           <Box sx={{ mb: "var(--space)", ml: "30px" }}>
-            <Typography sx={{ fontSize: "12px", mb: "px" }}>
+            <Typography sx={{ fontSize: "12px", mb: "35px" }}>
               {applicant?.lastName}, {applicant?.firstName}{" "}
               {applicant?.middleName}
             </Typography>
@@ -252,7 +235,6 @@ export default function PaymentReceipt({
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
-                  mb: "var(--pad-xs)",
                   mx: "20px",
                   mt: "5px",
                 }}
@@ -266,11 +248,16 @@ export default function PaymentReceipt({
           </Box>
 
           {/* Total Right Side */}
-          <Box sx={{ textAlign: "right", mt: "var(--space)" }}>
-            <Typography
-              sx={{ fontWeight: "bold", fontSize: "12px", mr: "20px" }}
-            >
-              {amount.toFixed(2)}
+          <Box
+            sx={{
+              position: "absolute",
+              top: "340px",
+              right: "20px",
+              textAlign: "right",
+            }}
+          >
+            <Typography sx={{ fontWeight: "bold", fontSize: "12px" }}>
+              ₱{amount.toFixed(2)}
             </Typography>
           </Box>
 
@@ -279,10 +266,11 @@ export default function PaymentReceipt({
             <Typography
               sx={{
                 fontStyle: "italic",
+                position: "absolute",
+                top: "400px",
                 textTransform: "capitalize",
                 fontSize: "8px",
                 ml: "20px",
-                mt: "20px",
               }}
             >
               {amountInWords}
@@ -290,36 +278,61 @@ export default function PaymentReceipt({
           </Box>
 
           {/* Cash / Check */}
-          <Box sx={{ mt: "var(--space)" }}>
-            <Typography sx={{ fontSize: "10px" }}>
-              <strong>Payment Mode:</strong> {receiptData?.mode}
-            </Typography>
+          <Box
+            sx={{
+              position: "absolute",
+              top: "450px",
+              left: "20px",
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: "10px",
+              fontSize: "10px",
+              mt: receiptData?.mode === "Check" ? "10px" : 0, // extra spacing if check
+            }}
+          >
+            {/* Always display slash / */}
+            <Typography sx={{ fontSize: "10px" }}>/</Typography>
 
+            {/* Show check details only if mode is actually "Check" */}
             {receiptData?.mode === "Check" && (
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  mt: "var(--pad-md)",
-                }}
-              >
-                <Typography sx={{ fontSize: "10px" }}>
-                  <strong>Drawee Bank:</strong> {receiptData?.draweeBank}
+              <>
+                <Typography sx={{ fontSize: "10px", ml: "70px" }}>
+                  {receiptData?.draweeBank}
                 </Typography>
-
-                <Typography sx={{ fontSize: "10px" }}>
-                  <strong>Check No:</strong> {receiptData?.checkNumber}
+                <Typography sx={{ fontSize: "10px", ml: "10px" }}>
+                  {receiptData?.checkNumber}
                 </Typography>
-
-                <Typography sx={{ fontSize: "10px" }}>
-                  <strong>Date:</strong> {receiptData?.checkDate}
+                <Typography sx={{ fontSize: "10px", ml: "10px" }}>
+                  {receiptData?.checkDate}
                 </Typography>
-              </Box>
+              </>
             )}
           </Box>
 
           {/* Collector (Right Side) */}
-          <Box sx={{ textAlign: "right", mt: "30px" }}>
+
+          <Box
+            sx={{
+              position: "absolute",
+              top: "500px", // distance from bottom
+              left: "30px", // distance from left
+              textAlign: "left",
+            }}
+          >
+            <Typography sx={{ fontSize: "15px" }}>
+              {applicant.Modeofpayment}
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              position: "absolute",
+              top: "520px", // distance from bottom
+              right: "20px", // distance from right
+              textAlign: "right",
+            }}
+          >
             <Typography sx={{ fontSize: "10px" }}>
               ________________________
             </Typography>
@@ -335,9 +348,10 @@ export default function PaymentReceipt({
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            mt: 3,
+            mt: 1,
             borderTop: "1px solid #ccc",
-            pt: 2,
+            pt: 1,
+            px: 1,
           }}
         >
           <Button variant="contained" color="primary" onClick={handlePrint}>
