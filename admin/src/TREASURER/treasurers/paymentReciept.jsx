@@ -156,83 +156,182 @@ export default function PaymentReceipt({
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: "5in",
+          width: "3in",
           height: "7in",
           bgcolor: "background.paper",
           border: "2px solid #000",
           boxShadow: 24,
-          p: 3,
-          borderRadius: 2,
-          overflowY: "auto",
+          p: 2,
+          borderRadius: 1,
+          overflow: "hidden",
           fontFamily: "'Times New Roman', serif",
         }}
       >
-        <Box ref={printRef}>
-          <Typography variant="h6" gutterBottom align="center">
-            PAYMENT RECEIPT
-          </Typography>
-          <Typography variant="body2">
-            <strong>Date:</strong> {receiptData?.paymentDate || "N/A"}
-          </Typography>
+        <style>
+          {`
+    @media print {
+      @page {
+        size: 3in 7in;
+        margin: 0;
+      }
 
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="body2">
-              <strong>OR No.:</strong> {orNo || "N/A"}
+      body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* Hide buttons when printing */
+      .no-print {
+        display: none !important;
+      }
+            .print-outline {
+      outline: 2px solid black !important;
+      padding: 4px !important;
+    }
+    }
+  `}
+        </style>
+        <Box
+          ref={printRef}
+          className="print-outline"
+          sx={{
+            fontSize: "12px",
+            "--pad-xs": "2px",
+            "--pad-sm": "4px",
+            "--pad-md": "6px",
+            "--space": "6px",
+          }}
+        >
+          {/* Top Right: OR + Date */}
+          <Box sx={{ textAlign: "right", mb: "var(--space)" }}>
+            <Typography
+              sx={{
+                fontSize: "24px",
+                fontWeight: "bold",
+                mt: "120px",
+                mr: "35px",
+              }}
+            >
+              {orNo}
             </Typography>
-            <Typography variant="body2">
-              <strong>Barangay:</strong> {applicant?.barangay || "N/A"}
+            <Typography sx={{ fontSize: "14px", mt: "10px", mr: "40px" }}>
+              {receiptData?.paymentDate}
             </Typography>
-            <Typography variant="body2">
-              <strong>Payor:</strong>{" "}
-              {`${applicant?.lastName || ""} ${applicant?.firstName || ""} ${
-                applicant?.middleName || ""
-              }`}
+          </Box>
+
+          {/* Address + Fund (GF) inline */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              mb: "var(--space)",
+            }}
+          >
+            <Typography sx={{ fontSize: "12px", ml: "50px", mt: "15px" }}>
+              {applicant?.barangay}
             </Typography>
 
-            {/* Display grouped sums */}
-            <Box sx={{ mt: 2 }}>
-              {Object.entries(groupSums).map(([label, sum]) => (
-                <Typography key={label} variant="body2">
-                  {label}: ₱{sum.toFixed(2)}
+            <Typography sx={{ fontSize: "12px", mr: "25px", mt: "15px" }}>
+              GF
+            </Typography>
+          </Box>
+
+          {/* Payor */}
+          <Box sx={{ mb: "var(--space)", ml: "30px" }}>
+            <Typography sx={{ fontSize: "12px", mb: "px" }}>
+              {applicant?.lastName}, {applicant?.firstName}{" "}
+              {applicant?.middleName}
+            </Typography>
+          </Box>
+
+          {/* Fee Breakdown */}
+          <Box>
+            {Object.entries(groupSums).map(([label, value]) => (
+              <Box
+                key={label}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  mb: "var(--pad-xs)",
+                  mx: "20px",
+                  mt: "5px",
+                }}
+              >
+                <Typography sx={{ fontSize: "12px" }}>{label}</Typography>
+                <Typography sx={{ fontSize: "12px" }}>
+                  ₱{value.toFixed(2)}
                 </Typography>
-              ))}
-            </Box>
+              </Box>
+            ))}
+          </Box>
 
-            <Typography variant="body2" sx={{ mt: 2 }}>
-              <strong>Payment Mode:</strong> {receiptData?.mode || "N/A"}
+          {/* Total Right Side */}
+          <Box sx={{ textAlign: "right", mt: "var(--space)" }}>
+            <Typography
+              sx={{ fontWeight: "bold", fontSize: "12px", mr: "20px" }}
+            >
+              {amount.toFixed(2)}
+            </Typography>
+          </Box>
+
+          {/* Amount in Words */}
+          <Box sx={{ mt: "var(--space)" }}>
+            <Typography
+              sx={{
+                fontStyle: "italic",
+                textTransform: "capitalize",
+                fontSize: "8px",
+                ml: "20px",
+                mt: "20px",
+              }}
+            >
+              {amountInWords}
+            </Typography>
+          </Box>
+
+          {/* Cash / Check */}
+          <Box sx={{ mt: "var(--space)" }}>
+            <Typography sx={{ fontSize: "10px" }}>
+              <strong>Payment Mode:</strong> {receiptData?.mode}
             </Typography>
 
             {receiptData?.mode === "Check" && (
-              <>
-                <Typography variant="body2">
-                  <strong>Drawee Bank:</strong>{" "}
-                  {receiptData?.draweeBank || "N/A"}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  mt: "var(--pad-md)",
+                }}
+              >
+                <Typography sx={{ fontSize: "10px" }}>
+                  <strong>Drawee Bank:</strong> {receiptData?.draweeBank}
                 </Typography>
-                <Typography variant="body2">
-                  <strong>Check Number:</strong>{" "}
-                  {receiptData?.checkNumber || "N/A"}
+
+                <Typography sx={{ fontSize: "10px" }}>
+                  <strong>Check No:</strong> {receiptData?.checkNumber}
                 </Typography>
-                <Typography variant="body2">
-                  <strong>Check Date:</strong> {receiptData?.checkDate || "N/A"}
+
+                <Typography sx={{ fontSize: "10px" }}>
+                  <strong>Date:</strong> {receiptData?.checkDate}
                 </Typography>
-              </>
+              </Box>
             )}
+          </Box>
 
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              <strong>Amount:</strong> ₱{amount.toFixed(2)}
+          {/* Collector (Right Side) */}
+          <Box sx={{ textAlign: "right", mt: "30px" }}>
+            <Typography sx={{ fontSize: "10px" }}>
+              ________________________
             </Typography>
-
-            <Typography
-              variant="body2"
-              sx={{ fontStyle: "italic", mt: 1, textTransform: "capitalize" }}
-            >
-              <strong>Amount in Words:</strong> {amountInWords}
+            <Typography sx={{ fontSize: "10px" }}>
+              Authorized Collector
             </Typography>
           </Box>
         </Box>
 
         {/* Buttons (Not Printed) */}
         <Box
+          className="no-print"
           sx={{
             display: "flex",
             justifyContent: "space-between",
