@@ -580,18 +580,21 @@ export default function PaymentModal({ open, onClose, applicant, onConfirm }) {
                 amount_paid: form.amount,
                 index: selectedIndex,
                 payment_mode: mode,
-                orNo: form.orNo, // <-- also here
+                orNo: form.orNo,
                 paymentDate: form.paymentDate,
                 draweeBank: form.draweeBank,
                 checkNumber: form.checkNumber,
                 checkDate: form.checkDate,
               }
             );
+
             if (res.data.success) {
               onConfirm?.();
               setShowReceipt(false);
               onClose();
             }
+            alert("payment updated successfully.");
+            onClose();
           } catch (err) {
             console.error(err);
             alert("Error updating payment.");

@@ -168,15 +168,15 @@ router.put("/treasurer-payments/:id", async (req, res) => {
 
     const applicant = await TreasurersOffice.findByPk(id);
     const fileApplicant = await File.findByPk(id);
+    const businessProfile = await BusinessProfile.findByPk(id);
 
-    if (!applicant || !fileApplicant) {
-      return res.status(404).json({ error: "Applicant not found" });
+    if (!applicant || !fileApplicant || !businessProfile) {
+      return res.status(404).json({ error: "Applicant or Profile not found" });
     }
 
     const isRenew = applicant.application?.toLowerCase() === "renew";
     const isNew = applicant.application?.toLowerCase() === "new";
 
-    // Parse CSV-like strings (no brackets)
     const parseArray = (field) => {
       if (!field) return [];
       return field
@@ -185,7 +185,6 @@ router.put("/treasurer-payments/:id", async (req, res) => {
         .map((v) => v.trim());
     };
 
-    // Convert array → "quoted CSV"
     const toQuotedCSV = (arr) => arr.map((v) => `"${v}"`).join(",");
 
     let updatedFields = {};
@@ -207,7 +206,7 @@ router.put("/treasurer-payments/:id", async (req, res) => {
       };
     }
 
-    // === RENEWAL APPLICATION ===
+    // === RENEWAL ===
     else if (isRenew) {
       let oldPaid = parseArray(applicant.amount_paid);
       let oldMode = parseArray(applicant.payment_mode);
@@ -239,7 +238,6 @@ router.put("/treasurer-payments/:id", async (req, res) => {
         dueDates = [""];
       }
 
-      // Fill or expand arrays
       const ensureLength = (arr, len) => {
         while (arr.length < len) arr.push("");
         return arr.slice(0, len);
@@ -254,14 +252,12 @@ router.put("/treasurer-payments/:id", async (req, res) => {
       oldDueDates = ensureLength(oldDueDates, slots);
       oldAmountDue = ensureLength(oldAmountDue, slots);
 
-      // Fill missing due dates and amounts
       for (let i = 0; i < slots; i++) {
         if (oldDueDates[i] === "") oldDueDates[i] = dueDates[i];
         if (oldAmountDue[i] === "") oldAmountDue[i] = perSlot.toFixed(2);
       }
 
-      // Update selected slot
-      const i = index !== null && index !== undefined ? Number(index) : 0;
+      const i = Number(index) ?? 0;
       oldPaid[i] = amount_paid || "";
       oldMode[i] = payment_mode || "";
       oldPaymentDate[i] = paymentDate || "";
@@ -281,21 +277,19 @@ router.put("/treasurer-payments/:id", async (req, res) => {
       };
     }
 
-    console.log("Final fields to save:", updatedFields);
-
-    await applicant.update({
+    // SHARED UPDATE FOR ALL TABLES
+    const sharedUpdate = {
       ...updatedFields,
       TREASURER: "Approved",
       passtoTreasurer: "Done",
       permitRelease: "Yes",
-    });
-    await fileApplicant.update({
-      ...updatedFields,
-      passtoTreasurer: "Done",
-      permitRelease: "Yes",
-    });
+    };
 
-    res.json({ success: true, updated: updatedFields });
+    await applicant.update(sharedUpdate);
+    await fileApplicant.update(sharedUpdate);
+    await businessProfile.update(sharedUpdate);
+
+    res.json({ success: true, updated: sharedUpdate });
   } catch (error) {
     console.error("Payment update error:", error);
     res.status(500).json({ error: "Internal server error" });
