@@ -1,8 +1,10 @@
-import React, { useRef, useMemo, useEffect } from "react";
-import { Modal, Box, Typography, Button } from "@mui/material";
+// PaymentReceiptModal.js
+import React, { useRef, useMemo } from "react";
+import { Modal, Box, Button } from "@mui/material";
 import { useReactToPrint } from "react-to-print";
+import PrintableReceipt from "./PrintableReceipt";
 
-// Function to convert number to words
+// Convert Numbers to Words
 const numberToWords = (num) => {
   const a = [
     "",
@@ -71,7 +73,7 @@ const numberToWords = (num) => {
   return result.toUpperCase() + " PESOS ONLY";
 };
 
-export default function PaymentReceipt({
+export default function PaymentReceiptModal({
   open,
   onClose,
   receiptData,
@@ -80,16 +82,6 @@ export default function PaymentReceipt({
   orNo,
 }) {
   const printRef = useRef();
-
-  const handlePrint = useReactToPrint({
-    contentRef: printRef,
-    documentTitle: "Payment Receipt",
-    removeAfterPrint: true,
-    onAfterPrint: () => {
-      onPrint?.();
-      onClose?.();
-    },
-  });
 
   const amount = Number(receiptData?.amount) || 0;
   const amountInWords = useMemo(() => numberToWords(amount), [amount]);
@@ -101,7 +93,7 @@ export default function PaymentReceipt({
     (Number(applicant.Electrical) || 0) +
     (Number(applicant.Signage) || 0) +
     (Number(applicant.Electronics) || 0);
-  // Calculate grouped fee sums
+
   const groupSums = {
     "B.T/M.P/B.F/O.T":
       (Number(applicant.businessTaxFee) || 0) +
@@ -139,14 +131,15 @@ export default function PaymentReceipt({
       (Number(applicant.fsicFee) || 0),
   };
 
-  const totalFees = Object.values(groupSums).reduce((a, b) => a + b, 0);
-
-  // Log for debugging
-  useEffect(() => {
-    console.log("Applicant:", applicant);
-    console.log("Grouped Fee Sums:", groupSums);
-    console.log("Total Fees:", totalFees);
-  }, [applicant]);
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: "Payment Receipt",
+    removeAfterPrint: true,
+    onAfterPrint: () => {
+      onPrint?.();
+      onClose?.();
+    },
+  });
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -157,204 +150,45 @@ export default function PaymentReceipt({
           left: "50%",
           transform: "translate(-50%, -50%)",
           width: "4in",
-          height: "8in", // slightly taller to fit buttons
-          bgcolor: "background.paper",
-          border: "2px solid #000",
+          height: "8in",
+          bgcolor: "#fff",
+          border: "2px solid black",
+          borderRadius: "4px",
           boxShadow: 24,
-          p: 1,
-          borderRadius: 1,
-          overflow: "visible",
-          fontFamily: "'Times New Roman', serif",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "space-between", // ensures buttons at bottom
         }}
       >
-        {/* Printable area */}
+        {/* Printable Content */}
         <Box
-          ref={printRef}
-          className="print-outline"
           sx={{
-            fontSize: "12px",
-            height: "6in", // adjust height
-            position: "relative", // important for absolute children
-            "--pad-xs": "2px",
-            "--pad-sm": "4px",
-            "--pad-md": "6px",
-            "--space": "6px",
-            mb: 1,
+            flex: 1,
+            overflowY: "auto",
+            p: 1,
           }}
         >
-          {/* Top Right: OR + Date */}
-          <Box sx={{ textAlign: "right", mb: "var(--space)" }}>
-            <Typography
-              sx={{
-                fontSize: "24px",
-                fontWeight: "bold",
-                mt: "120px",
-                mr: "35px",
-              }}
-            >
-              {orNo}
-            </Typography>
-            <Typography sx={{ fontSize: "14px", mt: "10px", mr: "40px" }}>
-              {receiptData?.paymentDate}
-            </Typography>
-          </Box>
-
-          {/* Address + Fund (GF) inline */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              mb: "var(--space)",
-            }}
-          >
-            <Typography sx={{ fontSize: "12px", ml: "50px", mt: "15px" }}>
-              {applicant?.barangay}
-            </Typography>
-
-            <Typography sx={{ fontSize: "12px", mr: "25px", mt: "15px" }}>
-              GF
-            </Typography>
-          </Box>
-
-          {/* Payor */}
-          <Box sx={{ mb: "var(--space)", ml: "30px" }}>
-            <Typography sx={{ fontSize: "12px", mb: "35px" }}>
-              {applicant?.lastName}, {applicant?.firstName}{" "}
-              {applicant?.middleName}
-            </Typography>
-          </Box>
-
-          {/* Fee Breakdown */}
-          <Box>
-            {Object.entries(groupSums).map(([label, value]) => (
-              <Box
-                key={label}
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  mx: "20px",
-                  mt: "5px",
-                }}
-              >
-                <Typography sx={{ fontSize: "12px" }}>{label}</Typography>
-                <Typography sx={{ fontSize: "12px" }}>
-                  ₱{value.toFixed(2)}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
-
-          {/* Total Right Side */}
-          <Box
-            sx={{
-              position: "absolute",
-              top: "340px",
-              right: "20px",
-              textAlign: "right",
-            }}
-          >
-            <Typography sx={{ fontWeight: "bold", fontSize: "12px" }}>
-              ₱{amount.toFixed(2)}
-            </Typography>
-          </Box>
-
-          {/* Amount in Words */}
-          <Box sx={{ mt: "var(--space)" }}>
-            <Typography
-              sx={{
-                fontStyle: "italic",
-                position: "absolute",
-                top: "400px",
-                textTransform: "capitalize",
-                fontSize: "8px",
-                ml: "20px",
-              }}
-            >
-              {amountInWords}
-            </Typography>
-          </Box>
-
-          {/* Cash / Check */}
-          <Box
-            sx={{
-              position: "absolute",
-              top: "450px",
-              left: "20px",
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              gap: "10px",
-              fontSize: "10px",
-              mt: receiptData?.mode === "Check" ? "10px" : 0, // extra spacing if check
-            }}
-          >
-            {/* Always display slash / */}
-            <Typography sx={{ fontSize: "10px" }}>/</Typography>
-
-            {/* Show check details only if mode is actually "Check" */}
-            {receiptData?.mode === "Check" && (
-              <>
-                <Typography sx={{ fontSize: "10px", ml: "70px" }}>
-                  {receiptData?.draweeBank}
-                </Typography>
-                <Typography sx={{ fontSize: "10px", ml: "10px" }}>
-                  {receiptData?.checkNumber}
-                </Typography>
-                <Typography sx={{ fontSize: "10px", ml: "10px" }}>
-                  {receiptData?.checkDate}
-                </Typography>
-              </>
-            )}
-          </Box>
-
-          {/* Collector (Right Side) */}
-
-          <Box
-            sx={{
-              position: "absolute",
-              top: "500px", // distance from bottom
-              left: "30px", // distance from left
-              textAlign: "left",
-            }}
-          >
-            <Typography sx={{ fontSize: "15px" }}>
-              {applicant.Modeofpayment}
-            </Typography>
-          </Box>
-
-          <Box
-            sx={{
-              position: "absolute",
-              top: "520px", // distance from bottom
-              right: "20px", // distance from right
-              textAlign: "right",
-            }}
-          >
-            <Typography sx={{ fontSize: "10px" }}>
-              ________________________
-            </Typography>
-            <Typography sx={{ fontSize: "10px" }}>
-              Authorized Collector
-            </Typography>
-          </Box>
+          <PrintableReceipt
+            ref={printRef}
+            receiptData={receiptData}
+            applicant={applicant}
+            orNo={orNo}
+            groupSums={groupSums}
+            amount={amount}
+            amountInWords={amountInWords}
+          />
         </Box>
 
-        {/* Buttons (Not Printed) */}
+        {/* Buttons */}
         <Box
-          className="no-print"
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            mt: 1,
+            p: 1,
             borderTop: "1px solid #ccc",
-            pt: 1,
-            px: 1,
+            background: "#fafafa",
           }}
         >
-          <Button variant="contained" color="primary" onClick={handlePrint}>
+          <Button variant="contained" onClick={handlePrint}>
             Print
           </Button>
           <Button variant="outlined" onClick={onClose}>
