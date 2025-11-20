@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Side_bar from "../SIDE_BAR/side_bar";
 import BusinessProfileModal from "./businessProfile_modal";
 import TopBar from "../NAVBAR/nav_bar";
+
 import {
   Box,
   Button,
@@ -84,28 +85,36 @@ function BusinessProfile() {
 
   const handleExportCSV = async () => {
     try {
-      const res = await axios.get(
-        `${API}/businessProfile/businessProfiles/export`
+      const today = new Date().toISOString().slice(0, 10);
+
+      // Call backend to send email (email is hardcoded on backend)
+      const res = await axios.post(
+        `${API}/userAccounts/businessProfiles/export-email`
       );
+
       if (res.data.success) {
-        const blob = new Blob([res.data.csv], { type: "text/csv" });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", res.data.filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+        alert(`CSV emailed successfully!`);
+
+        // Download CSV locally if backend returns CSV string
+        if (res.data.csv) {
+          const blob = new Blob([res.data.csv], { type: "text/csv" });
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute(
+            "download",
+            res.data.filename || `businessProfiles_${today}.csv`
+          );
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        }
       }
     } catch (err) {
-      console.error("Error downloading CSV:", err);
+      console.error("Error exporting and emailing CSV:", err);
+      alert("Failed to send CSV email.");
     }
-  };
-
-  const handleRowClick = (applicant) => {
-    setSelectedApplicant(applicant);
-    setIsModalOpen(true);
   };
 
   const closeModal = () => {
@@ -226,11 +235,21 @@ function BusinessProfile() {
           <Table size={isMobile ? "small" : "medium"}>
             <TableHead>
               <TableRow sx={{ bgcolor: "#f5f5f5" }}>
-                <TableCell><strong>BIN</strong></TableCell>
-                <TableCell><strong>Business Name</strong></TableCell>
-                <TableCell><strong>First Name</strong></TableCell>
-                <TableCell><strong>Last Name</strong></TableCell>
-                <TableCell><strong>Application</strong></TableCell>
+                <TableCell>
+                  <strong>BIN</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Business Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>First Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Last Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Application</strong>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

@@ -2,7 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const UserAccounts = require("../db/model/userAccounts");
 const sgMail = require("@sendgrid/mail");
-
+const BusinessProfile = require("../db/model/businessProfileDB");
 const router = express.Router();
 
 /* ---------------------------------------------------
@@ -176,6 +176,79 @@ router.post("/register-renew", async (req, res) => {
   } catch (error) {
     console.error("❌ Register error:", error);
     res.status(500).json({ error: "Server error during registration." });
+  }
+});
+
+router.post("/businessProfiles/export-email", async (req, res) => {
+  try {
+    // Hardcoded recipient
+    const recipientEmail = "pilaresjoshuel@gmail.com";
+
+    if (!process.env.SENDGRID_FROM) {
+      return res.status(500).json({ error: "SendGrid sender email not set" });
+    }
+
+    // Get all applicants updated today
+    const today = new Date().toISOString().slice(0, 10);
+    const allProfiles = await BusinessProfile.findAll();
+
+    const todaysProfiles = allProfiles.filter((p) => {
+      const updatedDate = new Date(p.updatedAt).toISOString().slice(0, 10);
+      return updatedDate === today;
+    });
+
+    if (todaysProfiles.length === 0)
+      return res.status(404).json({ message: "No transactions for today." });
+
+    // Exclude BLOB fields dynamically
+    const sample = todaysProfiles[0].toJSON();
+    const keys = Object.keys(sample).filter(
+      (key) => !(sample[key] instanceof Buffer) // exclude all BLOB fields
+    );
+
+    // Build CSV
+    const csvRows = [];
+    csvRows.push(keys.join(",")); // header
+    todaysProfiles.forEach((profile) => {
+      const obj = profile.toJSON();
+      const values = keys.map((key) => {
+        const val = obj[key] ?? "";
+        return `"${String(val).replace(/"/g, '""')}"`;
+      });
+      csvRows.push(values.join(","));
+    });
+
+    const csv = csvRows.join("\n");
+    const filename = `businessProfiles_${today}.csv`;
+
+    // Send email with CSV
+    const msg = {
+      to: recipientEmail,
+      from: { email: process.env.SENDGRID_FROM, name: "Business Portal" },
+      subject: `Business Profiles CSV Export (${today})`,
+      text: "Attached is the latest Business Profiles CSV export for today.",
+      attachments: [
+        {
+          content: Buffer.from(csv).toString("base64"),
+          filename,
+          type: "text/csv",
+          disposition: "attachment",
+        },
+      ],
+    };
+
+    await sgMail.send(msg);
+
+    console.log(`✅ CSV sent to ${recipientEmail}`);
+    res.json({
+      success: true,
+      message: `CSV emailed successfully to ${recipientEmail}`,
+      filename,
+      csv,
+    });
+  } catch (error) {
+    console.error("Error sending CSV email:", error.response?.body || error);
+    res.status(500).json({ error: "Failed to send CSV email" });
   }
 });
 

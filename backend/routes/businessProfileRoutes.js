@@ -37,20 +37,20 @@ router.get("/businessProfiles", async (req, res) => {
   try {
     const { search } = req.query;
 
-    // If search query is provided, filter by BusinessName
+    let files;
+
     if (search) {
-      const files = await BusinessProfile.findAll({
+      files = await BusinessProfile.findAll({
         where: {
           businessName: {
-            [Op.like]: `%${search}%`, // partial match
+            [Op.like]: `%${search}%`,
           },
         },
       });
-      return res.json(files);
+    } else {
+      files = await BusinessProfile.findAll();
     }
 
-    // Otherwise, return all
-    const files = await BusinessProfile.findAll({});
     res.json(files);
   } catch (err) {
     console.error(err);
@@ -81,9 +81,9 @@ router.get("/:id/:bin", async (req, res) => {
 
 router.get("/businessProfiles/export", async (req, res) => {
   try {
-    const files = await BusinessProfile.findAll({});
+    const files = await BusinessProfile.findAll();
     if (!files.length) {
-      return res.status(404).json({ message: "No records found" });
+      return res.status(404).send("No records found");
     }
 
     const jsonData = files.map((file) => {
@@ -110,41 +110,17 @@ router.get("/businessProfiles/export", async (req, res) => {
       return obj;
     });
 
-    // Convert to CSV
-    const json2csvParser = new Parser();
-    const csv = json2csvParser.parse(jsonData);
+    const parser = new Parser();
+    const csv = parser.parse(jsonData);
     const filename = `businessProfiles_${moment().format("YYYY-MM-DD")}.csv`;
 
-    // ✅ Send email
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      // to: "miso@sanpablocity.gov.ph",
-      to: "pilaresjoshuel@gmail.com",
-      subject: "Business Profiles CSV Export",
-      text: "Attached is the latest Business Profiles export.",
-      attachments: [{ filename, content: csv }],
-    });
-
-    console.log("✅ Email sent successfully");
-
-    // ✅ Send response with CSV + confirmation
-    res.json({
-      success: true,
-      message: "CSV exported and email sent successfully",
-      csv, // include CSV so frontend can still download
-      filename,
-    });
+    // Send CSV as file
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
+    res.send(csv);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to export CSV and send email" });
+    res.status(500).send("Failed to export CSV");
   }
 });
 
