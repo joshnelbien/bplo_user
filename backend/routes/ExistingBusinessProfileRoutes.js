@@ -1,14 +1,25 @@
 const fs = require("fs");
 const path = require("path");
 const csv = require("csv-parser");
-const { Op } = require("sequelize");
+const { Op, Sequelize } = require("sequelize");
 const { sequelize } = require("../db/sequelize");
 const BusinessProfile = require("../db/model/BusinessProfileExisting");
 const router = require("express").Router();
 
+// --------------------------
+// GET all imported businesses
+// --------------------------
 router.get("/imported-businesses", async (req, res) => {
   try {
-    const businesses = await BusinessProfile.findAll();
+    const businesses = await BusinessProfile.findAll({
+      attributes: [
+        "business_name",
+        "incharge_last_name",
+        "incharge_first_name",
+        "incharge_middle_name",
+        "incharge_barangay",
+      ],
+    });
     res.json(businesses);
   } catch (error) {
     console.error("❌ Error fetching businesses:", error);
@@ -16,32 +27,38 @@ router.get("/imported-businesses", async (req, res) => {
   }
 });
 
+// --------------------------
+// GET searchable businesses with pagination
+// --------------------------
 router.get("/businessProfiles", async (req, res) => {
   try {
-    const { search } = req.query;
+    const { search = "", page = 1, limit = 100 } = req.query;
+    const offset = (page - 1) * limit;
 
-    // If search query is provided, filter by BusinessName
-    if (search) {
-      const files = await BusinessProfile.findAll({
-        where: {
-          business_name: {
-            [Op.like]: `%${search}%`, // partial match
-          },
-        },
-      });
-      return res.json(files);
-    }
+    const whereClause = search
+      ? { business_name: { [Op.like]: `${search}%` } } // prefix search for index
+      : {};
 
-    // Otherwise, return all
-    const files = await BusinessProfile.findAll({});
+    const files = await BusinessProfile.findAll({
+      attributes: [
+        "business_name",
+        "incharge_last_name",
+        "incharge_first_name",
+        "incharge_middle_name",
+        "incharge_barangay",
+      ],
+      where: whereClause,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [["business_name", "ASC"]],
+    });
+
     res.json(files);
   } catch (err) {
     console.error(err);
     res.status(500).json([]);
   }
 });
-
-module.exports = router;
 
 async function importBusinesses() {
   try {
@@ -78,3 +95,5 @@ async function importBusinesses() {
 }
 
 importBusinesses();
+
+module.exports = router;
