@@ -18,9 +18,13 @@ import {
   Checkbox,
   FormControlLabel,
 } from "@mui/material";
+
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { useState } from "react";
+
+// Import print template
+import generateORHtml from "./OfficialReceiptTemplate";
 
 const defaultFees = {
   "CERTIFICATION FEE": 100.0,
@@ -29,7 +33,7 @@ const defaultFees = {
   "CERT. OF ASSESSMENT": 50.0,
   "MISC.FEE(TAX MAPPING)": 30.0,
   "CERT. OF NON-OWNERSHIP": 50.0,
-  "CTC": 50.0,
+  CTC: 50.0,
   "CERT. FEE(100 WORDS)": 50.0,
   "CERT. FEE(120 WORDS)": 0.0,
   "CERT. FEE(MERALCO)": 50.0,
@@ -45,14 +49,39 @@ const defaultFees = {
 function numberToWords(num) {
   if (!num) return "Zero Pesos Only";
   const ones = [
-    "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
-    "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen",
-    "Seventeen", "Eighteen", "Nineteen"
+    "",
+    "One",
+    "Two",
+    "Three",
+    "Four",
+    "Five",
+    "Six",
+    "Seven",
+    "Eight",
+    "Nine",
+    "Ten",
+    "Eleven",
+    "Twelve",
+    "Thirteen",
+    "Fourteen",
+    "Fifteen",
+    "Sixteen",
+    "Seventeen",
+    "Eighteen",
+    "Nineteen",
   ];
   const tens = [
-    "", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+    "",
+    "",
+    "Twenty",
+    "Thirty",
+    "Forty",
+    "Fifty",
+    "Sixty",
+    "Seventy",
+    "Eighty",
+    "Ninety",
   ];
-  const scales = ["", "Thousand", "Million", "Billion"];
 
   const convertHundreds = (n) => {
     let str = "";
@@ -70,8 +99,10 @@ function numberToWords(num) {
 
   if (num === 0) return "Zero Pesos Only";
 
-  let word = "";
-  let scaleIndex = 0;
+  let word = "",
+    scaleIndex = 0;
+  const scales = ["", "Thousand", "Million", "Billion"];
+
   while (num > 0) {
     const chunk = num % 1000;
     if (chunk) {
@@ -83,329 +114,111 @@ function numberToWords(num) {
     scaleIndex++;
   }
 
-  return word.trim() + " Pesos Only";
+  return word + " Pesos Only";
 }
 
-function FeeModal({ open, onClose, applicant }) {
+export default function FeeModal({ open, onClose, applicant }) {
   const [orNo, setOrNo] = useState("");
   const [payor, setPayor] = useState(applicant?.businessName || "");
-  const [fund, setFund] = useState("GENERAL FUND");
+  const [fund, setFund] = useState("GF");
   const [paymentMode, setPaymentMode] = useState("cash");
   const [checkBank, setCheckBank] = useState("");
   const [checkNumber, setCheckNumber] = useState("");
   const [checkDate, setCheckDate] = useState("");
 
-  // Initialize fees with quantity
   const [feeData, setFeeData] = useState(() => {
     const saved = applicant?.fees ? JSON.parse(applicant.fees) : {};
-    return Object.keys(defaultFees).reduce((acc, key) => {
-      acc[key] = {
-        amount: saved[key] ?? defaultFees[key],
-        quantity: saved[key] > 0 ? 1 : 0,
-      };
-      return acc;
-    }, {});
+    return Object.fromEntries(
+      Object.keys(defaultFees).map((key) => [
+        key,
+        {
+          amount: saved[key] ?? defaultFees[key],
+          quantity: saved[key] > 0 ? 1 : 0,
+        },
+      ])
+    );
   });
 
   const handleQuantityChange = (name, delta) => {
-    setFeeData((prev) => {
-      const current = prev[name];
-      const newQty = Math.max(0, current.quantity + delta);
-      return {
-        ...prev,
-        [name]: { ...current, quantity: newQty },
-      };
-    });
-  };
-
-  const handleAmountChange = (name, value) => {
-    const num = parseFloat(value) || 0;
     setFeeData((prev) => ({
       ...prev,
-      [name]: { ...prev[name], amount: num },
+      [name]: {
+        ...prev[name],
+        quantity: Math.max(0, prev[name].quantity + delta),
+      },
     }));
   };
 
-  // Calculate total
-  const total = Object.values(feeData).reduce((sum, { amount, quantity }) => {
-    return sum + amount * quantity;
-  }, 0);
+  const handleAmountChange = (name, value) => {
+    setFeeData((prev) => ({
+      ...prev,
+      [name]: { ...prev[name], amount: parseFloat(value) || 0 },
+    }));
+  };
 
-  const amountInWords = numberToWords(Math.floor(total)) +
-    (total % 1 !== 0 ? " and " + ((total % 1) * 100).toFixed(0) + "/100" : "");
+  const total = Object.values(feeData).reduce(
+    (sum, f) => sum + f.amount * f.quantity,
+    0
+  );
+
+  const amountInWords =
+    numberToWords(Math.floor(total)) +
+    (total % 1 !== 0 ? ` and ${((total % 1) * 100).toFixed(0)}/100` : "");
 
   const handlePrint = () => {
-    const printWindow = window.open("", "_blank");
-    const today = new Date().toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+    const printHTML = generateORHtml({
+      orNo,
+      payor,
+      fund,
+      feeData,
+      total,
+      amountInWords,
+      paymentMode,
+      checkBank,
+      checkNumber,
+      checkDate,
     });
 
-    // Filter only items with quantity > 0
-    const printableFees = Object.entries(feeData).filter(
-      ([_, { quantity }]) => quantity > 0
-    );
+    // Create a hidden iframe
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
 
-    printWindow.document.write(`
+    document.body.appendChild(iframe);
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<title>Official Receipt</title>
+    // Write HTML into the iframe
+    iframe.contentDocument.open();
+    iframe.contentDocument.write(printHTML);
+    iframe.contentDocument.close();
 
-<style>
-  @page {
-    size: 8.5in 11in;
-    margin: 0;
-  }
-
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: "Times New Roman", serif;
-    background: white;
-  }
-
-  /* Center small OR on whole paper */
-  .page-center {
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: 20px;
-  }
-
-  /* OR actual size (approx 4.5in wide like real OR) */
-  .or-container {
-    width: 4.6in;
-    border: 1px solid #000;
-    padding: 6px;
-    box-sizing: border-box;
-  }
-
-  .header {
-    text-align: center;
-    line-height: 1.1;
-    margin-bottom: 5px;
-  }
-
-  .seal-box {
-    width: 60px;
-    height: 60px;
-    border: 1px solid #000;
-    margin: 0 auto 4px auto;
-    font-size: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    margin-bottom: 4px;
-  }
-
-  .label-line {
-    border-bottom: 1px solid #000;
-    padding-bottom: 2px;
-    font-size: 11px;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 11px;
-    margin-top: 4px;
-  }
-
-  th, td {
-    border: 1px solid #000;
-    padding: 3px;
-  }
-
-  th {
-    text-align: center;
-    font-weight: bold;
-    background: #f2f2f2;
-  }
-
-  .amount-right {
-    text-align: right;
-  }
-
-  .total-row td {
-    font-weight: bold;
-    background: #eaeaea;
-  }
-
-  .amount-words {
-    border: 1px solid #000;
-    padding: 4px;
-    font-size: 11px;
-    margin-top: 6px;
-  }
-
-  .payment-box {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 6px;
-    font-size: 11px;
-  }
-
-  .signature {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 11px;
-  }
-
-  .note {
-    font-size: 9px;
-    margin-top: 10px;
-    text-align: center;
-  }
-</style>
-</head>
-
-<body>
-<div class="page-center"> 
-  <div class="or-container">
-
-<div class="header">
-  <div class="seal-box">
-    <img src="/republicofthephilippines.png" alt="Republic of the Philippines Seal" style="width: 100%; height: 100%; object-fit: contain;" />
-  </div>
-  <div style="font-weight:bold; font-size:14px;">OFFICIAL RECEIPT</div>
-  <div style="font-size:11px;">Republic of the Philippines</div>
-</div>
-
-    <!-- FORM NUMBER + ORIGINAL -->
-    <div class="row">
-      <div style="font-size:10px;">
-        Accountable Form No. 51<br/>
-        Revised January, 1992
-      </div>
-
-      <div style="font-size:12px; font-weight:bold;">
-        O R I G I N A L
-      </div>
-    </div>
-
-    <!-- DATE + OR NO -->
-    <div class="row">
-      <div>Date: <span class="label-line">${today}</span></div>
-      <div>No. <span class="label-line">${orNo || "________"}</span></div>
-    </div>
-
-    <!-- Agency + Fund -->
-    <div class="row">
-      <div>Agency: <span class="label-line">San Pablo City, Laguna</span></div>
-      <div>Fund: <span class="label-line">${fund}</span></div>
-    </div>
-
-    <!-- Payor -->
-    <div style="margin-top:5px; font-size:11px;">
-      Payor: <span class="label-line">${payor || "____________________________"}</span>
-    </div>
-
-    <!-- TABLE -->
-    <table>
-      <thead>
-        <tr>
-          <th style="width: 60%;">NATURE OF COLLECTION</th>
-          <th style="width: 20%;">ACCOUNT CODE</th>
-          <th style="width: 20%;">AMOUNT</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${printableFees
-          .map(
-            ([name, { amount, quantity }]) => `
-          <tr>
-            <td>${name}</td>
-            <td></td>
-            <td class="amount-right">₱ ${(amount * quantity).toFixed(2)}</td>
-          </tr>
-        `
-          )
-          .join("")}
-
-        <tr class="total-row">
-          <td colspan="2">TOTAL</td>
-          <td class="amount-right">₱ ${total.toFixed(2)}</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- AMOUNT IN WORDS -->
-    <div class="amount-words">
-      <strong>AMOUNT IN WORDS:</strong><br/>
-      ${amountInWords}
-    </div>
-
-    <!-- PAYMENT MODE -->
-    <div class="payment-box">
-      <div>
-        <div><input type="checkbox" ${paymentMode === "cash" ? "checked" : ""}/> Cash</div>
-        <div><input type="checkbox" ${paymentMode === "check" ? "checked" : ""}/> Check</div>
-        <div><input type="checkbox" ${paymentMode === "moneyorder" ? "checked" : ""}/> Money Order</div>
-      </div>
-
-      <div style="text-align:right;">
-        Drawee Bank: <span class="label-line">${checkBank || ""}</span><br/>
-        Number: <span class="label-line">${checkNumber || ""}</span><br/>
-        Date: <span class="label-line">${checkDate || ""}</span>
-      </div>
-    </div>
-
-    <div class="signature">
-      Received the amount stated above.<br/><br/><br/>
-      _______________________________<br/>
-      <strong>LUCIO GERALDO G. CIOLO</strong><br/>
-      <em>Asst. City Treasurer</em><br/>
-      Collecting Officer
-    </div>
-
-    <div class="note">
-      NOTE: Write the number and date of this receipt at the back of checks or money orders.
-    </div>
-
-  </div>
-</div>
-</body>
-</html>
-`);
-
-
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => printWindow.print(), 500);
+    // Wait for HTML + CSS to load before printing
+    setTimeout(() => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      document.body.removeChild(iframe);
+    }, 500);
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle
-        sx={{
-          backgroundColor: "#1c541eff",
-          color: "white",
-          textAlign: "center",
-          fontWeight: "bold",
-        }}
-      > 
+        sx={{ background: "#1c541e", color: "white", textAlign: "center" }}
+      >
         Official Receipt (Accountable Form No. 51-C)
       </DialogTitle>
+
       <DialogContent dividers>
+        {/* OR Inputs */}
         <Box sx={{ mb: 2, display: "flex", gap: 2 }}>
           <TextField
             label="OR No."
             size="small"
             value={orNo}
             onChange={(e) => setOrNo(e.target.value)}
-            sx={{ width: 150 }}
           />
           <TextField
             label="Payor"
@@ -419,170 +232,134 @@ function FeeModal({ open, onClose, applicant }) {
             size="small"
             value={fund}
             onChange={(e) => setFund(e.target.value)}
-            sx={{ width: 180 }}
           />
         </Box>
 
-        <TableContainer component={Paper} elevation={3} sx={{ mb: 2 }}>
+        {/* TABLE */}
+        <TableContainer component={Paper} sx={{ mb: 2 }}>
           <Table size="small">
             <TableHead>
-              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell sx={{ fontWeight: "bold" }}>Nature of Collection</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Account Code</TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Amount (₱)
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Qty
-                </TableCell>
-                <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                  Subtotal
-                </TableCell>
+              <TableRow>
+                <TableCell>Nature of Collection</TableCell>
+                <TableCell>Account Code</TableCell>
+                <TableCell align="center">Amount (₱)</TableCell>
+                <TableCell align="center">Qty</TableCell>
+                <TableCell align="right">Subtotal</TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
               {Object.keys(defaultFees).map((name) => {
                 const { amount, quantity } = feeData[name];
                 const subtotal = amount * quantity;
+
                 return (
                   <TableRow key={name}>
                     <TableCell>{name}</TableCell>
                     <TableCell></TableCell>
+
                     <TableCell align="center">
                       <TextField
                         size="small"
                         type="number"
                         value={amount}
-                        onChange={(e) => handleAmountChange(name, e.target.value)}
-                        inputProps={{ step: "0.01", min: 0 }}
+                        onChange={(e) =>
+                          handleAmountChange(name, e.target.value)
+                        }
                         sx={{ width: 90 }}
                       />
                     </TableCell>
+
                     <TableCell align="center">
-                      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleQuantityChange(name, -1)}
-                          disabled={quantity === 0}
-                        >
-                          <RemoveIcon fontSize="small" />
-                        </IconButton>
-                        <Typography sx={{ mx: 1, minWidth: 30, textAlign: "center" }}>
-                          {quantity}
-                        </Typography>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleQuantityChange(name, 1)}
-                          color="primary"
-                        >
-                          <AddIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleQuantityChange(name, -1)}
+                        disabled={quantity === 0}
+                      >
+                        <RemoveIcon fontSize="small" />
+                      </IconButton>
+
+                      {quantity}
+
+                      <IconButton
+                        size="small"
+                        onClick={() => handleQuantityChange(name, 1)}
+                      >
+                        <AddIcon fontSize="small" />
+                      </IconButton>
                     </TableCell>
-                    <TableCell align="right">
-                      <strong>₱{subtotal.toFixed(2)}</strong>
-                    </TableCell>
+
+                    <TableCell align="right">₱{subtotal.toFixed(2)}</TableCell>
                   </TableRow>
                 );
               })}
+
               <TableRow>
-                <TableCell colSpan={4} sx={{ fontWeight: "bold", textAlign: "right" }}>
-                  TOTAL
+                <TableCell colSpan={4} align="right">
+                  <strong>TOTAL</strong>
                 </TableCell>
-                <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                  ₱{total.toFixed(2)}
+                <TableCell align="right">
+                  <strong>₱{total.toFixed(2)}</strong>
                 </TableCell>
               </TableRow>
             </TableBody>
           </Table>
         </TableContainer>
 
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-            Amount in Words:
-          </Typography>
-          <Typography variant="body1" sx={{ fontStyle: "italic" }}>
-            {amountInWords}
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: "flex", gap: 3, mb: 2 }}>
+        {/* PAYMENT MODE */}
+        <Box sx={{ display: "flex", gap: 3 }}>
           <Box>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={paymentMode === "cash"}
-                  onChange={() => setPaymentMode("cash")}
-                />
-              }
-              label="Cash"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={paymentMode === "check"}
-                  onChange={() => setPaymentMode("check")}
-                />
-              }
-              label="Check"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={paymentMode === "moneyorder"}
-                  onChange={() => setPaymentMode("moneyorder")}
-                />
-              }
-              label="Money Order"
-            />
+            {["cash", "check", "moneyorder"].map((mode) => (
+              <FormControlLabel
+                key={mode}
+                control={
+                  <Checkbox
+                    checked={paymentMode === mode}
+                    onChange={() => setPaymentMode(mode)}
+                  />
+                }
+                label={mode.toUpperCase()}
+              />
+            ))}
           </Box>
+
           <Box sx={{ flex: 1 }}>
             <TextField
               label="Drawee Bank"
               size="small"
               fullWidth
+              disabled={paymentMode === "cash"}
               value={checkBank}
               onChange={(e) => setCheckBank(e.target.value)}
-              disabled={paymentMode !== "check" && paymentMode !== "moneyorder"}
             />
             <TextField
-              label="Number"
+              label="Check Number"
               size="small"
               fullWidth
               sx={{ mt: 1 }}
+              disabled={paymentMode === "cash"}
               value={checkNumber}
               onChange={(e) => setCheckNumber(e.target.value)}
-              disabled={paymentMode !== "check" && paymentMode !== "moneyorder"}
             />
             <TextField
-              label="Date"
+              label="Check Date"
               size="small"
               fullWidth
               sx={{ mt: 1 }}
+              disabled={paymentMode === "cash"}
               value={checkDate}
               onChange={(e) => setCheckDate(e.target.value)}
-              disabled={paymentMode !== "check" && paymentMode !== "moneyorder"}
             />
           </Box>
         </Box>
-
-        <Box sx={{ textAlign: "right", mt: 2 }}>
-          <Typography variant="body2" color="text.secondary">
-            Received by: _______________________
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Date: {new Date().toLocaleDateString()}
-          </Typography>
-        </Box>
       </DialogContent>
+
       <DialogActions>
         <Button onClick={onClose}>Close</Button>
-        <Button onClick={handlePrint} variant="contained" color="primary">
-          Print Official Receipt
+        <Button variant="contained" onClick={handlePrint}>
+          Print Receipt
         </Button>
       </DialogActions>
     </Dialog>
   );
 }
-
-export default FeeModal;
