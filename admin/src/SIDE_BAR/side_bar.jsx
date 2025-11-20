@@ -37,8 +37,8 @@ import MenuIcon from "@mui/icons-material/Menu"; // Added for mobile toggle
 
 // --- Color Constants ---
 const PRIMARY_DARK_GREEN = "#ffffffff"; // White background
-const WHITE_COLOR = "#1d5236";           // Dark green text
-const HOVER_GREEN = "#a2bba6ff";         // Light green hover
+const WHITE_COLOR = "#1d5236"; // Dark green text
+const HOVER_GREEN = "#a2bba6ff"; // Light green hover
 
 // Common style
 const listItemStyle = {
@@ -63,8 +63,16 @@ const activeListItemStyle = {
 // Main menu items
 const menuItems = [
   { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon /> },
-  { text: "Client Applications", path: "/new_records", icon: <AssignmentTurnedInIcon /> },
-  { text: "Business Profile", path: "/businessProfile", icon: <AccountBoxRoundedIcon /> },
+  {
+    text: "Client Applications",
+    path: "/new_records",
+    icon: <AssignmentTurnedInIcon />,
+  },
+  {
+    text: "Business Profile",
+    path: "/businessProfile",
+    icon: <AccountBoxRoundedIcon />,
+  },
   { text: "Announcement", path: "/announcement", icon: <CampaignIcon /> },
 ];
 
@@ -79,9 +87,24 @@ const departmentItems = [
 
 // Treasurer's dropdown items
 const treasurers = [
-  { text: "TREASURER", label: "Treasurer’s Office", path: "/treasurers", icon: <AccountBalanceIcon /> },
-  { text: "EXAMINERS", label: "Examiner’s Office", path: "/examiners", icon: <ReceiptLongIcon /> },
-  { text: "BUSINESS TAX", label: "Business Tax", path: "/businessTax", icon: <CalculateIcon /> },
+  {
+    text: "TREASURER",
+    label: "Treasurer’s Office",
+    path: "/treasurers",
+    icon: <AccountBalanceIcon />,
+  },
+  {
+    text: "EXAMINERS",
+    label: "Examiner’s Office",
+    path: "/examiners",
+    icon: <ReceiptLongIcon />,
+  },
+  {
+    text: "BUSINESS TAX",
+    label: "Business Tax",
+    path: "/businessTax",
+    icon: <CalculateIcon />,
+  },
 ];
 
 const drawerWidth = 270;
@@ -120,7 +143,9 @@ function Side_bar() {
 
   // Auto-open dropdowns based on current path
   useEffect(() => {
-    if (departmentItems.some((dept) => location.pathname.startsWith(dept.path))) {
+    if (
+      departmentItems.some((dept) => location.pathname.startsWith(dept.path))
+    ) {
       setOpenDept(true);
     } else {
       setOpenDept(false);
@@ -179,7 +204,8 @@ function Side_bar() {
             "/announcement",
           ];
 
-          const isAllowed = isSuperAdmin || (isBPLO && allowedBPLOPaths.includes(item.path));
+          const isAllowed =
+            isSuperAdmin || (isBPLO && allowedBPLOPaths.includes(item.path));
           const isDisabled = item.path === "/announcement" ? false : !isAllowed;
 
           return (
@@ -189,7 +215,9 @@ function Side_bar() {
                 sx={{
                   opacity: isDisabled ? 0.4 : 1,
                   cursor: isDisabled ? "not-allowed" : "pointer",
-                  ...(location.pathname === item.path ? activeListItemStyle : listItemStyle),
+                  ...(location.pathname === item.path
+                    ? activeListItemStyle
+                    : listItemStyle),
                 }}
                 onClick={() => {
                   if (!isDisabled) {
@@ -216,18 +244,26 @@ function Side_bar() {
         })}
 
         {/* Backroom Dropdown */}
-        <ListItemButton onClick={() => setOpenDept(!openDept)} sx={listItemStyle}>
+        <ListItemButton
+          onClick={() => setOpenDept(!openDept)}
+          sx={listItemStyle}
+        >
           <ListItemIcon>
             <BusinessIcon sx={{ color: WHITE_COLOR }} />
           </ListItemIcon>
           <ListItemText primary="Backroom" />
-          {openDept ? <ExpandLess sx={{ color: WHITE_COLOR }} /> : <ExpandMore sx={{ color: WHITE_COLOR }} />}
+          {openDept ? (
+            <ExpandLess sx={{ color: WHITE_COLOR }} />
+          ) : (
+            <ExpandMore sx={{ color: WHITE_COLOR }} />
+          )}
         </ListItemButton>
 
         <Collapse in={openDept} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             {departmentItems.map((dept) => {
-              const isDisabled = !isSuperAdmin && dept.text.toUpperCase() !== userOffice;
+              const isDisabled =
+                !isSuperAdmin && dept.text.toUpperCase() !== userOffice;
               return (
                 <ListItem key={dept.text} disablePadding>
                   <ListItemButton
@@ -236,7 +272,9 @@ function Side_bar() {
                       pl: 4,
                       opacity: isDisabled ? 0.4 : 1,
                       cursor: isDisabled ? "not-allowed" : "pointer",
-                      ...(location.pathname === dept.path ? activeListItemStyle : listItemStyle),
+                      ...(location.pathname === dept.path
+                        ? activeListItemStyle
+                        : listItemStyle),
                     }}
                     onClick={() => {
                       if (!isDisabled) {
@@ -265,21 +303,33 @@ function Side_bar() {
         </Collapse>
 
         {/* Treasurer’s Dropdown */}
-        <ListItemButton onClick={() => setOpenTreasurers(!openTreasurers)} sx={listItemStyle}>
+        <ListItemButton
+          onClick={() => setOpenTreasurers(!openTreasurers)}
+          sx={listItemStyle}
+        >
           <ListItemIcon>
             <AccountBalanceIcon sx={{ color: WHITE_COLOR }} />
           </ListItemIcon>
           <ListItemText primary="Treasurer’s Office" />
-          {openTreasurers ? <ExpandLess sx={{ color: WHITE_COLOR }} /> : <ExpandMore sx={{ color: WHITE_COLOR }} />}
+          {openTreasurers ? (
+            <ExpandLess sx={{ color: WHITE_COLOR }} />
+          ) : (
+            <ExpandMore sx={{ color: WHITE_COLOR }} />
+          )}
         </ListItemButton>
 
         <Collapse in={openTreasurers} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             {treasurers.map((tre) => {
               const normalize = (str) =>
-                str?.replace(/[’‘]/g, "'").replace(/\s+/g, " ").trim().toUpperCase();
+                str
+                  ?.replace(/[’‘]/g, "'")
+                  .replace(/\s+/g, " ")
+                  .trim()
+                  .toUpperCase();
 
-              const isDisabled = !isSuperAdmin && normalize(tre.text) !== normalize(userOffice);
+              const isDisabled =
+                !isSuperAdmin && normalize(tre.text) !== normalize(userOffice);
 
               return (
                 <ListItem key={tre.text} disablePadding>
@@ -289,7 +339,9 @@ function Side_bar() {
                       pl: 4,
                       opacity: isDisabled ? 0.4 : 1,
                       cursor: isDisabled ? "not-allowed" : "pointer",
-                      ...(location.pathname === tre.path ? activeListItemStyle : listItemStyle),
+                      ...(location.pathname === tre.path
+                        ? activeListItemStyle
+                        : listItemStyle),
                     }}
                     onClick={() => {
                       if (!isDisabled) {
@@ -340,7 +392,10 @@ function Side_bar() {
                 }}
               />
             </ListItemIcon>
-            <ListItemText primary="Logout" sx={{ color: "white", fontWeight: "bold" }} />
+            <ListItemText
+              primary="Logout"
+              sx={{ color: "white", fontWeight: "bold" }}
+            />
           </ListItemButton>
         </ListItem>
       </Box>
@@ -355,7 +410,7 @@ function Side_bar() {
           onClick={() => setOpenDrawer(true)}
           sx={{
             position: "fixed",
-            top: 16,
+            top: 50,
             left: 16,
             zIndex: 1300,
             bgcolor: "background.paper",
@@ -368,7 +423,10 @@ function Side_bar() {
       )}
 
       {/* Drawer */}
-      <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}>
+      <Box
+        component="nav"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+      >
         <Drawer
           variant={isMobile ? "temporary" : "permanent"}
           open={isMobile ? openDrawer : true}
@@ -415,7 +473,10 @@ function Side_bar() {
             <Button variant="contained" color="success" onClick={confirmLogout}>
               Yes
             </Button>
-            <Button variant="outlined" onClick={() => setOpenLogoutDialog(false)}>
+            <Button
+              variant="outlined"
+              onClick={() => setOpenLogoutDialog(false)}
+            >
               No
             </Button>
           </Box>

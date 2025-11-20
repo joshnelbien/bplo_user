@@ -722,35 +722,37 @@ function ChoApplicantModal({
           </Button>
 
           {applicant.CHO !== "Approved" && (
-            <Button
-              onClick={handleApproveClick}
-              variant="contained"
-              color="success"
-            >
-              Approve
-            </Button>
+            <>
+              <Button
+                onClick={handleApproveClick}
+                variant="contained"
+                color="success"
+              >
+                Approve
+              </Button>
+
+              <Button
+                onClick={handleDeclineClick}
+                variant="contained"
+                color="error"
+              >
+                Decline
+              </Button>
+
+              <Button
+                onClick={() => setCertificatePreviewOpen(true)}
+                variant="contained"
+                sx={{
+                  bgcolor: "#3179d6ff",
+                  color: "white",
+                  minWidth: "200px",
+                  "&:hover": { bgcolor: "#0d42a3ff" },
+                }}
+              >
+                GENERATE CERTIFICATE
+              </Button>
+            </>
           )}
-
-          <Button
-            onClick={handleDeclineClick}
-            variant="contained"
-            color="error"
-          >
-            Decline
-          </Button>
-
-          <Button
-            onClick={() => setCertificatePreviewOpen(true)}
-            variant="contained"
-            sx={{
-              bgcolor: "#3179d6ff",
-              color: "white",
-              minWidth: "200px",
-              "&:hover": { bgcolor: "#0d42a3ff" },
-            }}
-          >
-            GENERATE CERTIFICATE
-          </Button>
         </DialogActions>
       </Dialog>
 

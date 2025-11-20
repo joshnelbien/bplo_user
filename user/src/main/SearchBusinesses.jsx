@@ -18,6 +18,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Pagination,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
@@ -27,28 +28,43 @@ function SearchBusinesses({ open, onClose }) {
   const [searchValue, setSearchValue] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [lastSearch, setLastSearch] = useState(""); // store last search
+  const limit = 100;
+
   const API = import.meta.env.VITE_API_BASE;
 
-  const handleSearch = async () => {
-    if (!searchValue.trim()) {
-      alert("⚠️ Please enter a business name.");
-      return;
-    }
-
+  const fetchResults = async (search, pageNumber) => {
+    if (!search.trim()) return;
     setLoading(true);
     try {
       const response = await axios.get(
-        `${API}/existing-businesses/businessProfiles?search=${encodeURIComponent(
-          searchValue
-        )}`
+        `${API}/existing-businesses/businessProfiles`,
+        {
+          params: { search, page: pageNumber, limit },
+        }
       );
       setResults(response.data);
+      setTotalPages(Math.ceil(response.data.length / limit));
+      setLastSearch(search); // remember search term
     } catch (error) {
       console.error("Error fetching business profiles:", error);
       setResults([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (e, value) => {
+    setPage(value);
+    fetchResults(lastSearch, value); // fetch results for last search term
+  };
+
+  const handleSearchClick = () => {
+    setPage(1); // reset page to 1
+    fetchResults(searchValue, 1);
   };
 
   return (
@@ -59,7 +75,6 @@ function SearchBusinesses({ open, onClose }) {
       maxWidth="md"
       TransitionProps={{ unmountOnExit: true }}
     >
-      {/* Header */}
       <DialogTitle
         sx={{
           fontWeight: "bold",
@@ -80,7 +95,6 @@ function SearchBusinesses({ open, onClose }) {
         </Button>
       </DialogTitle>
 
-      {/* Content */}
       <DialogContent dividers>
         <Box sx={{ py: 3 }}>
           <Typography
@@ -90,13 +104,7 @@ function SearchBusinesses({ open, onClose }) {
             Business Search Portal
           </Typography>
 
-          {/* Search Bar */}
-          <Stack
-            direction="row"
-            spacing={1}
-            justifyContent="center"
-            alignItems="center"
-          >
+          <Stack direction="row" spacing={1} justifyContent="center">
             <Paper
               component="form"
               sx={{
@@ -110,7 +118,7 @@ function SearchBusinesses({ open, onClose }) {
               }}
               onSubmit={(e) => {
                 e.preventDefault();
-                handleSearch();
+                handleSearchClick();
               }}
             >
               <InputBase
@@ -121,7 +129,7 @@ function SearchBusinesses({ open, onClose }) {
               />
               <IconButton
                 type="button"
-                onClick={handleSearch}
+                onClick={handleSearchClick}
                 sx={{ color: "#09360D" }}
               >
                 <SearchIcon />
@@ -129,7 +137,6 @@ function SearchBusinesses({ open, onClose }) {
             </Paper>
           </Stack>
 
-          {/* Results */}
           <Box sx={{ mt: 4 }}>
             {loading ? (
               <Box sx={{ textAlign: "center", py: 4 }}>
@@ -137,31 +144,43 @@ function SearchBusinesses({ open, onClose }) {
                 <Typography sx={{ mt: 2 }}>Searching...</Typography>
               </Box>
             ) : results.length > 0 ? (
-              <TableContainer sx={{ mt: 2 }}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: "bold" }}>
-                        Business Name
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>Owner</TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>Address</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {results.map((item, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{item.business_name}</TableCell>
-                        <TableCell>
-                          {item.incharge_last_name} {item.incharge_first_name}{" "}
-                          {item.incharge_middle_name}
+              <>
+                <TableContainer sx={{ mt: 2 }}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: "bold" }}>
+                          Business Name
                         </TableCell>
-                        <TableCell>{item.incharge_barangay}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>Owner</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>
+                          Address
+                        </TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                      {results.map((item, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{item.business_name}</TableCell>
+                          <TableCell>
+                            {item.incharge_last_name} {item.incharge_first_name}{" "}
+                            {item.incharge_middle_name}
+                          </TableCell>
+                          <TableCell>{item.incharge_barangay}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                  <Pagination
+                    count={totalPages}
+                    page={page}
+                    onChange={handlePageChange}
+                    color="primary"
+                  />
+                </Box>
+              </>
             ) : (
               <Typography
                 variant="body2"
@@ -174,7 +193,6 @@ function SearchBusinesses({ open, onClose }) {
         </Box>
       </DialogContent>
 
-      {/* Footer */}
       <DialogActions sx={{ px: 3, py: 2 }}>
         <Button
           variant="contained"

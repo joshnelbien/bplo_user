@@ -696,19 +696,19 @@ function OboApplicantModal({
               >
                 Approve
               </Button>
+
+              <Button
+                onClick={handleDeclineClick}
+                variant="contained"
+                color="error"
+                sx={{
+                  color: "white",
+                }}
+              >
+                Decline
+              </Button>
             </>
           )}
-
-          <Button
-            onClick={handleDeclineClick}
-            variant="contained"
-            color="error"
-            sx={{
-              color: "white",
-            }}
-          >
-            Decline
-          </Button>
         </DialogActions>
       </Dialog>
 
@@ -1022,6 +1022,7 @@ function OboApplicantModal({
           >
             Cancel
           </Button>
+
           <Button
             onClick={handleDeclineConfirm}
             variant="contained"
