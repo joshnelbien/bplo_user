@@ -651,36 +651,36 @@ function CenroApplicantModal({
               >
                 Approve
               </Button>
+
+              <Button
+                onClick={handleDeclineClick}
+                variant="contained"
+                color="error"
+                sx={{
+                  color: "white",
+                  width: "100px",
+                }}
+              >
+                Decline
+              </Button>
+
+              {/* UPDATED: Generate Certificate Button */}
+              <Button
+                onClick={() => setCertOpen(true)}
+                variant="contained"
+                sx={{
+                  backgroundColor: "#3179d6ff",
+                  color: "white",
+                  width: "200px",
+                  "&:hover": {
+                    backgroundColor: "#0d42a3ff",
+                  },
+                }}
+              >
+                Generate Certificate
+              </Button>
             </>
           )}
-
-          <Button
-            onClick={handleDeclineClick}
-            variant="contained"
-            color="error"
-            sx={{
-              color: "white", 
-              width: "100px",
-            }}
-          >
-            Decline
-          </Button>
-
-          {/* UPDATED: Generate Certificate Button */}
-          <Button
-            onClick={() => setCertOpen(true)}
-            variant="contained"
-            sx={{
-              backgroundColor: "#3179d6ff",
-              color: "white",
-              width: "200px",
-              "&:hover": {
-                backgroundColor: "#0d42a3ff",
-              },
-            }}
-          >
-            Generate Certificate
-          </Button>
         </DialogActions>
       </Dialog>
 

@@ -380,7 +380,10 @@ function CmswoApplicantModal({
           <Section title="Business Address">
             <Field label="Region" value={applicant.region} />
             <Field label="Province" value={applicant.province} />
-            <Field label="City/Municipality" value={applicant.cityOrMunicipality} />
+            <Field
+              label="City/Municipality"
+              value={applicant.cityOrMunicipality}
+            />
             <Field label="Barangay" value={applicant.barangay} />
             <Field label="Address Line 1" value={applicant.addressLine1} />
             <Field label="Zip Code" value={applicant.zipCode} />
@@ -392,7 +395,10 @@ function CmswoApplicantModal({
             ) : (
               <>
                 <Field label="Lessor's Name" value={applicant.lessorName} />
-                <Field label="Monthly Rent" value={formatCurrency(applicant.monthlyRent)} />
+                <Field
+                  label="Monthly Rent"
+                  value={formatCurrency(applicant.monthlyRent)}
+                />
                 <Field label="Tax Dec. No." value={applicant.taxdec} />
               </>
             )}
@@ -404,7 +410,10 @@ function CmswoApplicantModal({
             <Field label="Employees" value={applicant.numberOfEmployee} />
             <Field label="Male Employees" value={applicant.maleEmployee} />
             <Field label="Female Employees" value={applicant.femaleEmployee} />
-            <Field label="Total Delivery Vehicle" value={applicant.totalDeliveryVehicle} />
+            <Field
+              label="Total Delivery Vehicle"
+              value={applicant.totalDeliveryVehicle}
+            />
             <Field label="No. of Nozzles" value={applicant.numNozzle} />
             <Field label="Weigh Scale" value={applicant.weighScale} />
           </Section>
@@ -413,7 +422,10 @@ function CmswoApplicantModal({
           <Section title="Taxpayer Address">
             <Field label="Region" value={applicant.Taxregion} />
             <Field label="Province" value={applicant.Taxprovince} />
-            <Field label="City/Municipality" value={applicant.TaxcityOrMunicipality} />
+            <Field
+              label="City/Municipality"
+              value={applicant.TaxcityOrMunicipality}
+            />
             <Field label="Barangay" value={applicant.Taxbarangay} />
             <Field label="Address Line 1" value={applicant.TaxaddressLine1} />
             <Field label="Zip Code" value={applicant.TaxzipCode} />
@@ -424,7 +436,11 @@ function CmswoApplicantModal({
           <Section title="Business Activity & Incentives">
             <Field label="Tax Incentives" value={applicant.tIGE} />
             {applicant.tIGE === "Yes" && (
-              <FileField fileKey="tIGEfiles" label="Tax Incentives From Government" fileData={applicant} />
+              <FileField
+                fileKey="tIGEfiles"
+                label="Tax Incentives From Government"
+                fileData={applicant}
+              />
             )}
             <Field label="Office Type" value={applicant.officeType} />
 
@@ -479,11 +495,21 @@ function CmswoApplicantModal({
                       width: "100%",
                     }}
                   >
-                    <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                    <Typography
+                      variant="subtitle2"
+                      fontWeight="bold"
+                      gutterBottom
+                    >
                       Business Line {index + 1}
                     </Typography>
                     <Grid container spacing={2}>
-                      <Field label="Line of Business" value={lob} fullWidth multiline rows={3} />
+                      <Field
+                        label="Line of Business"
+                        value={lob}
+                        fullWidth
+                        multiline
+                        rows={3}
+                      />
                       <Grid item xs={12} sm={6}>
                         <Field label="Product/Service" value={product} />
                       </Grid>
@@ -511,21 +537,57 @@ function CmswoApplicantModal({
 
           {/* Business Requirements */}
           <Section title="Business Requirements">
-            <FileField fileKey="proofOfReg" label="Proof of Registration" fileData={applicant} />
-            <FileField fileKey="proofOfRightToUseLoc" label="Proof of Right to Use Location" fileData={applicant} />
-            <FileField fileKey="locationPlan" label="Location Plan" fileData={applicant} />
-            <FileField fileKey="brgyClearance" label="Barangay Clearance" fileData={applicant} />
-            <FileField fileKey="marketClearance" label="Market Clearance" fileData={applicant} />
-            <FileField fileKey="occupancyPermit" label="Occupancy Permit" fileData={applicant} />
+            <FileField
+              fileKey="proofOfReg"
+              label="Proof of Registration"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="proofOfRightToUseLoc"
+              label="Proof of Right to Use Location"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="locationPlan"
+              label="Location Plan"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="brgyClearance"
+              label="Barangay Clearance"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="marketClearance"
+              label="Market Clearance"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="occupancyPermit"
+              label="Occupancy Permit"
+              fileData={applicant}
+            />
             <FileField fileKey="cedula" label="Cedula" fileData={applicant} />
-            <FileField fileKey="photoOfBusinessEstInt" label="Photo (Interior)" fileData={applicant} />
-            <FileField fileKey="photoOfBusinessEstExt" label="Photo (Exterior)" fileData={applicant} />
+            <FileField
+              fileKey="photoOfBusinessEstInt"
+              label="Photo (Interior)"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="photoOfBusinessEstExt"
+              label="Photo (Exterior)"
+              fileData={applicant}
+            />
           </Section>
 
           {/* Approved: Show Certificate */}
           {applicant.CSMWO === "Approved" && (
             <Section title="Attachments">
-              <FileField fileKey="cswmoCert" label="Solid Waste Cert" fileData={applicant} />
+              <FileField
+                fileKey="cswmoCert"
+                label="Solid Waste Cert"
+                fileData={applicant}
+              />
             </Section>
           )}
 
@@ -544,7 +606,9 @@ function CmswoApplicantModal({
                 sx={{ mt: 2 }}
                 required
                 error={feeError}
-                helperText={feeError && "Solid Waste Fee is required for approval."}
+                helperText={
+                  feeError && "Solid Waste Fee is required for approval."
+                }
               />
 
               {files.map((file) => (
@@ -558,7 +622,12 @@ function CmswoApplicantModal({
                       sx={{ minWidth: 120 }}
                     >
                       Choose File
-                      <input type="file" name={file.name} hidden onChange={handleFileSelect} />
+                      <input
+                        type="file"
+                        name={file.name}
+                        hidden
+                        onChange={handleFileSelect}
+                      />
                     </Button>
                   </Grid>
                   <Grid item xs>
@@ -592,60 +661,103 @@ function CmswoApplicantModal({
           </Button>
 
           {applicant.CSMWO !== "Approved" && (
-            <Button
-              onClick={handleApproveClick}
-              variant="contained"
-              color="success"
-              sx={{ width: "100px" }}
-            >
-              Approve
-            </Button>
+            <>
+              <Button
+                onClick={handleApproveClick}
+                variant="contained"
+                color="success"
+                sx={{ width: "100px" }}
+              >
+                Approve
+              </Button>
+
+              <Button
+                onClick={handleDeclineClick}
+                variant="contained"
+                color="error"
+                sx={{ color: "white", width: "100px" }}
+              >
+                Decline
+              </Button>
+
+              {/* AUTO DOWNLOAD PDF BUTTON */}
+              <Button
+                onClick={handleGenerateCertificate}
+                disabled={generatingPDF}
+                variant="contained"
+                sx={{
+                  bgcolor: "#3179d6ff",
+                  color: "white",
+                  width: "200px",
+                  "&:hover": { bgcolor: "#0d42a3ff" },
+                  position: "relative",
+                }}
+              >
+                {generatingPDF ? (
+                  <>
+                    <CircularProgress
+                      size={20}
+                      color="inherit"
+                      sx={{ mr: 1 }}
+                    />
+                    Generating PDF...
+                  </>
+                ) : (
+                  "Generate Certificate"
+                )}
+              </Button>
+            </>
           )}
-
-          <Button
-            onClick={handleDeclineClick}
-            variant="contained"
-            color="error"
-            sx={{ color: "white", width: "100px" }}
-          >
-            Decline
-          </Button>
-
-          {/* AUTO DOWNLOAD PDF BUTTON */}
-          <Button
-            onClick={handleGenerateCertificate}
-            disabled={generatingPDF}
-            variant="contained"
-            sx={{
-              bgcolor: "#3179d6ff",
-              color: "white",
-              width: "200px",
-              "&:hover": { bgcolor: "#0d42a3ff" },
-              position: "relative",
-            }}
-          >
-            {generatingPDF ? (
-              <>
-                <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
-                Generating PDF...
-              </>
-            ) : (
-              "Generate Certificate"
-            )}
-          </Button>
         </DialogActions>
       </Dialog>
 
       {/* APPROVE CONFIRMATION */}
-      <Dialog open={confirmApproveOpen} onClose={handleConfirmClose} sx={{ "& .MuiDialog-paper": { borderRadius: "10px", width: "400px" } }}>
-        <DialogTitle align="center" sx={{ py: 3, px: 4, fontWeight: "bold", fontSize: "1.25rem", color: "#333" }}>
+      <Dialog
+        open={confirmApproveOpen}
+        onClose={handleConfirmClose}
+        sx={{ "& .MuiDialog-paper": { borderRadius: "10px", width: "400px" } }}
+      >
+        <DialogTitle
+          align="center"
+          sx={{
+            py: 3,
+            px: 4,
+            fontWeight: "bold",
+            fontSize: "1.25rem",
+            color: "#333",
+          }}
+        >
           Are you sure you want to approve this applicant?
         </DialogTitle>
-        <DialogActions sx={{ display: "flex", justifyContent: "center", gap: 2, pb: 2 }}>
-          <Button onClick={handleConfirmApprove} variant="contained" color="success" sx={{ fontWeight: "bold", textTransform: "uppercase", minWidth: "100px", bgcolor: "#1a7322", "&:hover": { bgcolor: "#155a1b" } }}>
+        <DialogActions
+          sx={{ display: "flex", justifyContent: "center", gap: 2, pb: 2 }}
+        >
+          <Button
+            onClick={handleConfirmApprove}
+            variant="contained"
+            color="success"
+            sx={{
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              minWidth: "100px",
+              bgcolor: "#1a7322",
+              "&:hover": { bgcolor: "#155a1b" },
+            }}
+          >
             Yes
           </Button>
-          <Button onClick={handleConfirmClose} variant="outlined" sx={{ fontWeight: "bold", textTransform: "uppercase", minWidth: "100px", color: "#1a7322", borderColor: "#1a7322", "&:hover": { borderColor: "#1a7322", bgcolor: "#e8f5e9" } }}>
+          <Button
+            onClick={handleConfirmClose}
+            variant="outlined"
+            sx={{
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              minWidth: "100px",
+              color: "#1a7322",
+              borderColor: "#1a7322",
+              "&:hover": { borderColor: "#1a7322", bgcolor: "#e8f5e9" },
+            }}
+          >
             No
           </Button>
         </DialogActions>
@@ -653,7 +765,14 @@ function CmswoApplicantModal({
 
       {/* DECLINE REASON DIALOG */}
       <Dialog open={confirmDeclineOpen} onClose={handleDeclineConfirmClose}>
-        <DialogTitle sx={{ fontWeight: "bold", backgroundColor: "#053d16ff", color: "white", mb: 2 }}>
+        <DialogTitle
+          sx={{
+            fontWeight: "bold",
+            backgroundColor: "#053d16ff",
+            color: "white",
+            mb: 2,
+          }}
+        >
           Decline Applicant
         </DialogTitle>
         <DialogContent sx={{ pt: 2, px: 3 }}>
@@ -677,12 +796,25 @@ function CmswoApplicantModal({
                     mr: 1,
                     p: 0,
                     borderColor: "#053d16ff",
-                    ...(selectedReasons.includes(reason) && { backgroundColor: "#e8f5e9" }),
+                    ...(selectedReasons.includes(reason) && {
+                      backgroundColor: "#e8f5e9",
+                    }),
                   }}
                 >
-                  {selectedReasons.includes(reason) && <CheckCircleIcon sx={{ fontSize: "1rem", color: "#053d16ff" }} />}
+                  {selectedReasons.includes(reason) && (
+                    <CheckCircleIcon
+                      sx={{ fontSize: "1rem", color: "#053d16ff" }}
+                    />
+                  )}
                 </Button>
-                <Typography component="span" sx={{ fontSize: "1.1rem", color: "#000000", verticalAlign: "middle" }}>
+                <Typography
+                  component="span"
+                  sx={{
+                    fontSize: "1.1rem",
+                    color: "#000000",
+                    verticalAlign: "middle",
+                  }}
+                >
                   {reason}
                 </Typography>
               </Grid>
@@ -722,27 +854,88 @@ function CmswoApplicantModal({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleDeclineConfirmClose}>Cancel</Button>
-          <Button onClick={handleDeclineConfirm} color="error" variant="contained" disabled={declineReason.trim() === ""}>
+          <Button
+            onClick={handleDeclineConfirm}
+            color="error"
+            variant="contained"
+            disabled={declineReason.trim() === ""}
+          >
             Decline
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* SUCCESS: APPROVED */}
-      <Dialog open={successOpen} onClose={handleSuccessClose} TransitionComponent={Fade} maxWidth="xs">
-        <Paper elevation={6} sx={{ p: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, backgroundColor: "white", color: "#4caf50", borderRadius: 2 }}>
-          <CheckCircleIcon fontSize="large" sx={{ fontSize: "5rem", color: "#4caf50" }} />
-          <Typography variant="h5" fontWeight="bold">Successfully Approved!</Typography>
-          <Button onClick={handleSuccessClose} variant="contained" color="success">OK</Button>
+      <Dialog
+        open={successOpen}
+        onClose={handleSuccessClose}
+        TransitionComponent={Fade}
+        maxWidth="xs"
+      >
+        <Paper
+          elevation={6}
+          sx={{
+            p: 4,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            backgroundColor: "white",
+            color: "#4caf50",
+            borderRadius: 2,
+          }}
+        >
+          <CheckCircleIcon
+            fontSize="large"
+            sx={{ fontSize: "5rem", color: "#4caf50" }}
+          />
+          <Typography variant="h5" fontWeight="bold">
+            Successfully Approved!
+          </Typography>
+          <Button
+            onClick={handleSuccessClose}
+            variant="contained"
+            color="success"
+          >
+            OK
+          </Button>
         </Paper>
       </Dialog>
 
       {/* SUCCESS: DECLINED */}
-      <Dialog open={declineSuccessOpen} onClose={handleDeclineSuccessClose} TransitionComponent={Fade} maxWidth="xs">
-        <Paper elevation={6} sx={{ p: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, backgroundColor: "white", color: "#d32f2f", borderRadius: 2 }}>
-          <CancelIcon fontSize="large" sx={{ fontSize: "5rem", color: "#d32f2f" }} />
-          <Typography variant="h5" fontWeight="bold">Successfully Declined!</Typography>
-          <Button onClick={handleDeclineSuccessClose} variant="contained" color="error">OK</Button>
+      <Dialog
+        open={declineSuccessOpen}
+        onClose={handleDeclineSuccessClose}
+        TransitionComponent={Fade}
+        maxWidth="xs"
+      >
+        <Paper
+          elevation={6}
+          sx={{
+            p: 4,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            backgroundColor: "white",
+            color: "#d32f2f",
+            borderRadius: 2,
+          }}
+        >
+          <CancelIcon
+            fontSize="large"
+            sx={{ fontSize: "5rem", color: "#d32f2f" }}
+          />
+          <Typography variant="h5" fontWeight="bold">
+            Successfully Declined!
+          </Typography>
+          <Button
+            onClick={handleDeclineSuccessClose}
+            variant="contained"
+            color="error"
+          >
+            OK
+          </Button>
         </Paper>
       </Dialog>
     </>
