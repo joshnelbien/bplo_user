@@ -3,7 +3,10 @@ const BusinessProfile = require("../db/model/businessProfileDB");
 
 async function sendBusinessProfileCSV() {
   try {
-    const recipientEmail = "cict.sanpablocity.gov.ph";
+    const recipientEmail = [
+      "miso@sanpablocity.gov.ph",
+      "bplo@sanpablocity.gov.ph",
+    ];
 
     if (!process.env.SENDGRID_FROM) {
       console.log("❌ SendGrid sender email not set");
