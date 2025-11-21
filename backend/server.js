@@ -6,6 +6,8 @@ const path = require("path");
 const csv = require("csv-parser");
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("./db/sequelize");
+const cron = require("node-cron");
+const sendBusinessProfileCSV = require("./routes/sendBusinessProfileCSV");
 
 // 📌 Import your existing models and routes
 const Examiners = require("./db/model/examiners");
@@ -132,6 +134,17 @@ async function importBusinesses() {
     console.error("❌ Error importing businesses:", error);
   }
 }
+
+cron.schedule(
+  "30 16 * * *",
+  async () => {
+    console.log("⏰ Running scheduled CSV export (2:20 PM)...");
+    await sendBusinessProfileCSV();
+  },
+  {
+    timezone: "Asia/Manila",
+  }
+);
 
 async function parseCsvFile(csvFilePath) {
   return new Promise((resolve, reject) => {
