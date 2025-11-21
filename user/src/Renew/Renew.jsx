@@ -39,7 +39,9 @@ function Renewal() {
       console.log("   Last Name:", form.incharge_last_name);
       console.log("   Business Name:", form.business_name);
 
-      const res = await axios.get(`${API}/businessProfile/businessProfiles`);
+      const res = await axios.get(
+        `${API}/businessProfile/exixting-businessProfiles`
+      );
 
       const matchedRecord = res.data.find(
         (item) =>

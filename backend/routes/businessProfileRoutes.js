@@ -58,6 +58,31 @@ router.get("/businessProfiles", async (req, res) => {
   }
 });
 
+router.get("/exixting-businessProfiles", async (req, res) => {
+  try {
+    const { search } = req.query;
+
+    let files;
+
+    if (search) {
+      files = await ExistingBusinessProfile.findAll({
+        where: {
+          businessName: {
+            [Op.like]: `%${search}%`,
+          },
+        },
+      });
+    } else {
+      files = await ExistingBusinessProfile.findAll();
+    }
+
+    res.json(files);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json([]);
+  }
+});
+
 router.get("/:id/:bin", async (req, res) => {
   try {
     const { bin } = req.params; // ✅ Only use BIN, ignore ID
