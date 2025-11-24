@@ -83,6 +83,11 @@ function BusinessProfile() {
 
   const handlePageChange = (event, value) => setCurrentPage(value);
 
+  const handleRowClick = (applicant) => {
+    setSelectedApplicant(applicant);
+    setIsModalOpen(true);
+  };
+
   const handleExportCSV = async () => {
     try {
       const today = new Date().toISOString().slice(0, 10);
