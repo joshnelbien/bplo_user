@@ -290,7 +290,7 @@ function Dashboard() {
                 icon: <TrendingUp />,
               },
               {
-                title: "Pending Renewals",
+                title: "Pending Applications",
                 value: metrics.pendingRenewals,
                 icon: <AccessTime />,
               },
