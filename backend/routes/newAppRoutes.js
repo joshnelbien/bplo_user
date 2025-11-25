@@ -182,14 +182,61 @@ router.get("/files", async (req, res) => {
 
 router.get("/application-counts", async (req, res) => {
   try {
-    // Count all records in the File table
+    // Total applications
     const totalApps = await File.count();
 
-    // Return as JSON
-    res.json({ totalApplications: totalApps });
+    // New applications
+    const newApps = await File.count({ where: { application: "New" } });
+
+    // Renew applications
+    const renewApps = await File.count({ where: { application: "Renew" } });
+
+    // ================= MONTHLY APPLICATIONS =================
+    // Group by month (PostgreSQL)
+    const monthlyAppsRaw = await File.findAll({
+      attributes: [
+        [
+          sequelize.fn("to_char", sequelize.col("createdAt"), "YYYY-MM"),
+          "month",
+        ],
+        [sequelize.fn("count", sequelize.col("id")), "count"],
+      ],
+      group: [sequelize.fn("to_char", sequelize.col("createdAt"), "YYYY-MM")],
+      order: [
+        [sequelize.fn("to_char", sequelize.col("createdAt"), "YYYY-MM"), "ASC"],
+      ],
+      raw: true,
+    });
+
+    // ================= YEARLY APPLICATIONS =================
+    const yearlyAppsRaw = await File.findAll({
+      attributes: [
+        [sequelize.fn("date_part", "year", sequelize.col("createdAt")), "year"],
+        [sequelize.fn("count", sequelize.col("id")), "count"],
+      ],
+      group: [sequelize.fn("date_part", "year", sequelize.col("createdAt"))],
+      order: [
+        [sequelize.fn("date_part", "year", sequelize.col("createdAt")), "ASC"],
+      ],
+      raw: true,
+    });
+
+    res.json({
+      totalApplications: totalApps,
+      newApplications: newApps,
+      renewApplications: renewApps,
+      monthlyApplications: monthlyAppsRaw, // [{ month: '2025-01', count: 12 }, ...]
+      yearlyApplications: yearlyAppsRaw, // [{ year: '2025', count: 120 }, ...]
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ totalApplications: 0 });
+    res.status(500).json({
+      totalApplications: 0,
+      newApplications: 0,
+      renewApplications: 0,
+      monthlyApplications: [],
+      yearlyApplications: [],
+    });
   }
 });
 

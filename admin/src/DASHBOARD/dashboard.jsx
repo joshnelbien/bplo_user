@@ -7,12 +7,14 @@ import {
   Grid,
   useTheme,
   Divider,
-  useMediaQuery,
   Button,
   Card,
   CardContent,
-  Chip,
   Stack,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
   Avatar,
   alpha,
 } from "@mui/material";
@@ -23,7 +25,6 @@ import {
   PersonAdd,
 } from "@mui/icons-material";
 import Side_bar from "../SIDE_BAR/side_bar";
-import { LineChart, lineElementClasses } from "@mui/x-charts/LineChart";
 import { BarChart, barElementClasses } from "@mui/x-charts/BarChart";
 import AddAdminModal from "./AddAdminModal";
 
@@ -110,7 +111,6 @@ function TopBar({ onAddAdminClick, isSuperAdmin }) {
       }}
     >
       <LiveClock />
-
       <Typography
         variant="h5"
         sx={{
@@ -149,20 +149,22 @@ function TopBar({ onAddAdminClick, isSuperAdmin }) {
   );
 }
 
-/* ================== PESO ICON ================== */
-const PesoIcon = () => (
-  <Typography sx={{ fontWeight: "bold", fontSize: "1.2rem" }}>₱</Typography>
-);
-
 /* ================== MAIN DASHBOARD ================== */
 function Dashboard() {
   const API = import.meta.env.VITE_API_BASE;
   const theme = useTheme();
   const [openModal, setOpenModal] = useState(false);
-  const [totalApplications, setTotalApplications] = useState(0); // dynamic metric
-  const TOP_BAR_HEIGHT = 80;
-
+  const [totalApplications, setTotalApplications] = useState(0);
   const [adminData, setAdminData] = useState(null);
+  const [appBreakdown, setAppBreakdown] = useState({
+    newApplications: 0,
+    renewApplications: 0,
+  });
+  const [approvedPermits, setApprovedPermits] = useState(0);
+  const [monthlyData, setMonthlyData] = useState([]); // full monthly objects [{month, count}]
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState("all"); // "all" or "01".."12"
+  const TOP_BAR_HEIGHT = 80;
 
   useEffect(() => {
     const stored = localStorage.getItem("adminData");
@@ -175,64 +177,67 @@ function Dashboard() {
   const handleOpenModal = () => setOpenModal(true);
   const handleCloseModal = () => setOpenModal(false);
 
-  const [approvedPermits, setApprovedPermits] = useState(0);
+  // Fetch application counts
+  useEffect(() => {
+    const fetchAppData = async () => {
+      try {
+        const res = await axios.get(`${API}/newApplication/application-counts`);
+        setTotalApplications(res.data.totalApplications);
+        setAppBreakdown({
+          newApplications: res.data.newApplications,
+          renewApplications: res.data.renewApplications,
+        });
+        setMonthlyData(res.data.monthlyApplications || []);
+      } catch (err) {
+        console.error("Failed to fetch application counts:", err);
+        setTotalApplications(0);
+        setAppBreakdown({ newApplications: 0, renewApplications: 0 });
+        setMonthlyData([]);
+      }
+    };
+    fetchAppData();
+  }, []);
 
+  // Fetch approved permits
   useEffect(() => {
     const fetchApprovedPermits = async () => {
       try {
-        const res = await axios.get(`${API}/businessProfile/approved-counts`); // your endpoint
-        setApprovedPermits(res.data.totalApplications); // assuming backend returns { totalApplications }
+        const res = await axios.get(`${API}/businessProfile/approved-counts`);
+        setApprovedPermits(res.data.totalApplications);
       } catch (err) {
         console.error("Failed to fetch approved permits:", err);
         setApprovedPermits(0);
       }
     };
-
     fetchApprovedPermits();
   }, []);
-  /* ================== FETCH TOTAL APPLICATIONS ================== */
-  useEffect(() => {
-    const fetchTotalApps = async () => {
-      try {
-        const res = await axios.get(`${API}/newApplication/application-counts`); // replace with your backend URL if needed
-        setTotalApplications(res.data.totalApplications);
-      } catch (err) {
-        console.error("Failed to fetch total applications:", err);
-        setTotalApplications(0);
-      }
-    };
-    fetchTotalApps();
-  }, []);
 
-  // Sample Data (other metrics)
   const metrics = {
-    totalApplications: totalApplications,
-    approvedPermits: approvedPermits,
+    totalApplications,
+    approvedPermits,
     pendingRenewals: totalApplications - approvedPermits,
   };
 
-  const revenueData = [
-    { month: "Jan", revenue: 30000 },
-    { month: "Feb", revenue: 45000 },
-    { month: "Mar", revenue: 38000 },
-    { month: "Apr", revenue: 52000 },
-    { month: "May", revenue: 48000 },
-    { month: "Jun", revenue: 61000 },
-    { month: "Jul", revenue: 55000 },
-    { month: "Aug", revenue: 67000 },
-    { month: "Sep", revenue: 72000 },
-    { month: "Oct", revenue: 78000 },
-    { month: "Nov", revenue: 82000 },
-    { month: "Dec", revenue: 91000 },
-  ];
-
-  const xLabels = revenueData.map((d) => d.month);
-  const revenueValues = revenueData.map((d) => d.revenue);
-
   const barData = {
-    categories: ["New Apps", "Renewals", "Permits", "Appeals"],
-    values: [450, 300, 290, 205],
+    categories: ["New Applications", "Renewals"],
+    values: [appBreakdown.newApplications, appBreakdown.renewApplications],
   };
+
+  // Generate all months of the year
+  const allMonths = Array.from({ length: 12 }, (_, i) =>
+    (i + 1).toString().padStart(2, "0")
+  );
+
+  // Prepare chart data based on selected year and month
+  const monthlyCounts = allMonths.map((month) => {
+    if (selectedMonth !== "all" && month !== selectedMonth) return 0;
+    const item = monthlyData.find(
+      (d) =>
+        d.month.startsWith(`${selectedYear}-${month}`) ||
+        d.month === `${selectedYear}-${month}`
+    );
+    return item ? parseInt(item.count, 10) : 0;
+  });
 
   return (
     <Box
@@ -246,7 +251,7 @@ function Dashboard() {
       {/* TOP BAR */}
       <TopBar onAddAdminClick={handleOpenModal} isSuperAdmin={isSuperAdmin} />
 
-      {/* MAIN LAYOUT: SIDEBAR + CONTENT */}
+      {/* MAIN LAYOUT */}
       <Box
         sx={{
           display: "flex",
@@ -257,10 +262,7 @@ function Dashboard() {
           pb: 4,
         }}
       >
-        {/* SIDEBAR */}
         <Side_bar />
-
-        {/* MAIN CONTENT */}
         <Box
           component="main"
           sx={{
@@ -351,9 +353,9 @@ function Dashboard() {
 
           <Divider sx={{ my: 4, width: "100%", borderColor: lightGreen }} />
 
-          {/* CHARTS */}
-          <Grid container spacing={4} sx={{ width: "100%", mb: 6 }}>
-            {/* LINE CHART */}
+          {/* APPLICATIONS BREAKDOWN BAR CHART */}
+          <Grid container spacing={3} sx={{ width: "100%", mb: 5 }}>
+            {/* APPLICATIONS BREAKDOWN */}
             <Grid item xs={12} md={6}>
               <Paper
                 elevation={3}
@@ -362,55 +364,10 @@ function Dashboard() {
                   borderRadius: 3,
                   background: "#ffffff",
                   border: `1px solid ${lightGreen}`,
-                  height: { xs: 300, sm: 350, md: 400 },
                   display: "flex",
                   flexDirection: "column",
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{
-                    mb: 2,
-                    fontWeight: "bold",
-                    color: darkGreen,
-                    textAlign: "center",
-                  }}
-                >
-                  Revenue Trend (Annual)
-                </Typography>
-                <Box sx={{ flexGrow: 1, minHeight: 0 }}>
-                  <LineChart
-                    series={[
-                      {
-                        data: revenueValues,
-                        label: "Revenue",
-                        color: primaryGreen,
-                      },
-                    ]}
-                    xAxis={[{ scaleType: "point", data: xLabels }]}
-                    sx={{
-                      [`& .${lineElementClasses.root}`]: { strokeWidth: 3 },
-                      ".MuiChartsLegend-root": { color: darkGreen },
-                      width: "100%",
-                      height: "100%",
-                    }}
-                  />
-                </Box>
-              </Paper>
-            </Grid>
-
-            {/* BAR CHART */}
-            <Grid item xs={12} md={6}>
-              <Paper
-                elevation={3}
-                sx={{
-                  p: 3,
-                  borderRadius: 3,
-                  background: "#ffffff",
-                  border: `1px solid ${lightGreen}`,
-                  height: { xs: 300, sm: 350, md: 400 },
-                  display: "flex",
-                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
                 <Typography
@@ -424,10 +381,167 @@ function Dashboard() {
                 >
                   Applications Breakdown
                 </Typography>
-                <Box sx={{ flexGrow: 1, minHeight: 0 }}>
+                <Box
+                  sx={{
+                    width: { xs: "100%", sm: "90%", md: 500 },
+                    height: { xs: 250, sm: 300, md: 350 },
+                  }}
+                >
                   <BarChart
                     series={[{ data: barData.values, color: primaryGreen }]}
                     xAxis={[{ scaleType: "band", data: barData.categories }]}
+                    sx={{
+                      [`& .${barElementClasses.root}`]: { fill: primaryGreen },
+                      ".MuiChartsLegend-root": { color: darkGreen },
+                      width: "100%",
+                      height: "100%",
+                    }}
+                  />
+                </Box>
+              </Paper>
+            </Grid>
+
+            {/* MONTHLY CHART WITH YEAR & MONTH FILTER */}
+            <Grid item xs={12} md={6}>
+              <Paper
+                elevation={3}
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                  background: "#ffffff",
+                  border: `1px solid ${lightGreen}`,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{
+                    mb: 2,
+                    fontWeight: "bold",
+                    color: darkGreen,
+                    textAlign: "center",
+                  }}
+                >
+                  Applications per Month
+                </Typography>
+
+                {/* YEAR & MONTH DROPDOWNS */}
+                <Box
+                  sx={{ display: "flex", gap: 1, mb: 0.5, flexWrap: "wrap" }}
+                >
+                  {/* Year Dropdown */}
+                  <FormControl sx={{ minWidth: 120 }}>
+                    <InputLabel id="year-select-label">Year</InputLabel>
+                    <Select
+                      labelId="year-select-label"
+                      value={selectedYear}
+                      label="Year"
+                      onChange={(e) =>
+                        setSelectedYear(parseInt(e.target.value))
+                      }
+                      sx={{
+                        bgcolor: "#f5f5f5",
+                        borderRadius: 1,
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: primaryGreen,
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: darkGreen,
+                        },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: primaryGreen,
+                        },
+                      }}
+                    >
+                      {Array.from(
+                        { length: 5 },
+                        (_, i) => new Date().getFullYear() - i
+                      ).map((year) => (
+                        <MenuItem key={year} value={year}>
+                          {year}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  {/* Month Dropdown */}
+                  <FormControl sx={{ minWidth: 140 }}>
+                    <InputLabel id="month-select-label">Month</InputLabel>
+                    <Select
+                      labelId="month-select-label"
+                      value={selectedMonth}
+                      label="Month"
+                      onChange={(e) => setSelectedMonth(e.target.value)}
+                      sx={{
+                        bgcolor: "#f5f5f5",
+                        borderRadius: 1,
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: primaryGreen,
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: darkGreen,
+                        },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: primaryGreen,
+                        },
+                      }}
+                    >
+                      <MenuItem value="all">All Months</MenuItem>
+                      {[
+                        "Jan",
+                        "Feb",
+                        "Mar",
+                        "Apr",
+                        "May",
+                        "Jun",
+                        "Jul",
+                        "Aug",
+                        "Sep",
+                        "Oct",
+                        "Nov",
+                        "Dec",
+                      ].map((m, idx) => (
+                        <MenuItem
+                          key={idx}
+                          value={(idx + 1).toString().padStart(2, "0")}
+                        >
+                          {m}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+
+                <Box
+                  sx={{
+                    width: { xs: "100%", sm: "90%", md: 700 },
+                    height: { xs: 300, sm: 400, md: 280 },
+                  }}
+                >
+                  <BarChart
+                    series={[{ data: monthlyCounts, color: primaryGreen }]}
+                    xAxis={[
+                      {
+                        scaleType: "band",
+                        data: [
+                          "Jan",
+                          "Feb",
+                          "Mar",
+                          "Apr",
+                          "May",
+                          "Jun",
+                          "Jul",
+                          "Aug",
+                          "Sep",
+                          "Oct",
+                          "Nov",
+                          "Dec",
+                        ],
+                      },
+                    ]}
                     sx={{
                       [`& .${barElementClasses.root}`]: { fill: primaryGreen },
                       ".MuiChartsLegend-root": { color: darkGreen },
