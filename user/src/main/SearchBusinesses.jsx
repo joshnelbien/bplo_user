@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -23,6 +23,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import axios from "axios";
+import debounce from "lodash.debounce";
 
 function SearchBusinesses({ open, onClose }) {
   const [searchValue, setSearchValue] = useState("");
@@ -30,13 +31,14 @@ function SearchBusinesses({ open, onClose }) {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [lastSearch, setLastSearch] = useState(""); // store last search
   const limit = 100;
 
   const API = import.meta.env.VITE_API_BASE;
 
+  // Fetch results from backend
   const fetchResults = async (search, pageNumber) => {
     if (!search.trim()) return;
+
     setLoading(true);
     try {
       const response = await axios.get(
@@ -45,9 +47,11 @@ function SearchBusinesses({ open, onClose }) {
           params: { search, page: pageNumber, limit },
         }
       );
-      setResults(response.data);
-      setTotalPages(Math.ceil(response.data.length / limit));
-      setLastSearch(search); // remember search term
+
+      // Expect backend to return { rows: [...], total: X }
+      const { rows, total } = response.data;
+      setResults(rows || []);
+      setTotalPages(Math.ceil((total || 0) / limit));
     } catch (error) {
       console.error("Error fetching business profiles:", error);
       setResults([]);
@@ -57,13 +61,31 @@ function SearchBusinesses({ open, onClose }) {
     }
   };
 
+  // Debounced search to avoid too many requests
+  const debouncedSearch = useCallback(
+    debounce((value, pageNumber) => {
+      fetchResults(value, pageNumber);
+    }, 500),
+    []
+  );
+
+  useEffect(() => {
+    if (searchValue.trim()) {
+      setPage(1);
+      debouncedSearch(searchValue, 1);
+    } else {
+      setResults([]);
+      setTotalPages(1);
+    }
+  }, [searchValue, debouncedSearch]);
+
   const handlePageChange = (e, value) => {
     setPage(value);
-    fetchResults(lastSearch, value); // fetch results for last search term
+    fetchResults(searchValue, value);
   };
 
   const handleSearchClick = () => {
-    setPage(1); // reset page to 1
+    setPage(1);
     fetchResults(searchValue, 1);
   };
 
@@ -124,13 +146,14 @@ function SearchBusinesses({ open, onClose }) {
               <InputBase
                 placeholder="Enter Business Name"
                 value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value.toUpperCase())}
+                onChange={(e) => setSearchValue(e.target.value)}
                 sx={{ ml: 2, flex: 1 }}
               />
               <IconButton
                 type="button"
                 onClick={handleSearchClick}
                 sx={{ color: "#09360D" }}
+                disabled={loading}
               >
                 <SearchIcon />
               </IconButton>
@@ -172,6 +195,7 @@ function SearchBusinesses({ open, onClose }) {
                     </TableBody>
                   </Table>
                 </TableContainer>
+
                 <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
                   <Pagination
                     count={totalPages}

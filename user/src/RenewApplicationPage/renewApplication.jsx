@@ -491,6 +491,7 @@ function RenewApplicationPage() {
           .join(","),
         Units: businessLines.map((b) => `"${b.Units}"`).join(","),
         capital: businessLines.map((b) => `"${b.capital}"`).join(","),
+        Modeofpayment: formDataState.Modeofpayment,
         application: "Renew",
       };
 
