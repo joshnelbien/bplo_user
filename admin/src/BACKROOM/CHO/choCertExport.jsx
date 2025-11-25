@@ -1,11 +1,65 @@
 // src/components/ChoCertExport.jsx
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Box, Button } from "@mui/material";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import axios from "axios";
+
+const API = import.meta.env.VITE_API_BASE;
 
 const ChoCertExport = ({ applicant }) => {
   const certRef = useRef();
+
+  // SIGNATURE STATES
+  const [userSignatory, setUserSignatory] = useState(null);
+  const [fallbackSig, setFallbackSig] = useState(null);
+
+  // Convert fallback image to base64
+  const loadImageAsBase64 = async (imagePath) => {
+    try {
+      const response = await fetch(imagePath);
+      const blob = await response.blob();
+
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+    } catch {
+      return null;
+    }
+  };
+
+  // LOAD SIGNATURES
+  useEffect(() => {
+    const loadAdminSig = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await axios.get(`${API}/adminAccounts/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.data?.signatories) {
+          setUserSignatory(`data:image/png;base64,${res.data.signatories}`);
+        }
+      } catch (err) {
+        console.error("Error loading admin signature:", err);
+      }
+    };
+
+    const loadFallback = async () => {
+      const img = await loadImageAsBase64("/samplesig.png");
+      setFallbackSig(img);
+    };
+
+    loadAdminSig();
+    loadFallback();
+  }, []);
+
+  const signatureToUse = userSignatory || fallbackSig;
+  const cho = fallbackSig;
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -15,10 +69,8 @@ const ChoCertExport = ({ applicant }) => {
     });
   };
 
-  const today = new Date(); // Issued date = today
+  const today = new Date();
   const endOfYear = new Date(today.getFullYear(), 11, 31);
-
-  const isRenewal = applicant.isRenewal || false;
 
   const handleDownloadPDF = async () => {
     const element = certRef.current;
@@ -164,6 +216,7 @@ const ChoCertExport = ({ applicant }) => {
               >
                 (Business Name)
               </p>
+
               {applicant.officeType}
               <p
                 style={{
@@ -256,7 +309,7 @@ const ChoCertExport = ({ applicant }) => {
             style={{
               display: "flex",
               justifyContent: "space-between",
-              marginTop: "30px",
+              marginTop: "50px",
               fontSize: "11pt",
             }}
           >
@@ -270,51 +323,97 @@ const ChoCertExport = ({ applicant }) => {
               </div>
             </div>
 
-            <div style={{ width: "48%", textAlign: "center" }}>
+            <div
+              style={{
+                width: "48%",
+                textAlign: "center",
+                position: "relative",
+                height: "120px",
+              }}
+            >
               <p style={{ margin: "0 0 5px", fontWeight: "bold" }}>Approved:</p>
-              <div style={{ height: "50px" }}></div>
-              <div style={{ borderTop: "1px solid #000", paddingTop: "5px" }}>
+
+              {/* SIGNATURE ABOVE NAME */}
+              {cho && (
+                <img
+                  src={cho}
+                  alt="CHO Signature"
+                  style={{
+                    position: "absolute", // absolute positioning
+                    top: 0, // adjust vertical position
+                    left: "50%", // center horizontally
+                    transform: "translateX(-50%)", // center correctly
+                    width: "150px",
+                    height: "auto",
+                  }}
+                />
+              )}
+
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 0, // pin to the bottom of the container
+                  left: 0,
+                  right: 0,
+                  borderTop: "1px solid #000",
+                  paddingTop: "5px",
+                }}
+              >
                 <strong>MERCYDINA AM. CAPONPON, MD. DPPS, MPH</strong>
+                <p style={{ margin: "5px 0 0", fontSize: "10pt" }}>
+                  City Health Officer
+                </p>
               </div>
-              <p style={{ margin: "5px 0 0", fontSize: "10pt" }}>
-                City Health Officer
-              </p>
             </div>
           </div>
 
-          {/* BY: Authorized */}
+          {/* BY: Authorized (WITH SIGNATURE) */}
           <div
             style={{
-              marginTop: "15px", // adjust vertical spacing
+              marginTop: "15px",
               display: "flex",
-              justifyContent: "flex-end", // push the block to the right side
+              justifyContent: "flex-end",
             }}
           >
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center", // centers text over the line
-                width: "200px", // signature line width
+                alignItems: "center",
+                width: "200px",
                 gap: "5px",
               }}
             >
               <p
                 style={{
                   margin: 0,
-                  marginBottom: 20,
+                  marginBottom: 10,
                   marginTop: 15,
                   fontWeight: "bold",
                 }}
               >
                 BY:
               </p>
+
+              {/* SIGNATURE IMAGE */}
+              {signatureToUse && (
+                <img
+                  src={signatureToUse}
+                  alt="Authorized Signatory"
+                  style={{
+                    width: "150px",
+                    height: "auto",
+                    marginBottom: "-5px",
+                  }}
+                />
+              )}
+
               <div
                 style={{
                   borderTop: "1px solid #000",
-                  width: "100%", // full width of container
+                  width: "100%",
                   paddingTop: "5px",
-                  textAlign: "center", // centers "(Authorized Signatory)" text over the line
+                  textAlign: "center",
                 }}
               >
                 <strong>(Authorized Signatory)</strong>

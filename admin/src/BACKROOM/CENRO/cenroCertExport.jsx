@@ -1,15 +1,18 @@
-import React, { useRef, useState } from "react";
-import { Button, Checkbox, FormControlLabel } from "@mui/material";
+import React, { useRef, useState, useEffect } from "react";
+import { Button } from "@mui/material";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import axios from "axios";
 
 const spcLogo = "/spclogo.png";
-const eSignature = "/samplesig.png";
+const fallbackSignature = "/samplesig.png"; // default signature
+
+const API = import.meta.env.VITE_API_BASE; // your API base
 
 const CenroCertExport = ({ applicant }) => {
   const certificateRef = useRef();
 
-  // State to track checkbox values
+  // State for checkboxes
   const [checkboxes, setCheckboxes] = useState({
     A: false,
     B: false,
@@ -22,10 +25,36 @@ const CenroCertExport = ({ applicant }) => {
     setCheckboxes((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // State for signatory
+  const [signatory, setSignatory] = useState(fallbackSignature);
+
+  // Fetch admin/signatory from API
+  useEffect(() => {
+    const loadSignatory = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await axios.get(`${API}/adminAccounts/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.data?.signatories) {
+          setSignatory(`data:image/png;base64,${res.data.signatories}`);
+        }
+      } catch (err) {
+        console.error("Error fetching signatory:", err);
+        setSignatory(fallbackSignature);
+      }
+    };
+
+    loadSignatory();
+  }, []);
+
+  // Generate PDF
   const handleGeneratePDF = async () => {
     const input = certificateRef.current;
 
-    // Temporarily force checkbox appearance for PDF
     const canvas = await html2canvas(input, {
       scale: 2.5,
       useCORS: true,
@@ -33,12 +62,9 @@ const CenroCertExport = ({ applicant }) => {
       width: 612,
       height: 1008,
       onclone: (clonedDoc) => {
-        // Ensure checkboxes render as checked in the cloned DOM
         clonedDoc.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
           const key = cb.dataset.key;
-          if (checkboxes[key]) {
-            cb.checked = true;
-          }
+          if (checkboxes[key]) cb.checked = true;
         });
       },
     });
@@ -88,12 +114,12 @@ const CenroCertExport = ({ applicant }) => {
           color: "black",
           lineHeight: "1.2",
           boxSizing: "border-box",
-          width: "612px", // ← set your modal width here
-          margin: "0 auto", // ← center horizontally
+          width: "612px",
+          margin: "0 auto",
           padding: "30px 40px",
         }}
       >
-        {/* === HEADER (unchanged) === */}
+        {/* HEADER */}
         <div style={{ textAlign: "center", marginBottom: "5px" }}>
           <img
             src={spcLogo}
@@ -141,7 +167,7 @@ const CenroCertExport = ({ applicant }) => {
           </h1>
         </div>
 
-        {/* === BODY TEXT === */}
+        {/* BODY */}
         <div style={{ textAlign: "justify", marginBottom: "10px" }}>
           <p style={{ marginBottom: "8px", fontSize: "10pt" }}>
             This is to certify that the establishment{" "}
@@ -174,19 +200,18 @@ const CenroCertExport = ({ applicant }) => {
             THAT SAID ESTABLISHMENT SHALL:
           </p>
 
-          {/* ==== INTERACTIVE CHECKBOX LIST ==== */}
+          {/* CHECKBOX LIST */}
           <div style={{ marginBottom: "12px" }}>
             {checklistItems.map((item) => (
               <div
                 key={item.key}
                 style={{
                   display: "flex",
-                  alignItems: "center", // ← vertical centre
+                  alignItems: "center",
                   marginBottom: "6px",
-                  gap: "6px", // space between box and text
+                  gap: "6px",
                 }}
               >
-                {/* ---- Tiny checkbox ---- */}
                 <input
                   type="checkbox"
                   checked={checkboxes[item.key]}
@@ -199,8 +224,6 @@ const CenroCertExport = ({ applicant }) => {
                   }}
                   data-key={item.key}
                 />
-
-                {/* ---- Text ---- */}
                 <span style={{ fontSize: "10pt", lineHeight: "1.2" }}>
                   <strong>{item.key}.</strong> {item.text}
                 </span>
@@ -208,7 +231,7 @@ const CenroCertExport = ({ applicant }) => {
             ))}
           </div>
 
-          {/* === NUMBERED LIST & REST OF TEXT (unchanged) === */}
+          {/* NUMBERED LIST */}
           <ol
             style={{
               margin: "8px 0 12px 0",
@@ -246,7 +269,7 @@ const CenroCertExport = ({ applicant }) => {
           </p>
         </div>
 
-        {/* === SIGNATURE SECTION (unchanged) === */}
+        {/* SIGNATURE */}
         <div
           style={{
             marginTop: "10px",
@@ -289,11 +312,13 @@ const CenroCertExport = ({ applicant }) => {
               <strong>APPROVED BY:</strong>
             </p>
             <div style={{ marginBottom: "2px" }}>
-              <img
-                src={eSignature}
-                alt="e-Signature"
-                style={{ width: "140px", height: "auto" }}
-              />
+              {signatory && (
+                <img
+                  src={signatory}
+                  alt="e-Signature"
+                  style={{ width: "140px", height: "auto" }}
+                />
+              )}
             </div>
             <p style={{ margin: "0", fontWeight: "bold", fontSize: "11pt" }}>
               DENNIS A. RAMOS, MPA
@@ -305,7 +330,7 @@ const CenroCertExport = ({ applicant }) => {
         </div>
       </div>
 
-      {/* === DOWNLOAD BUTTON === */}
+      {/* DOWNLOAD BUTTON */}
       <div style={{ textAlign: "center", marginTop: "20px" }}>
         <Button
           variant="contained"

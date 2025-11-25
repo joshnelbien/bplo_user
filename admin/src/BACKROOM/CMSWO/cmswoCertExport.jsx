@@ -1,11 +1,46 @@
 // src/components/cmswoCertExport.jsx
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Box, Typography, Button } from "@mui/material";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import axios from "axios";
+
+const API = import.meta.env.VITE_API_BASE; // Your API base URL
 
 const CmswoCertExport = ({ applicant }) => {
   const certRef = useRef();
+
+  // State for CMSWO signatory
+  const [cmswoSignatoryName, setCmswoSignatoryName] = useState(
+    "CHARLIE B. BELARMINO"
+  );
+  const [cmswoSignatorySig, setCmswoSignatorySig] = useState(null);
+
+  // Load signatory signature and name from API
+  useEffect(() => {
+    const loadCmswoSig = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await axios.get(`${API}/adminAccounts/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.data?.signatories) {
+          setCmswoSignatorySig(`data:image/png;base64,${res.data.signatories}`);
+        }
+
+        if (res.data?.name) {
+          setCmswoSignatoryName(res.data.name); // Adjust if API returns first/last separately
+        }
+      } catch (err) {
+        console.error("Error loading CMSWO admin signature:", err);
+      }
+    };
+
+    loadCmswoSig();
+  }, []);
 
   const handleDownloadPDF = async () => {
     const element = certRef.current;
@@ -56,16 +91,16 @@ const CmswoCertExport = ({ applicant }) => {
           pageBreakAfter: "always",
         }}
       >
-        {/* Left logo – SMALLER */}
+        {/* Left logo */}
         <Box
           component="img"
           src="/spclogo.png"
           alt="left logo"
           sx={{
             position: "absolute",
-            top: "15mm", // pushed down a bit so it doesn’t touch the header
-            left: "20mm", // a little more margin from edge
-            width: "28mm", // ← 30% smaller (was 55mm)
+            top: "15mm",
+            left: "20mm",
+            width: "28mm",
             height: "auto",
             opacity: 0.85,
             zIndex: 1,
@@ -153,23 +188,25 @@ const CmswoCertExport = ({ applicant }) => {
             zIndex: 2,
           }}
         >
-          {/* Left signatory */}
+          {/* Left signatory – dynamically loaded */}
           <Box textAlign="center">
-            <Box
-              component="img"
-              src="/samplesig.png"
-              alt="signature"
-              sx={{ width: "90px", mb: -1 }}
-            />
+            {cmswoSignatorySig && (
+              <Box
+                component="img"
+                src={cmswoSignatorySig}
+                alt="signature"
+                sx={{ width: "90px", mb: -1, mt: "13px" }}
+              />
+            )}
             <Typography variant="body1" fontWeight="bold">
-              CHARLIE B. BELARMINO
+              {cmswoSignatoryName}
             </Typography>
             <Typography variant="caption">
               Public Services Officer IV
             </Typography>
           </Box>
 
-          {/* Right signatory */}
+          {/* Right signatory – static */}
           <Box textAlign="center">
             <Box
               component="img"
