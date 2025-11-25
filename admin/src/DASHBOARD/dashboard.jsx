@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Box,
   Paper,
@@ -30,7 +31,7 @@ import AddAdminModal from "./AddAdminModal";
 const primaryGreen = "#1d5236";
 const lightGreen = alpha(primaryGreen, 0.1);
 const darkGreen = "#0f2a1b";
-const drawerWidth = 270; // Match with side_bar.jsx
+const drawerWidth = 0;
 
 /* ================== LIVE CLOCK ================== */
 function LiveClock() {
@@ -60,8 +61,8 @@ function LiveClock() {
         display: "flex",
         flexDirection: "column",
         color: "white",
-        pl: { xs: 1, md: 3 },          // responsive left padding
-        minWidth: { xs: 130, md: 180 }, // keep it from collapsing
+        pl: { xs: 1, md: 3 },
+        minWidth: { xs: 130, md: 180 },
       }}
     >
       <Typography
@@ -155,10 +156,10 @@ const PesoIcon = () => (
 
 /* ================== MAIN DASHBOARD ================== */
 function Dashboard() {
+  const API = import.meta.env.VITE_API_BASE;
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const [openModal, setOpenModal] = useState(false);
+  const [totalApplications, setTotalApplications] = useState(0); // dynamic metric
   const TOP_BAR_HEIGHT = 80;
 
   const [adminData, setAdminData] = useState(null);
@@ -174,12 +175,40 @@ function Dashboard() {
   const handleOpenModal = () => setOpenModal(true);
   const handleCloseModal = () => setOpenModal(false);
 
-  // Sample Data
+  const [approvedPermits, setApprovedPermits] = useState(0);
+
+  useEffect(() => {
+    const fetchApprovedPermits = async () => {
+      try {
+        const res = await axios.get(`${API}/businessProfile/approved-counts`); // your endpoint
+        setApprovedPermits(res.data.totalApplications); // assuming backend returns { totalApplications }
+      } catch (err) {
+        console.error("Failed to fetch approved permits:", err);
+        setApprovedPermits(0);
+      }
+    };
+
+    fetchApprovedPermits();
+  }, []);
+  /* ================== FETCH TOTAL APPLICATIONS ================== */
+  useEffect(() => {
+    const fetchTotalApps = async () => {
+      try {
+        const res = await axios.get(`${API}/newApplication/application-counts`); // replace with your backend URL if needed
+        setTotalApplications(res.data.totalApplications);
+      } catch (err) {
+        console.error("Failed to fetch total applications:", err);
+        setTotalApplications(0);
+      }
+    };
+    fetchTotalApps();
+  }, []);
+
+  // Sample Data (other metrics)
   const metrics = {
-    totalApplications: 1245,
-    approvedPermits: 890,
-    pendingRenewals: 155,
-    revenueCollected: 456789,
+    totalApplications: totalApplications,
+    approvedPermits: approvedPermits,
+    pendingRenewals: totalApplications - approvedPermits,
   };
 
   const revenueData = [
@@ -228,7 +257,7 @@ function Dashboard() {
           pb: 4,
         }}
       >
-        {/* SIDEBAR - Always rendered */}
+        {/* SIDEBAR */}
         <Side_bar />
 
         {/* MAIN CONTENT */}
@@ -237,7 +266,7 @@ function Dashboard() {
           sx={{
             flexGrow: 1,
             width: "100%",
-            ml: { md: `${drawerWidth}px` }, // Push content right on md+
+            ml: { md: `${drawerWidth}px` },
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -251,27 +280,17 @@ function Dashboard() {
               {
                 title: "Total Applications",
                 value: metrics.totalApplications,
-                chip: "+12% from last month",
                 icon: <Description />,
               },
               {
                 title: "Approved Permits",
                 value: metrics.approvedPermits,
-                chip: "+8% from last month",
                 icon: <TrendingUp />,
               },
               {
                 title: "Pending Renewals",
                 value: metrics.pendingRenewals,
-                chip: "Urgent: 23",
-                chipColor: "warning",
                 icon: <AccessTime />,
-              },
-              {
-                title: "Revenue Collected",
-                value: `₱${metrics.revenueCollected.toLocaleString()}`,
-                chip: "+18% YoY",
-                icon: <PesoIcon />,
               },
             ].map((item, idx) => (
               <Grid item xs={12} sm={6} md={3} key={idx}>
@@ -312,16 +331,6 @@ function Dashboard() {
                         >
                           {item.value}
                         </Typography>
-                        <Chip
-                          label={item.chip}
-                          size="small"
-                          color={item.chipColor || "default"}
-                          sx={{
-                            mt: 2,
-                            background: item.chipColor ? undefined : lightGreen,
-                            color: item.chipColor ? undefined : primaryGreen,
-                          }}
-                        />
                       </Box>
                       <Avatar
                         sx={{

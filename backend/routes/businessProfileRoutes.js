@@ -159,4 +159,17 @@ router.post("/businesses", async (req, res) => {
   }
 });
 
+router.get("/approved-counts", async (req, res) => {
+  try {
+    // Count all records in the File table
+    const totalApps = await BusinessProfile.count();
+
+    // Return as JSON
+    res.json({ totalApplications: totalApps });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ totalApplications: 0 });
+  }
+});
+
 module.exports = router;

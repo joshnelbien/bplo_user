@@ -180,6 +180,19 @@ router.get("/files", async (req, res) => {
   }
 });
 
+router.get("/application-counts", async (req, res) => {
+  try {
+    // Count all records in the File table
+    const totalApps = await File.count();
+
+    // Return as JSON
+    res.json({ totalApplications: totalApps });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ totalApplications: 0 });
+  }
+});
+
 router.get("/files/:id", async (req, res) => {
   try {
     const { id } = req.params;
