@@ -31,6 +31,7 @@ router.get("/businessProfiles", async (req, res) => {
         "first_name",
         "middle_name",
         "business_address",
+        "application_type",
       ],
       where: whereClause,
       limit: parseInt(limit),

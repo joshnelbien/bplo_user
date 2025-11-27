@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -34,23 +34,23 @@ function SearchBusinesses({ open, onClose }) {
 
   const API = import.meta.env.VITE_API_BASE;
 
+  useEffect(() => {
+    if (!open) {
+      setSearchValue("");
+      setResults([]);
+      setPage(1);
+    }
+  }, [open]);
+
   const fetchResults = async (search, pageNumber = 1) => {
     if (!search.trim()) return;
-    console.log("Searching for:", search); // ✅ debug search value
-
     setLoading(true);
     try {
       const response = await axios.get(
         `${API}/businesses2025/businessProfiles`,
-        {
-          params: { search, page: pageNumber, limit },
-        }
+        { params: { search, page: pageNumber, limit } }
       );
-
       const { rows, total } = response.data;
-      console.log("API returned rows:", rows); // ✅ debug API results
-      console.log("Total results:", total); // ✅ debug total count
-
       setResults(rows || []);
       setTotalPages(Math.ceil((total || 0) / limit));
       setPage(pageNumber);
@@ -63,22 +63,18 @@ function SearchBusinesses({ open, onClose }) {
     }
   };
 
-  const handlePageChange = (e, value) => {
-    console.log("Page changed to:", value); // ✅ debug page change
-    fetchResults(searchValue, value);
-  };
-
-  const handleSearchClick = () => {
-    console.log("Search clicked with value:", searchValue); // ✅ debug search click
-    fetchResults(searchValue, 1);
-  };
+  const handlePageChange = (e, value) => fetchResults(searchValue, value);
+  const handleSearchClick = () => fetchResults(searchValue, 1);
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
-      e.preventDefault(); // prevent form refresh
+      e.preventDefault();
       handleSearchClick();
     }
   };
+
+  // Generate multiple watermark spans to cover the page
+  const watermarkArray = Array.from({ length: 50 }, (_, i) => i);
 
   return (
     <Dialog
@@ -88,6 +84,64 @@ function SearchBusinesses({ open, onClose }) {
       maxWidth="md"
       TransitionProps={{ unmountOnExit: true }}
     >
+      {/* Inject print CSS */}
+      <style>{`
+      .watermark {
+  display: none;
+}
+
+        @media print {
+          body {
+            -webkit-print-color-adjust: exact;
+          }
+
+          /* watermark across entire page */
+          .watermark {
+            position: fixed;
+            top: 0%;
+            left: 0%;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            pointer-events: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-items: center;
+            opacity: 0.2;
+            font-size: 50px;
+            font-weight: bold;
+            color: black;
+            transform: rotate(-45deg);
+          }
+          .watermark span {
+            margin: 60px;
+          }
+
+          /* hide non-print elements */
+          .MuiDialogActions-root,
+          .MuiIconButton-root,
+          .MuiInputBase-root,
+          .MuiPagination-root,
+          .MuiDialogTitle-root {
+            display: none !important;
+          }
+
+          /* table page break handling */
+          table { page-break-inside:auto }
+          tr { page-break-inside:avoid; page-break-after:auto }
+          thead { display:table-header-group }
+          tfoot { display:table-footer-group }
+        }
+      `}</style>
+
+      {/* Watermark for print only */}
+      <div className="watermark print-only">
+        {watermarkArray.map((i) => (
+          <span key={i}>GOVERNMENT PROPERTY</span>
+        ))}
+      </div>
+
       <DialogTitle
         sx={{
           fontWeight: "bold",
@@ -147,7 +201,7 @@ function SearchBusinesses({ open, onClose }) {
             </Paper>
           </Stack>
 
-          <Box sx={{ mt: 4 }}>
+          <Box className="printable" sx={{ mt: 4 }}>
             {loading ? (
               <Box sx={{ textAlign: "center", py: 4 }}>
                 <CircularProgress sx={{ color: "#09360D" }} />
@@ -166,6 +220,9 @@ function SearchBusinesses({ open, onClose }) {
                         <TableCell sx={{ fontWeight: "bold" }}>
                           Address
                         </TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>
+                          Application Type
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -177,6 +234,7 @@ function SearchBusinesses({ open, onClose }) {
                             {item.middle_name}
                           </TableCell>
                           <TableCell>{item.business_address}</TableCell>
+                          <TableCell>{item.application_type}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
