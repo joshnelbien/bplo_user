@@ -32,9 +32,9 @@ router.get("/businessProfiles", async (req, res) => {
     }
 
     const offset = (page - 1) * limit;
-    const whereClause = search
-      ? { business_name: { [Op.iLike]: `%${search}%` } }
-      : {};
+
+    // Exact match (case-insensitive)
+    const whereClause = search ? { business_name: { [Op.iLike]: search } } : {};
 
     const total = await Businesses_2025.count({ where: whereClause });
     const rows = await Businesses_2025.findAll({
