@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+// SearchBusinesses.jsx
+import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -23,6 +24,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import axios from "axios";
+import ReCAPTCHA from "react-google-recaptcha";
 
 function SearchBusinesses({ open, onClose }) {
   const [searchValue, setSearchValue] = useState("");
@@ -30,32 +32,60 @@ function SearchBusinesses({ open, onClose }) {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 100;
+  const [captchaToken, setCaptchaToken] = useState(null);
+  const captchaRef = useRef(null);
 
+  const limit = 100;
   const API = import.meta.env.VITE_API_BASE;
+  const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || "YOUR_SITE_KEY";
 
   useEffect(() => {
     if (!open) {
+      // Reset everything when modal closes
       setSearchValue("");
       setResults([]);
       setPage(1);
+      setTotalPages(1);
+      setCaptchaToken(null);
+      if (captchaRef.current) captchaRef.current.reset();
     }
   }, [open]);
 
-  const fetchResults = async (search, pageNumber = 1) => {
-    if (!search.trim()) return;
+  const verifyAndSearch = async (
+    search,
+    pageNumber = 1,
+    requireCaptcha = true
+  ) => {
+    if (!search || !search.trim()) return;
+
+    if (requireCaptcha && !captchaToken) {
+      alert("Please complete the captcha before searching.");
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await axios.get(
         `${API}/businesses2025/businessProfiles`,
-        { params: { search, page: pageNumber, limit } }
+        {
+          params: { search, page: pageNumber, limit, token: captchaToken },
+        }
       );
+
       const { rows, total } = response.data;
       setResults(rows || []);
       setTotalPages(Math.ceil((total || 0) / limit));
       setPage(pageNumber);
-    } catch (error) {
-      console.error("Error fetching business profiles:", error);
+
+      // Only reset captcha after modal closes, not after each search
+      // This allows switching pages without captcha again
+    } catch (err) {
+      console.error("Search error:", err);
+      if (err.response?.data?.message) {
+        alert(err.response.data.message);
+      } else {
+        alert("Error searching businesses. Please try again.");
+      }
       setResults([]);
       setTotalPages(1);
     } finally {
@@ -63,8 +93,9 @@ function SearchBusinesses({ open, onClose }) {
     }
   };
 
-  const handlePageChange = (e, value) => fetchResults(searchValue, value);
-  const handleSearchClick = () => fetchResults(searchValue, 1);
+  const handlePageChange = (e, value) =>
+    verifyAndSearch(searchValue, value, false);
+  const handleSearchClick = () => verifyAndSearch(searchValue, 1, true);
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
@@ -73,7 +104,10 @@ function SearchBusinesses({ open, onClose }) {
     }
   };
 
-  // Generate multiple watermark spans to cover the page
+  const onCaptchaChange = (token) => {
+    setCaptchaToken(token);
+  };
+
   const watermarkArray = Array.from({ length: 50 }, (_, i) => i);
 
   return (
@@ -84,58 +118,41 @@ function SearchBusinesses({ open, onClose }) {
       maxWidth="md"
       TransitionProps={{ unmountOnExit: true }}
     >
-      {/* Inject print CSS */}
       <style>{`
-      .watermark {
-  display: none;
-}
-
+        .watermark { display: none; }
         @media print {
-          body {
-            -webkit-print-color-adjust: exact;
-          }
-
-          /* watermark across entire page */
+          body { -webkit-print-color-adjust: exact; }
           .watermark {
-            position: fixed;
-            top: 0%;
-            left: 0%;
-            width: 100%;
-            height: 100%;
-            z-index: 9999;
-            pointer-events: none;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-around;
             align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             opacity: 0.2;
             font-size: 50px;
             font-weight: bold;
             color: black;
             transform: rotate(-45deg);
+            z-index: 9999;
+            pointer-events: none;
           }
-          .watermark span {
-            margin: 60px;
-          }
-
-          /* hide non-print elements */
+          .watermark span { margin: 60px; }
           .MuiDialogActions-root,
           .MuiIconButton-root,
           .MuiInputBase-root,
           .MuiPagination-root,
-          .MuiDialogTitle-root {
-            display: none !important;
-          }
-
-          /* table page break handling */
-          table { page-break-inside:auto }
-          tr { page-break-inside:avoid; page-break-after:auto }
-          thead { display:table-header-group }
-          tfoot { display:table-footer-group }
+          .MuiDialogTitle-root { display: none !important; }
+          table { page-break-inside:auto; }
+          tr { page-break-inside:avoid; page-break-after:auto; }
+          thead { display:table-header-group; }
+          tfoot { display:table-footer-group; }
         }
       `}</style>
 
-      {/* Watermark for print only */}
       <div className="watermark print-only">
         {watermarkArray.map((i) => (
           <span key={i}>GOVERNMENT PROPERTY</span>
@@ -194,12 +211,20 @@ function SearchBusinesses({ open, onClose }) {
                 type="button"
                 onClick={handleSearchClick}
                 sx={{ color: "#09360D" }}
-                disabled={loading}
+                disabled={loading || !captchaToken}
               >
                 <SearchIcon />
               </IconButton>
             </Paper>
           </Stack>
+
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <ReCAPTCHA
+              ref={captchaRef}
+              sitekey={SITE_KEY}
+              onChange={onCaptchaChange}
+            />
+          </Box>
 
           <Box className="printable" sx={{ mt: 4 }}>
             {loading ? (
