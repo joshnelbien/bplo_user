@@ -30,16 +30,19 @@ router.get("/imported-businesses", async (req, res) => {
 // --------------------------
 // GET searchable businesses with pagination
 // --------------------------
+
 router.get("/businessProfiles", async (req, res) => {
   try {
     const { search = "", page = 1, limit = 100 } = req.query;
     const offset = (page - 1) * limit;
 
     const whereClause = search
-      ? { business_name: { [Op.like]: `${search}%` } } // prefix search for index
+      ? { business_name: { [Op.iLike]: `%${search}%` } } // case-insensitive substring search
       : {};
 
-    const files = await BusinessProfile.findAll({
+    const total = await BusinessProfile.count({ where: whereClause });
+
+    const rows = await BusinessProfile.findAll({
       attributes: [
         "business_name",
         "incharge_last_name",
@@ -53,10 +56,10 @@ router.get("/businessProfiles", async (req, res) => {
       order: [["business_name", "ASC"]],
     });
 
-    res.json(files);
+    res.json({ rows, total });
   } catch (err) {
     console.error(err);
-    res.status(500).json([]);
+    res.status(500).json({ rows: [], total: 0 });
   }
 });
 

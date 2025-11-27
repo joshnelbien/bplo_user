@@ -43,6 +43,10 @@ const AdminAccountRoutes = require("./routes/adminAccountRoutes");
 const ExistingBusinessProfile = require("./db/model/BusinessProfileExisting");
 const ExistingBusinessProfileRoutes = require("./routes/ExistingBusinessProfileRoutes");
 
+const Businesses_2025 = require("./db/model/businesses2025");
+const Businesses_2025Routes = require("./routes/businesses2025Routes");
+const importBusinesses2025 = require("./routes/scripts/importBusinesses2025");
+
 const ClientPayments = require("./db/model/paymentsDB");
 
 const feedback = require("./routes/feedback");
@@ -364,7 +368,8 @@ function watchFSICFile() {
     await BusinessProfile.sync({ alter: true });
     await ClientPayments.sync({ alter: true });
     await ExistingBusinessProfile.sync({ alter: true });
-
+    await Businesses_2025.sync({ alter: true });
+    await importBusinesses2025();
     await importFSICData();
     await importBusinesses();
     watchFSICFile();
@@ -387,6 +392,7 @@ app.use("/businessProfile", businessProfileRoutes);
 app.use("/user-feedback", feedback);
 app.use("/adminAccounts", AdminAccountRoutes);
 app.use("/existing-businesses", ExistingBusinessProfileRoutes);
+app.use("/businesses2025", Businesses_2025Routes);
 
 // Endpoint to fetch FSIC rows (limited)
 app.get("/api/my-existing-table", async (req, res) => {
