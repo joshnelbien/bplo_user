@@ -168,11 +168,11 @@ router.put("/treasurer-payments/:id", async (req, res) => {
 
     const applicant = await TreasurersOffice.findByPk(id);
     const fileApplicant = await File.findByPk(id);
-    const businessProfile = await BusinessProfile.findByPk(id);
+    // const businessProfile = await BusinessProfile.findByPk(id);
 
-    if (!applicant || !fileApplicant || !businessProfile) {
-      return res.status(404).json({ error: "Applicant or Profile not found" });
-    }
+    // if (!applicant || !fileApplicant || !businessProfile) {
+    //   return res.status(404).json({ error: "Applicant or Profile not found" });
+    // }
 
     const isRenew = applicant.application?.toLowerCase() === "renew";
     const isNew = applicant.application?.toLowerCase() === "new";
@@ -287,7 +287,7 @@ router.put("/treasurer-payments/:id", async (req, res) => {
 
     await applicant.update(sharedUpdate);
     await fileApplicant.update(sharedUpdate);
-    await businessProfile.update(sharedUpdate);
+    // await businessProfile.update(sharedUpdate);
 
     res.json({ success: true, updated: sharedUpdate });
   } catch (error) {

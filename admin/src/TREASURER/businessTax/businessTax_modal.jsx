@@ -619,7 +619,7 @@ function BusinessTaxApplicantModal({
               )}
             </Stack>
           </Section>
-          {applicant.BusinessTax === "Approved" && (
+          {applicant.BusinessTax !== "Approved" && (
             <>
               <Grid container spacing={1} sx={{ mt: 1 }}>
                 <Grid item>
@@ -662,7 +662,7 @@ function BusinessTaxApplicantModal({
           >
             Close
           </Button>
-          {applicant.BusinessTax === "Approved" && (
+          {applicant.BusinessTax !== "Approved" && (
             <>
               <Button
                 onClick={() => setComputeOpen(true)}

@@ -199,7 +199,7 @@ const BusinessProfile = sequelize.define(
     application: { type: DataTypes.STRING },
     businessTaxTotal: { type: DataTypes.STRING },
     payment_mode: {
-      type: DataTypes.STRING, // "Cash" or "Check"
+      type: DataTypes.STRING,
     },
     amount_due: {
       type: DataTypes.STRING,
