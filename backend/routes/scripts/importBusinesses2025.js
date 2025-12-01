@@ -13,7 +13,7 @@ const CSV_PATH = path.join(
   "..",
   "..",
   "public",
-  "businesses2025.csv"
+  "Businesses2025.csv"
 );
 const BATCH_SIZE = 1000;
 
