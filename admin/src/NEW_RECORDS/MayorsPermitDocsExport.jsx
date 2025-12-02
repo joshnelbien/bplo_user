@@ -99,6 +99,7 @@ const styles = StyleSheet.create({
   totalCell: {
     padding: 3,
     border: "0.5pt solid black",
+    minHeight: 12,
     fontSize: 7,
     fontWeight: "bold",
   },
@@ -252,6 +253,13 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
       (i) => i.amount && Number(i.amount) > 0
     );
 
+    const MAX_ROWS = 17;
+    const filledRows = [...validCollections];
+
+    while (filledRows.length < MAX_ROWS) {
+      filledRows.push({ label: "", amount: "" });
+    }
+
     const bagongPilipinasSrc = await loadImageAsBase64("/bagongpilipinas.png");
     const spcLogoSrc = await loadImageAsBase64("/spclogo.png");
     const eSig = await loadImageAsBase64("/samplesig.png");
@@ -306,8 +314,9 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
             </View>
 
             <Text style={styles.introText}>
-              Pursuant to City Ordinance No. 2012-40, s. of 2012,also knwon as
-              the "2012 Revenue Code if the City of San Pablo", as amended.
+              Pursuant to City Ordinance No. 2012-40, s. of 2012,also known as
+              the "2012 Revenue Code of the City of San Pablo", as amended.
+              {"\n"}
               BUSINESS LICENSE and MAYOR'S PERMIT is hereby granted to:
             </Text>
 
@@ -378,9 +387,14 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
                   </Text>
                 </View>
 
-                {validCollections.map((item) => (
-                  <View style={styles.row} key={item.label}>
-                    <Text style={[styles.collectionCell, { width: "40%" }]}>
+                {filledRows.map((item, idx) => (
+                  <View style={styles.row} key={idx}>
+                    <Text
+                      style={[
+                        styles.collectionCell,
+                        { width: "40%", height: "12px" },
+                      ]}
+                    >
                       {item.label}
                     </Text>
                     <Text
@@ -389,7 +403,7 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
                         { width: "70%", textAlign: "left" },
                       ]}
                     >
-                      {formatPeso(Number(item.amount))}
+                      {item.amount ? formatPeso(Number(item.amount)) : ""}
                     </Text>
                   </View>
                 ))}
@@ -437,7 +451,7 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
                       width: 40,
                       height: 40,
                       marginBottom: -10,
-                      marginTop: 25,
+                      marginTop: 65,
                     }}
                   />
                   <Text style={{ fontWeight: "bold", fontSize: 10 }}>
@@ -455,7 +469,7 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
                       width: 40,
                       height: 40,
                       marginBottom: -10,
-                      marginTop: 50,
+                      marginTop: 30,
                     }}
                   />
                   <Text style={{ fontWeight: "bold", fontSize: 10 }}>
