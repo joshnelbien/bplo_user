@@ -6,6 +6,8 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
+  Select,
+  MenuItem,
   Paper,
   FormControl,
   InputLabel,
@@ -139,6 +141,8 @@ function ExaminersApplicantModalUpdate({
   const [businessNature, setBusinessNature] = useState([]);
   const [lineCode, setLineCode] = useState([]);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [lobOptions, setLobOptions] = useState([]);
+  const [businessLineData, setBusinessLineData] = useState([]);
 
   const handleDeleteBusinessLine = (indexToDelete) => {
     setLineOfBusiness((prev) => prev.filter((_, i) => i !== indexToDelete));
@@ -256,6 +260,26 @@ function ExaminersApplicantModalUpdate({
     businessNature.length,
     lineCode.length
   );
+
+  useEffect(() => {
+    const fetchBusinessLines = async () => {
+      try {
+        const res = await axios.get(`${API}/api/my-existing-table`);
+
+        // Store unique business line names for dropdown
+        const lines = res.data
+          .map((item) => item.business_line?.toUpperCase())
+          .filter(Boolean);
+        setLobOptions([...new Set(lines)]);
+
+        // Store full records for auto-fill
+        setBusinessLineData(res.data);
+      } catch (err) {
+        console.error("❌ Failed to fetch business_line from DB:", err);
+      }
+    };
+    fetchBusinessLines();
+  }, [API]);
 
   return (
     <>
@@ -377,24 +401,52 @@ function ExaminersApplicantModalUpdate({
                 {/* Line of Business */}
                 <FormControl fullWidth sx={{ width: "100%" }}>
                   <InputLabel
-                    htmlFor={`line-of-business-${index}`}
+                    id={`line-of-business-label-${index}`}
                     sx={{ color: "black" }}
                   >
                     Line of Business
                   </InputLabel>
-                  <OutlinedInput
+                  <Select
+                    labelId={`line-of-business-label-${index}`}
                     id={`line-of-business-${index}`}
                     value={lineOfBusiness[index] || ""}
-                    onChange={(e) =>
-                      updateArray(index, "lineOfBusiness", e.target.value)
-                    }
-                    multiline
-                    rows={3}
-                    sx={{ backgroundColor: "#fffbe6" }}
-                    label="Line of Business"
-                  />
-                </FormControl>
+                    onChange={(e) => {
+                      const selectedLOB = e.target.value;
 
+                      // Update Line of Business
+                      updateArray(index, "lineOfBusiness", selectedLOB);
+
+                      // Find corresponding record in businessLineData
+                      const match = businessLineData.find(
+                        (item) =>
+                          item.business_line?.toUpperCase() === selectedLOB
+                      );
+
+                      if (match) {
+                        // Auto-fill related fields
+                        updateArray(
+                          index,
+                          "natureCode",
+                          match.nature_code || ""
+                        );
+                        updateArray(
+                          index,
+                          "businessNature",
+                          match.business_nature || ""
+                        );
+                        updateArray(index, "lineCode", match.line_code || "");
+                      }
+                    }}
+                    sx={{ backgroundColor: "#fffbe6", minHeight: 56 }}
+                    label="Line of Business"
+                  >
+                    {lobOptions.map((option) => (
+                      <MenuItem key={option} value={option}>
+                        {option}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
                 <Grid item xs={12} mt={2}>
                   {/* Product/Service */}
                   <Grid item xs={12} mt={2}>
