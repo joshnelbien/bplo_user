@@ -7,6 +7,10 @@ import {
   DialogTitle,
   Grid,
   Paper,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  Box,
   TextField,
   Typography,
   Tooltip,
@@ -20,8 +24,13 @@ import axios from "axios";
 const API = import.meta.env.VITE_API_BASE;
 
 // Reusable Text Field (Read-only)
-const Field = ({ label, value, disabled = true }) => (
-  <Grid item xs={12} sm={6}>
+const Field = ({
+  label,
+  value,
+  disabled = true,
+  gridProps = { xs: 12, sm: 6 },
+}) => (
+  <Grid item {...gridProps}>
     <TextField
       label={label}
       value={value || ""}
@@ -130,6 +139,16 @@ function ExaminersApplicantModalUpdate({
   const [businessNature, setBusinessNature] = useState([]);
   const [lineCode, setLineCode] = useState([]);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+
+  const handleDeleteBusinessLine = (indexToDelete) => {
+    setLineOfBusiness((prev) => prev.filter((_, i) => i !== indexToDelete));
+    setProductService((prev) => prev.filter((_, i) => i !== indexToDelete));
+    setUnits((prev) => prev.filter((_, i) => i !== indexToDelete));
+    setCapitalValues((prev) => prev.filter((_, i) => i !== indexToDelete));
+    setNatureCode((prev) => prev.filter((_, i) => i !== indexToDelete));
+    setBusinessNature((prev) => prev.filter((_, i) => i !== indexToDelete));
+    setLineCode((prev) => prev.filter((_, i) => i !== indexToDelete));
+  };
 
   // Helper to parse CSV-like string arrays
   const parseCSV = (text) => {
@@ -327,6 +346,7 @@ function ExaminersApplicantModalUpdate({
           {/* Business Activity & Incentives */}
           <Section title="Business Activity & Incentives">
             <Field label="Tax Incentives" value={applicant.tIGE} />
+
             {applicant.tIGE === "Yes" && (
               <FileField
                 fileKey="tIGEfiles"
@@ -334,6 +354,7 @@ function ExaminersApplicantModalUpdate({
                 fileData={applicant}
               />
             )}
+
             <Field label="Office Type" value={applicant.officeType} />
 
             {/* Editable Business Lines */}
@@ -353,27 +374,30 @@ function ExaminersApplicantModalUpdate({
                   Business Line {index + 1}
                 </Typography>
 
-                <Grid container spacing={2}>
-                  {/* Line of Business */}
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Line of Business"
-                      value={lineOfBusiness[index] || ""}
-                      onChange={(e) =>
-                        updateArray(index, "lineOfBusiness", e.target.value)
-                      }
-                      fullWidth
-                      multiline
-                      rows={3}
-                      variant="outlined"
-                      size="small"
-                      sx={{ backgroundColor: "#fffbe6" }}
-                      InputLabelProps={{ sx: { color: "black" } }}
-                    />
-                  </Grid>
+                {/* Line of Business */}
+                <FormControl fullWidth sx={{ width: "100%" }}>
+                  <InputLabel
+                    htmlFor={`line-of-business-${index}`}
+                    sx={{ color: "black" }}
+                  >
+                    Line of Business
+                  </InputLabel>
+                  <OutlinedInput
+                    id={`line-of-business-${index}`}
+                    value={lineOfBusiness[index] || ""}
+                    onChange={(e) =>
+                      updateArray(index, "lineOfBusiness", e.target.value)
+                    }
+                    multiline
+                    rows={3}
+                    sx={{ backgroundColor: "#fffbe6" }}
+                    label="Line of Business"
+                  />
+                </FormControl>
 
+                <Grid item xs={12} mt={2}>
                   {/* Product/Service */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} mt={2}>
                     <TextField
                       label="Product/Service"
                       value={productService[index] || ""}
@@ -386,9 +410,8 @@ function ExaminersApplicantModalUpdate({
                       InputLabelProps={{ sx: { color: "black" } }}
                     />
                   </Grid>
-
                   {/* Units */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} mt={2}>
                     <TextField
                       label="Units"
                       value={units[index] || ""}
@@ -401,9 +424,8 @@ function ExaminersApplicantModalUpdate({
                       InputLabelProps={{ sx: { color: "black" } }}
                     />
                   </Grid>
-
                   {/* Capital */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} mt={2}>
                     <TextField
                       label="Capital"
                       value={
@@ -422,24 +444,12 @@ function ExaminersApplicantModalUpdate({
                       fullWidth
                       variant="outlined"
                       size="small"
-                      sx={{
-                        backgroundColor: "#fffbe6",
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#1c541e",
-                        },
-                        "&:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#2e7d32",
-                        },
-                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#1b5e20",
-                        },
-                      }}
+                      sx={{ backgroundColor: "#fffbe6" }}
                       InputLabelProps={{ sx: { color: "black" } }}
                     />
                   </Grid>
-
                   {/* Nature Code */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} mt={2}>
                     <TextField
                       label="Nature Code"
                       value={natureCode[index] || ""}
@@ -452,9 +462,8 @@ function ExaminersApplicantModalUpdate({
                       InputLabelProps={{ sx: { color: "black" } }}
                     />
                   </Grid>
-
                   {/* Business Nature */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} mt={2}>
                     <TextField
                       label="Business Nature"
                       value={businessNature[index] || ""}
@@ -467,9 +476,8 @@ function ExaminersApplicantModalUpdate({
                       InputLabelProps={{ sx: { color: "black" } }}
                     />
                   </Grid>
-
                   {/* Line Code */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} mt={2}>
                     <TextField
                       label="Line Code"
                       value={lineCode[index] || ""}
@@ -483,8 +491,32 @@ function ExaminersApplicantModalUpdate({
                     />
                   </Grid>
                 </Grid>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  sx={{ mt: 2 }}
+                  onClick={() => handleDeleteBusinessLine(index)}
+                >
+                  Delete
+                </Button>
               </Paper>
             ))}
+
+            {/* SINGLE BUTTON AT THE VERY BOTTOM */}
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setLineOfBusiness((prev) => [...prev, ""]);
+                setProductService((prev) => [...prev, ""]);
+                setUnits((prev) => [...prev, ""]);
+                setCapitalValues((prev) => [...prev, ""]);
+                setNatureCode((prev) => [...prev, ""]);
+                setBusinessNature((prev) => [...prev, ""]);
+                setLineCode((prev) => [...prev, ""]);
+              }}
+            >
+              Add Business Line
+            </Button>
           </Section>
 
           {/* Business Requirements */}

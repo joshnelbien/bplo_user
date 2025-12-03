@@ -225,7 +225,6 @@ router.put("/examiners/:id", async (req, res) => {
     const { id } = req.params;
     const updates = { ...req.body };
 
-    // If capital is included, compute totalCapital
     if (updates.capital) {
       try {
         const capitalArray = updates.capital
@@ -241,21 +240,17 @@ router.put("/examiners/:id", async (req, res) => {
       }
     }
 
-    // Find the examiner first
     const examiner = await Examiners.findByPk(id);
     if (!examiner) {
       return res.status(404).json({ error: "Examiner not found" });
     }
 
-    // Find related application (if exists)
     const application = await File.findOne({ where: { id } });
 
-    // Update file (if exists)
     if (application) {
       await application.update(updates);
     }
 
-    // Update the examiner
     await examiner.update(updates);
 
     res.json({
