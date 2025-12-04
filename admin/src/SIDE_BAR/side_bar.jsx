@@ -73,7 +73,7 @@ const menuItems = [
     path: "/businessProfile",
     icon: <AccountBoxRoundedIcon />,
   },
-  { text: "Announcement", path: "/announcement", icon: <CampaignIcon /> },
+  // { text: "Announcement", path: "/announcement", icon: <CampaignIcon /> },
 ];
 
 // Department items
