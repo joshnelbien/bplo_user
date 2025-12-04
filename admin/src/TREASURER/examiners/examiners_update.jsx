@@ -211,14 +211,15 @@ function ExaminersApplicantModalUpdate({
     }
   };
 
-  const quoteJoin = (arr) =>
-    Array.isArray(arr) ? arr.map((v) => `"${v}"`).join(",") : arr;
+  const quoteJoin = (arr) => {
+    if (!arr || !arr.length) return "";
+    return arr.map((v) => `"${v}"`).join(",");
+  };
 
   const handleUpdate = async () => {
     try {
       const updatedData = {
         ...formData,
-
         capital: quoteJoin(capitalValues),
         lineOfBusiness: quoteJoin(lineOfBusiness),
         productService: quoteJoin(productService),
@@ -228,26 +229,14 @@ function ExaminersApplicantModalUpdate({
         lineCode: quoteJoin(lineCode),
       };
 
-      const res = await axios.put(
-        `${API}/examiners/examiners/${formData.id}`,
-        updatedData
-      );
-
-      if (res.status === 200) {
-        console.log("Updated record:", res.data);
-        setSuccessDialogOpen(true);
-
-        if (onApprove) onApprove(updatedData);
-
-        setTimeout(() => {
-          setSuccessDialogOpen(false);
-          onClose();
-          window.location.reload();
-        }, 1500);
-      }
+      await axios.put(`${API}/examiners/examiners/${formData.id}`, updatedData);
+      setSuccessDialogOpen(true);
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } catch (err) {
-      console.error("Update failed:", err);
-      alert("Failed to update applicant details.");
+      console.error(err);
+      alert("Update failed.");
     }
   };
 
