@@ -27,7 +27,13 @@ const TOP_BAR_HEIGHT = 80;
 const SIDE_BAR_WIDTH = 250;
 
 // Confirmation Modal (Responsive)
-const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
+const ConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  message,
+  loading,
+}) => {
   const isMobile = useMediaQuery("(max-width:600px)");
   return (
     <Modal open={isOpen} onClose={onClose}>
@@ -46,14 +52,28 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
           outline: "none",
         }}
       >
-        <Typography variant={isMobile ? "subtitle1" : "h6"} mb={2} fontWeight="bold">
+        <Typography
+          variant={isMobile ? "subtitle1" : "h6"}
+          mb={2}
+          fontWeight="bold"
+        >
           {message}
         </Typography>
         <Box display="flex" justifyContent="center" gap={2} flexWrap="wrap">
-          <Button variant="contained" color="success" onClick={onConfirm} size={isMobile ? "small" : "medium"}>
-            Yes
+          <Button
+            variant="contained"
+            color="success"
+            onClick={onConfirm}
+            size={isMobile ? "small" : "medium"}
+            disabled={loading}
+          >
+            {loading ? "Processing..." : "Approve"}
           </Button>
-          <Button variant="outlined" onClick={onClose} size={isMobile ? "small" : "medium"}>
+          <Button
+            variant="outlined"
+            onClick={onClose}
+            size={isMobile ? "small" : "medium"}
+          >
             No
           </Button>
         </Box>
@@ -86,11 +106,18 @@ const SuccessModal = ({ isOpen, onClose, message }) => {
           gap: 2,
         }}
       >
-        <CheckCircleOutline sx={{ color: "green", fontSize: isMobile ? 50 : 60 }} />
+        <CheckCircleOutline
+          sx={{ color: "green", fontSize: isMobile ? 50 : 60 }}
+        />
         <Typography variant={isMobile ? "subtitle1" : "h6"} fontWeight="bold">
           {message}
         </Typography>
-        <Button variant="contained" color="success" onClick={onClose} size={isMobile ? "small" : "medium"}>
+        <Button
+          variant="contained"
+          color="success"
+          onClick={onClose}
+          size={isMobile ? "small" : "medium"}
+        >
           OK
         </Button>
       </Box>
@@ -142,7 +169,8 @@ function Cenro() {
 
   // Filter Logic
   const filteredApplicants = applicants.filter((a) => {
-    if (filter === "pending") return a.CENRO !== "Approved" && a.CENRO !== "Declined";
+    if (filter === "pending")
+      return a.CENRO !== "Approved" && a.CENRO !== "Declined";
     if (filter === "approved") return a.CENRO === "Approved";
     if (filter === "declined") return a.CENRO === "Declined";
     return true;
@@ -151,7 +179,10 @@ function Cenro() {
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = filteredApplicants.slice(indexOfFirstRecord, indexOfLastRecord);
+  const currentRecords = filteredApplicants.slice(
+    indexOfFirstRecord,
+    indexOfLastRecord
+  );
 
   // 1. Open confirmation
   const handleApprove = (id, cenroFee, selectedFiles) => {
@@ -167,7 +198,8 @@ function Cenro() {
     try {
       const formData = new FormData();
       formData.append("cenroFee", cenroFee);
-      if (selectedFiles.cenroCert) formData.append("cenroCert", selectedFiles.cenroCert);
+      if (selectedFiles.cenroCert)
+        formData.append("cenroCert", selectedFiles.cenroCert);
 
       await axios.post(`${API}/backroom/cenro/approve/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -272,7 +304,11 @@ function Cenro() {
                   textTransform: "capitalize",
                 }}
               >
-                {status === "pending" ? "Pending" : status === "approved" ? "Approved" : "Declined"}
+                {status === "pending"
+                  ? "Pending"
+                  : status === "approved"
+                  ? "Approved"
+                  : "Declined"}
               </Button>
             ))}
           </ButtonGroup>
@@ -291,12 +327,24 @@ function Cenro() {
           <Table size={isMobile ? "small" : "medium"}>
             <TableHead>
               <TableRow sx={{ bgcolor: "#f5f5f5" }}>
-                <TableCell><strong>Application</strong></TableCell>
-                <TableCell><strong>BIN</strong></TableCell>
-                <TableCell><strong>Business Name</strong></TableCell>
-                <TableCell><strong>First Name</strong></TableCell>
-                <TableCell><strong>Last Name</strong></TableCell>
-                <TableCell><strong>Status</strong></TableCell>
+                <TableCell>
+                  <strong>Application</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>BIN</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Business Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>First Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Last Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Status</strong>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -377,7 +425,8 @@ function Cenro() {
         isOpen={isConfirmModalOpen}
         onClose={() => setIsConfirmModalOpen(false)}
         onConfirm={handleConfirmAction}
-        message="Are you sure you want to approve this CENRO application?"
+        loading={loading}
+        message="Are you sure you want to approve this applicant?"
       />
 
       {/* Success Modal */}

@@ -248,9 +248,25 @@ function CenroApplicantModal({
   };
 
   const handleConfirmApprove = () => {
-    setConfirmOpen(false);
-    onApprove(applicant.id, cenroField.cenroFee, selectedFiles);
-    setSuccessOpen(true);
+    let hasError = false;
+    const newErrors = { cenroFee: false, cenroCert: false };
+
+    if (cenroField.cenroFee.trim() === "") {
+      newErrors.cenroFee = true;
+      hasError = true;
+    }
+
+    if (!selectedFiles.cenroCert) {
+      newErrors.cenroCert = true;
+      hasError = true;
+    }
+
+    setValidationErrors(newErrors);
+
+    if (!hasError) {
+      setConfirmOpen(true); // show modal only when valid
+      onApprove(applicant.id, cenroField.cenroFee, selectedFiles);
+    }
   };
 
   const handleDeclineConfirm = () => {
@@ -644,7 +660,7 @@ function CenroApplicantModal({
           {applicant.CENRO !== "Approved" && (
             <>
               <Button
-                onClick={handleApproveClick}
+                onClick={handleConfirmApprove}
                 variant="contained"
                 color="success"
                 sx={{ width: "100px" }}
@@ -685,7 +701,7 @@ function CenroApplicantModal({
       </Dialog>
 
       {/* Confirmation Dialog for Approve */}
-      <Dialog
+      {/* <Dialog
         open={confirmOpen}
         onClose={handleConfirmClose}
         aria-labelledby="confirm-dialog-title"
@@ -743,7 +759,7 @@ function CenroApplicantModal({
             No
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
 
       {/* Decline Dialog with Reason Buttons and input */}
       <Dialog
