@@ -196,7 +196,6 @@ function ZoningApplicantModal({
     }
 
     onApprove(applicant.id, renewZoningFee);
-    setSuccessOpen(true);
   };
 
   const handleSuccessClose = () => {
@@ -587,14 +586,14 @@ function ZoningApplicantModal({
 
                       <TextField
                         label="Zoning Fee"
+                        type="text" // <- change this
                         value={formatCurrency(renewZoningFee)}
                         onChange={(e) => {
-                          const rawValue = e.target.value.replace(/,/g, "");
+                          const rawValue = e.target.value.replace(/,/g, ""); // remove commas
                           handleChange("renewZoningFee", rawValue);
                         }}
                         fullWidth
                         size="small"
-                        sx={{ mt: 2 }}
                         required
                         error={feeError}
                         helperText={
@@ -996,6 +995,7 @@ function ZoningApplicantModal({
         </DialogActions>
       </Dialog>
       {/* Success Pop-up for Approve */}
+
       <Dialog
         open={successOpen}
         onClose={handleSuccessClose}

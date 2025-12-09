@@ -27,7 +27,13 @@ const TOP_BAR_HEIGHT = 80;
 const SIDE_BAR_WIDTH = 250;
 
 // Responsive Confirmation Modal
-const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
+const ConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  message,
+  loading,
+}) => {
   const isMobile = useMediaQuery("(max-width:600px)");
   return (
     <Modal open={isOpen} onClose={onClose}>
@@ -46,14 +52,27 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
           outline: "none",
         }}
       >
-        <Typography variant={isMobile ? "subtitle1" : "h6"} mb={2} fontWeight="bold">
+        <Typography
+          variant={isMobile ? "subtitle1" : "h6"}
+          mb={2}
+          fontWeight="bold"
+        >
           {message}
         </Typography>
         <Box display="flex" justifyContent="center" gap={2} flexWrap="wrap">
-          <Button variant="contained" color="success" onClick={onConfirm} size={isMobile ? "small" : "medium"}>
-            Yes
+          <Button
+            variant="contained"
+            color="success"
+            onClick={onConfirm}
+            size={isMobile ? "small" : "medium"}
+          >
+            {loading ? "Processing..." : "Approve"}
           </Button>
-          <Button variant="outlined" onClick={onClose} size={isMobile ? "small" : "medium"}>
+          <Button
+            variant="outlined"
+            onClick={onClose}
+            size={isMobile ? "small" : "medium"}
+          >
             No
           </Button>
         </Box>
@@ -86,11 +105,18 @@ const SuccessModal = ({ isOpen, onClose, message }) => {
           gap: 2,
         }}
       >
-        <CheckCircleOutline sx={{ color: "green", fontSize: isMobile ? 50 : 60 }} />
+        <CheckCircleOutline
+          sx={{ color: "green", fontSize: isMobile ? 50 : 60 }}
+        />
         <Typography variant={isMobile ? "subtitle1" : "h6"} fontWeight="bold">
           {message}
         </Typography>
-        <Button variant="contained" color="success" onClick={onClose} size={isMobile ? "small" : "medium"}>
+        <Button
+          variant="contained"
+          color="success"
+          onClick={onClose}
+          size={isMobile ? "small" : "medium"}
+        >
           OK
         </Button>
       </Box>
@@ -138,7 +164,8 @@ function Zoning() {
 
   // Filter Logic
   const filteredApplicants = applicants.filter((a) => {
-    if (filter === "pending") return a.ZONING !== "Approved" && a.ZONING !== "Declined";
+    if (filter === "pending")
+      return a.ZONING !== "Approved" && a.ZONING !== "Declined";
     if (filter === "approved") return a.ZONING === "Approved";
     if (filter === "declined") return a.ZONING === "Declined";
     return true;
@@ -147,7 +174,10 @@ function Zoning() {
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = filteredApplicants.slice(indexOfFirstRecord, indexOfLastRecord);
+  const currentRecords = filteredApplicants.slice(
+    indexOfFirstRecord,
+    indexOfLastRecord
+  );
 
   const handleFileChange = (e) => {
     const { name, files } = e.target;
@@ -183,6 +213,7 @@ function Zoning() {
 
   const handleConfirmAction = async () => {
     setIsConfirmModalOpen(false);
+    setLoading(true);
     const id = confirmationData;
 
     try {
@@ -217,7 +248,11 @@ function Zoning() {
       setApplicants((prev) =>
         prev.map((applicant) =>
           applicant.id === id
-            ? { ...applicant, ZONING: "Approved", zoningFee: formData.get("zoningFee") }
+            ? {
+                ...applicant,
+                ZONING: "Approved",
+                zoningFee: formData.get("zoningFee"),
+              }
             : applicant
         )
       );
@@ -297,7 +332,11 @@ function Zoning() {
                   textTransform: "capitalize",
                 }}
               >
-                {status === "pending" ? "Pending" : status === "approved" ? "Approved" : "Declined"}
+                {status === "pending"
+                  ? "Pending"
+                  : status === "approved"
+                  ? "Approved"
+                  : "Declined"}
               </Button>
             ))}
           </ButtonGroup>
@@ -316,12 +355,24 @@ function Zoning() {
           <Table size={isMobile ? "small" : "medium"}>
             <TableHead>
               <TableRow sx={{ bgcolor: "#f5f5f5" }}>
-                <TableCell><strong>Application</strong></TableCell>
-                <TableCell><strong>BIN</strong></TableCell>
-                <TableCell><strong>Business Name</strong></TableCell>
-                <TableCell><strong>First Name</strong></TableCell>
-                <TableCell><strong>Last Name</strong></TableCell>
-                <TableCell><strong>Status</strong></TableCell>
+                <TableCell>
+                  <strong>Application</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>BIN</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Business Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>First Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Last Name</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Status</strong>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -403,6 +454,7 @@ function Zoning() {
         onClose={() => setIsConfirmModalOpen(false)}
         onConfirm={handleConfirmAction}
         message="Are you sure you want to approve this applicant?"
+        loading={loading}
       />
 
       {/* Success Modal */}

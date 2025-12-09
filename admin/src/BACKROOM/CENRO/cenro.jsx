@@ -193,6 +193,7 @@ function Cenro() {
   // 2. Confirm & send to backend
   const handleConfirmAction = async () => {
     setIsConfirmModalOpen(false);
+    setLoading(true);
     const { id, cenroFee, selectedFiles } = confirmationData;
 
     try {
