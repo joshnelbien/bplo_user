@@ -54,8 +54,8 @@ const Alert = forwardRef(function Alert(props, ref) {
 });
 
 function RenewApplicationPage() {
-  const { BIN } = useParams();
-  const { id } = useParams();
+  const { bin, id } = useParams();
+
   const API = import.meta.env.VITE_API_BASE;
   const navigate = useNavigate();
   const theme = useTheme();
@@ -149,37 +149,37 @@ function RenewApplicationPage() {
   }, [step]); // Trigger on step change
 
   useEffect(() => {
-    if (!BIN) return; // ✅ Prevent API call if BIN is not set
+    if (!bin) return; // ✅ Prevent API call if bin is not set
 
     const fetchUserData = async () => {
       try {
-        const res = await axios.get(`${API}/businessProfile/${BIN}`);
+        const res = await axios.get(`${API}/businessProfile/${id}/${bin}`);
         const userData = res.data;
         console.log("✅ Fetched user data:", userData);
-        console.log("📌 raw businessLines:", userData.lineOfBusiness);
-        console.log("📌 raw businessLines:", userData.productService);
-        console.log("📌 raw businessLines:", userData.Units);
-        console.log("📌 raw businessLines:", userData.capital);
 
         // 📝 Populate all form fields by step
         setFormDataState((prev) => ({
           ...prev,
 
           // 📝 Step 1 - Business Profile
-          BIN: userData.BIN || prev.BIN,
-          BusinessType: userData.BusinessType || prev.BusinessType,
+          bin: userData.bin || prev.bin,
+          business_type: userData.business_type || prev.business_type,
           dscRegNo: userData.dscRegNo || prev.dscRegNo,
-          businessName: userData.businessName || prev.businessName,
-          tinNo: userData.tinNo || prev.tinNo,
-          TradeName: userData.TradeName || prev.TradeName,
-          firstName: userData.firstName || prev.firstName,
-          middleName: userData.middleName || prev.middleName,
-          lastName: userData.lastName || prev.lastName,
-          extName: userData.extName || prev.extName,
-          sex: userData.sex || prev.sex,
-          eMailAdd: userData.eMailAdd || prev.eMailAdd,
-          telNo: userData.telNo || prev.telNo,
-          mobileNo: userData.mobileNo || prev.mobileNo,
+          business_name: userData.business_name || prev.business_name,
+          tin_no: userData.tin_no || prev.tin_no,
+          trade_name: userData.trade_name || prev.trade_name,
+          incharge_first_name:
+            userData.incharge_first_name || prev.incharge_first_name,
+          incharge_middle_name:
+            userData.incharge_middle_name || prev.incharge_middle_name,
+          incharge_last_name:
+            userData.incharge_last_name || prev.incharge_last_name,
+          incharge_extension_name:
+            userData.incharge_extension_name || prev.incharge_extension_name,
+          incharge_sex: userData.incharge_sex || prev.incharge_sex,
+          email_address: userData.email_address || prev.email_address,
+          telephone_no: userData.telephone_no || prev.telephone_no,
+          cellphone_no: userData.cellphone_no || prev.cellphone_no,
 
           // 🧭 Step 3 - Business Address
           region: userData.region || prev.region || "",
@@ -255,7 +255,7 @@ function RenewApplicationPage() {
     };
 
     fetchUserData();
-  }, [BIN, API]);
+  }, [bin, API]);
 
   const [filesState, setFilesState] = useState(
     savedFiles || {
@@ -312,7 +312,7 @@ function RenewApplicationPage() {
   const validateStep = () => {
     const newErrors = {};
     const requiredFields = {
-      1: ["BusinessType", "businessName", "tinNo", "TradeName"],
+      1: ["business_type", "business_name", "tin_no", "trade_name"],
       2: ["firstName", "lastName", "sex", "eMailAdd", "mobileNo"],
       3: [
         "region",
@@ -387,7 +387,29 @@ function RenewApplicationPage() {
 
   const handleFileChange = (e) => {
     const { name, files } = e.target;
-    setFilesState((prev) => ({ ...prev, [name]: files[0] }));
+    const file = files[0];
+
+    if (!file) return;
+
+    // Allowed file types
+    const allowedTypes = [
+      "application/pdf",
+      "image/png",
+      "image/jpg",
+      "image/jpeg",
+      "image/webp",
+    ];
+
+    // Validate file type
+    if (!allowedTypes.includes(file.type)) {
+      alert(
+        "Invalid file type. Only PDF, PNG, JPG, JPEG, and WEBP are allowed."
+      );
+      e.target.value = ""; // Reset input
+      return;
+    }
+
+    setFilesState((prev) => ({ ...prev, [name]: file }));
   };
 
   const handleSnackbarClose = () => {
@@ -395,15 +417,7 @@ function RenewApplicationPage() {
   };
 
   const handleNextClick = () => {
-    if (validateStep()) {
-      setDialogOpen(true);
-    } else {
-      setSnackbarState({
-        open: true,
-        message: "Please fill in all required fields correctly",
-        severity: "error",
-      });
-    }
+    setDialogOpen(true);
   };
 
   const handleDialogConfirm = () => {
@@ -428,63 +442,115 @@ function RenewApplicationPage() {
 
     setIsSubmitting(true);
 
-    const formData = new FormData();
-    formData.append("userId", id);
-
-    if (businessLines.length > 0) {
-      formData.append(
-        "lineOfBusiness",
-        businessLines.map((b) => b.lineOfBusiness).join(",")
-      );
-      formData.append(
-        "productService",
-        businessLines.map((b) => b.productService).join(",")
-      );
-      formData.append("Units", businessLines.map((b) => b.Units).join(","));
-      formData.append("capital", businessLines.map((b) => b.capital).join(","));
-    }
-
-    Object.keys(formDataState).forEach((key) => {
-      if (formDataState[key]) formData.append(key, formDataState[key]);
-    });
-
-    Object.keys(filesState).forEach((key) => {
-      if (filesState[key]) formData.append(key, filesState[key]);
-    });
-
     try {
-      await axios.post(`${API}/newApplication/files`, formData, {
-        id,
+      // 🧩 Prepare your clean payload for text fields
+      const payload = {
+        userId: id,
+        bin: formDataState.bin,
+        firstName: formDataState.incharge_first_name,
+        middleName: formDataState.incharge_middle_name,
+        lastName: formDataState.incharge_last_name,
+        extName: formDataState.incharge_extension_name,
+        sex: formDataState.incharge_sex,
+        email: formDataState.email_address,
+        mobileNo: formDataState.cellphone_no,
+        BusinessType: formDataState.business_type,
+        dscRegNo: formDataState.dscRegNo,
+        businessName: formDataState.business_name,
+        tinNo: formDataState.tin_no,
+        TradeName: formDataState.trade_name,
+        telNo: formDataState.telephone_no,
+        region: formDataState.region,
+        province: formDataState.province,
+        cityOrMunicipality: formDataState.cityOrMunicipality,
+        barangay: formDataState.barangay,
+        addressLine1: formDataState.addressLine1,
+        zipCode: formDataState.zipCode,
+        Taxregion: formDataState.Taxregion,
+        Taxprovince: formDataState.Taxprovince,
+        TaxcityOrMunicipality: formDataState.TaxcityOrMunicipality,
+        Taxbarangay: formDataState.Taxbarangay,
+        TaxaddressLine1: formDataState.TaxaddressLine1,
+        TaxzipCode: formDataState.TaxzipCode,
+        totalFloorArea: formDataState.totalFloorArea,
+        numberOfEmployee: formDataState.numberOfEmployee,
+        maleEmployee: formDataState.maleEmployee,
+        femaleEmployee: formDataState.femaleEmployee,
+        numNozzle: formDataState.numNozzle,
+        weighScale: formDataState.weighScale,
+        totalDeliveryVehicle: formDataState.totalDeliveryVehicle,
+        tIGE: formDataState.tIGE,
+        officeType: formDataState.officeType,
+        officeTypeOther: formDataState.officeTypeOther,
+        totalCapital: formDataState.totalCapital,
+        lineOfBusiness: businessLines
+          .map((b) => `"${b.lineOfBusiness}"`)
+          .join(","),
+        productService: businessLines
+          .map((b) => `"${b.productService}"`)
+          .join(","),
+        Units: businessLines.map((b) => `"${b.Units}"`).join(","),
+        capital: businessLines.map((b) => `"${b.capital}"`).join(","),
+        Modeofpayment: formDataState.Modeofpayment,
+        application: "Renew",
+      };
+
+      // 🧩 Now combine files + text payload into FormData
+      const formData = new FormData();
+      Object.entries(payload).forEach(([key, value]) => {
+        formData.append(key, value == null ? "" : String(value));
+      });
+
+      // 🧠 Append all your files (only if not null)
+      const fileKeys = [
+        "proofOfReg",
+        "proofOfRightToUseLoc",
+        "locationPlan",
+        "brgyClearance",
+        "marketClearance",
+        "occupancyPermit",
+        "cedula",
+        "photoOfBusinessEstInt",
+        "photoOfBusinessEstExt",
+        "tIGEfiles",
+        "RecentBusinessPermit",
+      ];
+
+      fileKeys.forEach((key) => {
+        if (filesState[key]) {
+          formData.append(key, filesState[key]); // File object (from input)
+        }
+      });
+
+      console.log("🚀 Submitting renewal with files:", formData);
+
+      // 📤 Submit to your backend
+      await axios.post(`${API}/newApplication/files-renewal`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
+      // ✅ Cleanup after success
       localStorage.removeItem("formDataState");
       localStorage.removeItem("filesState");
       localStorage.removeItem("businessLines");
       localStorage.removeItem("formStep");
 
       setSuccessDialogOpen(true);
-
-      if (paperRef.current) {
+      if (paperRef.current)
         paperRef.current.scrollIntoView({ behavior: "smooth" });
-      } else {
-        window.scrollTo({
-          top: 0,
-          left: 0,
-          behavior: "smooth",
-        });
-      }
+      else window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
 
       setTimeout(() => {
         navigate(`/appTracker/${id}`);
       }, 2000);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error("❌ Renewal submission failed:", error);
       setSnackbarState({
         open: true,
         message: "Submission failed. Please try again.",
         severity: "error",
       });
+    } finally {
       setIsSubmitting(false);
     }
   };

@@ -125,6 +125,13 @@ const FileField = ({ label, fileKey, fileData }) => (
   </Grid>
 );
 
+const formatCurrency = (value) => {
+  if (value == null || value === "") return "";
+  const num = parseFloat(value.toString().replace(/,/g, ""));
+  if (isNaN(num)) return value;
+  return num.toLocaleString("en-US");
+};
+
 function BusinessProfileModal({ applicant, isOpen, onClose, baseUrl }) {
   if (!isOpen || !applicant) return null;
 
@@ -146,13 +153,13 @@ function BusinessProfileModal({ applicant, isOpen, onClose, baseUrl }) {
   return (
     <>
       <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
-        <DialogTitle>Applicant Details</DialogTitle>
+        <DialogTitle>Business Details</DialogTitle>
         <DialogContent dividers>
           {/* Business Info */}
           <Section title="Business Information">
             <Field label="Status" value={applicant.TREASURER} />
             <Field label="Mode of Payment" value={applicant.Modeofpayment} />
-            <Field label="BIN" value={applicant.BIN} />
+            <Field label="BIN" value={applicant.bin} />
             <Field label="Business Type" value={applicant.BusinessType} />
             <Field label="DSC Registration No" value={applicant.dscRegNo} />
             <Field label="Business Name" value={applicant.businessName} />
@@ -244,47 +251,98 @@ function BusinessProfileModal({ applicant, isOpen, onClose, baseUrl }) {
 
             <Field label="Office Type" value={applicant.officeType} />
 
-            {applicant.lineOfBusiness?.split(",").map((lob, index) => {
-              const product = applicant.productService?.split(",")[index] || "";
-              const unit = applicant.Units?.split(",")[index] || "";
-              const capital = applicant.capital?.split(",")[index] || "";
+            {(() => {
+              const parseCSV = (text) => {
+                if (!text) return [];
+                return text
+                  .trim()
+                  .replace(/^\[|\]$/g, "")
+                  .split(/",\s*"?/)
+                  .map((val) => val.replace(/^"|"$/g, "").trim())
+                  .filter((val) => val.length > 0);
+              };
 
-              return (
-                <Paper
-                  key={index}
-                  elevation={2}
-                  sx={{
-                    p: 2,
-                    mb: 2,
-                    borderRadius: 2,
-                    backgroundColor: "#f9f9f9",
-                  }}
-                >
-                  <Typography
-                    variant="subtitle2"
-                    fontWeight="bold"
-                    gutterBottom
-                  >
-                    Business Line {index + 1}
-                  </Typography>
+              const lobArr = parseCSV(applicant.lineOfBusiness);
+              const productArr = parseCSV(applicant.productService);
+              const unitArr = parseCSV(applicant.Units);
+              const capitalArr = parseCSV(applicant.capital);
+              const natureCodeArr = parseCSV(applicant.natureCode);
+              const businessNatureArr = parseCSV(applicant.businessNature);
+              const lineCodeArr = parseCSV(applicant.lineCode);
 
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <Field label="Line of Business" value={lob.trim()} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Field label="Product/Service" value={product.trim()} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Field label="Units" value={unit.trim()} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Field label="Capital" value={capital.trim()} />
-                    </Grid>
-                  </Grid>
-                </Paper>
+              const maxLength = Math.max(
+                lobArr.length,
+                productArr.length,
+                unitArr.length,
+                capitalArr.length,
+                natureCodeArr.length,
+                businessNatureArr.length,
+                lineCodeArr.length
               );
-            })}
+
+              return Array.from({ length: maxLength }).map((_, index) => {
+                const lob = lobArr[index] || "";
+                const product = productArr[index] || "";
+                const unit = unitArr[index] || "";
+                const capital = capitalArr[index] || "";
+                const natureCode = natureCodeArr[index] || "";
+                const businessNature = businessNatureArr[index] || "";
+                const lineCode = lineCodeArr[index] || "";
+
+                return (
+                  <Paper
+                    key={index}
+                    elevation={2}
+                    sx={{
+                      p: 2,
+                      mb: 2,
+                      borderRadius: 2,
+                      backgroundColor: "#f9f9f9",
+                      width: "100%",
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      fontWeight="bold"
+                      gutterBottom
+                    >
+                      Business Line {index + 1}
+                    </Typography>
+
+                    <Grid container spacing={2}>
+                      <Field
+                        label="Line of Business"
+                        value={lob}
+                        fullWidth
+                        multiline
+                        rows={3}
+                      />
+                      <Grid item xs={12} sm={6}>
+                        <Field label="Product/Service" value={product} />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Field label="Units" value={unit} />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Field
+                          label="Capital"
+                          value={formatCurrency(capital)}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Field label="Nature Code" value={natureCode} />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Field label="Business Nature" value={businessNature} />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Field label="Line Code" value={lineCode} />
+                      </Grid>
+                    </Grid>
+                  </Paper>
+                );
+              });
+            })()}
           </Section>
 
           {/* Business Requirements */}
@@ -434,6 +492,13 @@ function BusinessProfileModal({ applicant, isOpen, onClose, baseUrl }) {
                     fileData={applicant}
                     baseUrl={baseUrl}
                   />
+
+                  <FileField
+                    fileKey="businessPermit"
+                    label="Business Permit"
+                    fileData={applicant}
+                    baseUrl={baseUrl}
+                  />
                 </Grid>
               </Paper>
 
@@ -461,6 +526,115 @@ function BusinessProfileModal({ applicant, isOpen, onClose, baseUrl }) {
                 </Grid>
               </Paper>
             </Stack>
+          </Section>
+
+          {/* Business Requirements */}
+          <Section title="Business Permit & Tax Order">
+            <FileField
+              fileKey="businessPermit"
+              label="Business Permit"
+              fileData={applicant}
+            />
+
+            <FileField
+              fileKey="businesstaxComputation"
+              label="Business Permit"
+              fileData={applicant}
+            />
+          </Section>
+
+          <Section title="Payments">
+            {(() => {
+              const businessTaxTotal = parseFloat(
+                applicant.businessTaxTotal || 0
+              );
+              const mode = applicant.Modeofpayment?.toLowerCase();
+              let breakdown = [];
+              let label = "";
+              let dueDates = [];
+
+              // Determine breakdown based on mode
+              if (mode === "quarterly") {
+                breakdown = Array(4).fill((businessTaxTotal / 4).toFixed(2));
+                label = "Quarter";
+                dueDates = ["January 20", "April 20", "July 20", "October 20"];
+              } else if (mode === "semi-annual") {
+                breakdown = Array(2).fill((businessTaxTotal / 2).toFixed(2));
+                label = "Semi-Annual";
+                dueDates = ["January 20", "July 20"];
+              } else {
+                breakdown = [businessTaxTotal.toFixed(2)];
+                label = "Annual";
+                dueDates = ["January 20"];
+              }
+
+              return (
+                <Grid container spacing={2}>
+                  {breakdown.map((amount, index) => {
+                    const paidAmounts = (applicant.amount_paid || "").split(
+                      ","
+                    );
+                    const paid = paidAmounts[index]
+                      ? `₱ ${paidAmounts[index]}`
+                      : "Pending";
+
+                    return (
+                      <Grid item xs={12} sm={6} key={index}>
+                        <Paper
+                          elevation={2}
+                          sx={{
+                            p: 2.5,
+                            borderRadius: 3,
+                            backgroundColor: "white",
+                            border: "1px solid #ccc",
+                          }}
+                        >
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ fontWeight: 600, color: "primary.main" }}
+                          >
+                            {label} {index + 1}
+                          </Typography>
+
+                          <Typography
+                            variant="body1"
+                            sx={{ fontWeight: "bold", color: "#2e7d32" }}
+                          >
+                            ₱{" "}
+                            {parseFloat(amount).toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                            })}
+                          </Typography>
+
+                          {mode !== "annual" && (
+                            <Typography
+                              variant="body2"
+                              sx={{ color: "gray", mt: 1, fontStyle: "italic" }}
+                            >
+                              Due Date: {dueDates[index]}
+                            </Typography>
+                          )}
+
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color:
+                                paid === "Pending"
+                                  ? "error.main"
+                                  : "success.main",
+                              mt: 1,
+                              fontWeight: 500,
+                            }}
+                          >
+                            {paid === "Pending" ? "Pending" : `Paid: ${paid}`}
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+              );
+            })()}
           </Section>
         </DialogContent>
 

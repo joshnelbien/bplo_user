@@ -2,7 +2,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import Side_bar from "../../SIDE_BAR/side_bar";
 import ExaminersApplicantModal from "./examiners_modal";
-
+import TopBar from "../../NAVBAR/nav_bar";
+import { CircularProgress } from "@mui/material";
 import {
   Box,
   Button,
@@ -16,7 +17,13 @@ import {
   TableHead,
   TableRow,
   Typography,
+  alpha, // 🛑 Added for TopBar styling (text shadow)
 } from "@mui/material";
+
+const TOP_BAR_HEIGHT = 80; // Define height constant
+const SIDE_BAR_WIDTH = 250;
+
+/* ================== MAIN COMPONENT ================== */
 
 function Examiners() {
   const [applicants, setApplicants] = useState([]);
@@ -27,24 +34,27 @@ function Examiners() {
   const recordsPerPage = 20;
   const API = import.meta.env.VITE_API_BASE;
   const [selectedFiles, setSelectedFiles] = useState({});
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchApplicants = async () => {
+      setLoading(true);
       try {
         const res = await axios.get(`${API}/examiners/examiners`);
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
-
         setApplicants(sortedData);
-        setApplicants(res.data);
+        // Removed the duplicate setApplicants(res.data);
       } catch (error) {
         console.error("Error fetching applicants:", error);
+      } finally {
+        setLoading(false); // stop loading
       }
     };
 
     fetchApplicants();
-  }, []);
+  }, [API]); // Added API to dependency array for best practice
 
   // ✅ Filter applicants based on button selection
   const filteredApplicants =
@@ -97,15 +107,25 @@ function Examiners() {
 
   return (
     <>
+      {/* 1. TOP BAR (Fixed Header) - NEWLY ADDED */}
+      <TopBar />
+
+      {/* 2. SIDE BAR (Original Position Maintained) */}
       <Side_bar />
+
+      {/* 3. MAIN CONTENT (Padded to clear fixed TopBar and offset by Side_bar) */}
       <Box
         id="main_content"
         sx={{
           p: 3,
           minHeight: "100vh",
-          background: "linear-gradient(to bottom, #FFFFFF, #e6ffe6)",
-          marginLeft: { xs: 0, sm: "250px" }, // 0 on mobile, 250px on larger screens
-          width: { xs: "100%", sm: "calc(100% - 250px)" }, // full width on mobile
+          // 🛑 CHANGED: Background set to plain white
+          background: "white",
+          // Offset from sidebar (250px)
+          marginLeft: { xs: 0, sm: `${SIDE_BAR_WIDTH}px` },
+          width: { xs: "100%", sm: `calc(100% - ${SIDE_BAR_WIDTH}px)` },
+          // Padded to clear fixed TopBar (80px + margin)
+          pt: `${TOP_BAR_HEIGHT + 24}px`,
         }}
       >
         <Typography
@@ -114,9 +134,12 @@ function Examiners() {
           sx={{
             color: "darkgreen",
             fontWeight: "bold",
+            // Only show on mobile since the TopBar handles the title on desktop
+            display: { xs: "block", sm: "none" },
           }}
         >
-          EXAMINERS
+          {/* Title for Mobile View */}
+          EXAMINERS OFFICE
         </Typography>
 
         {/* ✅ Button Group Filter */}
@@ -164,7 +187,7 @@ function Examiners() {
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                 <TableCell>
-                  <strong>Applicant ID</strong>
+                  <strong>Application Type</strong>
                 </TableCell>
                 <TableCell>
                   <strong>Business Name</strong>
@@ -181,20 +204,35 @@ function Examiners() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {currentRecords.map((applicant) => (
-                <TableRow
-                  key={applicant.id}
-                  hover
-                  sx={{ cursor: "pointer" }}
-                  onClick={() => openModal(applicant)}
-                >
-                  <TableCell>{applicant.id}</TableCell>
-                  <TableCell>{applicant.businessName}</TableCell>
-                  <TableCell>{applicant.firstName}</TableCell>
-                  <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.Examiners}</TableCell>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                    <CircularProgress size={40} thickness={4} />
+                    <Typography mt={1}>Loading data...</Typography>
+                  </TableCell>
                 </TableRow>
-              ))}
+              ) : currentRecords.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                    <Typography>No records found</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                currentRecords.map((applicant) => (
+                  <TableRow
+                    key={applicant.id}
+                    hover
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => openModal(applicant)}
+                  >
+                    <TableCell>{applicant.application}</TableCell>
+                    <TableCell>{applicant.businessName}</TableCell>
+                    <TableCell>{applicant.firstName}</TableCell>
+                    <TableCell>{applicant.lastName}</TableCell>
+                    <TableCell>{applicant.Examiners}</TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -205,7 +243,7 @@ function Examiners() {
             count={totalPages}
             page={currentPage}
             onChange={handlePageChange}
-            color="primary"
+            color="success" // Changed color to 'success' to match the green theme
             shape="rounded"
           />
         </Box>

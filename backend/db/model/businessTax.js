@@ -8,7 +8,7 @@ const BusinessTax = sequelize.define(
       type: DataTypes.STRING,
       primaryKey: true,
     },
-    BIN: {
+    bin: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -76,6 +76,11 @@ const BusinessTax = sequelize.define(
     proofOfReg_mimetype: { type: DataTypes.STRING, allowNull: true },
     proofOfReg_size: { type: DataTypes.INTEGER, allowNull: true },
 
+    RecentBusinessPermit: { type: DataTypes.BLOB("long"), allowNull: true },
+    RecentBusinessPermit_filename: { type: DataTypes.STRING, allowNull: true },
+    RecentBusinessPermit_mimetype: { type: DataTypes.STRING, allowNull: true },
+    RecentBusinessPermit_size: { type: DataTypes.INTEGER, allowNull: true },
+
     proofOfRightToUseLoc: { type: DataTypes.BLOB("long"), allowNull: true },
     proofOfRightToUseLoc_filename: { type: DataTypes.STRING, allowNull: true },
     proofOfRightToUseLoc_mimetype: { type: DataTypes.STRING, allowNull: true },
@@ -121,7 +126,7 @@ const BusinessTax = sequelize.define(
 
     CSMWO: { type: DataTypes.STRING, defaultValue: "Pending" },
     CSMWOtimeStamp: { type: DataTypes.STRING },
-    csmwoFee: { type: DataTypes.STRING },
+
     cswmoCert: { type: DataTypes.BLOB("long"), allowNull: true },
     cswmoCert_filename: { type: DataTypes.STRING, allowNull: true },
     cswmoCert_mimetype: { type: DataTypes.STRING, allowNull: true },
@@ -158,7 +163,7 @@ const BusinessTax = sequelize.define(
 
     CENRO: { type: DataTypes.STRING, defaultValue: "Pending" },
     CENROtimeStamp: { type: DataTypes.STRING },
-    cenroFee: { type: DataTypes.STRING },
+
     cenroCert: { type: DataTypes.BLOB("long"), allowNull: true },
     cenroCert_filename: { type: DataTypes.STRING, allowNull: true },
     cenroCert_mimetype: { type: DataTypes.STRING, allowNull: true },
@@ -166,7 +171,7 @@ const BusinessTax = sequelize.define(
 
     ZONING: { type: DataTypes.STRING, defaultValue: "Pending" },
     ZONINGtimeStamp: { type: DataTypes.STRING },
-    zoningFee: { type: DataTypes.STRING },
+
     zoningCert: { type: DataTypes.BLOB("long"), allowNull: true },
     zoningCert_filename: { type: DataTypes.STRING, allowNull: true },
     zoningCert_mimetype: { type: DataTypes.STRING, allowNull: true },
@@ -191,6 +196,30 @@ const BusinessTax = sequelize.define(
     TREASURER: { type: DataTypes.STRING, defaultValue: "Pending" },
     TREASURERtimeStamp: { type: DataTypes.STRING },
     application: { type: DataTypes.STRING },
+    businessTaxTotal: { type: DataTypes.STRING },
+
+    businessTaxFee: { type: DataTypes.STRING }, //B.T
+    occupationalTax: { type: DataTypes.STRING }, //OT
+    barangayFee: { type: DataTypes.STRING }, //BF
+    mayorsPermit: { type: DataTypes.STRING }, //MP
+    deliveryVehicle: { type: DataTypes.STRING }, //DV
+    surcharge: { type: DataTypes.STRING }, //SURC
+    interest: { type: DataTypes.STRING }, //INT
+    zoningFee: { type: DataTypes.STRING }, //ZF
+    cenroFee: { type: DataTypes.STRING }, //EF
+    csmwoFee: { type: DataTypes.STRING }, //SWF
+    choFee: { type: DataTypes.STRING }, //SF
+    tinplateStickerFee: { type: DataTypes.STRING }, //T.P
+    verificationFee: { type: DataTypes.STRING }, //VF
+    veterinaryFee: { type: DataTypes.STRING }, //VETF
+    fixedTax: { type: DataTypes.STRING }, //FT
+    //other charges
+    videokeFee: { type: DataTypes.STRING }, //OC
+    cigarettes: { type: DataTypes.STRING }, //OC
+    liquor: { type: DataTypes.STRING }, //OC
+    billiards: { type: DataTypes.STRING }, //OC
+    boardAndLogging: { type: DataTypes.STRING }, //OC
+    fsicFee: { type: DataTypes.STRING }, //FSIC
   },
 
   {

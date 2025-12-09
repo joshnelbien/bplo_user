@@ -20,6 +20,7 @@ import {
 // NOTE: You will need to make sure the updated BusinessTaxDocxExport is in a separate file
 // or update the function in this file (which is done in the next section).
 import BusinessTaxDocxExport from "./BusinessTaxDocxExport";
+import BusinessTaxApplicantModal from "./businessTax_modal";
 
 // 1. Import the logos from the public folder
 import spcLogo from "/spclogo.png"; // Assuming / is the public folder root
@@ -75,6 +76,10 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
   const capital = Number(applicant?.totalCapital) || 0;
   const businessTax = capital * 0.5 * 0.01;
 
+  const totalExcludingOBO = collections
+    .filter((item) => item.label !== "OBO")
+    .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
   const nonEditableFields = new Set([
     "BUSINESS TAX",
     "BARANGAY FEE",
@@ -89,7 +94,6 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
     "ELECTRONIC INSPECTION",
     "ZONING FEE",
     "CENRO",
-    "SWMO CERT",
   ]);
 
   const feeRanges = {
@@ -162,6 +166,16 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
 
   // Initialize collections
   useEffect(() => {
+    const sanitary = Number(applicant?.SR) || 0;
+    const building = Number(applicant?.BSAP) || 0;
+    const mechanical = Number(applicant?.Mechanical) || 0;
+    const electrical = Number(applicant?.Electrical) || 0;
+    const signage = Number(applicant?.Signage) || 0;
+    const electronic = Number(applicant?.Electronics) || 0;
+
+    const oboTotal =
+      sanitary + building + mechanical + electrical + signage + electronic;
+
     setCollections([
       { label: "BUSINESS TAX", amount: String(businessTax) },
       { label: "MAYOR’S PERMIT", amount: "" },
@@ -172,7 +186,8 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
       { label: "OCCUPATIONAL TAX", amount: String(occupationalTax) },
       { label: "HEALTH, CER & SSF", amount: String(applicant?.choFee || "") },
       { label: "SWM GARBAGE FEE", amount: String(applicant?.csmwoFee || "") },
-      { label: "OBO", amount: "" },
+
+      { label: "OBO", amount: String(oboTotal) },
       { label: "SANITARY INSPECTION", amount: String(applicant?.SR || "") },
       { label: "BUILDING INSPECTION", amount: String(applicant?.BSAP || "") },
       {
@@ -198,7 +213,6 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
       { label: "VERIFICATION FEE", amount: "" },
       { label: "ZONING FEE", amount: String(applicant?.zoningFee || "") },
       { label: "CENRO", amount: String(applicant?.cenroFee || "") },
-      { label: "SWMO CERT", amount: String(applicant?.cenroFee || "") },
       { label: "VETERNARY FEE", amount: "" },
       { label: "FIXED TAX", amount: "" },
       { label: "VIDEOKE CARABET DANCEHALL", amount: "" },
@@ -227,6 +241,19 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
     .filter((item) => item.label !== "BUSINESS TAX")
     .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
 
+  useEffect(() => {
+    // Store total and other charges
+    sessionStorage.setItem("businessTaxTotal", totalExcludingOBO.toString());
+    sessionStorage.setItem("otherChargesTotal", otherChargesTotal.toString());
+
+    // Store each individual collection amount
+    collections.forEach((item) => {
+      // Replace spaces and special characters for safe keys
+      const key = item.label.replace(/\s+/g, "").replace(/[^a-zA-Z0-9]/g, "");
+      sessionStorage.setItem(key, item.amount || "0");
+    });
+  }, [collections, total, otherChargesTotal]);
+
   const formatPeso = (value) =>
     value > 0
       ? `₱ ${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
@@ -246,20 +273,29 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
             <Grid item xs={12}>
               <Typography>REFERENCE NO: ___________</Typography>
               <Typography>
-                BUSINESS ID: {applicant?.BIN || "___________"}
+                BUSINESS ID: {applicant?.bin || "___________"}
               </Typography>
-              <Typography>
-                CAPITAL:{" "}
-                {capital > 0
-                  ? capital.toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })
-                  : "0.00"}
-              </Typography>
-              <Typography>
-                GROSS: {applicant?.gross || "___________"}
-              </Typography>
+              {applicant?.application === "New" ? (
+                <Typography>
+                  CAPITAL:{" "}
+                  {capital > 0
+                    ? capital.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })
+                    : "0.00"}
+                </Typography>
+              ) : (
+                <Typography>
+                  GROSS:{" "}
+                  {Number(applicant?.gross) > 0
+                    ? Number(applicant?.gross).toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })
+                    : "___________"}
+                </Typography>
+              )}
             </Grid>
           </Grid>
           {/* Business Info */}
@@ -277,7 +313,12 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
             </Typography>
             <Typography>BUSINESS ADDRESS: {applicant?.barangay}</Typography>
             <Typography>
-              NATURE OF BUSINESS: {applicant?.nature || "___________"}
+              NATURE OF BUSINESS:{" "}
+              {applicant?.businessNature
+                ? applicant.businessNature
+                    .replace(/"/g, "")
+                    .replace(/^\([A-Z]\)\s*/, "")
+                : "___________"}
             </Typography>
           </Box>
           {/* Collection Table */}
@@ -323,7 +364,7 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
             <Typography>
               Other Charges total: {formatPeso(otherChargesTotal)}
             </Typography>
-            <Typography>Total: {formatPeso(total)}</Typography>
+            <Typography>Total : {formatPeso(totalExcludingOBO)}</Typography>
           </Box>
           {/* Footer */}
           <Box mt={4}>
@@ -342,8 +383,14 @@ function BusinessTax_computation({ isOpen, onClose, applicant }) {
         <BusinessTaxDocxExport
           applicant={applicant}
           collections={collections}
-          total={total}
+          totalExcludingOBO={totalExcludingOBO}
           otherChargesTotal={otherChargesTotal}
+        />
+        <BusinessTaxApplicantModal
+          otherChargesTotal={otherChargesTotal}
+          total={total}
+          collections={collections}
+          applicant={applicant}
         />
       </DialogActions>
     </Dialog>

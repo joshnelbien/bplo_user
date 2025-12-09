@@ -6,6 +6,8 @@ const path = require("path");
 const csv = require("csv-parser");
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("./db/sequelize");
+const cron = require("node-cron");
+const sendBusinessProfileCSV = require("./routes/sendBusinessProfileCSV");
 
 // 📌 Import your existing models and routes
 const Examiners = require("./db/model/examiners");
@@ -37,6 +39,15 @@ const businessProfileRoutes = require("./routes/businessProfileRoutes");
 
 const AdminAccounts = require("./db/model/adminAccountsDB");
 const AdminAccountRoutes = require("./routes/adminAccountRoutes");
+
+const ExistingBusinessProfile = require("./db/model/BusinessProfileExisting");
+const ExistingBusinessProfileRoutes = require("./routes/ExistingBusinessProfileRoutes");
+
+const Businesses_2025 = require("./db/model/businesses2025");
+const Businesses_2025Routes = require("./routes/businesses2025Routes");
+const importBusinesses2025 = require("./routes/scripts/importBusinesses2025");
+
+const ClientPayments = require("./db/model/paymentsDB");
 
 const feedback = require("./routes/feedback");
 
@@ -88,6 +99,56 @@ const clean = (val) => {
   const v = val.replace(/^\uFEFF/, "").trim();
   return v === "" ? null : v;
 };
+
+async function importBusinesses() {
+  try {
+    const csvFilePath = path.join(__dirname, "public", "businesses.csv");
+
+    if (!fs.existsSync(csvFilePath)) {
+      console.warn(
+        `⚠️ CSV file not found at ${csvFilePath}. Skipping business import.`
+      );
+      return;
+    }
+
+    const businesses = [];
+
+    await new Promise((resolve, reject) => {
+      fs.createReadStream(csvFilePath)
+        .pipe(csv())
+        .on("data", (row) => {
+          businesses.push(row);
+        })
+        .on("end", resolve)
+        .on("error", reject);
+    });
+
+    console.log(`✅ Read ${businesses.length} business records from CSV file.`);
+
+    // Ensure table exists
+    await ExistingBusinessProfile.sync();
+
+    // Bulk insert
+    await ExistingBusinessProfile.bulkCreate(businesses, {
+      ignoreDuplicates: true,
+    });
+
+    console.log("🎉 Business profiles successfully imported to database!");
+  } catch (error) {
+    console.error("❌ Error importing businesses:", error);
+  }
+}
+
+cron.schedule(
+  "30 16 * * *",
+  async () => {
+    console.log("⏰ Running scheduled CSV export (2:20 PM)...");
+    await sendBusinessProfileCSV();
+  },
+  {
+    timezone: "Asia/Manila",
+  }
+);
 
 async function parseCsvFile(csvFilePath) {
   return new Promise((resolve, reject) => {
@@ -285,31 +346,33 @@ function watchFSICFile() {
     await sequelize.authenticate();
     console.log(" Database connected");
 
-    await Examiners.sync();
-    await File.sync();
-    await Backroom.sync();
-    await UserAccounts.sync();
-    await Announcements.sync();
-    await BusinessTax.sync();
-    await AppStatus.sync();
-    await TreasurersOffice.sync();
-    await BusinessProfile.sync();
-    await AdminAccounts.sync();
+    // await Examiners.sync();
+    // await File.sync();
+    // await Backroom.sync();
+    // await UserAccounts.sync();
+    // await Announcements.sync();
+    // await BusinessTax.sync();
+    // await AppStatus.sync();
+    // await TreasurersOffice.sync();
+    // await BusinessProfile.sync();
+    // await AdminAccounts.sync();
 
-    // await Examiners.sync({ alter: true });
-    // await File.sync({ alter: true });
-    // await Backroom.sync({ alter: true });
-    // await UserAccounts.sync({ alter: true });
-    // await Announcements.sync({ alter: true });
-    // await BusinessTax.sync({ alter: true });
-    // await AppStatus.sync({ alter: true });
-    // await TreasurersOffice.sync({ alter: true });
-    // await BusinessProfile.sync({ alter: true });
-
+    await Examiners.sync({ alter: true });
+    await File.sync({ alter: true });
+    await Backroom.sync({ alter: true });
+    await UserAccounts.sync({ alter: true });
+    await Announcements.sync({ alter: true });
+    await BusinessTax.sync({ alter: true });
+    await AppStatus.sync({ alter: true });
+    await TreasurersOffice.sync({ alter: true });
+    await BusinessProfile.sync({ alter: true });
+    await ClientPayments.sync({ alter: true });
+    await ExistingBusinessProfile.sync({ alter: true });
+    await Businesses_2025.sync({ alter: true });
+    await importBusinesses2025();
     await importFSICData();
-
+    await importBusinesses();
     watchFSICFile();
-
     console.log(" Database ready");
   } catch (err) {
     console.error(" Startup error:", err);
@@ -328,6 +391,8 @@ app.use("/treasurer", TreasurersOfficeRoutes);
 app.use("/businessProfile", businessProfileRoutes);
 app.use("/user-feedback", feedback);
 app.use("/adminAccounts", AdminAccountRoutes);
+app.use("/existing-businesses", ExistingBusinessProfileRoutes);
+app.use("/businesses2025", Businesses_2025Routes);
 
 // Endpoint to fetch FSIC rows (limited)
 app.get("/api/my-existing-table", async (req, res) => {

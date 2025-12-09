@@ -3,6 +3,8 @@ const multer = require("multer");
 const File = require("../db/model/files");
 const AppStatus = require("../db/model/applicantStatusDB");
 const UserAccounts = require("../db/model/userAccounts");
+const BusinessProfile = require("../db/model/businessProfileDB");
+const Backroom = require("../db/model/backroomLocal");
 const { where } = require("sequelize");
 const { v4: uuidv4 } = require("uuid");
 const { sequelize } = require("../db/sequelize");
@@ -80,6 +82,92 @@ router.post(
   }
 );
 
+router.post(
+  "/files-renewal",
+  upload.fields([
+    { name: "proofOfReg" },
+    { name: "proofOfRightToUseLoc" },
+    { name: "locationPlan" },
+    { name: "brgyClearance" },
+    { name: "marketClearance" },
+    { name: "occupancyPermit" },
+    { name: "cedula" },
+    { name: "photoOfBusinessEstInt" },
+    { name: "photoOfBusinessEstExt" },
+    { name: "tIGEfiles" },
+    { name: "RecentBusinessPermit" },
+  ]),
+  async (req, res) => {
+    const t = await sequelize.transaction();
+    try {
+      const { files, body } = req;
+      const sharedId = uuidv4();
+
+      // ✅ Ensure `userId` exists
+      if (!body.userId) {
+        return res.status(400).json({ error: "Missing userId in form data." });
+      }
+
+      const userId = body.userId;
+
+      // ✅ Extract file info into fileData object
+      const fileData = {};
+      if (files && Object.keys(files).length > 0) {
+        Object.entries(files).forEach(([key, fileArray]) => {
+          const file = fileArray[0];
+          fileData[key] = file.buffer;
+          fileData[`${key}_filename`] = file.originalname;
+          fileData[`${key}_mimetype`] = file.mimetype;
+          fileData[`${key}_size`] = file.size;
+        });
+      }
+
+      // ✅ Create File record
+      const createdFile = await File.create(
+        {
+          id: sharedId,
+          userId,
+          ...body, // includes all form fields (business info, etc.)
+          ...fileData, // includes uploaded file binary + metadata
+          applicationType: "Renewal",
+          submittedAt: new Date(),
+        },
+        { transaction: t }
+      );
+
+      // ✅ Create corresponding AppStatus record
+      const createdStatus = await AppStatus.create(
+        {
+          id: sharedId,
+          userId,
+          status: "Submitted",
+          remarks: "Renewal Application Submitted",
+          updatedAt: new Date(),
+        },
+        { transaction: t }
+      );
+
+      // ✅ Commit the transaction
+      await t.commit();
+
+      return res.status(201).json({
+        success: true,
+        message: "Renewal application submitted successfully!",
+        file: createdFile,
+        status: createdStatus,
+        sharedId,
+      });
+    } catch (err) {
+      console.error("❌ Upload failed:", err);
+      await t.rollback();
+      return res.status(500).json({
+        success: false,
+        error: "Internal server error during upload.",
+      });
+    }
+  }
+);
+
 // List files
 
 router.get("/files", async (req, res) => {
@@ -89,6 +177,66 @@ router.get("/files", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json([]);
+  }
+});
+
+router.get("/application-counts", async (req, res) => {
+  try {
+    // Total applications
+    const totalApps = await File.count();
+
+    // New applications
+    const newApps = await File.count({ where: { application: "New" } });
+
+    // Renew applications
+    const renewApps = await File.count({ where: { application: "Renew" } });
+
+    // ================= MONTHLY APPLICATIONS =================
+    // Group by month (PostgreSQL)
+    const monthlyAppsRaw = await File.findAll({
+      attributes: [
+        [
+          sequelize.fn("to_char", sequelize.col("createdAt"), "YYYY-MM"),
+          "month",
+        ],
+        [sequelize.fn("count", sequelize.col("id")), "count"],
+      ],
+      group: [sequelize.fn("to_char", sequelize.col("createdAt"), "YYYY-MM")],
+      order: [
+        [sequelize.fn("to_char", sequelize.col("createdAt"), "YYYY-MM"), "ASC"],
+      ],
+      raw: true,
+    });
+
+    // ================= YEARLY APPLICATIONS =================
+    const yearlyAppsRaw = await File.findAll({
+      attributes: [
+        [sequelize.fn("date_part", "year", sequelize.col("createdAt")), "year"],
+        [sequelize.fn("count", sequelize.col("id")), "count"],
+      ],
+      group: [sequelize.fn("date_part", "year", sequelize.col("createdAt"))],
+      order: [
+        [sequelize.fn("date_part", "year", sequelize.col("createdAt")), "ASC"],
+      ],
+      raw: true,
+    });
+
+    res.json({
+      totalApplications: totalApps,
+      newApplications: newApps,
+      renewApplications: renewApps,
+      monthlyApplications: monthlyAppsRaw, // [{ month: '2025-01', count: 12 }, ...]
+      yearlyApplications: yearlyAppsRaw, // [{ year: '2025', count: 120 }, ...]
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      totalApplications: 0,
+      newApplications: 0,
+      renewApplications: 0,
+      monthlyApplications: [],
+      yearlyApplications: [],
+    });
   }
 });
 
@@ -108,21 +256,60 @@ router.get("/files/:id", async (req, res) => {
 });
 
 // ✅ Corrected route
-router.put("/appDone/:id", async (req, res) => {
-  try {
-    const { id } = req.params; // get the id from the URL
+router.put(
+  "/appDone/:id",
+  upload.single("businessPermit"), // <-- matches the FormData key
+  async (req, res) => {
+    try {
+      const { id } = req.params;
 
-    const file = await File.findByPk(id);
-    if (!file) return res.status(404).send("File not found");
+      // Find the record in File table
+      const file = await File.findByPk(id);
+      if (!file) return res.status(404).send("File not found");
+      const backroom = await Backroom.findByPk(id);
+      if (!backroom) return res.status(404).send("File not found");
 
-    await file.update({ permitRelease: "Done" });
+      // Update permitRelease in File table
 
-    res.status(200).send("Permit marked as released");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Server error");
+      // Prepare file data if uploaded
+      const { originalname, mimetype, size, buffer } = req.file || {};
+
+      await backroom.update({
+        permitRelease: "Done",
+        businessPermit: buffer || null,
+        businessPermit_filename: originalname || null,
+        businessPermit_mimetype: mimetype || null,
+        businessPermit_size: size || null,
+      });
+      await file.update({
+        permitRelease: "Done",
+        businessPermit: buffer || null,
+        businessPermit_filename: originalname || null,
+        businessPermit_mimetype: mimetype || null,
+        businessPermit_size: size || null,
+      });
+
+      // Create a copy in BusinessProfile
+      const created = await BusinessProfile.create({
+        ...file.toJSON(),
+        permitRelease: "Done",
+        businessPermit: buffer || null,
+        businessPermit_filename: originalname || null,
+        businessPermit_mimetype: mimetype || null,
+        businessPermit_size: size || null,
+      });
+
+      res.status(200).json({
+        message:
+          "Applicant approved, archived in Files, uploaded file saved, and added to Business Profile.",
+        businessProfile: created,
+      });
+    } catch (err) {
+      console.error("❌ Error in /appDone route:", err);
+      res.status(500).send("Server error");
+    }
   }
-});
+);
 
 // Preview file
 router.get("/files/:id/:key", async (req, res) => {

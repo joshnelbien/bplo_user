@@ -49,6 +49,9 @@ router.post(
     try {
       const { id } = req.params;
       const file = req.file;
+      const { businessTaxTotal } = req.body;
+      const allFees = { ...req.body };
+      console.log("All fees from request body:", allFees);
 
       const applicant = await BusinessTax.findByPk(id);
       if (!applicant)
@@ -57,10 +60,10 @@ router.post(
           .json({ error: "Applicant not found in BusinessTax" });
 
       const applicantbusinessTax = await File.findByPk(id);
-      if (!applicant)
+      if (!applicantbusinessTax)
         return res
           .status(404)
-          .json({ error: "Applicant not found in BusinessTax" });
+          .json({ error: "Applicant not found in BusinessTax Files" });
 
       const applicantBackroom = await File.findByPk(id);
       if (!applicantBackroom)
@@ -73,17 +76,32 @@ router.post(
         return res.status(404).json({ error: "Applicant status not found" });
 
       const applicantExaminers = await AppStatus.findByPk(id);
-      if (!applicantStatus)
-        return res.status(404).json({ error: "Applicant status not found" });
+      if (!applicantExaminers)
+        return res.status(404).json({ error: "Applicant examiners not found" });
+
+      const backroom = await Backroom.findByPk(id);
+      if (!backroom)
+        return res.status(404).json({ error: "Applicant examiners not found" });
 
       const timestamp = moment().format("DD/MM/YYYY HH:mm:ss");
 
-      // Update statuses
+      await backroom.update({
+        ...allFees,
+        ...(file && {
+          businesstaxComputation: file.buffer,
+          businesstaxComputation_filename: file.originalname,
+          businesstaxComputation_mimetype: file.mimetype,
+          businesstaxComputation_size: file.size,
+        }),
+      });
 
+      // ✅ Add businessTaxTotal to all relevant updates
       await applicantbusinessTax.update({
         passtoBusinessTax: "Done",
         passtoTreasurer: "Yes",
         BUSINESSTAXtimeStamp: timestamp,
+        businessTaxTotal: businessTaxTotal || 0, // ✅ Insert total here
+        ...allFees,
         ...(file && {
           businesstaxComputation: file.buffer,
           businesstaxComputation_filename: file.originalname,
@@ -95,6 +113,8 @@ router.post(
       await applicantBackroom.update({
         BUSINESSTAX: "Approved",
         BUSINESSTAXtimeStamp: timestamp,
+        businessTaxTotal: businessTaxTotal || 0,
+        ...allFees,
         ...(file && {
           businesstaxComputation: file.buffer,
           businesstaxComputation_filename: file.originalname,
@@ -104,8 +124,12 @@ router.post(
       });
 
       await applicant.update({
+        businessTaxTotal: businessTaxTotal || 0,
         BUSINESSTAX: "Approved",
+
         BUSINESSTAXtimeStamp: timestamp,
+        businessTaxTotal: businessTaxTotal || 0,
+        ...allFees,
         ...(file && {
           businesstaxComputation: file.buffer,
           businesstaxComputation_filename: file.originalname,
@@ -113,34 +137,37 @@ router.post(
           businesstaxComputation_size: file.size,
         }),
       });
+
       await applicantStatus.update({
         BUSINESSTAX: "Approved",
         BUSINESSTAXtimeStamp: timestamp,
+        businessTaxTotal: businessTaxTotal || 0,
       });
 
       await applicantExaminers.update({
         BUSINESSTAX: "Approved",
         BUSINESSTAXtimeStamp: timestamp,
+        businessTaxTotal: businessTaxTotal || 0,
       });
 
       // Move to Treasurer's Office
       const applicantData = applicant.toJSON();
       if (file) {
-        await applicant.update({
-          businesstaxComputation: file.buffer,
-          businesstaxComputation_filename: file.originalname,
-          businesstaxComputation_mimetype: file.mimetype,
-          businesstaxComputation_size: file.size,
-        });
+        applicantData.businesstaxComputation = file.buffer;
+        applicantData.businesstaxComputation_filename = file.originalname;
+        applicantData.businesstaxComputation_mimetype = file.mimetype;
+        applicantData.businesstaxComputation_size = file.size;
       }
+
       applicantData.BUSINESSTAX = "Approved";
       applicantData.BUSINESSTAXtimeStamp = timestamp;
+      applicantData.businessTaxTotal = businessTaxTotal || 0;
 
       const created = await TreasurersOffice.create(applicantData);
 
       res.status(201).json({
         message:
-          "Applicant approved, file uploaded, and moved to Treasurer's Office",
+          "Applicant approved, file uploaded, total recorded, and moved to Treasurer's Office",
         created,
       });
     } catch (err) {

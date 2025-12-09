@@ -2,7 +2,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import Side_bar from "../../SIDE_BAR/side_bar";
 import CmswoApplicantModal from "./cmswo_modal";
-
+import TopBar from "../../NAVBAR/nav_bar";
+import { CircularProgress } from "@mui/material";
 import {
   Box,
   Button,
@@ -16,16 +17,26 @@ import {
   TableHead,
   TableRow,
   Typography,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 
+const TOP_BAR_HEIGHT = 80;
+const SIDE_BAR_WIDTH = 250;
+
 function Cmswo() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const [applicants, setApplicants] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filter, setFilter] = useState("pending"); // ✅ pending by default
-  const recordsPerPage = 20;
+  const [filter, setFilter] = useState("pending");
   const [selectedFiles, setSelectedFiles] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const recordsPerPage = 20;
   const API = import.meta.env.VITE_API_BASE;
 
   const handleFileChange = (name, file) => {
@@ -35,59 +46,41 @@ function Cmswo() {
     }));
   };
 
-  const handleFileSelect = (e) => {
-    const { name, files } = e.target;
-    if (files[0]) {
-      setSelectedFiles((prev) => ({
-        ...prev,
-        [name]: files[0], // store the actual File object
-      }));
-      handleFileChange(name, files[0]); // send file up to parent
-      setValidationErrors((prev) => ({ ...prev, cswmoCert: false }));
-    }
-  };
   useEffect(() => {
     const fetchApplicants = async () => {
+      setLoading(true);
       try {
         const res = await axios.get(`${API}/backroom/backrooms`);
-
-        // Sort by createdAt ascending (oldest first, newest at bottom)
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
-
         setApplicants(sortedData);
       } catch (error) {
         console.error("Error fetching applicants:", error);
+      } finally {
+        setLoading(false);
       }
     };
-
     fetchApplicants();
-  }, []);
+  }, [API]);
 
-  // ✅ Filter applicants based on button selection
-  const filteredApplicants =
-    filter === "pending"
-      ? applicants.filter(
-          (a) => a.CSMWO !== "Approved" && a.CSMWO !== "Declined"
-        )
-      : filter === "approved"
-      ? applicants.filter((a) => a.CSMWO === "Approved")
-      : applicants.filter((a) => a.CSMWO === "Declined");
+  // Filter Logic
+  const filteredApplicants = applicants.filter((a) => {
+    if (filter === "pending") return a.CSMWO !== "Approved" && a.CSMWO !== "Declined";
+    if (filter === "approved") return a.CSMWO === "Approved";
+    if (filter === "declined") return a.CSMWO === "Declined";
+    return true;
+  });
 
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = filteredApplicants.slice(
-    indexOfFirstRecord,
-    indexOfLastRecord
-  );
+  const currentRecords = filteredApplicants.slice(indexOfFirstRecord, indexOfLastRecord);
 
   const handleApprove = async (id, csmwoFee, selectedFiles = {}) => {
     try {
       const formData = new FormData();
       formData.append("csmwoFee", csmwoFee);
-
       if (selectedFiles?.cswmoCert) {
         formData.append("cswmoCert", selectedFiles.cswmoCert);
       }
@@ -104,16 +97,13 @@ function Cmswo() {
         )
       );
     } catch (error) {
-      console.error("Error approving applicant:", error);
+      console.error("Error approving:", error);
     }
   };
+
   const handleDecline = async (id, reason) => {
     try {
-      const res = await axios.post(
-        `${API}/backroom/csmwo/decline/${id}`,
-        { reason } // ⬅️ send reason to backend
-      );
-
+      await axios.post(`${API}/backroom/csmwo/decline/${id}`, { reason });
       setApplicants((prev) =>
         prev.map((applicant) =>
           applicant.id === id
@@ -121,17 +111,12 @@ function Cmswo() {
             : applicant
         )
       );
-
-      // alert("Applicant declined");
-      // closeModal();
     } catch (error) {
-      console.error("Error declining applicant:", error);
+      console.error("Error declining:", error);
     }
   };
 
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-  };
+  const handlePageChange = (event, value) => setCurrentPage(value);
 
   const openModal = (applicant) => {
     setSelectedApplicant(applicant);
@@ -145,124 +130,136 @@ function Cmswo() {
 
   return (
     <>
+      <TopBar />
       <Side_bar />
+
       <Box
-        id="main_content"
         sx={{
-          p: 3,
           minHeight: "100vh",
-          background: "linear-gradient(to bottom, #FFFFFF, #e6ffe6)",
-          marginLeft: { xs: 0, sm: "250px" }, // 0 on mobile, 250px on larger screens
-          width: { xs: "100%", sm: "calc(100% - 250px)" }, // full width on mobile
+          bgcolor: "#fff",
+          pt: `${TOP_BAR_HEIGHT + 24}px`,
+          px: { xs: 1, sm: 2, md: 3 },
+          ml: { xs: 0, md: `${SIDE_BAR_WIDTH}px` },
+          width: { xs: "100%", md: `calc(100% - ${SIDE_BAR_WIDTH}px)` },
         }}
       >
+        {/* Mobile Title */}
         <Typography
-          variant="h4"
-          gutterBottom
+          variant="h5"
           sx={{
-            color: "darkgreen",
             fontWeight: "bold",
+            color: "#1d5236",
+            mb: 2,
+            display: { xs: "block", sm: "none" },
+            textAlign: "center",
           }}
         >
           CMSWO
         </Typography>
 
-        {/* ✅ Button Group Filter */}
-        <Box mb={2}>
-          <ButtonGroup variant="contained">
-            <Button
-              sx={{
-                bgcolor: filter === "pending" ? "darkgreen" : "white",
-                color: filter === "pending" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "pending" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("pending");
-                setCurrentPage(1);
-              }}
-            >
-              Pending
-            </Button>
-            <Button
-              sx={{
-                bgcolor: filter === "approved" ? "darkgreen" : "white",
-                color: filter === "approved" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "approved" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("approved");
-                setCurrentPage(1);
-              }}
-            >
-              Approved
-            </Button>
-            <Button
-              sx={{
-                bgcolor: filter === "declined" ? "darkgreen" : "white",
-                color: filter === "declined" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "declined" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("declined");
-                setCurrentPage(1);
-              }}
-            >
-              Declined
-            </Button>
+        {/* Filter Buttons */}
+        <Box mb={3}>
+          <ButtonGroup
+            orientation={isMobile ? "vertical" : "horizontal"}
+            variant="contained"
+            fullWidth={isMobile}
+            sx={{ gap: 1 }}
+          >
+            {["pending", "approved", "declined"].map((status) => (
+              <Button
+                key={status}
+                onClick={() => {
+                  setFilter(status);
+                  setCurrentPage(1);
+                }}
+                sx={{
+                  bgcolor: filter === status ? "#1d5236" : "#fff",
+                  color: filter === status ? "#fff" : "#1d5236",
+                  border: `1px solid #1d5236`,
+                  "&:hover": {
+                    bgcolor: filter === status ? "#0f2a1b" : "#f0f0f0",
+                  },
+                  flexGrow: 1,
+                  textTransform: "capitalize",
+                }}
+              >
+                {status === "pending" ? "Pending" : status === "approved" ? "Approved" : "Declined"}
+              </Button>
+            ))}
           </ButtonGroup>
         </Box>
 
-        {/* ✅ Table */}
+        {/* Table */}
         <TableContainer
           component={Paper}
-          sx={{ borderRadius: 2, boxShadow: 3 }}
+          sx={{
+            borderRadius: 2,
+            boxShadow: 3,
+            overflowX: "auto",
+            maxWidth: "100%",
+          }}
         >
-          <Table>
+          <Table size={isMobile ? "small" : "medium"}>
             <TableHead>
-              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell>
-                  <strong>BIN</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Business Name</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>First Name</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Last Name</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Status</strong>
-                </TableCell>
+              <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+                <TableCell><strong>Application</strong></TableCell>
+                <TableCell><strong>BIN</strong></TableCell>
+                <TableCell><strong>Business Name</strong></TableCell>
+                <TableCell><strong>First Name</strong></TableCell>
+                <TableCell><strong>Last Name</strong></TableCell>
+                <TableCell><strong>Status</strong></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {currentRecords.map((applicant) => (
-                <TableRow
-                  key={applicant.id}
-                  hover
-                  sx={{ cursor: "pointer" }}
-                  onClick={() => openModal(applicant)}
-                >
-                  <TableCell>{applicant.BIN}</TableCell>
-                  <TableCell>{applicant.businessName}</TableCell>
-                  <TableCell>{applicant.firstName}</TableCell>
-                  <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.CSMWO}</TableCell>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                    <CircularProgress size={40} thickness={4} />
+                    <Typography mt={1}>Loading...</Typography>
+                  </TableCell>
                 </TableRow>
-              ))}
+              ) : currentRecords.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                    <Typography>No records found</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                currentRecords.map((applicant) => (
+                  <TableRow
+                    key={applicant.id}
+                    hover
+                    onClick={() => openModal(applicant)}
+                    sx={{ cursor: "pointer" }}
+                  >
+                    <TableCell>{applicant.application || "-"}</TableCell>
+                    <TableCell>{applicant.bin || "-"}</TableCell>
+                    <TableCell>{applicant.businessName || "-"}</TableCell>
+                    <TableCell>{applicant.firstName || "-"}</TableCell>
+                    <TableCell>{applicant.lastName || "-"}</TableCell>
+                    <TableCell>
+                      <Typography
+                        sx={{
+                          fontWeight: "bold",
+                          color:
+                            applicant.CSMWO === "Approved"
+                              ? "success.main"
+                              : applicant.CSMWO === "Declined"
+                              ? "error.main"
+                              : "text.primary",
+                        }}
+                      >
+                        {applicant.CSMWO || "Pending"}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
 
-        {/* ✅ Pagination */}
+        {/* Pagination */}
         <Box display="flex" justifyContent="center" mt={3}>
           <Pagination
             count={totalPages}
@@ -270,11 +267,12 @@ function Cmswo() {
             onChange={handlePageChange}
             color="success"
             shape="rounded"
+            size={isMobile ? "small" : "medium"}
           />
         </Box>
       </Box>
 
-      {/* ✅ Modal Component */}
+      {/* Modal */}
       <CmswoApplicantModal
         applicant={selectedApplicant}
         isOpen={isModalOpen}

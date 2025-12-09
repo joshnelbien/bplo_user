@@ -2,9 +2,9 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const UserAccounts = require("../db/model/userAccounts");
 const sgMail = require("@sendgrid/mail");
-
+const BusinessProfile = require("../db/model/businessProfileDB");
 const router = express.Router();
-
+const sendBusinessProfileCSV = require("./sendBusinessProfileCSV");
 /* ---------------------------------------------------
  ✅ SendGrid setup
 --------------------------------------------------- */
@@ -106,7 +106,7 @@ router.post("/register", async (req, res) => {
 router.post("/register-renew", async (req, res) => {
   try {
     const {
-      BIN,
+      bin,
       firstName,
       middleName,
       lastName,
@@ -131,7 +131,7 @@ router.post("/register-renew", async (req, res) => {
 
     // Insert user into DB
     const user = await UserAccounts.create({
-      BIN,
+      bin,
       firstName,
       middleName: middleName || null,
       lastName,
@@ -145,11 +145,11 @@ router.post("/register-renew", async (req, res) => {
       business_name: businessName || null,
       tin_no: tinNo || null,
       trade_name: TradeName || null,
-      application_type: "New",
+      application_type: "Renew",
       DataPrivacy: "True",
     });
 
-    console.log("✅ User inserted:", user.id, user.BIN);
+    console.log("✅ User inserted:", user.id, user.bin);
 
     // Send success response immediately
     res.status(200).json({
@@ -162,7 +162,7 @@ router.post("/register-renew", async (req, res) => {
   <p>Hello <b>${firstName} ${lastName}</b>,</p>
   <p>We are pleased to inform you that you may now proceed with your <b>Business Renewal Application.</b></p>
   <p>Please click the link below to continue with your application process:</p>
-  <a href="${process.env.VITE_API_BASE}/renewPage/${user.id}/${user.BIN}"
+  <a href="${process.env.VITE_API_BASE}/renewPage/${user.id}/${user.bin}"
      style="display:inline-block; padding:10px 16px; background-color:#144C22; color:white; 
             text-decoration:none; border-radius:4px; font-weight:bold;">
     View Application
@@ -177,6 +177,21 @@ router.post("/register-renew", async (req, res) => {
     console.error("❌ Register error:", error);
     res.status(500).json({ error: "Server error during registration." });
   }
+});
+
+router.post("/businessProfiles/export-email", async (req, res) => {
+  const result = await sendBusinessProfileCSV();
+
+  if (result.success) {
+    return res.json({
+      success: true,
+      message: "CSV emailed successfully.",
+      filename: result.filename,
+      csv: result.csv,
+    });
+  }
+
+  return res.status(500).json({ error: "Failed to send email." });
 });
 
 router.get("/:id", async (req, res) => {

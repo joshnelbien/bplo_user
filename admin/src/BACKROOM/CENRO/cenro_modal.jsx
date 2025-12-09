@@ -25,9 +25,10 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import { styled } from "@mui/system";
+import CenroCertExport from "./cenroCertExport";
 
 // The API base URL is hardcoded as a placeholder since environment variables cannot be accessed.
-const API = "https://api.example.com";
+const API = import.meta.env.VITE_API_BASE;
 
 // Component to display a normal text field
 const Field = ({
@@ -114,7 +115,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`${API}/examiners/examiners/${fileData.id}/${fileKey}`}
+            href={`${API}/newApplication/files/${fileData.id}/${fileKey}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -127,7 +128,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`${API}/examiners/examiners/${fileData.id}/${fileKey}/download`}
+            href={`${API}/newApplication/files/${fileData.id}/${fileKey}/download`}
             target="_blank"
             rel="noreferrer"
           >
@@ -162,6 +163,9 @@ function CenroApplicantModal({
     cenroFee: false,
     cenroCert: false,
   });
+
+  // NEW STATE FOR CERTIFICATE MODAL
+  const [certOpen, setCertOpen] = useState(false);
 
   useEffect(() => {
     if (applicant) {
@@ -304,10 +308,10 @@ function CenroApplicantModal({
       <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
         <DialogTitle
           sx={{
-            backgroundColor: "#1d5236", // Requested Background Color
-            color: "white", // White text for contrast
-            textAlign: "center", // Center the text
-            py: 2, // Vertical padding
+            backgroundColor: "#1d5236",
+            color: "white",
+            textAlign: "center",
+            py: 2,
           }}
         >
           Applicant Details
@@ -318,7 +322,7 @@ function CenroApplicantModal({
           <Section title="Business Information">
             <Field label="Status" value={applicant.CENRO} />
             <Field label="Mode of Payment" value={applicant.Modeofpayment} />
-            <Field label="BIN" value={applicant.BIN} />
+            <Field label="BIN" value={applicant.bin} />
             <Field label="Business Type" value={applicant.BusinessType} />
             <Field label="DSC Registration No" value={applicant.dscRegNo} />
             <Field label="Business Name" value={applicant.businessName} />
@@ -414,22 +418,16 @@ function CenroApplicantModal({
             <Field label="Office Type" value={applicant.officeType} />
 
             {(() => {
-              // ✅ Utility function to safely parse CSV-like fields with quotes
               const parseCSV = (text) => {
                 if (!text) return [];
                 return text
-
                   .trim()
-
                   .replace(/^\[|\]$/g, "")
-
                   .split(/",\s*"?/)
-
                   .map((val) => val.replace(/^"|"$/g, "").trim())
                   .filter((val) => val.length > 0);
               };
 
-              // ✅ Extract arrays for each field
               const lobArr = parseCSV(applicant.lineOfBusiness);
               const productArr = parseCSV(applicant.productService);
               const unitArr = parseCSV(applicant.Units);
@@ -438,7 +436,6 @@ function CenroApplicantModal({
               const businessNatureArr = parseCSV(applicant.businessNature);
               const lineCodeArr = parseCSV(applicant.lineCode);
 
-              // ✅ Find the maximum length among arrays (in case some are shorter)
               const maxLength = Math.max(
                 lobArr.length,
                 productArr.length,
@@ -467,7 +464,7 @@ function CenroApplicantModal({
                       mb: 2,
                       borderRadius: 2,
                       backgroundColor: "#f9f9f9",
-                      width: "100%", // 🟩 Ensure Paper itself takes full width
+                      width: "100%",
                     }}
                   >
                     <Typography
@@ -479,15 +476,13 @@ function CenroApplicantModal({
                     </Typography>
 
                     <Grid container spacing={2}>
-                      {/* 🟩 Line of Business — full width */}
                       <Field
                         label="Line of Business"
                         value={lob}
                         fullWidth
                         multiline
-                        rows={3} // adjust rows if you want a taller box (e.g., 4 or 5)
+                        rows={3}
                       />
-
                       <Grid item xs={12} sm={6}>
                         <Field label="Product/Service" value={product} />
                       </Grid>
@@ -561,57 +556,73 @@ function CenroApplicantModal({
             />
           </Section>
 
-          {/* CENRO Fee input */}
-          <TextField
-            label="Environmental Fee"
-            value={formatCurrency(cenroField.cenroFee)}
-            onChange={(e) => handleChange("cenroFee", e.target.value)}
-            fullWidth
-            size="small"
-            sx={{ mt: 2 }}
-            error={validationErrors.cenroFee}
-            helperText={
-              validationErrors.cenroFee &&
-              "Environmental Fee is required for approval."
-            }
-          />
-
-          {/* File Upload */}
-          {files.map((file) => (
-            <Grid container spacing={1} sx={{ mt: 1 }}>
-              <Grid item>
-                <Button
-                  variant="contained"
-                  component="label"
-                  size="small"
-                  color="success"
-                  sx={{ minWidth: 120 }}
-                >
-                  Choose File
-                  <input
-                    type="file"
-                    name={file.name}
-                    hidden
-                    onChange={handleFileSelect}
-                  />
-                </Button>
-              </Grid>
-              <Grid item xs>
-                <TextField
-                  value={selectedFiles[file.name]?.name || ""}
-                  placeholder="No file selected"
-                  size="small"
-                  fullWidth
-                  InputProps={{ readOnly: true }}
-                  error={validationErrors.cenroCert}
-                  helperText={
-                    validationErrors.cenroCert &&
-                    "A file is required for approval."
-                  }
+          {applicant.CENRO === "Approved" && (
+            <>
+              <Section title={"Attachments"}>
+                <FileField
+                  fileKey="cenroCert"
+                  label="Cenro Certificate"
+                  fileData={applicant}
                 />
-              </Grid>
-            </Grid>
-          ))}
+              </Section>
+            </>
+          )}
+
+          {applicant.CENRO !== "Approved" && (
+            <>
+              {/* CENRO Fee input */}
+              <TextField
+                label="Environmental Fee"
+                value={formatCurrency(cenroField.cenroFee)}
+                onChange={(e) => handleChange("cenroFee", e.target.value)}
+                fullWidth
+                size="small"
+                sx={{ mt: 2 }}
+                error={validationErrors.cenroFee}
+                helperText={
+                  validationErrors.cenroFee &&
+                  "Environmental Fee is required for approval."
+                }
+              />
+
+              {/* File Upload */}
+              {files.map((file) => (
+                <Grid container spacing={1} sx={{ mt: 1 }} key={file.name}>
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      component="label"
+                      size="small"
+                      color="success"
+                      sx={{ minWidth: 120 }}
+                    >
+                      Choose File
+                      <input
+                        type="file"
+                        name={file.name}
+                        hidden
+                        onChange={handleFileSelect}
+                      />
+                    </Button>
+                  </Grid>
+                  <Grid item xs>
+                    <TextField
+                      value={selectedFiles[file.name]?.name || ""}
+                      placeholder="No file selected"
+                      size="small"
+                      fullWidth
+                      InputProps={{ readOnly: true }}
+                      error={validationErrors.cenroCert}
+                      helperText={
+                        validationErrors.cenroCert &&
+                        "A file is required for approval."
+                      }
+                    />
+                  </Grid>
+                </Grid>
+              ))}
+            </>
+          )}
         </DialogContent>
 
         <DialogActions>
@@ -629,25 +640,47 @@ function CenroApplicantModal({
           >
             Close
           </Button>
-          <Button
-            onClick={handleApproveClick}
-            variant="contained"
-            color="success"
-            sx={{ width: "100px" }}
-          >
-            Approve
-          </Button>
-          <Button
-            onClick={handleDeclineClick}
-            variant="contained"
-            color="error"
-            sx={{
-              color: "white",
-              width: "100px",
-            }}
-          >
-            Decline
-          </Button>
+
+          {applicant.CENRO !== "Approved" && (
+            <>
+              <Button
+                onClick={handleApproveClick}
+                variant="contained"
+                color="success"
+                sx={{ width: "100px" }}
+              >
+                Approve
+              </Button>
+
+              <Button
+                onClick={handleDeclineClick}
+                variant="contained"
+                color="error"
+                sx={{
+                  color: "white",
+                  width: "100px",
+                }}
+              >
+                Decline
+              </Button>
+
+              {/* UPDATED: Generate Certificate Button */}
+              <Button
+                onClick={() => setCertOpen(true)}
+                variant="contained"
+                sx={{
+                  backgroundColor: "#3179d6ff",
+                  color: "white",
+                  width: "200px",
+                  "&:hover": {
+                    backgroundColor: "#0d42a3ff",
+                  },
+                }}
+              >
+                Generate Certificate
+              </Button>
+            </>
+          )}
         </DialogActions>
       </Dialog>
 
@@ -885,6 +918,41 @@ function CenroApplicantModal({
             OK
           </Button>
         </Paper>
+      </Dialog>
+
+      {/* NEW: Certificate Generation Dialog */}
+      <Dialog
+        open={certOpen}
+        onClose={() => setCertOpen(false)}
+        fullWidth
+        maxWidth="md"
+      >
+        <DialogTitle
+          sx={{
+            backgroundColor: "#1d5236",
+            color: "white",
+            textAlign: "center",
+            py: 2,
+          }}
+        >
+          Generate CENRO Certificate
+        </DialogTitle>
+        <DialogContent dividers>
+          <CenroCertExport applicant={applicant} />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setCertOpen(false)}
+            variant="contained"
+            sx={{
+              backgroundColor: "#70706fff",
+              color: "white",
+              "&:hover": { backgroundColor: "#acababff" },
+            }}
+          >
+            Close
+          </Button>
+        </DialogActions>
       </Dialog>
     </>
   );

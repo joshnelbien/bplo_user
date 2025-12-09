@@ -8,6 +8,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControlLabel,
+  Checkbox,
   Grid,
   Paper,
   TextField,
@@ -119,7 +121,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`${API}/examiners/examiners/${fileData.id}/${fileKey}`}
+            href={`${API}/newApplication/files/${fileData.id}/${fileKey}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -132,7 +134,7 @@ const FileField = ({ label, fileKey, fileData }) => (
           <IconButton
             size="small"
             component="a"
-            href={`${API}/examiners/examiners/${fileData.id}/${fileKey}/download`}
+            href={`${API}/newApplication/files/${fileData.id}/${fileKey}/download`}
             target="_blank"
             rel="noreferrer"
           >
@@ -159,6 +161,8 @@ function ZoningApplicantModal({
   const [successOpen, setSuccessOpen] = useState(false);
   const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false);
   const [selectedReasons, setSelectedReasons] = useState([]); // New state for selected reasons
+  const [feeError, setFeeError] = useState(false);
+  const [renewZoningFee, setRenewZoningFee] = useState("");
 
   const files = [{ label: "Zoning Certificate", name: "zoningCert" }];
 
@@ -186,12 +190,12 @@ function ZoningApplicantModal({
   };
 
   const handleApproveClick = () => {
-    // Check if a file has been selected for zoningCert
     if (!selectedFiles.zoningCert) {
       setValidationError(true);
       return;
     }
-    onApprove(applicant.id);
+
+    onApprove(applicant.id, renewZoningFee);
     setSuccessOpen(true);
   };
 
@@ -201,7 +205,7 @@ function ZoningApplicantModal({
   };
 
   const handleDeclineClick = () => {
-    setDeclineConfirmOpen(true); // Open the new dialog
+    setDeclineConfirmOpen(true);
   };
 
   const handleToggleReason = (reason) => {
@@ -214,6 +218,13 @@ function ZoningApplicantModal({
 
   const handleAddReasons = () => {
     setDeclineReason(selectedReasons.join(", "));
+  };
+
+  const handleChange = (field, value) => {
+    setRenewZoningFee(value);
+    if (value.trim() !== "") {
+      setFeeError(false);
+    }
   };
 
   const handleDeclineConfirm = () => {
@@ -278,7 +289,7 @@ function ZoningApplicantModal({
                   label="Mode of Payment"
                   value={applicant.Modeofpayment}
                 />
-                <Field label="BIN" value={applicant.BIN} />
+                <Field label="BIN" value={applicant.bin} />
                 <Field label="Business Type" value={applicant.BusinessType} />
                 <Field label="DSC Registration No" value={applicant.dscRegNo} />
                 <Field label="Business Name" value={applicant.businessName} />
@@ -538,14 +549,66 @@ function ZoningApplicantModal({
               </Section>
 
               {/* Zoning Attachments */}
-              <Typography variant="subtitle1" sx={{ mb: 3, pt: 2 }}>
-                ZONING FEE:{" "}
-                <b>
-                  {zoningFee === "Exempted"
-                    ? zoningFee
-                    : `₱${formatCurrency(zoningFee)}`}
-                </b>
-              </Typography>
+              {applicant.application === "New" && (
+                <>
+                  <Typography variant="subtitle1" sx={{ mb: 3, pt: 2 }}>
+                    ZONING FEE:{" "}
+                    <b>
+                      {zoningFee === "Exempted"
+                        ? zoningFee
+                        : `₱${formatCurrency(zoningFee)}`}
+                    </b>
+                  </Typography>
+                </>
+              )}
+
+              {applicant.ZONING === "Pending" && (
+                <>
+                  {applicant.application === "Renew" && (
+                    <>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={
+                              renewZoningFee === "0" || renewZoningFee === 0
+                            }
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                handleChange("renewZoningFee", "0");
+                              } else {
+                                handleChange("renewZoningFee", "");
+                              }
+                            }}
+                          />
+                        }
+                        label="Exempt Zoning Fee"
+                        sx={{ mt: 2 }}
+                      />
+
+                      <TextField
+                        label="Zoning Fee"
+                        value={formatCurrency(renewZoningFee)}
+                        onChange={(e) => {
+                          const rawValue = e.target.value.replace(/,/g, "");
+                          handleChange("renewZoningFee", rawValue);
+                        }}
+                        fullWidth
+                        size="small"
+                        sx={{ mt: 2 }}
+                        required
+                        error={feeError}
+                        helperText={
+                          feeError &&
+                          "Solid Waste Fee is required for approval."
+                        }
+                        disabled={
+                          renewZoningFee === "0" || renewZoningFee === 0
+                        }
+                      />
+                    </>
+                  )}
+                </>
+              )}
 
               {applicant.ZONING === "Pending" ? (
                 // ✅ Show upload fields
@@ -588,44 +651,51 @@ function ZoningApplicantModal({
                   ))}
                 </Stack>
               ) : applicant.ZONING === "Approved" ? (
-                <FileField
-                  fileKey="zoningCert"
-                  label="Zoning Certificate"
-                  fileData={applicant}
-                />
+                <Grid item xs={12} sm={6}>
+                  <FileField
+                    fileKey="zoningCert"
+                    label="Zoning Certificate"
+                    fileData={applicant}
+                  />
+                  <Field label="ZONING FEE" value={applicant.zoningFee} />
+                </Grid>
               ) : null}
             </>
           ) : (
-            <ZoningCert applicant={applicant} />
+            <ZoningCert applicant={applicant} renewZoningFee={renewZoningFee} />
           )}
         </DialogContent>
         {/* ✅ Cleaned Up Actions */}
+
         <DialogActions>
+          {/* Close Button */}
+          <Button
+            onClick={onClose}
+            variant="contained"
+            sx={{
+              backgroundColor: "#70706fff",
+              color: "white",
+              "&:hover": { backgroundColor: "#acababff" },
+              width: "100px",
+              border: "none",
+            }}
+          >
+            Close
+          </Button>
           {/* Only show Approve/Decline if not yet approved and not viewing cert */}
           {!showCert && applicant.ZONING !== "Approved" && (
             <>
-              {/* Close Button */}
-              <Button
-                onClick={onClose}
-                variant="contained"
-                sx={{
-                  backgroundColor: "#70706fff",
-                  color: "white",
-                  "&:hover": { backgroundColor: "#acababff" },
-                  width: "100px",
-                  border: "none",
-                }}
-              >
-                Close
-              </Button>
-              <Button
-                onClick={handleApproveClick}
-                variant="contained"
-                color="success"
-              >
-                Approve
-              </Button>
-
+              {applicant.ZONING !== "Approved" && (
+                <>
+                  <Button
+                    onClick={handleApproveClick}
+                    variant="contained"
+                    color="success"
+                  >
+                    Approve
+                  </Button>
+                </>
+              )}
               <Button
                 onClick={handleDeclineClick}
                 variant="contained"
@@ -635,7 +705,7 @@ function ZoningApplicantModal({
                   width: "100px",
                 }}
               >
-                Decline
+                HOLD
               </Button>
             </>
           )}

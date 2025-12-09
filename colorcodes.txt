@@ -1,34 +1,9 @@
-#1d5236 (main background or Primary color) #072b0b Hover color background
+#1d5236 (main background or Primary color) HOVER #072b0b
 
-#70706fff (No) -- Hover #acababff
+NO BUTTON #70706fff HOVER #acababff
 
+APPLICANT DETAILS HEADER #1d5236
 
-      <!-- <DialogTitle
-        sx={{
-          backgroundColor: "#1d5236", // Requested Background Color
-          color: "white", // White text for contrast
-          textAlign: "center", // Center the text
-          py: 2, // Vertical padding
-        }}
-      >
-        Applicant Details
-      </DialogTitle>
+CLOSE BUTTON #70706fff HOVER #acababff
 
-      {/* ✅ Stepper Flow - Added vertical margin */}
-      <DialogContent sx={{ mt: 2, mb: 4 }}> -->
-
-
-           <!-- {/* Close Button */}
-        <Button
-          onClick={onClose}
-          variant="contained"
-          sx={{
-            backgroundColor: "#70706fff",
-            color: "white",
-            "&:hover": { backgroundColor: "#acababff" },
-            width: "100px",
-            border: "none",
-          }}
-        >
-          Close
-        </Button> -->
+GENERATE CERTIFICATE BUTTON #3179d6ff HOVER #0d42a3ff

@@ -6,7 +6,13 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
+  Select,
+  MenuItem,
   Paper,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  Box,
   TextField,
   Typography,
   Tooltip,
@@ -16,18 +22,20 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import axios from "axios";
-import ExaminersApplicantModal from "./examiners_modal";
 
 const API = import.meta.env.VITE_API_BASE;
 
-// ✅ Reusable Text Field
-const Field = ({ label, value, onChange, name, disabled = true }) => (
-  <Grid item xs={12} sm={6}>
+// Reusable Text Field (Read-only)
+const Field = ({
+  label,
+  value,
+  disabled = true,
+  gridProps = { xs: 12, sm: 6 },
+}) => (
+  <Grid item {...gridProps}>
     <TextField
       label={label}
-      name={name}
       value={value || ""}
-      onChange={onChange}
       fullWidth
       variant="outlined"
       size="small"
@@ -47,7 +55,7 @@ const Field = ({ label, value, onChange, name, disabled = true }) => (
   </Grid>
 );
 
-// ✅ Section Wrapper
+// Section Wrapper
 const Section = ({ title, children }) => (
   <Paper
     elevation={0}
@@ -62,7 +70,7 @@ const Section = ({ title, children }) => (
   </Paper>
 );
 
-// ✅ File Viewer / Downloader
+// File Viewer / Downloader
 const FileField = ({ label, fileKey, fileData }) => (
   <Grid item xs={12} sm={6}>
     <TextField
@@ -126,16 +134,27 @@ function ExaminersApplicantModalUpdate({
 }) {
   const [formData, setFormData] = useState({});
   const [capitalValues, setCapitalValues] = useState([]);
+  const [lineOfBusiness, setLineOfBusiness] = useState([]);
+  const [productService, setProductService] = useState([]);
+  const [units, setUnits] = useState([]);
+  const [natureCode, setNatureCode] = useState([]);
+  const [businessNature, setBusinessNature] = useState([]);
+  const [lineCode, setLineCode] = useState([]);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
-  const [examinersModal, setExaminersModal] = useState(false);
+  const [lobOptions, setLobOptions] = useState([]);
+  const [businessLineData, setBusinessLineData] = useState([]);
 
-  useEffect(() => {
-    if (applicant) {
-      setFormData({ ...applicant });
-      setCapitalValues(parseCSV(applicant.capital));
-    }
-  }, [applicant]);
+  const handleDeleteBusinessLine = (indexToDelete) => {
+    setLineOfBusiness((prev) => prev.filter((_, i) => i !== indexToDelete));
+    setProductService((prev) => prev.filter((_, i) => i !== indexToDelete));
+    setUnits((prev) => prev.filter((_, i) => i !== indexToDelete));
+    setCapitalValues((prev) => prev.filter((_, i) => i !== indexToDelete));
+    setNatureCode((prev) => prev.filter((_, i) => i !== indexToDelete));
+    setBusinessNature((prev) => prev.filter((_, i) => i !== indexToDelete));
+    setLineCode((prev) => prev.filter((_, i) => i !== indexToDelete));
+  };
 
+  // Helper to parse CSV-like string arrays
   const parseCSV = (text) => {
     if (!text) return [];
     return text
@@ -145,6 +164,20 @@ function ExaminersApplicantModalUpdate({
       .map((val) => val.replace(/^"|"$/g, "").trim())
       .filter((val) => val.length > 0);
   };
+
+  // Initialize all state when applicant changes
+  useEffect(() => {
+    if (applicant) {
+      setFormData({ ...applicant });
+      setCapitalValues(parseCSV(applicant.capital));
+      setLineOfBusiness(parseCSV(applicant.lineOfBusiness));
+      setProductService(parseCSV(applicant.productService));
+      setUnits(parseCSV(applicant.Units));
+      setNatureCode(parseCSV(applicant.natureCode));
+      setBusinessNature(parseCSV(applicant.businessNature));
+      setLineCode(parseCSV(applicant.lineCode));
+    }
+  }, [applicant]);
 
   if (!isOpen || !applicant) return null;
 
@@ -156,39 +189,86 @@ function ExaminersApplicantModalUpdate({
     }));
   };
 
+  // Generic array updater
+  const updateArray = (index, field, value) => {
+    const setters = {
+      capital: setCapitalValues,
+      lineOfBusiness: setLineOfBusiness,
+      productService: setProductService,
+      Units: setUnits,
+      natureCode: setNatureCode,
+      businessNature: setBusinessNature,
+      lineCode: setLineCode,
+    };
+
+    const setter = setters[field];
+    if (setter) {
+      setter((prev) => {
+        const updated = [...prev];
+        updated[index] = value;
+        return updated;
+      });
+    }
+  };
+
+  const quoteJoin = (arr) => {
+    if (!arr || !arr.length) return "";
+    return arr.map((v) => `"${v}"`).join(",");
+  };
+
   const handleUpdate = async () => {
     try {
       const updatedData = {
         ...formData,
-        capital: JSON.stringify(capitalValues), // send as JSON array string
+        capital: quoteJoin(capitalValues),
+        lineOfBusiness: quoteJoin(lineOfBusiness),
+        productService: quoteJoin(productService),
+        Units: quoteJoin(units),
+        natureCode: quoteJoin(natureCode),
+        businessNature: quoteJoin(businessNature),
+        lineCode: quoteJoin(lineCode),
       };
 
-      const res = await axios.put(
-        `${API}/examiners/examiners/${formData.id}`,
-        updatedData
-      );
-
-      if (res.status === 200) {
-        console.log("✅ Updated record:", res.data);
-        setSuccessDialogOpen(true);
-
-        if (onApprove) onApprove(formData, capitalValues);
-
-        // wait a bit before closing and refreshing
-        setTimeout(() => {
-          setSuccessDialogOpen(false);
-          setExaminersModal(false);
-          onClose();
-
-          // 🔄 Refresh the whole page
-          window.location.reload();
-        }, 1500);
-      }
+      await axios.put(`${API}/examiners/examiners/${formData.id}`, updatedData);
+      setSuccessDialogOpen(true);
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } catch (err) {
-      console.error("❌ Update failed:", err);
-      alert("Failed to update applicant details.");
+      console.error(err);
+      alert("Update failed.");
     }
   };
+
+  const maxLength = Math.max(
+    lineOfBusiness.length,
+    productService.length,
+    units.length,
+    capitalValues.length,
+    natureCode.length,
+    businessNature.length,
+    lineCode.length
+  );
+
+  useEffect(() => {
+    const fetchBusinessLines = async () => {
+      try {
+        const res = await axios.get(`${API}/api/my-existing-table`);
+
+        // Store unique business line names for dropdown
+        const lines = res.data
+          .map((item) => item.business_line?.toUpperCase())
+          .filter(Boolean);
+        setLobOptions([...new Set(lines)]);
+
+        // Store full records for auto-fill
+        setBusinessLineData(res.data);
+      } catch (err) {
+        console.error("❌ Failed to fetch business_line from DB:", err);
+      }
+    };
+    fetchBusinessLines();
+  }, [API]);
 
   return (
     <>
@@ -238,9 +318,7 @@ function ExaminersApplicantModalUpdate({
             <Field label="Own Place" value={applicant.ownPlace} />
 
             {applicant.ownPlace === "YES" ? (
-              <>
-                <Field label="Tax Dec. No." value={applicant.taxdec} />
-              </>
+              <Field label="Tax Dec. No." value={applicant.taxdec} />
             ) : (
               <>
                 <Field label="Lessor's Name" value={applicant.lessorName} />
@@ -278,9 +356,10 @@ function ExaminersApplicantModalUpdate({
             <Field label="Pin Address" value={applicant.TaxpinAddress} />
           </Section>
 
-          {/* Business Activity */}
+          {/* Business Activity & Incentives */}
           <Section title="Business Activity & Incentives">
             <Field label="Tax Incentives" value={applicant.tIGE} />
+
             {applicant.tIGE === "Yes" && (
               <FileField
                 fileKey="tIGEfiles"
@@ -291,135 +370,194 @@ function ExaminersApplicantModalUpdate({
 
             <Field label="Office Type" value={applicant.officeType} />
 
-            {(() => {
-              const parseCSV = (text) => {
-                if (!text) return [];
-                return text
-                  .trim()
-                  .replace(/^\[|\]$/g, "")
-                  .split(/",\s*"?/)
-                  .map((val) => val.replace(/^"|"$/g, "").trim())
-                  .filter((val) => val.length > 0);
-              };
+            {/* Editable Business Lines */}
+            {Array.from({ length: maxLength }).map((_, index) => (
+              <Paper
+                key={index}
+                elevation={2}
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  borderRadius: 2,
+                  backgroundColor: "#f9f9f9",
+                  width: "100%",
+                }}
+              >
+                <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                  Business Line {index + 1}
+                </Typography>
 
-              const lobArr = parseCSV(applicant.lineOfBusiness);
-              const productArr = parseCSV(applicant.productService);
-              const unitArr = parseCSV(applicant.Units);
-              const natureCodeArr = parseCSV(applicant.natureCode);
-              const businessNatureArr = parseCSV(applicant.businessNature);
-              const lineCodeArr = parseCSV(applicant.lineCode);
-
-              const maxLength = Math.max(
-                lobArr.length,
-                productArr.length,
-                unitArr.length,
-                capitalValues.length,
-                natureCodeArr.length,
-                businessNatureArr.length,
-                lineCodeArr.length
-              );
-
-              return Array.from({ length: maxLength }).map((_, index) => (
-                <Paper
-                  key={index}
-                  elevation={2}
-                  sx={{
-                    p: 2,
-                    mb: 2,
-                    borderRadius: 2,
-                    backgroundColor: "#f9f9f9",
-                    width: "100%",
-                  }}
-                >
-                  <Typography
-                    variant="subtitle2"
-                    fontWeight="bold"
-                    gutterBottom
+                {/* Line of Business */}
+                <FormControl fullWidth sx={{ width: "100%" }}>
+                  <InputLabel
+                    id={`line-of-business-label-${index}`}
+                    sx={{ color: "black" }}
                   >
-                    Business Line {index + 1}
-                  </Typography>
+                    Line of Business
+                  </InputLabel>
+                  <Select
+                    labelId={`line-of-business-label-${index}`}
+                    id={`line-of-business-${index}`}
+                    value={lineOfBusiness[index] || ""}
+                    onChange={(e) => {
+                      const selectedLOB = e.target.value;
 
-                  <Grid container spacing={2}>
-                    <Field
-                      label="Line of Business"
-                      value={lobArr[index] || ""}
+                      // Update Line of Business
+                      updateArray(index, "lineOfBusiness", selectedLOB);
+
+                      // Find corresponding record in businessLineData
+                      const match = businessLineData.find(
+                        (item) =>
+                          item.business_line?.toUpperCase() === selectedLOB
+                      );
+
+                      if (match) {
+                        // Auto-fill related fields
+                        updateArray(
+                          index,
+                          "natureCode",
+                          match.nature_code || ""
+                        );
+                        updateArray(
+                          index,
+                          "businessNature",
+                          match.business_nature || ""
+                        );
+                        updateArray(index, "lineCode", match.line_code || "");
+                      }
+                    }}
+                    sx={{ backgroundColor: "#fffbe6", minHeight: 56 }}
+                    label="Line of Business"
+                  >
+                    {lobOptions.map((option) => (
+                      <MenuItem key={option} value={option}>
+                        {option}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <Grid item xs={12} mt={2}>
+                  {/* Product/Service */}
+                  <Grid item xs={12} mt={2}>
+                    <TextField
+                      label="Product/Service"
+                      value={productService[index] || ""}
+                      onChange={(e) =>
+                        updateArray(index, "productService", e.target.value)
+                      }
                       fullWidth
-                      multiline
-                      rows={3}
+                      variant="outlined"
+                      size="small"
+                      InputLabelProps={{ sx: { color: "black" } }}
                     />
-                    <Grid item xs={12} sm={6}>
-                      <Field
-                        label="Product/Service"
-                        value={productArr[index] || ""}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Field label="Units" value={unitArr[index] || ""} />
-                    </Grid>
-
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        label="Capital"
-                        value={
-                          capitalValues[index]
-                            ? Number(
-                                capitalValues[index]
-                                  .toString()
-                                  .replace(/,/g, "")
-                              ).toLocaleString()
-                            : ""
-                        }
-                        onChange={(e) => {
-                          const rawValue = e.target.value
-                            .replace(/,/g, "")
-                            .replace(/\D/g, "");
-                          const updated = [...capitalValues];
-                          updated[index] = rawValue;
-                          setCapitalValues(updated);
-                        }}
-                        fullWidth
-                        variant="outlined"
-                        size="small"
-                        sx={{
-                          backgroundColor: "#fffbe6",
-                          "& .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "#1c541e",
-                          },
-                          "&:hover .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "#2e7d32",
-                          },
-                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "#1b5e20",
-                          },
-                        }}
-                        InputLabelProps={{
-                          sx: { color: "black" },
-                        }}
-                      />
-                    </Grid>
-
-                    <Grid item xs={12} sm={6}>
-                      <Field
-                        label="Nature Code"
-                        value={natureCodeArr[index] || ""}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Field
-                        label="Business Nature"
-                        value={businessNatureArr[index] || ""}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Field
-                        label="Line Code"
-                        value={lineCodeArr[index] || ""}
-                      />
-                    </Grid>
                   </Grid>
-                </Paper>
-              ));
-            })()}
+                  {/* Units */}
+                  <Grid item xs={12} mt={2}>
+                    <TextField
+                      label="Units"
+                      value={units[index] || ""}
+                      onChange={(e) =>
+                        updateArray(index, "Units", e.target.value)
+                      }
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      InputLabelProps={{ sx: { color: "black" } }}
+                    />
+                  </Grid>
+                  {/* Capital */}
+                  <Grid item xs={12} mt={2}>
+                    <TextField
+                      label="Capital"
+                      value={
+                        capitalValues[index]
+                          ? Number(
+                              capitalValues[index].toString().replace(/,/g, "")
+                            ).toLocaleString()
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const rawValue = e.target.value
+                          .replace(/,/g, "")
+                          .replace(/\D/g, "");
+                        updateArray(index, "capital", rawValue);
+                      }}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      sx={{ backgroundColor: "#fffbe6" }}
+                      InputLabelProps={{ sx: { color: "black" } }}
+                    />
+                  </Grid>
+                  {/* Nature Code */}
+                  <Grid item xs={12} mt={2}>
+                    <TextField
+                      label="Nature Code"
+                      value={natureCode[index] || ""}
+                      onChange={(e) =>
+                        updateArray(index, "natureCode", e.target.value)
+                      }
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      InputLabelProps={{ sx: { color: "black" } }}
+                    />
+                  </Grid>
+                  {/* Business Nature */}
+                  <Grid item xs={12} mt={2}>
+                    <TextField
+                      label="Business Nature"
+                      value={businessNature[index] || ""}
+                      onChange={(e) =>
+                        updateArray(index, "businessNature", e.target.value)
+                      }
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      InputLabelProps={{ sx: { color: "black" } }}
+                    />
+                  </Grid>
+                  {/* Line Code */}
+                  <Grid item xs={12} mt={2}>
+                    <TextField
+                      label="Line Code"
+                      value={lineCode[index] || ""}
+                      onChange={(e) =>
+                        updateArray(index, "lineCode", e.target.value)
+                      }
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      InputLabelProps={{ sx: { color: "black" } }}
+                    />
+                  </Grid>
+                </Grid>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  sx={{ mt: 2 }}
+                  onClick={() => handleDeleteBusinessLine(index)}
+                >
+                  Delete
+                </Button>
+              </Paper>
+            ))}
+
+            {/* SINGLE BUTTON AT THE VERY BOTTOM */}
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setLineOfBusiness((prev) => [...prev, ""]);
+                setProductService((prev) => [...prev, ""]);
+                setUnits((prev) => [...prev, ""]);
+                setCapitalValues((prev) => [...prev, ""]);
+                setNatureCode((prev) => [...prev, ""]);
+                setBusinessNature((prev) => [...prev, ""]);
+                setLineCode((prev) => [...prev, ""]);
+              }}
+            >
+              Add Business Line
+            </Button>
           </Section>
 
           {/* Business Requirements */}
@@ -478,7 +616,7 @@ function ExaminersApplicantModalUpdate({
         </DialogActions>
       </Dialog>
 
-      {/* ✅ Success Feedback */}
+      {/* Success Dialog */}
       <Dialog
         open={successDialogOpen}
         onClose={() => setSuccessDialogOpen(false)}

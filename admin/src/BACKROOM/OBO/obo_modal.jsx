@@ -337,7 +337,7 @@ function OboApplicantModal({
           <Section title="Business Information">
             <Field label="Status" value={applicant.OBO} />
             <Field label="Mode of Payment" value={applicant.Modeofpayment} />
-            <Field label="BIN" value={applicant.BIN} />
+            <Field label="BIN" value={applicant.bin} />
             <Field label="Business Type" value={applicant.BusinessType} />
             <Field label="DSC Registration No" value={applicant.dscRegNo} />
             <Field label="Business Name" value={applicant.businessName} />
@@ -530,91 +530,150 @@ function OboApplicantModal({
               });
             })()}
           </Section>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Building Structure Architectural Presentability"
-              value={oboFields.BSAP}
-              onChange={(e) => handleChange("BSAP", e.target.value)}
-              fullWidth
-              size="small"
-              error={fieldErrors.BSAP}
-              helperText={fieldErrors.BSAP && "Required to fill out this field"}
+          <Section title="Business Requirements">
+            <FileField
+              fileKey="proofOfReg"
+              label="Proof of Registration"
+              fileData={applicant}
             />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Sanitary Requirements"
-              value={oboFields.SR}
-              onChange={(e) => handleChange("SR", e.target.value)}
-              fullWidth
-              size="small"
-              error={fieldErrors.SR}
-              helperText={fieldErrors.SR && "Required to fill out this field"}
+            <FileField
+              fileKey="proofOfRightToUseLoc"
+              label="Proof of Right to Use Location"
+              fileData={applicant}
             />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Mechanical"
-              value={oboFields.Mechanical}
-              onChange={(e) => handleChange("Mechanical", e.target.value)}
-              fullWidth
-              size="small"
-              error={fieldErrors.Mechanical}
-              helperText={
-                fieldErrors.Mechanical && "Required to fill out this field"
-              }
+            <FileField
+              fileKey="locationPlan"
+              label="Location Plan"
+              fileData={applicant}
             />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Electrical"
-              value={oboFields.Electrical}
-              onChange={(e) => handleChange("Electrical", e.target.value)}
-              fullWidth
-              size="small"
-              error={fieldErrors.Electrical}
-              helperText={
-                fieldErrors.Electrical && "Required to fill out this field"
-              }
+            <FileField
+              fileKey="brgyClearance"
+              label="Barangay Clearance"
+              fileData={applicant}
             />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Signage"
-              value={oboFields.Signage}
-              onChange={(e) => handleChange("Signage", e.target.value)}
-              fullWidth
-              size="small"
-              error={fieldErrors.Signage}
-              helperText={
-                fieldErrors.Signage && "Required to fill out this field"
-              }
+            <FileField
+              fileKey="marketClearance"
+              label="Market Clearance"
+              fileData={applicant}
             />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Electronics"
-              value={oboFields.Electronics}
-              onChange={(e) => handleChange("Electronics", e.target.value)}
-              fullWidth
-              size="small"
-              error={fieldErrors.Electronics}
-              helperText={
-                fieldErrors.Electronics && "Required to fill out this field"
-              }
+            <FileField
+              fileKey="occupancyPermit"
+              label="Occupancy Permit"
+              fileData={applicant}
             />
-          </Grid>
+            <FileField fileKey="cedula" label="Cedula" fileData={applicant} />
+            <FileField
+              fileKey="photoOfBusinessEstInt"
+              label="Photo (Interior)"
+              fileData={applicant}
+            />
+            <FileField
+              fileKey="photoOfBusinessEstExt"
+              label="Photo (Exterior)"
+              fileData={applicant}
+            />
+            {applicant.application === "Renew" && (
+              <>
+                <FileField
+                  fileKey="RecentBusinessPermit"
+                  label="Business Permit"
+                  fileData={applicant}
+                />
+              </>
+            )}
+          </Section>
+          {applicant.OBO !== "Approved" && (
+            <>
+              <Grid item xs={12} sm={6} mt={2}>
+                <TextField
+                  label="Building Structure Architectural Presentability"
+                  value={oboFields.BSAP}
+                  onChange={(e) => handleChange("BSAP", e.target.value)}
+                  fullWidth
+                  size="small"
+                  error={fieldErrors.BSAP}
+                  helperText={
+                    fieldErrors.BSAP && "Required to fill out this field"
+                  }
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6} mt={2}>
+                <TextField
+                  label="Sanitary Requirements"
+                  value={oboFields.SR}
+                  onChange={(e) => handleChange("SR", e.target.value)}
+                  fullWidth
+                  size="small"
+                  error={fieldErrors.SR}
+                  helperText={
+                    fieldErrors.SR && "Required to fill out this field"
+                  }
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6} mt={2}>
+                <TextField
+                  label="Mechanical"
+                  value={oboFields.Mechanical}
+                  onChange={(e) => handleChange("Mechanical", e.target.value)}
+                  fullWidth
+                  size="small"
+                  error={fieldErrors.Mechanical}
+                  helperText={
+                    fieldErrors.Mechanical && "Required to fill out this field"
+                  }
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6} mt={2}>
+                <TextField
+                  label="Electrical"
+                  value={oboFields.Electrical}
+                  onChange={(e) => handleChange("Electrical", e.target.value)}
+                  fullWidth
+                  size="small"
+                  error={fieldErrors.Electrical}
+                  helperText={
+                    fieldErrors.Electrical && "Required to fill out this field"
+                  }
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6} mt={2}>
+                <TextField
+                  label="Signage"
+                  value={oboFields.Signage}
+                  onChange={(e) => handleChange("Signage", e.target.value)}
+                  fullWidth
+                  size="small"
+                  error={fieldErrors.Signage}
+                  helperText={
+                    fieldErrors.Signage && "Required to fill out this field"
+                  }
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6} mt={2}>
+                <TextField
+                  label="Electronics"
+                  value={oboFields.Electronics}
+                  onChange={(e) => handleChange("Electronics", e.target.value)}
+                  fullWidth
+                  size="small"
+                  error={fieldErrors.Electronics}
+                  helperText={
+                    fieldErrors.Electronics && "Required to fill out this field"
+                  }
+                />
+              </Grid>
+            </>
+          )}
         </DialogContent>
 
         <DialogActions>
           {/* Close Button */}
-          
+
           <Button
             onClick={onClose}
             variant="contained"
@@ -628,24 +687,28 @@ function OboApplicantModal({
           >
             Close
           </Button>
-          <Button
-            onClick={handleApproveClick}
-            variant="contained"
-            color="success"
-          >
-            Approve
-          </Button>
+          {applicant.OBO !== "Approved" && (
+            <>
+              <Button
+                onClick={handleApproveClick}
+                variant="contained"
+                color="success"
+              >
+                Approve
+              </Button>
 
-          <Button
-            onClick={handleDeclineClick}
-            variant="contained"
-            color="error"
-            sx={{
-              color: "white",
-            }}
-          >
-            Decline
-          </Button>
+              <Button
+                onClick={handleDeclineClick}
+                variant="contained"
+                color="error"
+                sx={{
+                  color: "white",
+                }}
+              >
+                Decline
+              </Button>
+            </>
+          )}
         </DialogActions>
       </Dialog>
 
@@ -959,6 +1022,7 @@ function OboApplicantModal({
           >
             Cancel
           </Button>
+
           <Button
             onClick={handleDeclineConfirm}
             variant="contained"

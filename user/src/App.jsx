@@ -19,13 +19,13 @@ function App() {
         <Route path="/" element={<Main />} />
         <Route path="/loginPage" element={<LoginPage />} />
         <Route path="/homePage/:id" element={<HomePage />} />
-        <Route path="/homePage/:id/:BIN" element={<HomePage />} />
+        <Route path="/homePage/:id/:bin" element={<HomePage />} />
         <Route
           path="/newApplicationPage/:id"
           element={<NewApplicationPage />}
         />
         <Route path="/renew" element={<Renew />} />
-        <Route path="/renewPage/:id/:BIN" element={<RenewApplicationPage />} />
+        <Route path="/renewPage/:id/:bin" element={<RenewApplicationPage />} />
         <Route path="/feedback" element={<ClientFeedbackForm />} />
 
         <Route path="/registerPage" element={<RegisterPage />} />

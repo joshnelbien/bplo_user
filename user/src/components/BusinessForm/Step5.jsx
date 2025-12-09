@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Stack, TextField, Typography, Button } from "@mui/material";
+import { Stack, TextField, Typography, Button, MenuItem } from "@mui/material";
 import { useEffect, useState } from "react";
 
 export default function Step5BusinessDetails({
@@ -10,8 +10,14 @@ export default function Step5BusinessDetails({
 }) {
   const files = [
     { label: "Cedula", name: "cedula" },
-    { label: "Photo of Business Establishment (Interior)", name: "photoOfBusinessEstInt" },
-    { label: "Photo of Business Establishment (Exterior)", name: "photoOfBusinessEstExt" },
+    {
+      label: "Photo of Business Establishment (Interior)",
+      name: "photoOfBusinessEstInt",
+    },
+    {
+      label: "Photo of Business Establishment (Exterior)",
+      name: "photoOfBusinessEstExt",
+    },
   ];
 
   const [selectedFiles, setSelectedFiles] = useState({});
@@ -152,8 +158,8 @@ export default function Step5BusinessDetails({
                 size="small"
                 sx={{
                   minWidth: 120,
-                  backgroundColor: "#4caf50",
-                  "&:hover": { backgroundColor: "#15400d" },
+                  backgroundColor: "#1d5236",
+                  "&:hover": { backgroundColor: "#072b0b" },
                 }}
               >
                 Choose File

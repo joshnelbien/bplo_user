@@ -8,7 +8,7 @@ const Examiners = sequelize.define(
       type: DataTypes.STRING,
       primaryKey: true,
     },
-    BIN: {
+    bin: {
       type: DataTypes.STRING,
     },
     userId: DataTypes.UUID,
@@ -74,6 +74,11 @@ const Examiners = sequelize.define(
     proofOfReg_filename: { type: DataTypes.STRING, allowNull: true },
     proofOfReg_mimetype: { type: DataTypes.STRING, allowNull: true },
     proofOfReg_size: { type: DataTypes.INTEGER, allowNull: true },
+
+    RecentBusinessPermit: { type: DataTypes.BLOB("long"), allowNull: true },
+    RecentBusinessPermit_filename: { type: DataTypes.STRING, allowNull: true },
+    RecentBusinessPermit_mimetype: { type: DataTypes.STRING, allowNull: true },
+    RecentBusinessPermit_size: { type: DataTypes.INTEGER, allowNull: true },
 
     proofOfRightToUseLoc: { type: DataTypes.BLOB("long"), allowNull: true },
     proofOfRightToUseLoc_filename: { type: DataTypes.STRING, allowNull: true },
@@ -189,6 +194,7 @@ const Examiners = sequelize.define(
     },
     businesstaxComputation_size: { type: DataTypes.INTEGER, allowNull: true },
     application: { type: DataTypes.STRING },
+    businessTaxTotal: { type: DataTypes.STRING },
   },
 
   {

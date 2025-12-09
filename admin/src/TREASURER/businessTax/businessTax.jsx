@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Side_bar from "../../SIDE_BAR/side_bar";
+import { CircularProgress } from "@mui/material";
 import {
   Box,
   Button,
@@ -14,8 +15,13 @@ import {
   TableHead,
   TableRow,
   Typography,
+  alpha, // 🛑 Added for TopBar styling (text shadow)
 } from "@mui/material";
 import BusinessTaxApplicantModal from "./businessTax_modal";
+import TopBar from "../../NAVBAR/nav_bar";
+
+const TOP_BAR_HEIGHT = 80;
+const SIDE_BAR_WIDTH = 250;
 
 function BusinessTax() {
   const [applicants, setApplicants] = useState([]);
@@ -26,6 +32,7 @@ function BusinessTax() {
   const recordsPerPage = 20;
   const [selectedFiles, setSelectedFiles] = useState({});
   const API = import.meta.env.VITE_API_BASE;
+  const [loading, setLoading] = useState(false);
 
   const handleFileChange = (name, file) => {
     setSelectedFiles((prev) => ({
@@ -36,21 +43,23 @@ function BusinessTax() {
 
   useEffect(() => {
     const fetchApplicants = async () => {
+      setLoading(true);
       try {
         const res = await axios.get(`${API}/businessTax/businessTax`);
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
-
         setApplicants(sortedData);
-        setApplicants(res.data);
+        // Removed the duplicate setApplicants(res.data);
       } catch (error) {
         console.error("Error fetching applicants:", error);
+      } finally {
+        setLoading(false); // stop loading
       }
     };
 
     fetchApplicants();
-  }, []);
+  }, [API]); // Added API to dependency array for best practice
 
   // ✅ Filter applicants based on button selection
   const filteredApplicants =
@@ -69,24 +78,89 @@ function BusinessTax() {
   const handleApprove = async (id, selectedFiles) => {
     try {
       const formData = new FormData();
-      if (selectedFiles.businessTaxComputation) {
+
+      // 1. Add uploaded file if there is one
+      if (selectedFiles?.businessTaxComputation) {
         formData.append(
           "businessTaxComputation",
           selectedFiles.businessTaxComputation
         );
       }
 
+      // 2. Retrieve all collection amounts from sessionStorage
+      const map = {
+        "BUSINESS TAX": "businessTaxFee",
+        "MAYOR’S PERMIT": "mayorsPermit",
+        "BARANGAY FEE": "barangayFee",
+        "OCCUPATIONAL TAX": "occupationalTax",
+        "HEALTH, CER & SSF": "choFee",
+        "SWM GARBAGE FEE": "csmwoFee",
+        OBO: "oboTotal",
+        "SANITARY INSPECTION": "sanitaryInspection",
+        "BUILDING INSPECTION": "buildingInspection",
+        "MECHANICAL INSPECTION": "mechanicalInspection",
+        "ELECTRICAL INSPECTION": "electricalInspection",
+        "SIGNBOARD/BILLBOARD": "signage",
+        "ELECTRONIC INSPECTION": "electronics",
+        "DELIVERY VEHICLE": "deliveryVehicle",
+        SURCHARGE: "surcharge",
+        INTEREST: "interest",
+        "TINPLATE/STICKER FEE": "tinplateStickerFee",
+        "VERIFICATION FEE": "verificationFee",
+        "ZONING FEE": "zoningFee",
+        CENRO: "cenroFee",
+        "SWMO CERT": "swmoCert",
+        "VETERNARY FEE": "veterinaryFee",
+        "FIXED TAX": "fixedTax",
+        "VIDEOKE CARABET DANCEHALL": "videokeFee",
+        CIGARETTES: "cigarettes",
+        LIQUOR: "liquor",
+        BILLIARDS: "billiards",
+        "BOARD AND LOGGING": "boardAndLogging",
+        "FSIC FEE": "fsicFee",
+      };
+
+      // Append all collection items from sessionStorage
+      Object.entries(map).forEach(([label, key]) => {
+        const storageKey = label
+          .replace(/\s+/g, "")
+          .replace(/[^a-zA-Z0-9]/g, "");
+        const value = sessionStorage.getItem(storageKey) || "0";
+        formData.append(key, value);
+      });
+
+      // Append totals
+      const businessTaxTotal =
+        sessionStorage.getItem("businessTaxTotal") || "0";
+      const otherChargesTotal =
+        sessionStorage.getItem("otherChargesTotal") || "0";
+      formData.append("businessTaxTotal", businessTaxTotal);
+      formData.append("otherChargesTotal", otherChargesTotal);
+
+      // 3. Send to backend
       await axios.post(`${API}/businessTax/business/approve/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
+      // 4. Update UI
       setApplicants((prev) =>
         prev.map((applicant) =>
-          applicant.id === id ? { ...applicant } : applicant
+          applicant.id === id
+            ? { ...applicant, BUSINESSTAX: "Approved", total: businessTaxTotal }
+            : applicant
         )
       );
 
-      alert("Applicant approved with file uploaded");
+      // 5. Clear session storage for these items after success
+      Object.keys(map).forEach((label) => {
+        const storageKey = label
+          .replace(/\s+/g, "")
+          .replace(/[^a-zA-Z0-9]/g, "");
+        sessionStorage.removeItem(storageKey);
+      });
+      sessionStorage.removeItem("businessTaxTotal");
+      sessionStorage.removeItem("otherChargesTotal");
+
       closeModal();
     } catch (error) {
       console.error("Error approving applicant:", error);
@@ -109,15 +183,25 @@ function BusinessTax() {
 
   return (
     <>
+      {/* 1. TOP BAR (Fixed Header) - NEWLY ADDED */}
+      <TopBar />
+
+      {/* 2. SIDE BAR (Original Position Maintained) */}
       <Side_bar />
+
+      {/* 3. MAIN CONTENT (Padded to clear fixed TopBar and offset by Side_bar) */}
       <Box
         id="main_content"
         sx={{
           p: 3,
           minHeight: "100vh",
-          background: "linear-gradient(to bottom, #FFFFFF, #e6ffe6)",
-          marginLeft: { xs: 0, sm: "250px" }, // 0 on mobile, 250px on larger screens
-          width: { xs: "100%", sm: "calc(100% - 250px)" }, // full width on mobile
+          // 🛑 CHANGED: Background set to plain white
+          background: "white",
+          // Offset from sidebar (250px)
+          marginLeft: { xs: 0, sm: `${SIDE_BAR_WIDTH}px` },
+          width: { xs: "100%", sm: `calc(100% - ${SIDE_BAR_WIDTH}px)` },
+          // Padded to clear fixed TopBar (80px + margin)
+          pt: `${TOP_BAR_HEIGHT + 24}px`,
         }}
       >
         <Typography
@@ -126,9 +210,12 @@ function BusinessTax() {
           sx={{
             color: "darkgreen",
             fontWeight: "bold",
+            // Only show on mobile since the TopBar handles the title on desktop
+            display: { xs: "block", sm: "none" },
           }}
         >
-          BUSINESS TAX
+          {/* Title for Mobile View */}
+          BUSINESS TAX OFFICE
         </Typography>
 
         {/* ✅ Button Group Filter */}
@@ -176,6 +263,9 @@ function BusinessTax() {
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                 <TableCell>
+                  <strong>Application Type</strong>
+                </TableCell>
+                <TableCell>
                   <strong>BIN</strong>
                 </TableCell>
                 <TableCell>
@@ -193,20 +283,36 @@ function BusinessTax() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {currentRecords.map((applicant) => (
-                <TableRow
-                  key={applicant.id}
-                  hover
-                  sx={{ cursor: "pointer" }}
-                  onClick={() => openModal(applicant)}
-                >
-                  <TableCell>{applicant.BIN}</TableCell>
-                  <TableCell>{applicant.businessName}</TableCell>
-                  <TableCell>{applicant.firstName}</TableCell>
-                  <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.BUSINESSTAX}</TableCell>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                    <CircularProgress size={40} thickness={4} />
+                    <Typography mt={1}>Loading data...</Typography>
+                  </TableCell>
                 </TableRow>
-              ))}
+              ) : currentRecords.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                    <Typography>No records found</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                currentRecords.map((applicant) => (
+                  <TableRow
+                    key={applicant.id}
+                    hover
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => openModal(applicant)}
+                  >
+                    <TableCell>{applicant.application}</TableCell>
+                    <TableCell>{applicant.bin}</TableCell>
+                    <TableCell>{applicant.businessName}</TableCell>
+                    <TableCell>{applicant.firstName}</TableCell>
+                    <TableCell>{applicant.lastName}</TableCell>
+                    <TableCell>{applicant.BUSINESSTAX}</TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -217,11 +323,13 @@ function BusinessTax() {
             count={totalPages}
             page={currentPage}
             onChange={handlePageChange}
-            color="primary"
+            color="success" // Changed color to 'success' to match the green theme
             shape="rounded"
           />
         </Box>
       </Box>
+
+      {/* ✅ Modal Component */}
       <BusinessTaxApplicantModal
         applicant={selectedApplicant}
         isOpen={isModalOpen}

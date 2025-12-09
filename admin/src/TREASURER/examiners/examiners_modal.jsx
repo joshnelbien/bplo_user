@@ -228,7 +228,7 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
           <Section title="Business Information">
             <Field label="Status" value={applicant.Examiners} />
             <Field label="Mode of Payment" value={applicant.Modeofpayment} />
-            <Field label="BIN" value={applicant.BIN} />
+            <Field label="BIN" value={applicant.bin} />
             <Field label="Business Type" value={applicant.BusinessType} />
             <Field label="DSC Registration No" value={applicant.dscRegNo} />
             <Field label="Business Name" value={applicant.businessName} />
@@ -467,6 +467,11 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
               label="Photo (Exterior)"
               fileData={applicant}
             />
+            <FileField
+              fileKey="RecentBusinessPermit"
+              label="Business Permit"
+              fileData={applicant}
+            />
           </Section>
         </DialogContent>
 
@@ -484,27 +489,36 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
           >
             Close
           </Button>
-          <Button
-            onClick={handleApproveClick}
-            variant="contained"
-            color="success"
-          >
-            Approve
-          </Button>
-          <Button onClick={handleUpdate} variant="contained" color="success">
-            Update
-          </Button>
 
-          <Button
-            onClick={onClose}
-            variant="contained"
-            color="error"
-            sx={{
-              color: "white",
-            }}
-          >
-            Decline
-          </Button>
+          {applicant.Examiners !== "Approved" && (
+            <>
+              <Button
+                onClick={handleApproveClick}
+                variant="contained"
+                color="success"
+              >
+                Approve
+              </Button>
+              <Button
+                onClick={handleUpdate}
+                variant="contained"
+                color="success"
+              >
+                Update
+              </Button>
+
+              <Button
+                onClick={onClose}
+                variant="contained"
+                color="error"
+                sx={{
+                  color: "white",
+                }}
+              >
+                Decline
+              </Button>
+            </>
+          )}
         </DialogActions>
       </Dialog>
 

@@ -2,7 +2,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import Side_bar from "../../SIDE_BAR/side_bar";
 import TreasurersApplicantModal from "./treasurers_modal";
-
+import TopBar from "../../NAVBAR/nav_bar";
+import { CircularProgress } from "@mui/material";
 import {
   Box,
   Button,
@@ -16,7 +17,11 @@ import {
   TableHead,
   TableRow,
   Typography,
+  alpha, // Needed for text shadow effect
 } from "@mui/material";
+
+const TOP_BAR_HEIGHT = 80; // Define height constant
+const SIDE_BAR_WIDTH = 250;
 
 function Treasurers() {
   const [applicants, setApplicants] = useState([]);
@@ -26,9 +31,11 @@ function Treasurers() {
   const [filter, setFilter] = useState("pending"); // ✅ pending by default
   const recordsPerPage = 20;
   const API = import.meta.env.VITE_API_BASE;
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchApplicants = async () => {
+      setLoading(true);
       try {
         const res = await axios.get(`${API}/treasurer/treasurer`);
 
@@ -40,11 +47,13 @@ function Treasurers() {
         setApplicants(sortedData);
       } catch (error) {
         console.error("Error fetching applicants:", error);
+      } finally {
+        setLoading(false); // stop loading
       }
     };
 
     fetchApplicants();
-  }, []);
+  }, [API]);
 
   // ✅ Filter applicants based on button selection
   const filteredApplicants =
@@ -53,7 +62,15 @@ function Treasurers() {
           (a) => a.TREASURER !== "Approved" && a.TREASURER !== "Declined"
         )
       : filter === "approved"
-      ? applicants.filter((a) => a.TREASURER === "Approved")
+      ? applicants.filter(
+          (a) =>
+            a.TREASURER === "Approved" &&
+            (!a.passtoTreasurer || a.passtoTreasurer !== "Done")
+        )
+      : filter === "payment"
+      ? applicants.filter(
+          (a) => a.TREASURER === "Approved" && a.passtoTreasurer === "Done"
+        )
       : applicants.filter((a) => a.TREASURER === "Declined");
 
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
@@ -66,37 +83,15 @@ function Treasurers() {
 
   const handleApprove = async (id, csmwoFee) => {
     try {
-      const res = await axios.post(
-        `${API}/treasurer/treasurerOffice/approve/${id}`
-      );
+      await axios.post(`${API}/treasurer/treasurerOffice/approve/${id}`);
 
       setApplicants((prev) =>
         prev.map((applicant) =>
           applicant.id === id
-            ? { ...applicant, CSMWO: "Approved", csmwoFee }
+            ? { ...applicant, TREASURER: "Approved", csmwoFee }
             : applicant
         )
       );
-
-      // alert("Applicant approved");
-      // closeModal();
-    } catch (error) {
-      console.error("Error approving applicant:", error);
-    }
-  };
-
-  const handleDecline = async (id) => {
-    try {
-      const res = await axios.post(`${API}/backroom/csmwo/decline/${id}`);
-
-      setApplicants((prev) =>
-        prev.map((applicant) =>
-          applicant.id === id ? { ...applicant, CSMWO: "Declined" } : applicant
-        )
-      );
-
-      // alert("Applicant declined");
-      // closeModal();
     } catch (error) {
       console.error("Error approving applicant:", error);
     }
@@ -109,6 +104,8 @@ function Treasurers() {
   const openModal = (applicant) => {
     setSelectedApplicant(applicant);
     setIsModalOpen(true);
+    console.log(`Business Tax  :`, applicant.businessTaxTotal);
+    console.log(`Mode of Payment  :`, applicant.Modeofpayment);
   };
 
   const closeModal = () => {
@@ -118,15 +115,17 @@ function Treasurers() {
 
   return (
     <>
+      <TopBar />
       <Side_bar />
       <Box
         id="main_content"
         sx={{
           p: 3,
           minHeight: "100vh",
-          background: "linear-gradient(to bottom, #FFFFFF, #e6ffe6)",
-          marginLeft: { xs: 0, sm: "250px" }, // 0 on mobile, 250px on larger screens
-          width: { xs: "100%", sm: "calc(100% - 250px)" }, // full width on mobile
+          background: "white",
+          marginLeft: { xs: 0, sm: `${SIDE_BAR_WIDTH}px` },
+          width: { xs: "100%", sm: `calc(100% - ${SIDE_BAR_WIDTH}px)` },
+          pt: `${TOP_BAR_HEIGHT + 24}px`,
         }}
       >
         <Typography
@@ -135,59 +134,34 @@ function Treasurers() {
           sx={{
             color: "darkgreen",
             fontWeight: "bold",
+            display: { xs: "block", sm: "none" },
           }}
         >
-          TREASURER's OFFICE
+          {/* Title for Mobile View */}
+          TREASURER'S OFFICE
         </Typography>
 
         {/* ✅ Button Group Filter */}
         <Box mb={2}>
           <ButtonGroup variant="contained">
-            <Button
-              sx={{
-                bgcolor: filter === "pending" ? "darkgreen" : "white",
-                color: filter === "pending" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "pending" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("pending");
-                setCurrentPage(1);
-              }}
-            >
-              Pending
-            </Button>
-            <Button
-              sx={{
-                bgcolor: filter === "approved" ? "darkgreen" : "white",
-                color: filter === "approved" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "approved" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("approved");
-                setCurrentPage(1);
-              }}
-            >
-              Approved
-            </Button>
-            <Button
-              sx={{
-                bgcolor: filter === "declined" ? "darkgreen" : "white",
-                color: filter === "declined" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "declined" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("declined");
-                setCurrentPage(1);
-              }}
-            >
-              Declined
-            </Button>
+            {["pending", "payment"].map((status) => (
+              <Button
+                key={status}
+                sx={{
+                  bgcolor: filter === status ? "darkgreen" : "white",
+                  color: filter === status ? "white" : "darkgreen",
+                  "&:hover": {
+                    bgcolor: filter === status ? "#004d00" : "#f0f0f0",
+                  },
+                }}
+                onClick={() => {
+                  setFilter(status);
+                  setCurrentPage(1);
+                }}
+              >
+                {status.charAt(0).toUpperCase() + status.slice(1)}
+              </Button>
+            ))}
           </ButtonGroup>
         </Box>
 
@@ -199,6 +173,9 @@ function Treasurers() {
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                <TableCell>
+                  <strong>APPLICATION TYPE</strong>
+                </TableCell>
                 <TableCell>
                   <strong>BIN</strong>
                 </TableCell>
@@ -217,20 +194,36 @@ function Treasurers() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {currentRecords.map((applicant) => (
-                <TableRow
-                  key={applicant.id}
-                  hover
-                  sx={{ cursor: "pointer" }}
-                  onClick={() => openModal(applicant)}
-                >
-                  <TableCell>{applicant.BIN}</TableCell>
-                  <TableCell>{applicant.businessName}</TableCell>
-                  <TableCell>{applicant.firstName}</TableCell>
-                  <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.TREASURER}</TableCell>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                    <CircularProgress size={40} thickness={4} />
+                    <Typography mt={1}>Loading data...</Typography>
+                  </TableCell>
                 </TableRow>
-              ))}
+              ) : currentRecords.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                    <Typography>No records found</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                currentRecords.map((applicant) => (
+                  <TableRow
+                    key={applicant.id}
+                    hover
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => openModal(applicant)}
+                  >
+                    <TableCell>{applicant.application}</TableCell>
+                    <TableCell>{applicant.bin}</TableCell>
+                    <TableCell>{applicant.businessName}</TableCell>
+                    <TableCell>{applicant.firstName}</TableCell>
+                    <TableCell>{applicant.lastName}</TableCell>
+                    <TableCell>{applicant.TREASURER}</TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -249,11 +242,11 @@ function Treasurers() {
 
       {/* ✅ Modal Component */}
       <TreasurersApplicantModal
+        filter={filter}
         applicant={selectedApplicant}
         isOpen={isModalOpen}
         onClose={closeModal}
         onApprove={handleApprove}
-        onDecline={handleDecline}
       />
     </>
   );

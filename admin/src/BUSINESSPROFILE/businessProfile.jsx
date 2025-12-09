@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import Side_bar from "../SIDE_BAR/side_bar";
 import BusinessProfileModal from "./businessProfile_modal";
+import TopBar from "../NAVBAR/nav_bar";
 
 import {
   Box,
@@ -15,18 +16,27 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Typography,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 
+const primaryGreen = "#1d5236";
+const TOP_BAR_HEIGHT = 80;
+
 function BusinessProfile() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+
   const [applicants, setApplicants] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-
-  // ✅ Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
-
   const [filter, setFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
   const recordsPerPage = 20;
   const API = import.meta.env.VITE_API_BASE;
 
@@ -34,28 +44,34 @@ function BusinessProfile() {
     const fetchApplicants = async () => {
       try {
         const res = await axios.get(`${API}/businessProfile/businessProfiles`);
-
-        // Sort by createdAt ascending
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
-
         setApplicants(sortedData);
       } catch (error) {
         console.error("Error fetching applicants:", error);
       }
     };
-
     fetchApplicants();
-  }, []);
+  }, [API]);
 
-  // ✅ Filter applicants
-  const filteredApplicants =
-    filter === "all"
-      ? applicants
-      : filter === "new"
-      ? applicants.filter((a) => a.application === "New")
-      : applicants.filter((a) => a.application === "Renew");
+  // Filter + Search
+  const filteredApplicants = applicants.filter((a) => {
+    const matchesFilter =
+      filter === "all"
+        ? true
+        : filter === "new"
+        ? a.application === "New"
+        : a.application === "Renew";
+
+    const matchesSearch =
+      a.bin?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.businessName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.lastName?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return matchesFilter && matchesSearch;
+  });
 
   const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
   const indexOfLastRecord = currentPage * recordsPerPage;
@@ -65,36 +81,45 @@ function BusinessProfile() {
     indexOfLastRecord
   );
 
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-  };
+  const handlePageChange = (event, value) => setCurrentPage(value);
 
-  // ✅ Export CSV
-  const handleExportCSV = async () => {
-    try {
-      const res = await axios.get(
-        `${API}/businessProfile/businessProfiles/export`
-      );
-
-      if (res.data.success) {
-        const blob = new Blob([res.data.csv], { type: "text/csv" });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", res.data.filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-    } catch (err) {
-      console.error("❌ Error downloading CSV or sending email:", err);
-    }
-  };
-
-  // ✅ Handle row click
   const handleRowClick = (applicant) => {
     setSelectedApplicant(applicant);
     setIsModalOpen(true);
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+
+      // Call backend to send email (email is hardcoded on backend)
+      const res = await axios.post(
+        `${API}/userAccounts/businessProfiles/export-email`
+      );
+
+      if (res.data.success) {
+        alert(`CSV emailed successfully!`);
+
+        // Download CSV locally if backend returns CSV string
+        if (res.data.csv) {
+          const blob = new Blob([res.data.csv], { type: "text/csv" });
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute(
+            "download",
+            res.data.filename || `businessProfiles_${today}.csv`
+          );
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        }
+      }
+    } catch (err) {
+      console.error("Error exporting and emailing CSV:", err);
+      alert("Failed to send CSV email.");
+    }
   };
 
   const closeModal = () => {
@@ -104,93 +129,117 @@ function BusinessProfile() {
 
   return (
     <>
+      <TopBar />
       <Side_bar />
+
       <Box
-        id="main_content"
         sx={{
-          p: 3,
           minHeight: "100vh",
-          background: "linear-gradient(to bottom, #FFFFFF, #e6ffe6)",
-          marginLeft: { xs: 0, sm: "250px" },
-          width: { xs: "100%", sm: "calc(100% - 250px)" },
+          bgcolor: "#fff",
+          pt: `${TOP_BAR_HEIGHT + 24}px`,
+          px: { xs: 1, sm: 2, md: 3 },
+          ml: { xs: 0, md: "250px" },
+          width: { xs: "100%", md: "calc(100% - 250px)" },
         }}
       >
-        <Typography
-          variant="h4"
-          gutterBottom
-          sx={{ color: "darkgreen", fontWeight: "bold" }}
-        >
-          Business Profile
-        </Typography>
-
-        {/* ✅ Filter & Export */}
+        {/* FILTER + SEARCH + EXPORT */}
         <Box
-          mb={2}
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
+          sx={{
+            mb: 3,
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            justifyContent: "space-between",
+            alignItems: { xs: "stretch", sm: "center" },
+            gap: 2,
+            px: { xs: 1, md: 2 },
+          }}
         >
-          <ButtonGroup variant="contained">
-            <Button
-              sx={{
-                bgcolor: filter === "all" ? "darkgreen" : "white",
-                color: filter === "all" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "all" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("all");
-                setCurrentPage(1);
-              }}
-            >
-              All
-            </Button>
-            <Button
-              sx={{
-                bgcolor: filter === "new" ? "darkgreen" : "white",
-                color: filter === "new" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "new" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("new");
-                setCurrentPage(1);
-              }}
-            >
-              New
-            </Button>
-            <Button
-              sx={{
-                bgcolor: filter === "renew" ? "darkgreen" : "white",
-                color: filter === "renew" ? "white" : "darkgreen",
-                "&:hover": {
-                  bgcolor: filter === "renew" ? "#004d00" : "#f0f0f0",
-                },
-              }}
-              onClick={() => {
-                setFilter("renew");
-                setCurrentPage(1);
-              }}
-            >
-              Renew
-            </Button>
+          {/* Filter Buttons */}
+          <ButtonGroup
+            orientation={isMobile ? "vertical" : "horizontal"}
+            variant="contained"
+            fullWidth={isMobile}
+            sx={{ flex: { sm: 1 }, maxWidth: { sm: 400 } }}
+          >
+            {[
+              { key: "all", label: "All" },
+              { key: "new", label: "New" },
+              { key: "renew", label: "Renew" },
+            ].map((btn) => (
+              <Button
+                key={btn.key}
+                onClick={() => {
+                  setFilter(btn.key);
+                  setCurrentPage(1);
+                }}
+                sx={{
+                  bgcolor: filter === btn.key ? primaryGreen : "#fff",
+                  color: filter === btn.key ? "#fff" : primaryGreen,
+                  border: `1px solid ${primaryGreen}`,
+                  "&:hover": {
+                    bgcolor: filter === btn.key ? "#004d00" : "#f0f0f0",
+                  },
+                  flexGrow: 1,
+                }}
+              >
+                {btn.label}
+              </Button>
+            ))}
           </ButtonGroup>
 
-          <Button variant="outlined" color="success" onClick={handleExportCSV}>
-            Export to CSV
-          </Button>
+          {/* Search + Export */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              gap: 1,
+              width: { xs: "100%", sm: "auto" },
+            }}
+          >
+            <TextField
+              label="Search BIN, Name, Business..."
+              variant="outlined"
+              size="small"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              sx={{
+                width: { xs: "100%", sm: 280 },
+                "& .MuiOutlinedInput-root": {
+                  fontSize: { xs: "0.875rem" },
+                },
+              }}
+            />
+            <Button
+              variant="outlined"
+              color="success"
+              onClick={handleExportCSV}
+              sx={{
+                whiteSpace: "nowrap",
+                minWidth: { xs: "100%", sm: "auto" },
+              }}
+            >
+              Export CSV
+            </Button>
+          </Box>
         </Box>
 
-        {/* ✅ Table */}
+        {/* TABLE */}
         <TableContainer
           component={Paper}
-          sx={{ borderRadius: 2, boxShadow: 3 }}
+          sx={{
+            borderRadius: 2,
+            boxShadow: 3,
+            maxWidth: "1600px",
+            mx: "auto",
+            overflowX: "auto",
+          }}
         >
-          <Table>
+          <Table size={isMobile ? "small" : "medium"}>
             <TableHead>
-              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+              <TableRow sx={{ bgcolor: "#f5f5f5" }}>
                 <TableCell>
                   <strong>BIN</strong>
                 </TableCell>
@@ -209,25 +258,33 @@ function BusinessProfile() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {currentRecords.map((applicant) => (
-                <TableRow
-                  key={applicant.id}
-                  hover
-                  sx={{ cursor: "pointer" }}
-                  onClick={() => handleRowClick(applicant)} // ✅ opens modal
-                >
-                  <TableCell>{applicant.BIN}</TableCell>
-                  <TableCell>{applicant.businessName}</TableCell>
-                  <TableCell>{applicant.firstName}</TableCell>
-                  <TableCell>{applicant.lastName}</TableCell>
-                  <TableCell>{applicant.application}</TableCell>
+              {currentRecords.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                    <Typography>No records found</Typography>
+                  </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                currentRecords.map((applicant) => (
+                  <TableRow
+                    key={applicant.id}
+                    hover
+                    onClick={() => handleRowClick(applicant)}
+                    sx={{ cursor: "pointer" }}
+                  >
+                    <TableCell>{applicant.bin || "-"}</TableCell>
+                    <TableCell>{applicant.businessName || "-"}</TableCell>
+                    <TableCell>{applicant.firstName || "-"}</TableCell>
+                    <TableCell>{applicant.lastName || "-"}</TableCell>
+                    <TableCell>{applicant.application || "-"}</TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
 
-        {/* ✅ Pagination */}
+        {/* PAGINATION */}
         <Box display="flex" justifyContent="center" mt={3}>
           <Pagination
             count={totalPages}
@@ -235,11 +292,12 @@ function BusinessProfile() {
             onChange={handlePageChange}
             color="success"
             shape="rounded"
+            size={isMobile ? "small" : "medium"}
           />
         </Box>
       </Box>
 
-      {/* ✅ Modal */}
+      {/* MODAL */}
       {selectedApplicant && (
         <BusinessProfileModal
           applicant={selectedApplicant}

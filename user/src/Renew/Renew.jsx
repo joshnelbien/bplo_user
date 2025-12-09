@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  CircularProgress,
   Paper,
   TextField,
   Typography,
@@ -8,100 +9,61 @@ import {
   useTheme,
 } from "@mui/material";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 function Renewal() {
   const { id } = useParams();
-  const [renewals, setRenewals] = useState([]);
   const [form, setForm] = useState({
-    businessName: "",
-    bin: "", // ✅ lowercase for consistency
+    business_name: "",
+    incharge_last_name: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_BASE;
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // ✅ Fetch existing records (no loading state)
-  useEffect(() => {
-    const fetchRenewals = async () => {
-      try {
-        const res = await axios.get(`${API}/businessProfile/businessProfiles`);
-
-        if (Array.isArray(res.data)) {
-          const sortedData = res.data.sort(
-            (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-          );
-          setRenewals(sortedData);
-        } else {
-          console.warn("⚠️ Unexpected response format:", res.data);
-        }
-      } catch (error) {
-        console.error("❌ Error fetching renewals:", error);
-      }
-    };
-
-    fetchRenewals();
-  }, [API]);
-
-  // ✅ Format BIN to 0000000-0000-0000000 while typing
-  const formatBIN = (value) => {
-    const digits = value.replace(/\D/g, "").slice(0, 18); // max 18 digits (7+4+7)
-    if (digits.length <= 7) {
-      return digits;
-    } else if (digits.length <= 11) {
-      return `${digits.slice(0, 7)}-${digits.slice(7)}`;
-    } else {
-      return `${digits.slice(0, 7)}-${digits.slice(7, 11)}-${digits.slice(
-        11,
-        18
-      )}`;
-    }
-  };
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    if (name === "bin") {
-      const formatted = formatBIN(value);
-      setForm({ ...form, bin: formatted });
-    } else {
-      setForm({ ...form, [name]: value });
-    }
+    setForm({ ...form, [name]: value.toUpperCase() });
   };
 
-  // ✅ Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    const binDigitsOnly = form.bin.replace(/\D/g, "");
-    if (binDigitsOnly.length !== 18) {
-      alert("BIN must follow the format 0000000-0000-0000000 (18 digits).");
-      return;
-    }
+    try {
+      console.log("🔍 Searching for:");
+      console.log("   Last Name:", form.incharge_last_name);
+      console.log("   Business Name:", form.business_name);
 
-    console.log(" Searching for EXACT record with:");
-    console.log("   BIN:", form.bin);
-    console.log("   Business Name:", form.businessName);
-
-    // ✅ Exact match
-    const matchedRecord = renewals.find(
-      (item) => item.BIN === form.bin && item.businessName === form.businessName
-    );
-
-    if (matchedRecord) {
-      console.log(" Exact Matching Record Found:", matchedRecord);
-
-      navigate(`/renewal-form/step1`, {
-        state: { record: matchedRecord },
-      });
-    } else {
-      console.warn(
-        "⚠️ No exact matching record found for BIN and Business Name."
+      const res = await axios.get(
+        `${API}/businessProfile/exixting-businessProfiles`
       );
+
+      const matchedRecord = res.data.find(
+        (item) =>
+          item.incharge_last_name?.trim().toLowerCase() ===
+            form.incharge_last_name.trim().toLowerCase() &&
+          item.business_name?.trim().toLowerCase() ===
+            form.business_name.trim().toLowerCase()
+      );
+
+      if (matchedRecord) {
+        console.log("✅ Matching record found:", matchedRecord);
+        navigate(`/renewal-form/step1`, { state: { record: matchedRecord } });
+      } else {
+        alert(
+          "No matching record found. Please verify the Business Name and Last Name."
+        );
+      }
+    } catch (error) {
+      console.error("❌ Error searching renewal:", error);
+      alert("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -130,8 +92,8 @@ function Renewal() {
         >
           <TextField
             label="Business Name"
-            name="businessName"
-            value={form.businessName}
+            name="business_name"
+            value={form.business_name}
             onChange={handleChange}
             required
             fullWidth
@@ -139,29 +101,46 @@ function Renewal() {
           />
 
           <TextField
-            label="Business Identification Number (BIN)"
-            name="bin" // ✅ fixed name to lowercase
-            value={form.bin}
+            label="In-Charge Last Name"
+            name="incharge_last_name"
+            value={form.incharge_last_name}
             onChange={handleChange}
             required
             fullWidth
             color="primary"
-            placeholder="0000000-0000-0000000"
-            helperText="BIN must follow the format 0000000-0000-0000000"
           />
 
           <Button
             type="submit"
             variant="contained"
             color="success"
+            disabled={loading}
             sx={{
               mt: 2,
               borderRadius: 2,
               textTransform: "none",
               fontWeight: "bold",
+              position: "relative",
+              height: 40,
             }}
           >
-            Process Renewal
+            {loading ? (
+              <>
+                <CircularProgress
+                  size={24}
+                  sx={{
+                    color: "white",
+                    position: "absolute",
+                    left: "50%",
+                    top: "50%",
+                    transform: "translate(-50%, -50%)",
+                  }}
+                />
+                <span style={{ visibility: "hidden" }}>Processing...</span>
+              </>
+            ) : (
+              "Process Renewal"
+            )}
           </Button>
         </Box>
       </Paper>

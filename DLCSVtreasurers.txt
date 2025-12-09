@@ -1,0 +1,296 @@
+// src/pages/Treasurers.jsx
+import axios from "axios";
+import { useEffect, useState } from "react";
+import Side_bar from "../../SIDE_BAR/side_bar";
+import TreasurersApplicantModal from "./treasurers_modal";
+import TopBar from "../../NAVBAR/nav_bar";
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Pagination,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+} from "@mui/material";
+import DownloadIcon from "@mui/icons-material/Download";
+import CloseIcon from "@mui/icons-material/Close";
+
+const TOP_BAR_HEIGHT = 80;
+const SIDE_BAR_WIDTH = 250;
+
+function Treasurers() {
+  const [applicants, setApplicants] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedApplicant, setSelectedApplicant] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filter, setFilter] = useState("pending");
+  const [reportOpen, setReportOpen] = useState(false);
+  const recordsPerPage = 20;
+  const API = import.meta.env.VITE_API_BASE;
+
+  // FETCH ALL APPLICANTS
+  useEffect(() => {
+    const fetchApplicants = async () => {
+      try {
+        const res = await axios.get(`${API}/treasurer/treasurer`);
+        const sorted = res.data.sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
+        setApplicants(sorted);
+      } catch (err) {
+        console.error("Fetch error:", err);
+      }
+    };
+    fetchApplicants();
+  }, [API]);
+
+  // FILTER LOGIC
+  const filteredApplicants =
+    filter === "pending"
+      ? applicants.filter(
+          (a) => a.TREASURER !== "Approved" && a.TREASURER !== "Declined"
+        )
+      : filter === "payment"
+      ? applicants.filter(
+          (a) => a.TREASURER === "Approved" && a.passtoTreasurer === "Done"
+        )
+      : applicants.filter((a) => a.TREASURER === "Declined");
+
+  const totalPages = Math.ceil(filteredApplicants.length / recordsPerPage);
+  const currentRecords = filteredApplicants.slice(
+    (currentPage - 1) * recordsPerPage,
+    currentPage * recordsPerPage
+  );
+
+  const handleApprove = async (id, csmwoFee) => {
+    try {
+      await axios.post(`${API}/treasurer/treasurerOffice/approve/${id}`);
+      setApplicants((prev) =>
+        prev.map((a) =>
+          a.id === id ? { ...a, TREASURER: "Approved", csmwoFee } : a
+        )
+      );
+    } catch (err) {
+      console.error("Approve error:", err);
+    }
+  };
+
+  const openModal = (applicant) => {
+    setSelectedApplicant(applicant);
+    setIsModalOpen(true);
+  };
+
+  // DAILY REPORT: TODAY’S PAYMENTS ONLY
+  const today = new Date();
+  const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+
+  const dailyPayments = applicants
+    .filter((a) => {
+      if (a.passtoTreasurer !== "Done") return false;
+      if (!a.passtoTreasurerDate) return false;
+      const paid = new Date(a.passtoTreasurerDate);
+      return paid >= startOfDay && paid < endOfDay;
+    })
+    .map((a) => {
+      let total = parseFloat(a.csmwoFee || 0);
+      try {
+        const fees = a.fees ? JSON.parse(a.fees) : {};
+        total += Object.values(fees).reduce((s, v) => s + parseFloat(v || 0), 0);
+      } catch {}
+      return {
+        businessName: a.businessName || "N/A",
+        totalFee: total.toFixed(2),
+      };
+    });
+
+  const grandTotal = dailyPayments
+    .reduce((sum, item) => sum + parseFloat(item.totalFee), 0)
+    .toFixed(2);
+
+  // CSV DOWNLOAD
+  const downloadCSV = () => {
+    const headers = ["Business Name", "Total Fee (₱)"];
+    const rows = dailyPayments.map((i) => [i.businessName, i.totalFee]);
+    const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Daily_Report_${today.toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <>
+      <TopBar />
+      <Side_bar />
+      <Box
+        sx={{
+          p: 3,
+          minHeight: "100vh",
+          background: "white",
+          ml: { xs: 0, sm: `${SIDE_BAR_WIDTH}px` },
+          width: { xs: "100%", sm: `calc(100% - ${SIDE_BAR_WIDTH}px)` },
+          pt: `${TOP_BAR_HEIGHT + 24}px`,
+        }}
+      >
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ color: "darkgreen", fontWeight: "bold", display: { xs: "block", sm: "none" } }}
+        >
+          TREASURER'S OFFICE
+        </Typography>
+
+        {/* FILTER + DAILY REPORT BUTTON */}
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <ButtonGroup variant="contained">
+            {["pending", "payment"].map((s) => (
+              <Button
+                key={s}
+                onClick={() => { setFilter(s); setCurrentPage(1); }}
+                sx={{
+                  bgcolor: filter === s ? "darkgreen" : "white",
+                  color: filter === s ? "white" : "darkgreen",
+                  "&:hover": { bgcolor: filter === s ? "#004d00" : "#f0f0f0" },
+                }}
+              >
+                {s.charAt(0).toUpperCase() + s.slice(1)}
+              </Button>
+            ))}
+          </ButtonGroup>
+
+          <Button
+            variant="contained"
+            color="success"
+            startIcon={<DownloadIcon />}
+            onClick={() => setReportOpen(true)}
+          >
+            Daily Report
+          </Button>
+        </Box>
+
+        {/* MAIN TABLE */}
+        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 3 }}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ bgcolor: "#f5f5f5" }}>
+                <TableCell><strong>TYPE</strong></TableCell>
+                <TableCell><strong>BIN</strong></TableCell>
+                <TableCell><strong>BUSINESS</strong></TableCell>
+                <TableCell><strong>FIRST NAME</strong></TableCell>
+                <TableCell><strong>LAST NAME</strong></TableCell>
+                <TableCell><strong>STATUS</strong></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {currentRecords.map((a) => (
+                <TableRow
+                  key={a.id}
+                  hover
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => openModal(a)}
+                >
+                  <TableCell>{a.application}</TableCell>
+                  <TableCell>{a.bin}</TableCell>
+                  <TableCell>{a.businessName}</TableCell>
+                  <TableCell>{a.firstName}</TableCell>
+                  <TableCell>{a.lastName}</TableCell>
+                  <TableCell>{a.TREASURER}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <Box display="flex" justifyContent="center" mt={3}>
+          <Pagination
+            count={totalPages}
+            page={currentPage}
+            onChange={(_, v) => setCurrentPage(v)}
+            color="success"
+            shape="rounded"
+          />
+        </Box>
+      </Box>
+
+      {/* APPLICANT MODAL */}
+      <TreasurersApplicantModal
+        filter={filter}
+        applicant={selectedApplicant}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onApprove={handleApprove}
+      />
+
+      {/* DAILY REPORT MODAL */}
+      <Dialog open={reportOpen} onClose={() => setReportOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ bgcolor: "darkgreen", color: "white", fontWeight: "bold" }}>
+          Daily Collection Report — {today.toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          <IconButton sx={{ position: "absolute", right: 8, top: 8, color: "white" }} onClick={() => setReportOpen(false)}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent dividers>
+          {dailyPayments.length === 0 ? (
+            <Typography textAlign="center" color="text.secondary" py={5}>
+              No payments recorded today.
+            </Typography>
+          ) : (
+            <TableContainer component={Paper} elevation={3}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow sx={{ bgcolor: "#e8f5e9" }}>
+                    <TableCell><strong>Business Name</strong></TableCell>
+                    <TableCell align="right"><strong>Total Fee (₱)</strong></TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {dailyPayments.map((item, i) => (
+                    <TableRow key={i}>
+                      <TableCell>{item.businessName}</TableCell>
+                      <TableCell align="right">₱{item.totalFee}</TableCell>
+                    </TableRow>
+                  ))}
+                  <TableRow sx={{ bgcolor: "#c8e6c9" }}>
+                    <TableCell><strong>GRAND TOTAL</strong></TableCell>
+                    <TableCell align="right"><strong>₱{grandTotal}</strong></TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setReportOpen(false)}>Close</Button>
+          <Button
+            variant="contained"
+            color="success"
+            startIcon={<DownloadIcon />}
+            onClick={downloadCSV}
+            disabled={dailyPayments.length === 0}
+          >
+            Download CSV
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+}
+
+export default Treasurers;

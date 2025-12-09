@@ -156,20 +156,20 @@ router.post("/examiners/approve/:id", async (req, res) => {
     // ✅ Get last BIN from Backroom
     const lastBackroom = await Backroom.findOne({
       order: [["createdAt", "DESC"]],
-      attributes: ["BIN"],
+      attributes: ["bin"],
     });
 
     let newSequence = 403424; // default start
     let newSuffix = 400; // default start
 
-    if (lastBackroom && lastBackroom.BIN) {
-      const [seq, year, suffix] = lastBackroom.BIN.split("-");
+    if (lastBackroom && lastBackroom.bin) {
+      const [seq, year, suffix] = lastBackroom.bin.split("-");
       newSequence = parseInt(seq, 10) + 1;
       newSuffix = parseInt(suffix, 10) + 1;
     }
 
     const year = new Date().getFullYear();
-    const BIN = `${newSequence.toString().padStart(7, "0")}-${year}-${newSuffix
+    const bin = `${newSequence.toString().padStart(7, "0")}-${year}-${newSuffix
       .toString()
       .padStart(7, "0")}`;
 
@@ -177,21 +177,21 @@ router.post("/examiners/approve/:id", async (req, res) => {
     applicantData.Examiners = "Approved";
     applicantData.ExaminerstimeStamp = timestamp;
     applicantData.status = "Approved";
-    applicantData.BIN = BIN;
+    applicantData.bin = bin;
 
     const created = await Backroom.create(applicantData);
 
     await applicantFile.update({
       Examiners: "Approved",
       ExaminerstimeStamp: timestamp,
-      BIN,
+      bin,
     });
 
     await applicant.update({
       Examiners: "Approved",
       ExaminerstimeStamp: timestamp,
       status: "Approved",
-      BIN,
+      bin,
     });
 
     await applicantStatus.update({
@@ -223,18 +223,30 @@ router.get("/examiners", async (req, res) => {
 router.put("/examiners/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const updates = req.body;
+    const updates = { ...req.body };
 
-    // Find the examiner first
+    if (updates.capital) {
+      try {
+        const capitalArray = updates.capital
+          .split(",")
+          .map((v) => v.replace(/"/g, "").trim());
+        const totalCapital = capitalArray.reduce(
+          (sum, val) => sum + Number(val || 0),
+          0
+        );
+        updates.totalCapital = totalCapital;
+      } catch (error) {
+        console.error("Capital parsing error:", error);
+      }
+    }
+
     const examiner = await Examiners.findByPk(id);
     if (!examiner) {
       return res.status(404).json({ error: "Examiner not found" });
     }
 
-    // Find related application (if exists)
-    const application = await File.findOne({ where: { id: id } });
+    const application = await File.findOne({ where: { id } });
 
-    // Update both
     if (application) {
       await application.update(updates);
     }
@@ -242,12 +254,12 @@ router.put("/examiners/:id", async (req, res) => {
     await examiner.update(updates);
 
     res.json({
-      message: "✅ Examiner and related application updated successfully",
+      message: "Examiner and related application updated successfully",
       examiner,
       application,
     });
   } catch (err) {
-    console.error("❌ Update failed:", err);
+    console.error("Update failed:", err);
     res.status(500).json({ error: "Update failed", details: err.message });
   }
 });

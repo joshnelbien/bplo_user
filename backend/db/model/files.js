@@ -9,7 +9,7 @@ const File = sequelize.define(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    BIN: {
+    bin: {
       type: DataTypes.STRING,
     },
     userId: { type: DataTypes.UUID, allowNull: false },
@@ -61,12 +61,12 @@ const File = sequelize.define(
     officeType: DataTypes.STRING,
     officeTypeOther: DataTypes.STRING,
     lineOfBusiness: DataTypes.TEXT,
-    natureCode: DataTypes.STRING,
-    businessNature: DataTypes.STRING,
-    lineCode: DataTypes.STRING,
-    productService: DataTypes.STRING,
-    Units: DataTypes.STRING,
-    capital: DataTypes.STRING,
+    natureCode: DataTypes.TEXT,
+    businessNature: DataTypes.TEXT,
+    lineCode: DataTypes.TEXT,
+    productService: DataTypes.TEXT,
+    Units: DataTypes.TEXT,
+    capital: DataTypes.TEXT,
     totalCapital: DataTypes.STRING,
     Modeofpayment: DataTypes.STRING,
     totalDeliveryVehicle: DataTypes.STRING,
@@ -76,6 +76,11 @@ const File = sequelize.define(
     proofOfReg_filename: { type: DataTypes.STRING, allowNull: true },
     proofOfReg_mimetype: { type: DataTypes.STRING, allowNull: true },
     proofOfReg_size: { type: DataTypes.INTEGER, allowNull: true },
+
+    RecentBusinessPermit: { type: DataTypes.BLOB("long"), allowNull: true },
+    RecentBusinessPermit_filename: { type: DataTypes.STRING, allowNull: true },
+    RecentBusinessPermit_mimetype: { type: DataTypes.STRING, allowNull: true },
+    RecentBusinessPermit_size: { type: DataTypes.INTEGER, allowNull: true },
 
     proofOfRightToUseLoc: { type: DataTypes.BLOB("long"), allowNull: true },
     proofOfRightToUseLoc_filename: { type: DataTypes.STRING, allowNull: true },
@@ -180,6 +185,12 @@ const File = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+
+    businessPermit: { type: DataTypes.BLOB("long"), allowNull: true },
+    businessPermit_filename: { type: DataTypes.STRING, allowNull: true },
+    businessPermit_mimetype: { type: DataTypes.STRING, allowNull: true },
+    businessPermit_size: { type: DataTypes.INTEGER, allowNull: true },
+
     businesstaxComputation_mimetype: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -192,6 +203,46 @@ const File = sequelize.define(
     TREASURER: { type: DataTypes.STRING, defaultValue: "Pending" },
     TREASURERtimeStamp: { type: DataTypes.STRING },
     application: { type: DataTypes.STRING },
+    businessTaxTotal: { type: DataTypes.STRING },
+    payment_mode: {
+      type: DataTypes.STRING, // "Cash" or "Check"
+    },
+    amount_due: {
+      type: DataTypes.STRING,
+    },
+    amount_paid: {
+      type: DataTypes.STRING,
+    },
+    due_date: {
+      type: DataTypes.STRING,
+    },
+    drawee_bank: {
+      type: DataTypes.STRING,
+    },
+    check_number: {
+      type: DataTypes.STRING,
+    },
+    check_date: {
+      type: DataTypes.STRING,
+    },
+    //other charges
+    businessTaxFee: { type: DataTypes.STRING },
+    occupationalTax: { type: DataTypes.STRING },
+    barangayFee: { type: DataTypes.STRING },
+    mayorsPermit: { type: DataTypes.STRING },
+    deliveryVehicle: { type: DataTypes.STRING },
+    surcharge: { type: DataTypes.STRING },
+    interest: { type: DataTypes.STRING },
+    tinplateStickerFee: { type: DataTypes.STRING },
+    verificationFee: { type: DataTypes.STRING },
+    veterinaryFee: { type: DataTypes.STRING },
+    fixedTax: { type: DataTypes.STRING },
+    videokeFee: { type: DataTypes.STRING }, // VIDEOKE / CARABET / DANCEHALL
+    cigarettes: { type: DataTypes.STRING },
+    liquor: { type: DataTypes.STRING },
+    billiards: { type: DataTypes.STRING },
+    boardAndLogging: { type: DataTypes.STRING },
+    fsicFee: { type: DataTypes.STRING },
   },
   {
     tableName: "NewApplications",

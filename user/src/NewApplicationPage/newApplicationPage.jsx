@@ -20,6 +20,7 @@ import axios from "axios";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import HomeIcon from "@mui/icons-material/Home";
 import { useMediaQuery, useTheme } from "@mui/material";
 import Step1BusinessInfo from "../components/BusinessForm/Step1";
 import Step2PersonalInfo from "../components/BusinessForm/Step2";
@@ -28,6 +29,7 @@ import Step4TaxInfo from "../components/BusinessForm/Step4";
 import Step5BusinessDetails from "../components/BusinessForm/Step5";
 import Step6BusinessActivity from "../components/BusinessForm/Step6";
 import Section7FileUploads from "../components/BusinessForm/Step7";
+import NewAppConfirmation from "./newAppConfirmation"; // NEW IMPORT
 
 const GreenButton = styled(Button)(({ variant }) => ({
   borderRadius: "8px",
@@ -58,7 +60,9 @@ function NewApplicationPage() {
   const API = import.meta.env.VITE_API_BASE;
   const navigate = useNavigate();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isExtraSmall = useMediaQuery(theme.breakpoints.down("sm"));
+
   const savedFormData =
     JSON.parse(localStorage.getItem("formDataState")) || null;
   const savedFiles = JSON.parse(localStorage.getItem("filesState")) || null;
@@ -66,10 +70,11 @@ function NewApplicationPage() {
     JSON.parse(localStorage.getItem("businessLines")) || [];
   const savedStep = parseInt(localStorage.getItem("formStep")) || 1;
 
+  // --- START CONSOLIDATED STATE DEFINITIONS ---
   const [step, setStep] = useState(savedStep);
   const [businessLines, setBusinessLines] = useState(savedBusinessLines);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const paperRef = useRef(null); // Ref for the Paper component
+  const paperRef = useRef(null);
 
   const [formDataState, setFormDataState] = useState(
     savedFormData || {
@@ -125,6 +130,34 @@ function NewApplicationPage() {
     }
   );
 
+  const [filesState, setFilesState] = useState(
+    savedFiles || {
+      proofOfReg: null,
+      proofOfRightToUseLoc: null,
+      locationPlan: null,
+      brgyClearance: null,
+      marketClearance: null,
+      occupancyPermit: null,
+      cedula: null,
+      photoOfBusinessEstInt: null,
+      photoOfBusinessEstExt: null,
+      tIGEfiles: null,
+    }
+  );
+
+  // THESE STATES WERE MOVED UP TO FIX THE REFERNCE ERROR
+  const [snackbarState, setSnackbarState] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [errors, setErrors] = useState({});
+  // --- END CONSOLIDATED STATE DEFINITIONS ---
+
   // Scroll to top on component mount
   useEffect(() => {
     window.scrollTo({
@@ -134,18 +167,19 @@ function NewApplicationPage() {
     });
   }, []);
 
-  // Scroll to top when step changes
+  // Scroll to top when step changes (Now safe to use successDialogOpen)
   useEffect(() => {
-    if (paperRef.current) {
+    // Only scroll the Paper component if we are not on the success screen
+    if (paperRef.current && !successDialogOpen) {
       paperRef.current.scrollIntoView({ behavior: "smooth" });
-    } else {
+    } else if (!successDialogOpen) {
       window.scrollTo({
         top: 0,
         left: 0,
         behavior: "smooth",
       });
     }
-  }, [step]); // Trigger on step change
+  }, [step, successDialogOpen]); // Added successDialogOpen to dependencies
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -179,32 +213,6 @@ function NewApplicationPage() {
 
     fetchUserData();
   }, [id, API]);
-
-  const [filesState, setFilesState] = useState(
-    savedFiles || {
-      proofOfReg: null,
-      proofOfRightToUseLoc: null,
-      locationPlan: null,
-      brgyClearance: null,
-      marketClearance: null,
-      occupancyPermit: null,
-      cedula: null,
-      photoOfBusinessEstInt: null,
-      photoOfBusinessEstExt: null,
-      tIGEfiles: null,
-    }
-  );
-
-  const [snackbarState, setSnackbarState] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
-
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
-  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
-  const [errors, setErrors] = useState({});
 
   const steps = [
     "Business Info",
@@ -260,7 +268,7 @@ function NewApplicationPage() {
         "femaleEmployee",
       ],
       // 6: ["lineOfBusiness", "productService", "Units", "capital"],
-      //7: ["proofOfReg", "brgyClearance", "cedula"],
+      7: ["proofOfReg", "brgyClearance", "cedula"],
     };
 
     requiredFields[step]?.forEach((field) => {
@@ -310,7 +318,29 @@ function NewApplicationPage() {
 
   const handleFileChange = (e) => {
     const { name, files } = e.target;
-    setFilesState((prev) => ({ ...prev, [name]: files[0] }));
+    const file = files[0];
+
+    if (!file) return;
+
+    // Allowed file types
+    const allowedTypes = [
+      "application/pdf",
+      "image/png",
+      "image/jpg",
+      "image/jpeg",
+      "image/webp",
+    ];
+
+    // Validate file type
+    if (!allowedTypes.includes(file.type)) {
+      alert(
+        "Invalid file type. Only PDF, PNG, JPG, JPEG, and WEBP are allowed."
+      );
+      e.target.value = ""; // Reset input
+      return;
+    }
+
+    setFilesState((prev) => ({ ...prev, [name]: file }));
   };
 
   const handleSnackbarClose = () => {
@@ -393,6 +423,7 @@ function NewApplicationPage() {
 
       setSuccessDialogOpen(true);
 
+      // Scroll to top on success
       if (paperRef.current) {
         paperRef.current.scrollIntoView({ behavior: "smooth" });
       } else {
@@ -499,239 +530,222 @@ function NewApplicationPage() {
         flexDirection: "column",
         minHeight: "100vh",
         backgroundColor: "#f0f2f5",
-        py: { xs: 2, sm: 4 },
       }}
     >
+      {/* AppBar-like Header */}
       <Box
         sx={{
+          backgroundColor: "#1d5236",
+          py: { xs: 1, sm: 2 },
+          boxShadow: 3,
           width: "100%",
-          maxWidth: isMobile ? 320 : 900,
-          mx: "auto",
-          mb: 2,
-        }}
-      >
-        <GreenButton
-          onClick={() => navigate(`/homePage/${id}`)}
-          variant="contained"
-          sx={{
-            backgroundColor: "#09360D",
-            "&:hover": {
-              backgroundColor: "#062708", // slightly darker on hover
-            },
-          }}
-        >
-          BACK TO DASHBOARD
-        </GreenButton>
-      </Box>
-
-      <Paper
-        elevation={6}
-        ref={paperRef}
-        sx={{
-          p: { xs: 2, sm: 4 },
-          width: "100%",
-          maxWidth: isMobile ? 320 : 900,
-          mx: "auto",
-          borderRadius: "16px",
+          position: "sticky",
+          top: 0,
+          zIndex: theme.zIndex.appBar,
         }}
       >
         <Typography
           variant="h4"
           align="center"
-          gutterBottom
           sx={{
             fontWeight: "bold",
-            color: "#333",
-            mt: 2,
+            color: "#ffffff",
+            fontSize: { xs: "1.5rem", sm: "2.2rem" },
+            mt: 0,
+            mb: 0,
           }}
         >
-          Business Application Form
+          BUSINESS APPLICATION FORM
         </Typography>
+      </Box>
 
-        <Stepper
-          activeStep={step - 1}
-          alternativeLabel
-          connector={null}
+      {/* Main Content Box with Padding for AppBar */}
+      <Box sx={{ pt: { xs: 2, sm: 4 }, flexGrow: 1 }}>
+        <Box
           sx={{
+            width: "100%",
+            maxWidth: isExtraSmall ? "90%" : 900,
+            mx: "auto",
+            px: isExtraSmall ? 1 : 0,
             mb: 2,
-            flexWrap: "nowrap", // force one line
-            justifyContent: "space-between", // spread evenly
-            "& .MuiStep-root": {
-              p: 0,
-              minWidth: "auto", // remove default spacing
-              flex: "1 1 auto",
-            },
-            "& .MuiStepIcon-root": {
-              fontSize: { xs: "1rem", sm: "1.5rem" },
-              color: "gray",
-              "&.Mui-active": { color: "#4caf50" },
-              "&.Mui-completed": { color: "#4caf50" },
-            },
-            "& .MuiStepLabel-label": {
-              fontSize: { xs: "0.55rem", sm: "0.75rem" },
-              marginTop: 1,
-              textAlign: "center",
-              color: "gray",
-              display: "block",
-            },
-          }}
-        >
-          {steps.map((label, index) => (
-            <Step key={label} completed={step - 1 > index}>
-              <StepLabel
-                sx={{
-                  display: "flex",
-                  flexDirection: "column", // label below icon
-                  alignItems: "center",
-                }}
-              >
-                {label}
-              </StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-
-        <form style={{ width: "100%" }}>
-          {renderStepContent(step)}
-
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: step === 1 ? "flex-end" : "space-between",
-              mt: 3,
-            }}
-          >
-            {step > 1 && (
-              <GreenButton
-                type="button"
-                variant="outlined"
-                onClick={() => setStep(step - 1)}
-              >
-                Back
-              </GreenButton>
-            )}
-            {step < 7 && (
-              <GreenButton
-                type="button"
-                variant="contained"
-                onClick={handleNextClick}
-                sx={{
-                  backgroundColor: "#09360D",
-                  "&:hover": {
-                    backgroundColor: "#062708", // darker shade on hover
-                  },
-                }}
-              >
-                Next
-              </GreenButton>
-            )}
-            {step === 7 && (
-              <GreenButton
-                type="button"
-                variant="contained"
-                disabled={isSubmitting}
-                onClick={() => setSubmitDialogOpen(true)}
-                sx={{ display: "flex", alignItems: "center", gap: 1 }}
-              >
-                {isSubmitting ? (
-                  <>
-                    <CircularProgress size={20} color="inherit" />
-                    Processing...
-                  </>
-                ) : (
-                  "Submit Form"
-                )}
-              </GreenButton>
-            )}
-          </Box>
-        </form>
-      </Paper>
-
-      {/* Next Step Confirmation */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-        <DialogTitle></DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to proceed to the next step?
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ justifyContent: "center", gap: 2, p: 2 }}>
-          <GreenButton
-            variant="outlined"
-            onClick={() => setDialogOpen(false)}
-            sx={{ minWidth: "90px" }}
-          >
-            Cancel
-          </GreenButton>
-          <GreenButton
-            variant="contained"
-            onClick={handleDialogConfirm}
-            sx={{ minWidth: "120px" }}
-          >
-            Confirm
-          </GreenButton>
-        </DialogActions>
-      </Dialog>
-
-      {/* Submit Confirmation */}
-      <Dialog
-        open={submitDialogOpen}
-        onClose={() => setSubmitDialogOpen(false)}
-      >
-        <DialogTitle>Submit Application</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to submit?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <GreenButton
-            variant="outlined"
-            onClick={() => setSubmitDialogOpen(false)}
-          >
-            No
-          </GreenButton>
-          <GreenButton
-            variant="contained"
-            onClick={() => {
-              setSubmitDialogOpen(false);
-              handleSubmit();
-            }}
-          >
-            Yes
-          </GreenButton>
-        </DialogActions>
-      </Dialog>
-
-      {/* Success Popup */}
-      <Dialog
-        open={successDialogOpen}
-        onClose={() => setSuccessDialogOpen(false)}
-        PaperProps={{
-          sx: {
-            borderRadius: "16px",
-            textAlign: "center",
-            p: 3,
-          },
-        }}
-      >
-        <DialogContent
-          sx={{
             display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 2,
+            justifyContent: "center",
           }}
         >
-          <Grow in={successDialogOpen}>
-            <CheckCircleOutlineIcon sx={{ fontSize: 80, color: "#1a6d1cff" }} />
-          </Grow>
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: "bold", color: "#000000ff" }}
+          <GreenButton
+            onClick={() => navigate(`/homePage/${id}`)}
+            variant="contained"
+            sx={{
+              backgroundColor: "#1d5236",
+              "&:hover": {
+                backgroundColor: "#072b0b",
+              },
+              minWidth: { xs: 40, sm: 44 },
+              width: { xs: 40, sm: 44 },
+              height: { xs: 40, sm: 44 },
+              p: 0,
+              borderRadius: "50%",
+            }}
           >
-            Submitted Successfully!
-          </Typography>
-        </DialogContent>
-      </Dialog>
+            <HomeIcon sx={{ fontSize: { xs: 24, sm: 28 }, color: "#fff" }} />
+          </GreenButton>
+        </Box>
+
+        <Paper
+          elevation={6}
+          ref={paperRef}
+          sx={{
+            p: { xs: 2, sm: 4 },
+            width: "100%",
+            maxWidth: isExtraSmall ? "90%" : 900,
+            mx: "auto",
+            borderRadius: "16px",
+            mb: 4,
+          }}
+        >
+          <Stepper
+            activeStep={step - 1}
+            orientation={isMobile ? "vertical" : "horizontal"}
+            alternativeLabel={!isMobile}
+            connector={isMobile ? null : null}
+            sx={{
+              mb: 2,
+              ...(!isMobile && {
+                flexWrap: "nowrap",
+                justifyContent: "space-between",
+                "& .MuiStep-root": {
+                  p: 0,
+                  minWidth: "auto",
+                  flex: "1 1 auto",
+                },
+              }),
+              ...(isMobile && {
+                "& .MuiStep-root": {
+                  padding: "8px 0",
+                },
+                "& .MuiStepLabel-root": {
+                  textAlign: "left",
+                },
+              }),
+
+              "& .MuiStepIcon-root": {
+                fontSize: { xs: "1rem", sm: "1.5rem" },
+                color: "gray",
+                "&.Mui-active": { color: "#1d5236" },
+                "&.Mui-completed": { color: "#1d5236" },
+                "& .MuiStepIcon-text": {
+                  fill: "#ffffff",
+                },
+              },
+              "& .MuiStepLabel-label": {
+                fontSize: { xs: "0.75rem", sm: "0.75rem" },
+                marginTop: 1,
+                textAlign: isMobile ? "left" : "center",
+                color: "gray",
+                display: "block",
+              },
+            }}
+          >
+            {steps.map((label, index) => (
+              <Step key={label} completed={step - 1 > index}>
+                <StepLabel
+                  sx={{
+                    display: "flex",
+                    flexDirection: isMobile ? "row" : "column",
+                    alignItems: isMobile ? "center" : "center",
+                  }}
+                >
+                  {label}
+                </StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+
+          <form style={{ width: "100%" }}>
+            {renderStepContent(step)}
+
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: step === 1 ? "flex-end" : "space-between",
+                mt: 3,
+              }}
+            >
+              {step > 1 && (
+                <GreenButton
+                  type="button"
+                  variant="contained"
+                  onClick={() => setStep(step - 1)}
+                  sx={{
+                    backgroundColor: "#70706fff",
+                    "&:hover": {
+                      backgroundColor: "#acababff",
+                    },
+                  }}
+                >
+                  Back
+                </GreenButton>
+              )}
+              {step < 7 && (
+                <GreenButton
+                  type="button"
+                  variant="contained"
+                  onClick={handleNextClick}
+                  sx={{
+                    backgroundColor: "#1d5236",
+                    "&:hover": {
+                      backgroundColor: "#072b0b",
+                    },
+                  }}
+                >
+                  Next
+                </GreenButton>
+              )}
+              {step === 7 && (
+                <GreenButton
+                  type="button"
+                  variant="contained"
+                  disabled={isSubmitting}
+                  onClick={() => setSubmitDialogOpen(true)}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    backgroundColor: "#1d5236",
+                    color: "white",
+                    "&:hover": {
+                      backgroundColor: "#072b0b",
+                    },
+                  }}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <CircularProgress size={20} color="inherit" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Submit Form"
+                  )}
+                </GreenButton>
+              )}
+            </Box>
+          </form>
+        </Paper>
+      </Box>
+
+      {/* RENDER NEW CONFIRMATION COMPONENT */}
+      <NewAppConfirmation
+        dialogOpen={dialogOpen}
+        setDialogOpen={setDialogOpen}
+        handleDialogConfirm={handleDialogConfirm}
+        submitDialogOpen={submitDialogOpen}
+        setSubmitDialogOpen={setSubmitDialogOpen}
+        successDialogOpen={successDialogOpen}
+        setSuccessDialogOpen={setSuccessDialogOpen}
+        isSubmitting={isSubmitting}
+        handleSubmit={handleSubmit}
+      />
+      {/* END NEW CONFIRMATION COMPONENT */}
 
       <Snackbar
         open={snackbarState.open}

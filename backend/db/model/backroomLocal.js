@@ -9,7 +9,7 @@ const Backroom = sequelize.define(
       primaryKey: true,
     },
     userId: DataTypes.UUID,
-    BIN: {
+    bin: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -76,6 +76,11 @@ const Backroom = sequelize.define(
     proofOfReg_mimetype: { type: DataTypes.STRING, allowNull: true },
     proofOfReg_size: { type: DataTypes.INTEGER, allowNull: true },
 
+    RecentBusinessPermit: { type: DataTypes.BLOB("long"), allowNull: true },
+    RecentBusinessPermit_filename: { type: DataTypes.STRING, allowNull: true },
+    RecentBusinessPermit_mimetype: { type: DataTypes.STRING, allowNull: true },
+    RecentBusinessPermit_size: { type: DataTypes.INTEGER, allowNull: true },
+
     proofOfRightToUseLoc: { type: DataTypes.BLOB("long"), allowNull: true },
     proofOfRightToUseLoc_filename: { type: DataTypes.STRING, allowNull: true },
     proofOfRightToUseLoc_mimetype: { type: DataTypes.STRING, allowNull: true },
@@ -127,6 +132,11 @@ const Backroom = sequelize.define(
     cswmoCert_filename: { type: DataTypes.STRING, allowNull: true },
     cswmoCert_mimetype: { type: DataTypes.STRING, allowNull: true },
     cswmoCert_size: { type: DataTypes.INTEGER, allowNull: true },
+
+    businessPermit: { type: DataTypes.BLOB("long"), allowNull: true },
+    businessPermit_filename: { type: DataTypes.STRING, allowNull: true },
+    businessPermit_mimetype: { type: DataTypes.STRING, allowNull: true },
+    businessPermit_size: { type: DataTypes.INTEGER, allowNull: true },
 
     OBO: { type: DataTypes.STRING, defaultValue: "Pending" },
     OBOdecline: { type: DataTypes.STRING },
@@ -190,6 +200,7 @@ const Backroom = sequelize.define(
     },
     businesstaxComputation_size: { type: DataTypes.INTEGER, allowNull: true },
     application: { type: DataTypes.STRING },
+    businessTaxTotal: { type: DataTypes.STRING },
   },
 
   {

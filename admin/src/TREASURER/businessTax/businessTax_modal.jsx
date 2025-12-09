@@ -151,6 +151,7 @@ function BusinessTaxApplicantModal({
   handleFileChange,
   onDecline,
   baseUrl,
+  collections,
 }) {
   if (!isOpen || !applicant) return null;
 
@@ -187,7 +188,7 @@ function BusinessTaxApplicantModal({
   // Handle approval confirmation
   const handleConfirmApprove = () => {
     setConfirmOpen(false);
-    onApprove(applicant.id, selectedFiles); // Call the original onApprove
+    onApprove(applicant.id, selectedFiles, collections);
     setSuccessOpen(true); // Show success pop-up
   };
 
@@ -223,7 +224,7 @@ function BusinessTaxApplicantModal({
           <Section title="Business Information">
             <Field label="Status" value={applicant.BusinessTax} />
             <Field label="Mode of Payment" value={applicant.Modeofpayment} />
-            <Field label="BIN" value={applicant.BIN} />
+            <Field label="BIN" value={applicant.bin} />
             <Field label="Business Type" value={applicant.BusinessType} />
             <Field label="DSC Registration No" value={applicant.dscRegNo} />
             <Field label="Business Name" value={applicant.businessName} />
@@ -618,35 +619,38 @@ function BusinessTaxApplicantModal({
               )}
             </Stack>
           </Section>
-
-          <Grid container spacing={1} sx={{ mt: 1 }}>
-            <Grid item>
-              <Button
-                variant="contained"
-                component="label"
-                size="small"
-                color="success"
-                sx={{ minWidth: 120 }}
-              >
-                Choose File
-                <input
-                  type="file"
-                  name="businessTaxComputation"
-                  hidden
-                  onChange={handleFileSelect}
-                />
-              </Button>
-            </Grid>
-            <Grid item xs>
-              <TextField
-                value={selectedFiles.businessTaxComputation?.name || ""}
-                placeholder="No file selected"
-                size="small"
-                fullWidth
-                InputProps={{ readOnly: true }}
-              />
-            </Grid>
-          </Grid>
+          {applicant.BusinessTax !== "Approved" && (
+            <>
+              <Grid container spacing={1} sx={{ mt: 1 }}>
+                <Grid item>
+                  <Button
+                    variant="contained"
+                    component="label"
+                    size="small"
+                    color="success"
+                    sx={{ minWidth: 120 }}
+                  >
+                    Choose File
+                    <input
+                      type="file"
+                      name="businessTaxComputation"
+                      hidden
+                      onChange={handleFileSelect}
+                    />
+                  </Button>
+                </Grid>
+                <Grid item xs>
+                  <TextField
+                    value={selectedFiles.businessTaxComputation?.name || ""}
+                    placeholder="No file selected"
+                    size="small"
+                    fullWidth
+                    InputProps={{ readOnly: true }}
+                  />
+                </Grid>
+              </Grid>
+            </>
+          )}
         </DialogContent>
 
         <DialogActions>
@@ -658,30 +662,33 @@ function BusinessTaxApplicantModal({
           >
             Close
           </Button>
+          {applicant.BusinessTax !== "Approved" && (
+            <>
+              <Button
+                onClick={() => setComputeOpen(true)}
+                variant="contained"
+                color="primary"
+              >
+                Compute
+              </Button>
 
-          <Button
-            onClick={() => setComputeOpen(true)}
-            variant="contained"
-            color="primary"
-          >
-            Compute
-          </Button>
-
-          <Button
-            onClick={handleApproveClick}
-            variant="contained"
-            color="success"
-          >
-            Approve
-          </Button>
-          <Button
-            onClick={() => onDecline(applicant.id)}
-            variant="contained"
-            color="error"
-            sx={{ color: "white" }}
-          >
-            Decline
-          </Button>
+              <Button
+                onClick={handleApproveClick}
+                variant="contained"
+                color="success"
+              >
+                Approve
+              </Button>
+              <Button
+                onClick={() => onDecline(applicant.id)}
+                variant="contained"
+                color="error"
+                sx={{ color: "white" }}
+              >
+                Decline
+              </Button>
+            </>
+          )}
         </DialogActions>
 
         {/* Computation Dialog */}

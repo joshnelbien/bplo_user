@@ -10,7 +10,7 @@ const AppStatus = sequelize.define(
       primaryKey: true,
     },
     userId: {
-      type: DataTypes.UUID,
+      type: DataTypes.STRING,
     },
     BPLO: { type: DataTypes.STRING, defaultValue: "Pending" },
     BPLOtimeStamp: { type: DataTypes.STRING },

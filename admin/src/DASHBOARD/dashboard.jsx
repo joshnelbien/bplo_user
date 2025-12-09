@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Box,
   Paper,
@@ -6,362 +7,556 @@ import {
   Grid,
   useTheme,
   Divider,
-  useMediaQuery,
   Button,
+  Card,
+  CardContent,
+  Stack,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Avatar,
+  alpha,
 } from "@mui/material";
-import { styled, keyframes } from "@mui/material/styles";
+import {
+  Description,
+  TrendingUp,
+  AccessTime,
+  PersonAdd,
+} from "@mui/icons-material";
 import Side_bar from "../SIDE_BAR/side_bar";
-import { LineChart } from "@mui/x-charts/LineChart";
-
-import BusinessIcon from "@mui/icons-material/Business";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import HowToRegIcon from "@mui/icons-material/HowToReg";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import { BarChart, barElementClasses } from "@mui/x-charts/BarChart";
 import AddAdminModal from "./AddAdminModal";
 
-/* ================== STYLES ================== */
-const hoverAnimation = keyframes`
-  0% { transform: translateY(0); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-  50% { transform: translateY(-6px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-  100% { transform: translateY(0); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-`;
+/* ================== CONSTANTS ================== */
+const primaryGreen = "#1d5236";
+const lightGreen = alpha(primaryGreen, 0.1);
+const darkGreen = "#0f2a1b";
+const drawerWidth = 0;
 
-const DashboardCard = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(4),
-  borderRadius: theme.shape.borderRadius * 2,
-  textAlign: "center",
-  transition: "all 0.3s ease-in-out",
-  cursor: "pointer",
-  minHeight: "200px",
-  minWidth: "250px",
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "center",
-  alignItems: "center",
-  "&:hover": {
-    animation: `${hoverAnimation} 0.8s ease-in-out`,
-    transform: "translateY(-6px)",
-  },
-}));
+/* ================== LIVE CLOCK ================== */
+function LiveClock() {
+  const [now, setNow] = useState(new Date());
 
-const IconWrapper = styled(Box)(({ theme }) => ({
-  marginBottom: theme.spacing(2),
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  fontSize: "3rem",
-}));
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
 
-/* ================== UTILITY FUNCTIONS ================== */
-const sumArray = (arr) => arr.reduce((a, b) => a + b, 0);
-
-const calculateGrowth = (currentArr, previousArr) => {
-  const currentSum = sumArray(currentArr);
-  const previousSum = sumArray(previousArr);
-  if (previousSum === 0) return 0;
-  return ((currentSum - previousSum) / previousSum) * 100;
-};
-
-// ✅ Fixed filtering function
-const filterByMonth = (dataArr, monthsArr, selectedMonth) => {
-  if (selectedMonth === "All") {
-    return { data: dataArr, labels: monthsArr };
-  } else {
-    const idx = monthsArr.indexOf(selectedMonth);
-    return {
-      data: idx >= 0 ? [dataArr[idx]] : [],
-      labels: idx >= 0 ? [monthsArr[idx]] : [],
-    };
-  }
-};
-
-/* ================== COMPONENTS ================== */
-const GrowthIndicator = ({ growth }) => (
-  <Box
-    sx={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      mt: 1,
-    }}
-  >
-    {growth >= 0 ? (
-      <ArrowUpwardIcon color="success" fontSize="small" />
-    ) : (
-      <ArrowDownwardIcon color="error" fontSize="small" />
-    )}
-    <Typography
-      variant="subtitle2"
-      color={growth >= 0 ? "success.main" : "error.main"}
-      sx={{ ml: 0.5 }}
-    >
-      {Math.abs(growth).toFixed(1)}%
-    </Typography>
-  </Box>
-);
-
-const renderCard = (Icon, label, value, growth, color) => (
-  <Grid item xs={12} md={4}>
-    <DashboardCard>
-      <IconWrapper>
-        <Icon color={color} fontSize="large" />
-      </IconWrapper>
-      <Typography variant="h6" color="textSecondary">
-        {label}
-      </Typography>
-      <Typography variant="h4" color={`${color}.main`} fontWeight="bold">
-        {sumArray(value).toLocaleString()}
-      </Typography>
-      <GrowthIndicator growth={growth} />
-    </DashboardCard>
-  </Grid>
-);
-
-/* ================== DASHBOARD ================== */
-function Dashboard() {
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
-  const [openModal, setOpenModal] = useState(false);
-
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  const years = [2024, 2025, 2026];
-
-  const [selectedMonth, setSelectedMonth] = useState("All");
-  const [selectedYear, setSelectedYear] = useState(2025);
-
-  /* ================== HARD CODED DATA ================== */
-  const businesses = [
-    { year: 2025, month: "Jan", type: "Renewal", amount: 120 },
-    { year: 2025, month: "Jan", type: "New", amount: 80 },
-    { year: 2025, month: "Feb", type: "Renewal", amount: 150 },
-    { year: 2025, month: "Feb", type: "New", amount: 90 },
-    { year: 2025, month: "Mar", type: "Renewal", amount: 180 },
-    { year: 2025, month: "Mar", type: "New", amount: 110 },
-    { year: 2024, month: "Jan", type: "Renewal", amount: 100 },
-    { year: 2024, month: "Jan", type: "New", amount: 70 },
-    { year: 2024, month: "Feb", type: "Renewal", amount: 130 },
-    { year: 2024, month: "Feb", type: "New", amount: 60 },
-    { year: 2024, month: "Mar", type: "Renewal", amount: 160 },
-    { year: 2024, month: "Mar", type: "New", amount: 90 },
-  ];
-
-  /* ================== PROCESS DATA ================== */
-  // Filter by year
-  const businessesByYear = businesses.filter(
-    (b) => parseInt(b.year) === selectedYear
-  );
-
-  // Map monthly sums
-  const renewalData = months.map((month) =>
-    sumArray(
-      businessesByYear
-        .filter((b) => b.type === "Renewal" && b.month === month)
-        .map((b) => parseInt(b.amount || 0))
-    )
-  );
-
-  const newBusinessesData = months.map((month) =>
-    sumArray(
-      businessesByYear
-        .filter((b) => b.type === "New" && b.month === month)
-        .map((b) => parseInt(b.amount || 0))
-    )
-  );
-
-  const registeredData = renewalData.map(
-    (val, i) => val + newBusinessesData[i]
-  );
-
-  // Previous year data for growth
-  const businessesPrevYear = businesses.filter(
-    (b) => parseInt(b.year) === selectedYear - 1
-  );
-  const prevRenewal = months.map((month) =>
-    sumArray(
-      businessesPrevYear
-        .filter((b) => b.type === "Renewal" && b.month === month)
-        .map((b) => parseInt(b.amount || 0))
-    )
-  );
-  const prevNewBusinesses = months.map((month) =>
-    sumArray(
-      businessesPrevYear
-        .filter((b) => b.type === "New" && b.month === month)
-        .map((b) => parseInt(b.amount || 0))
-    )
-  );
-  const prevRegistered = prevRenewal.map(
-    (val, i) => val + prevNewBusinesses[i]
-  );
-
-  /* ================== CALCULATIONS ================== */
-  const growthRenewal = calculateGrowth(renewalData, prevRenewal);
-  const growthNew = calculateGrowth(newBusinessesData, prevNewBusinesses);
-  const growthRegistered = calculateGrowth(registeredData, prevRegistered);
-
-  const renewalFiltered = filterByMonth(renewalData, months, selectedMonth);
-  const newFiltered = filterByMonth(newBusinessesData, months, selectedMonth);
-  const registeredFiltered = filterByMonth(
-    registeredData,
-    months,
-    selectedMonth
-  );
-
-  const chartRenewal = renewalFiltered.data;
-  const chartNew = newFiltered.data;
-  const chartRegistered = registeredFiltered.data;
-  const chartMonths = renewalFiltered.labels;
+  const time = now.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+  const date = now.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   return (
     <Box
       sx={{
         display: "flex",
-        background: "linear-gradient(to bottom, #ffffff, #e6ffe6)",
-        minHeight: "100vh",
-        flexDirection: isSmallScreen ? "column" : "row",
-        justifyContent: "center",
-        alignItems: "flex-start",
-        px: isSmallScreen ? 2 : 4,
+        flexDirection: "column",
+        color: "white",
+        pl: { xs: 1, md: 3 },
+        minWidth: { xs: 130, md: 180 },
       }}
     >
-      {!isSmallScreen && <Side_bar />}
-      <Box
-        component="main"
+      <Typography
+        variant="h6"
         sx={{
-          flexGrow: 1,
-          maxWidth: 1200,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          width: "100%",
+          fontWeight: 600,
+          lineHeight: 1,
+          textShadow: "0 1px 3px rgba(0,0,0,0.4)",
         }}
       >
-        {/* Filters */}
-        <Box
-          sx={{
-            mb: 3,
-            display: "flex",
-            flexDirection: isSmallScreen ? "column" : "row",
-            gap: 2,
-            justifyContent: "center",
-          }}
-        >
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            style={{ padding: "8px", borderRadius: "4px" }}
-          >
-            <option value="All">All Months</option>
-            {months.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
+        {time}
+      </Typography>
+      <Typography
+        variant="caption"
+        sx={{ opacity: 0.9, fontSize: { xs: "0.65rem", md: "0.75rem" } }}
+      >
+        {date}
+      </Typography>
+    </Box>
+  );
+}
 
-          <select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            style={{ padding: "8px", borderRadius: "4px" }}
-          >
-            {years.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
-        </Box>
+/* ================== TOP BAR ================== */
+function TopBar({ onAddAdminClick, isSuperAdmin }) {
+  const TOP_BAR_HEIGHT = 80;
 
-        {/* Cards Section */}
-        <Grid container spacing={15.7} justifyContent="center">
-          {renderCard(
-            BusinessIcon,
-            "Renewal",
-            chartRenewal,
-            growthRenewal,
-            "success"
-          )}
-          {renderCard(
-            PersonAddIcon,
-            "New Businesses",
-            chartNew,
-            growthNew,
-            "error"
-          )}
-          {renderCard(
-            HowToRegIcon,
-            "Registered Businesses",
-            chartRegistered,
-            growthRegistered,
-            "primary"
-          )}
-        </Grid>
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        height: TOP_BAR_HEIGHT,
+        backgroundColor: primaryGreen,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        p: 2,
+        boxSizing: "border-box",
+        color: "white",
+        boxShadow: 3,
+        zIndex: 1100,
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+      }}
+    >
+      <LiveClock />
+      <Typography
+        variant="h5"
+        sx={{
+          position: "absolute",
+          left: "50%",
+          transform: "translateX(-50%)",
+          fontWeight: "light",
+          textShadow: `0 0 5px ${alpha("#000000", 0.5)}`,
+          display: { xs: "none", sm: "block" },
+        }}
+      >
+        DASHBOARD OVERVIEW
+      </Typography>
 
-        <Divider sx={{ my: 4, width: "100%" }} />
+      {isSuperAdmin && (
         <Button
           variant="contained"
-          color="primary"
-          onClick={() => setOpenModal(true)}
+          onClick={onAddAdminClick}
+          startIcon={<PersonAdd sx={{ color: primaryGreen }} />}
+          sx={{
+            background: "#ffffff",
+            color: primaryGreen,
+            "&:hover": { background: alpha("#ffffff", 0.8) },
+            borderRadius: 20,
+            py: 1,
+            textTransform: "none",
+            fontWeight: "bold",
+            boxShadow: `0 4px 12px ${alpha(primaryGreen, 0.5)}`,
+            mr: 2,
+          }}
         >
           Add Admin
         </Button>
+      )}
+    </Box>
+  );
+}
 
-        <AddAdminModal open={openModal} onClose={() => setOpenModal(false)} />
-        {/* Data Analytics Graph */}
-        <Paper
+/* ================== MAIN DASHBOARD ================== */
+function Dashboard() {
+  const API = import.meta.env.VITE_API_BASE;
+  const theme = useTheme();
+  const [openModal, setOpenModal] = useState(false);
+  const [totalApplications, setTotalApplications] = useState(0);
+  const [adminData, setAdminData] = useState(null);
+  const [appBreakdown, setAppBreakdown] = useState({
+    newApplications: 0,
+    renewApplications: 0,
+  });
+  const [approvedPermits, setApprovedPermits] = useState(0);
+  const [monthlyData, setMonthlyData] = useState([]); // full monthly objects [{month, count}]
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState("all"); // "all" or "01".."12"
+  const TOP_BAR_HEIGHT = 80;
+
+  useEffect(() => {
+    const stored = localStorage.getItem("adminData");
+    if (stored) setAdminData(JSON.parse(stored));
+  }, []);
+
+  const userOffice = adminData?.Office?.toUpperCase() || "";
+  const isSuperAdmin = userOffice === "SUPERADMIN";
+
+  const handleOpenModal = () => setOpenModal(true);
+  const handleCloseModal = () => setOpenModal(false);
+
+  // Fetch application counts
+  useEffect(() => {
+    const fetchAppData = async () => {
+      try {
+        const res = await axios.get(`${API}/newApplication/application-counts`);
+        setTotalApplications(res.data.totalApplications);
+        setAppBreakdown({
+          newApplications: res.data.newApplications,
+          renewApplications: res.data.renewApplications,
+        });
+        setMonthlyData(res.data.monthlyApplications || []);
+      } catch (err) {
+        console.error("Failed to fetch application counts:", err);
+        setTotalApplications(0);
+        setAppBreakdown({ newApplications: 0, renewApplications: 0 });
+        setMonthlyData([]);
+      }
+    };
+    fetchAppData();
+  }, []);
+
+  // Fetch approved permits
+  useEffect(() => {
+    const fetchApprovedPermits = async () => {
+      try {
+        const res = await axios.get(`${API}/businessProfile/approved-counts`);
+        setApprovedPermits(res.data.totalApplications);
+      } catch (err) {
+        console.error("Failed to fetch approved permits:", err);
+        setApprovedPermits(0);
+      }
+    };
+    fetchApprovedPermits();
+  }, []);
+
+  const metrics = {
+    totalApplications,
+    approvedPermits,
+    pendingRenewals: totalApplications - approvedPermits,
+  };
+
+  const barData = {
+    categories: ["New Applications", "Renewals"],
+    values: [appBreakdown.newApplications, appBreakdown.renewApplications],
+  };
+
+  // Generate all months of the year
+  const allMonths = Array.from({ length: 12 }, (_, i) =>
+    (i + 1).toString().padStart(2, "0")
+  );
+
+  // Prepare chart data based on selected year and month
+  const monthlyCounts = allMonths.map((month) => {
+    if (selectedMonth !== "all" && month !== selectedMonth) return 0;
+    const item = monthlyData.find(
+      (d) =>
+        d.month.startsWith(`${selectedYear}-${month}`) ||
+        d.month === `${selectedYear}-${month}`
+    );
+    return item ? parseInt(item.count, 10) : 0;
+  });
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        background: "#f5f5f5",
+        minHeight: "100vh",
+        flexDirection: "column",
+      }}
+    >
+      {/* TOP BAR */}
+      <TopBar onAddAdminClick={handleOpenModal} isSuperAdmin={isSuperAdmin} />
+
+      {/* MAIN LAYOUT */}
+      <Box
+        sx={{
+          display: "flex",
+          width: "100%",
+          flexGrow: 1,
+          pt: `${TOP_BAR_HEIGHT}px`,
+          px: { xs: 2, md: 3 },
+          pb: 4,
+        }}
+      >
+        <Side_bar />
+        <Box
+          component="main"
           sx={{
-            p: 3,
-            borderRadius: 4,
-            boxShadow: "0 6px 16px rgba(0,0,0,0.1)",
-            height: isSmallScreen ? 350 : 520,
+            flexGrow: 1,
             width: "100%",
-            maxWidth: 1200,
-            marginTop: 4,
+            ml: { md: `${drawerWidth}px` },
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            mt: 3,
+            px: { xs: 1, sm: 2 },
           }}
         >
-          <Typography variant="h6" gutterBottom textAlign="center">
-            Overview
-          </Typography>
-          <LineChart
-            height={isSmallScreen ? 300 : 440}
-            xAxis={[{ scaleType: "point", data: chartMonths }]}
-            series={[
+          {/* METRICS CARDS */}
+          <Grid container spacing={3} sx={{ mb: 5, width: "100%" }}>
+            {[
               {
-                data: chartRenewal,
-                label: "Renewal",
-                color: theme.palette.success.main,
-                showMark: true,
+                title: "Total Applications",
+                value: metrics.totalApplications,
+                icon: <Description />,
               },
               {
-                data: chartNew,
-                label: "New Businesses",
-                color: theme.palette.error.main,
-                showMark: true,
+                title: "Approved Permits",
+                value: metrics.approvedPermits,
+                icon: <TrendingUp />,
               },
               {
-                data: chartRegistered,
-                label: "Registered Businesses",
-                color: theme.palette.primary.main,
-                showMark: true,
+                title: "Pending Applications",
+                value: metrics.pendingRenewals,
+                icon: <AccessTime />,
               },
-            ]}
-            grid={{ vertical: true, horizontal: true }}
-          />
-        </Paper>
+            ].map((item, idx) => (
+              <Grid item xs={12} sm={6} md={3} key={idx}>
+                <Card
+                  elevation={3}
+                  sx={{
+                    background: "#ffffff",
+                    borderRadius: 3,
+                    height: 180,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                    "&:hover": {
+                      transform: "translateY(-8px)",
+                      boxShadow: `0 12px 24px ${alpha(primaryGreen, 0.2)}`,
+                    },
+                    border: `1px solid ${lightGreen}`,
+                  }}
+                >
+                  <CardContent sx={{ flexGrow: 1 }}>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Box>
+                        <Typography
+                          color="textSecondary"
+                          gutterBottom
+                          sx={{ fontSize: "1.5rem", color: darkGreen }}
+                        >
+                          {item.title}
+                        </Typography>
+                        <Typography
+                          variant="h5"
+                          sx={{ fontWeight: "bold", color: primaryGreen }}
+                        >
+                          {item.value}
+                        </Typography>
+                      </Box>
+                      <Avatar
+                        sx={{
+                          bgcolor: lightGreen,
+                          color: primaryGreen,
+                          width: 60,
+                          height: 60,
+                        }}
+                      >
+                        {item.icon}
+                      </Avatar>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+
+          <Divider sx={{ my: 4, width: "100%", borderColor: lightGreen }} />
+
+          {/* APPLICATIONS BREAKDOWN BAR CHART */}
+          <Grid container spacing={3} sx={{ width: "100%", mb: 5 }}>
+            {/* APPLICATIONS BREAKDOWN */}
+            <Grid item xs={12} md={6}>
+              <Paper
+                elevation={3}
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                  background: "#ffffff",
+                  border: `1px solid ${lightGreen}`,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{
+                    mb: 2,
+                    fontWeight: "bold",
+                    color: darkGreen,
+                    textAlign: "center",
+                  }}
+                >
+                  Applications Breakdown
+                </Typography>
+                <Box
+                  sx={{
+                    width: { xs: "100%", sm: "90%", md: 500 },
+                    height: { xs: 250, sm: 300, md: 350 },
+                  }}
+                >
+                  <BarChart
+                    series={[{ data: barData.values, color: primaryGreen }]}
+                    xAxis={[{ scaleType: "band", data: barData.categories }]}
+                    sx={{
+                      [`& .${barElementClasses.root}`]: { fill: primaryGreen },
+                      ".MuiChartsLegend-root": { color: darkGreen },
+                      width: "100%",
+                      height: "100%",
+                    }}
+                  />
+                </Box>
+              </Paper>
+            </Grid>
+
+            {/* MONTHLY CHART WITH YEAR & MONTH FILTER */}
+            <Grid item xs={12} md={6}>
+              <Paper
+                elevation={3}
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                  background: "#ffffff",
+                  border: `1px solid ${lightGreen}`,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{
+                    mb: 2,
+                    fontWeight: "bold",
+                    color: darkGreen,
+                    textAlign: "center",
+                  }}
+                >
+                  Applications per Month
+                </Typography>
+
+                {/* YEAR & MONTH DROPDOWNS */}
+                <Box
+                  sx={{ display: "flex", gap: 1, mb: 0.5, flexWrap: "wrap" }}
+                >
+                  {/* Year Dropdown */}
+                  <FormControl sx={{ minWidth: 120 }}>
+                    <InputLabel id="year-select-label">Year</InputLabel>
+                    <Select
+                      labelId="year-select-label"
+                      value={selectedYear}
+                      label="Year"
+                      onChange={(e) =>
+                        setSelectedYear(parseInt(e.target.value))
+                      }
+                      sx={{
+                        bgcolor: "#f5f5f5",
+                        borderRadius: 1,
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: primaryGreen,
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: darkGreen,
+                        },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: primaryGreen,
+                        },
+                      }}
+                    >
+                      {Array.from(
+                        { length: 5 },
+                        (_, i) => new Date().getFullYear() - i
+                      ).map((year) => (
+                        <MenuItem key={year} value={year}>
+                          {year}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  {/* Month Dropdown */}
+                  <FormControl sx={{ minWidth: 140 }}>
+                    <InputLabel id="month-select-label">Month</InputLabel>
+                    <Select
+                      labelId="month-select-label"
+                      value={selectedMonth}
+                      label="Month"
+                      onChange={(e) => setSelectedMonth(e.target.value)}
+                      sx={{
+                        bgcolor: "#f5f5f5",
+                        borderRadius: 1,
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: primaryGreen,
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: darkGreen,
+                        },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: primaryGreen,
+                        },
+                      }}
+                    >
+                      <MenuItem value="all">All Months</MenuItem>
+                      {[
+                        "Jan",
+                        "Feb",
+                        "Mar",
+                        "Apr",
+                        "May",
+                        "Jun",
+                        "Jul",
+                        "Aug",
+                        "Sep",
+                        "Oct",
+                        "Nov",
+                        "Dec",
+                      ].map((m, idx) => (
+                        <MenuItem
+                          key={idx}
+                          value={(idx + 1).toString().padStart(2, "0")}
+                        >
+                          {m}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+
+                <Box
+                  sx={{
+                    width: { xs: "100%", sm: "90%", md: 700 },
+                    height: { xs: 300, sm: 400, md: 280 },
+                  }}
+                >
+                  <BarChart
+                    series={[{ data: monthlyCounts, color: primaryGreen }]}
+                    xAxis={[
+                      {
+                        scaleType: "band",
+                        data: [
+                          "Jan",
+                          "Feb",
+                          "Mar",
+                          "Apr",
+                          "May",
+                          "Jun",
+                          "Jul",
+                          "Aug",
+                          "Sep",
+                          "Oct",
+                          "Nov",
+                          "Dec",
+                        ],
+                      },
+                    ]}
+                    sx={{
+                      [`& .${barElementClasses.root}`]: { fill: primaryGreen },
+                      ".MuiChartsLegend-root": { color: darkGreen },
+                      width: "100%",
+                      height: "100%",
+                    }}
+                  />
+                </Box>
+              </Paper>
+            </Grid>
+          </Grid>
+
+          {/* MODAL */}
+          <AddAdminModal open={openModal} onClose={handleCloseModal} />
+        </Box>
       </Box>
     </Box>
   );

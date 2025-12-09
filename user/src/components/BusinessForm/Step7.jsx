@@ -32,31 +32,34 @@ export default function Section7FileUploads({ handleFileChange, errors }) {
         Business Requirements
       </Typography>
 
-      {/* Example editable fields from formData */}
-      {Object.keys(localData.formData).map((key) => (
-        <TextField
-          key={key}
-          label={key}
-          name={key}
-          value={localData.formData[key] || ""}
-          onChange={handleChange}
-          error={Boolean(errors[key])}
-          helperText={errors[key] || ""}
-          fullWidth
-        />
-      ))}
+      {Object.keys(localData.formData)
+        .filter((key) => localData.formData[key])
+        .map((key) => (
+          <TextField
+            key={key}
+            label={key}
+            name={key}
+            value={localData.formData[key]}
+            onChange={handleChange}
+            error={Boolean(errors[key])}
+            helperText={errors[key] || ""}
+            fullWidth
+            disabled
+          />
+        ))}
 
-      {/* Example: you could also render files as editable names or keep file inputs */}
-      {Object.keys(localData.files).map((key) => (
-        <TextField
-          key={key}
-          label={key}
-          name={key}
-          value={localData.files[key]?.name || ""}
-          fullWidth
-          disabled
-        />
-      ))}
+      {Object.keys(localData.files)
+        .filter((key) => localData.files[key])
+        .map((key) => (
+          <TextField
+            key={key}
+            label={key}
+            name={key}
+            value={localData.files[key]?.name || ""}
+            fullWidth
+            disabled
+          />
+        ))}
     </Box>
   );
 }

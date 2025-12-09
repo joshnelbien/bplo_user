@@ -31,6 +31,12 @@ const AdminAccounts = sequelize.define("AdminAccounts", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  profile: {
+    type: DataTypes.BLOB("long"),
+  },
+  signatories: {
+    type: DataTypes.BLOB("long"),
+  },
   Password: {
     type: DataTypes.STRING,
   },

@@ -8,7 +8,7 @@ const BusinessProfile = sequelize.define(
       type: DataTypes.STRING,
       primaryKey: true,
     },
-    BIN: {
+    bin: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -74,6 +74,11 @@ const BusinessProfile = sequelize.define(
     proofOfReg_filename: { type: DataTypes.STRING, allowNull: true },
     proofOfReg_mimetype: { type: DataTypes.STRING, allowNull: true },
     proofOfReg_size: { type: DataTypes.INTEGER, allowNull: true },
+
+    RecentBusinessPermit: { type: DataTypes.BLOB("long"), allowNull: true },
+    RecentBusinessPermit_filename: { type: DataTypes.STRING, allowNull: true },
+    RecentBusinessPermit_mimetype: { type: DataTypes.STRING, allowNull: true },
+    RecentBusinessPermit_size: { type: DataTypes.INTEGER, allowNull: true },
 
     proofOfRightToUseLoc: { type: DataTypes.BLOB("long"), allowNull: true },
     proofOfRightToUseLoc_filename: { type: DataTypes.STRING, allowNull: true },
@@ -180,6 +185,11 @@ const BusinessProfile = sequelize.define(
     },
     businesstaxComputation_size: { type: DataTypes.INTEGER, allowNull: true },
 
+    businessPermit: { type: DataTypes.BLOB("long"), allowNull: true },
+    businessPermit_filename: { type: DataTypes.STRING, allowNull: true },
+    businessPermit_mimetype: { type: DataTypes.STRING, allowNull: true },
+    businessPermit_size: { type: DataTypes.INTEGER, allowNull: true },
+
     passtoBusinessTax: { type: DataTypes.STRING, defaultValue: "No" },
     passtoTreasurer: { type: DataTypes.STRING, defaultValue: "No" },
     permitRelease: { type: DataTypes.STRING, defaultValue: "No" },
@@ -187,6 +197,46 @@ const BusinessProfile = sequelize.define(
     TREASURER: { type: DataTypes.STRING, defaultValue: "Pending" },
     TREASURERtimeStamp: { type: DataTypes.STRING },
     application: { type: DataTypes.STRING },
+    businessTaxTotal: { type: DataTypes.STRING },
+    payment_mode: {
+      type: DataTypes.STRING,
+    },
+    amount_due: {
+      type: DataTypes.STRING,
+    },
+    amount_paid: {
+      type: DataTypes.STRING,
+    },
+    due_date: {
+      type: DataTypes.STRING,
+    },
+    drawee_bank: {
+      type: DataTypes.STRING,
+    },
+    check_number: {
+      type: DataTypes.STRING,
+    },
+    check_date: {
+      type: DataTypes.STRING,
+    },
+    //other charges
+    businessTaxFee: { type: DataTypes.STRING },
+    occupationalTax: { type: DataTypes.STRING },
+    barangayFee: { type: DataTypes.STRING },
+    mayorsPermit: { type: DataTypes.STRING },
+    deliveryVehicle: { type: DataTypes.STRING },
+    surcharge: { type: DataTypes.STRING },
+    interest: { type: DataTypes.STRING },
+    tinplateStickerFee: { type: DataTypes.STRING },
+    verificationFee: { type: DataTypes.STRING },
+    veterinaryFee: { type: DataTypes.STRING },
+    fixedTax: { type: DataTypes.STRING },
+    videokeFee: { type: DataTypes.STRING },
+    cigarettes: { type: DataTypes.STRING },
+    liquor: { type: DataTypes.STRING },
+    billiards: { type: DataTypes.STRING },
+    boardAndLogging: { type: DataTypes.STRING },
+    fsicFee: { type: DataTypes.STRING },
   },
 
   {

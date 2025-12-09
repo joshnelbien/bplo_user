@@ -180,6 +180,27 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
   const [expandedSection, setExpandedSection] = useState(false);
   const [businessDetails, setBusinessDetails] = useState([]);
   const [fsicData, setFsicData] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState({});
+
+  const handleFileChange = (name, file) => {
+    setSelectedFiles((prev) => ({
+      ...prev,
+      [name]: file,
+    }));
+  };
+
+  const handleFileSelect = (e) => {
+    const { name, files } = e.target;
+    if (files[0]) {
+      setSelectedFiles((prev) => ({
+        ...prev,
+        [name]: files[0],
+      }));
+      handleFileChange(name, files[0]);
+    }
+  };
+
+  const files = [{ label: "Business Permit", name: "businessPermit" }];
 
   useEffect(() => {
     const fetchFSIC = async () => {
@@ -273,18 +294,49 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
     );
   };
 
+  const oboTotal =
+    (Number(applicant.BSAP) || 0) +
+    (Number(applicant.SR) || 0) +
+    (Number(applicant.Mechanical) || 0) +
+    (Number(applicant.Electrical) || 0) +
+    (Number(applicant.Signage) || 0) +
+    (Number(applicant.Electronics) || 0) +
+    (Number(applicant.otherFee) || 0);
   // ✅ Collections data - customize based on your applicant fields (e.g., fees from backroom sections)
+  const otherCharges =
+    (Number(applicant.videokeFee) || 0) +
+    (Number(applicant.cigarettes) || 0) +
+    (Number(applicant.liquor) || 0) +
+    (Number(applicant.billiards) || 0) +
+    (Number(applicant.deliveryVehicle) || 0) +
+    (Number(applicant.boardAndLogging) || 0);
+
   // This is a placeholder; map real fields like applicant.zoningFee, applicant.choFee, etc.
   const collections = [
+    { label: "Business Tax", amount: applicant.businessTaxFee || 0 },
+    { label: "Mayor's Permit", amount: applicant.mayorsPermit || 0 },
+    { label: "Occupational Tax", amount: applicant.occupationalTax || 0 },
+    { label: "Barangay Fee", amount: applicant.barangayFee || 0 },
+    { label: "Surcharge", amount: applicant.surcharge || 0 },
+    { label: "interest", amount: applicant.interest || 0 },
     { label: "Zoning Fee", amount: applicant.zoningFee || 0 },
     { label: "Sanitary Fee", amount: applicant.choFee || 0 },
     { label: "Solid Waste Fee", amount: applicant.csmwoFee || 0 },
     { label: "Environment Fee", amount: applicant.cenroFee || 0 },
-    // Add more as needed, e.g., { label: "Other Charge", amount: applicant.someOtherFee }
+    { label: "OBO", amount: oboTotal },
+    {
+      label: "Tin Plate/ Sticker Fee",
+      amount: applicant.tinplateStickerFee || 0,
+    },
+    { label: "Verification Fee", amount: applicant.verificationFee || 0 },
+    { label: "Veterinary Fee", amount: applicant.veterinaryFee || 0 },
+    { label: "Fixed Tax", amount: applicant.fixedTax || 0 },
+    { label: "Other Charges", amount: otherCharges },
+    { label: "FSIC", amount: applicant.fsicFee },
   ].filter((item) => item.amount > 0);
 
   const total = collections.reduce((sum, item) => sum + Number(item.amount), 0);
-  const otherChargesTotal = 0; // If you have separate other charges, calculate here
+  const otherChargesTotal = 0;
 
   const handlePassToBusinessTax = async () => {
     try {
@@ -308,10 +360,10 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
     <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle
         sx={{
-          backgroundColor: "#1d5236", // Requested Background Color
-          color: "white", // White text for contrast
-          textAlign: "center", // Center the text
-          py: 2, // Vertical padding
+          backgroundColor: "#1d5236",
+          color: "white",
+          textAlign: "center",
+          py: 2,
         }}
       >
         Applicant Details
@@ -384,9 +436,9 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
       <DialogContent dividers>
         {/* Business Info */}
         <Section title="Business Information">
-          <Field label="Status" value={applicant.status} />
+          <Field label="Status" value={applicant.BPLO} />
           <Field label="Mode of Payment" value={applicant.Modeofpayment} />
-          <Field label="ID" value={applicant.id} />
+          <Field label="BIN" value={applicant.bin} />
           <Field label="Business Type" value={applicant.BusinessType} />
           <Field label="DSC Registration No" value={applicant.dscRegNo} />
           <Field label="Business Name" value={applicant.businessName} />
@@ -658,9 +710,16 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
             fileData={applicant}
             baseUrl={baseUrl}
           />
+
+          <FileField
+            fileKey="RecentBusinessPermit"
+            label="Business Permit"
+            fileData={applicant}
+            baseUrl={baseUrl}
+          />
         </Section>
         {/* Backroom Section */}
-        {applicant.status !== "pending" && (
+        {applicant.BPLO === "Approved" && (
           <Section title="Backroom">
             <Stack spacing={2}>
               {/* ✅ Zoning */}
@@ -819,6 +878,56 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
             </Stack>
           </Section>
         )}
+
+        {applicant.passtoBusinessTax === "Done" && (
+          <>
+            <Section title={"Tax Order"}>
+              <FileField
+                fileKey="businesstaxComputation"
+                label="Tax Order"
+                fileData={applicant}
+                baseUrl={baseUrl}
+              />
+            </Section>
+          </>
+        )}
+        {applicant.permitRelease === "Yes" && (
+          <>
+            <>
+              {/* File Upload */}
+              {files.map((file) => (
+                <Grid container spacing={1} sx={{ mt: 1 }} key={file.name}>
+                  <Grid item>
+                    <Button
+                      variant="contained"
+                      component="label"
+                      size="small"
+                      color="success"
+                      sx={{ minWidth: 120 }}
+                    >
+                      Choose File
+                      <input
+                        type="file"
+                        name={file.name}
+                        hidden
+                        onChange={handleFileSelect}
+                      />
+                    </Button>
+                  </Grid>
+                  <Grid item xs>
+                    <TextField
+                      value={selectedFiles[file.name]?.name || ""}
+                      placeholder="No file selected"
+                      size="small"
+                      fullWidth
+                      InputProps={{ readOnly: true }}
+                    />
+                  </Grid>
+                </Grid>
+              ))}
+            </>
+          </>
+        )}
       </DialogContent>
 
       {/* ✅ Actions */}
@@ -847,6 +956,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
               collections={collections}
               total={total}
               otherChargesTotal={otherChargesTotal}
+              selectedFiles={selectedFiles}
             />
           </>
         ) : applicant.BPLO?.toLowerCase() !== "approved" ? (
