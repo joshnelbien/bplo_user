@@ -243,7 +243,7 @@ function NewApplicationPage() {
   const validateStep = () => {
     const newErrors = {};
     const requiredFields = {
-      1: ["BusinessType", "businessName", "tinNo", "TradeName"],
+      1: ["BusinessType", "businessName", "tinNo"],
       2: ["firstName", "lastName", "sex", "eMailAdd", "mobileNo"],
       3: [
         "region",
@@ -267,8 +267,6 @@ function NewApplicationPage() {
         "maleEmployee",
         "femaleEmployee",
       ],
-      // 6: ["lineOfBusiness", "productService", "Units", "capital"],
-      7: ["proofOfReg", "brgyClearance", "cedula"],
     };
 
     requiredFields[step]?.forEach((field) => {

@@ -177,6 +177,7 @@ function OboApplicantModal({
   const [declineReason, setDeclineReason] = useState("");
   const [selectedReason, setSelectedReason] = useState("");
   const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleToggleReason = (reason) => {
     setSelectedReason(selectedReason === reason ? "" : reason);
@@ -266,14 +267,18 @@ function OboApplicantModal({
   const handleApproveClick = () => {
     if (validateFields()) {
       setConfirmOpen(true);
+      setLoading(true);
     }
   };
+
   const handleConfirmClose = () => setConfirmOpen(false);
+
   const handleConfirmApprove = () => {
     setConfirmOpen(false);
     onApprove(applicant.id, oboFields);
     setSuccessOpen(true);
   };
+
   const handleSuccessClose = () => {
     setSuccessOpen(false);
     onClose();
@@ -693,8 +698,9 @@ function OboApplicantModal({
                 onClick={handleApproveClick}
                 variant="contained"
                 color="success"
+                disabled={loading}
               >
-                Approve
+                {loading ? "Processing..." : "Approve"}
               </Button>
 
               <Button

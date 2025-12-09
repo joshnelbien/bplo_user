@@ -34,36 +34,59 @@ import TopBar from "../NAVBAR/nav_bar.jsx";
 const TOP_BAR_HEIGHT = 80;
 
 /* ================== MODALS (unchanged) ================== */
-const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => (
-  <Modal open={isOpen} onClose={onClose}>
-    <Box
-      sx={{
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        width: { xs: 300, sm: 400 },
-        bgcolor: "background.paper",
-        borderRadius: 2,
-        boxShadow: 24,
-        p: 4,
-        textAlign: "center",
-      }}
-    >
-      <Typography variant="h6" mb={2}>
-        {message}
-      </Typography>
-      <Box display="flex" justifyContent="center" gap={2}>
-        <Button variant="contained" color="success" onClick={onConfirm}>
-          Yes
-        </Button>
-        <Button variant="outlined" onClick={onClose}>
-          No
-        </Button>
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    await onConfirm(); // run your process
+    setLoading(false); // remove loading if you want (or close modal inside onConfirm)
+  };
+
+  return (
+    <Modal open={isOpen} onClose={!loading ? onClose : null}>
+      <Box
+        sx={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: { xs: 300, sm: 400 },
+          bgcolor: "background.paper",
+          borderRadius: 2,
+          boxShadow: 24,
+          p: 4,
+          textAlign: "center",
+        }}
+      >
+        <Typography variant="h6" mb={2}>
+          {message}
+        </Typography>
+
+        <Box display="flex" justifyContent="center" gap={2}>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleConfirm}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <CircularProgress size={20} sx={{ mr: 1 }} /> Processing...
+              </>
+            ) : (
+              "Yes"
+            )}
+          </Button>
+
+          <Button variant="outlined" onClick={onClose} disabled={loading}>
+            No
+          </Button>
+        </Box>
       </Box>
-    </Box>
-  </Modal>
-);
+    </Modal>
+  );
+};
 
 const SuccessModal = ({ isOpen, onClose, message }) => (
   <Modal open={isOpen} onClose={onClose}>
@@ -168,6 +191,7 @@ function New_records() {
   /* ---- APPROVE ---- */
   const handleApprove = (applicant, businessDetails) => {
     setConfirmationData({ ...applicant, businessDetails });
+    // setIsModalOpen(false);
     setIsConfirmModalOpen(true);
   };
 
@@ -178,6 +202,7 @@ function New_records() {
         businessDetails: confirmationData.businessDetails,
       });
       setIsConfirmModalOpen(false);
+      setIsModalOpen(false);
       setIsSuccessModalOpen(true);
       fetchApplicants();
     } catch (e) {

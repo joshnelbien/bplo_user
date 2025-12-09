@@ -153,6 +153,7 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [updateModal, setUpdateModal] = useState(false);
   const [capitalValues, setCapitalValues] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (applicant?.capital) {
@@ -199,7 +200,9 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
 
   const handleConfirmApprove = () => {
     setConfirmDialogOpen(false);
+    setLoading(true);
     setSuccessDialogOpen(true);
+
     if (onApprove) {
       onApprove(applicant.id);
     }
@@ -525,13 +528,24 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
       {/* Confirm Approve Dialog */}
       <Dialog
         open={confirmDialogOpen}
-        onClose={() => setConfirmDialogOpen(false)}
+        onClose={() => !loading && setConfirmDialogOpen(false)}
       >
         <DialogTitle>Are you sure you want to approve?</DialogTitle>
         <DialogActions>
-          <Button onClick={() => setConfirmDialogOpen(false)}>No</Button>
-          <Button onClick={handleConfirmApprove} color="success" autoFocus>
-            Yes
+          <Button
+            onClick={() => setConfirmDialogOpen(false)}
+            disabled={loading}
+          >
+            No
+          </Button>
+
+          <Button
+            onClick={handleConfirmApprove}
+            color="success"
+            disabled={loading}
+            autoFocus
+          >
+            {loading ? "Processing..." : "Yes"}
           </Button>
         </DialogActions>
       </Dialog>

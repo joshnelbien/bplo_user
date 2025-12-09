@@ -137,10 +137,13 @@ export default function Step3AddressInfo({
   ];
 
   // Uppercase handler
-  const handleUppercaseChange = useCallback((e) => {
-    const value = (e.target.value || "").toUpperCase();
-    handleChange({ target: { name: e.target.name, value } });
-  }, [handleChange]);
+  const handleUppercaseChange = useCallback(
+    (e) => {
+      const value = (e.target.value || "").toUpperCase();
+      handleChange({ target: { name: e.target.name, value } });
+    },
+    [handleChange]
+  );
 
   // File selection handler
   const handleFileSelect = (e) => {
@@ -158,7 +161,12 @@ export default function Step3AddressInfo({
       debounce(async (barangay) => {
         if (!barangay) {
           setMapCenter(defaultPosition);
-          handleChange({ target: { name: "pinAddress", value: `${defaultPosition[0]},${defaultPosition[1]}` } });
+          handleChange({
+            target: {
+              name: "pinAddress",
+              value: `${defaultPosition[0]},${defaultPosition[1]}`,
+            },
+          });
           return;
         }
 
@@ -177,7 +185,9 @@ export default function Step3AddressInfo({
         // ✅ SECOND: Try API geocoding
         try {
           const fullQuery = `${barangay}, San Pablo City, Laguna, Philippines`;
-          const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullQuery)}`;
+          const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            fullQuery
+          )}`;
 
           const response = await axios.get(url, {
             headers: {
@@ -196,7 +206,10 @@ export default function Step3AddressInfo({
             // ✅ THIRD: Fallback to city center
             console.warn("⚠️ API returned no results for", barangay);
             handleChange({
-              target: { name: "pinAddress", value: `${defaultPosition[0]},${defaultPosition[1]}` },
+              target: {
+                name: "pinAddress",
+                value: `${defaultPosition[0]},${defaultPosition[1]}`,
+              },
             });
             setMapCenter(defaultPosition);
           }
@@ -204,7 +217,10 @@ export default function Step3AddressInfo({
           console.error("❌ Geocoding error for", barangay, ":", error);
           // Fallback to city center on error
           handleChange({
-            target: { name: "pinAddress", value: `${defaultPosition[0]},${defaultPosition[1]}` },
+            target: {
+              name: "pinAddress",
+              value: `${defaultPosition[0]},${defaultPosition[1]}`,
+            },
           });
           setMapCenter(defaultPosition);
         }

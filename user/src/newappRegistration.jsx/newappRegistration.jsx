@@ -114,7 +114,7 @@ function NewApplicationRegisterPage() {
     const newErrors = {};
 
     const requiredFields = {
-      1: ["BusinessType", "businessName", "tinNo", "TradeName"],
+      1: ["BusinessType", "businessName", "tinNo"],
       2: ["firstName", "lastName", "sex", "email", "mobileNo"],
     };
 

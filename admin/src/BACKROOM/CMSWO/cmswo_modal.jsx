@@ -182,6 +182,7 @@ function CmswoApplicantModal({
   const [selectedFiles, setSelectedFiles] = useState({});
   const [selectedReasons, setSelectedReasons] = useState([]);
   const [generatingPDF, setGeneratingPDF] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Ref to access hidden certificate
   const certRef = useRef();
@@ -247,6 +248,7 @@ function CmswoApplicantModal({
   const handleConfirmApprove = () => {
     setConfirmApproveOpen(false);
     onApprove(applicant.id, csmwoFee, selectedFiles);
+    setLoading(true);
     setSuccessOpen(true);
   };
 
@@ -744,7 +746,7 @@ function CmswoApplicantModal({
               "&:hover": { bgcolor: "#155a1b" },
             }}
           >
-            Yes
+            {loading ? "Processing..." : "Approve"}
           </Button>
           <Button
             onClick={handleConfirmClose}

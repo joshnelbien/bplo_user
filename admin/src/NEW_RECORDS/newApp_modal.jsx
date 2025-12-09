@@ -604,13 +604,11 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
                       <TextField
                         label="FSIC"
                         select
+                        readOnly
                         fullWidth
                         size="small"
                         SelectProps={{ native: true }}
                         value={cleanedLOB.toUpperCase()}
-                        onChange={(e) =>
-                          handleIndustryChange(index, e.target.value)
-                        }
                       >
                         <option value="">-- Select Business Line --</option>
                         {fsicData.map((item, i) => (
