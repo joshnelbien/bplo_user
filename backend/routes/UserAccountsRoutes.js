@@ -12,25 +12,6 @@ dotenv.config();
 /* ---------------------------------------------------
  ✅ SendGrid setup
 --------------------------------------------------- */
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-async function sendEmail(to, subject, html) {
-  const msg = {
-    to,
-    from: process.env.SENDGRID_FROM, // MUST be a verified sender
-    subject,
-    html,
-  };
-
-  try {
-    const [response] = await sgMail.send(msg); // Get SendGrid response
-    console.log(`📧 Email request sent to SendGrid for ${to}`);
-    console.log(`Status Code: ${response.statusCode}`);
-    console.log("Headers:", response.headers);
-  } catch (err) {
-    console.error("❌ SendGrid email error (non-blocking):", err);
-  }
-}
 
 const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID;
 const EMAILJS_TEMPLATE_ID = process.env.EMAILJS_TEMPLATE_ID;
@@ -111,6 +92,7 @@ router.post("/register", async (req, res) => {
     const templateParams = {
       to_name: `${firstName} ${lastName}`,
       to_email: email,
+      type: "New",
       application_link: `${process.env.VITE_API_BASE}/newApplicationPage/${user.id}`,
     };
 
@@ -176,22 +158,14 @@ router.post("/register-renew", async (req, res) => {
       user,
     });
 
-    // Send confirmation email asynchronously
-    const htmlContent = `
-  <p>Hello <b>${firstName} ${lastName}</b>,</p>
-  <p>We are pleased to inform you that you may now proceed with your <b>Business Renewal Application.</b></p>
-  <p>Please click the link below to continue with your application process:</p>
-  <a href="${process.env.VITE_API_BASE}/renewPage/${user.id}/${user.bin}"
-     style="display:inline-block; padding:10px 16px; background-color:#144C22; color:white; 
-            text-decoration:none; border-radius:4px; font-weight:bold;">
-    View Application
-  </a>
-  <p>Should you have any questions or require further assistance, please do not hesitate to contact us.</p>
-  <br/><br/>
-  <p>Kind regards,<br/><b>Business Portal Team</b></p>
-`;
+    const templateParams = {
+      to_name: `${firstName} ${lastName}`,
+      to_email: email,
+      type: "Renew",
+      application_link: `${process.env.VITE_API_BASE}/renewPage/${user.id}/${user.bin}`,
+    };
 
-    sendEmail(email, "Renew Business Application", htmlContent);
+    sendEmailJS(templateParams);
   } catch (error) {
     console.error("❌ Register error:", error);
     res.status(500).json({ error: "Server error during registration." });
