@@ -5,6 +5,10 @@ const sgMail = require("@sendgrid/mail");
 const BusinessProfile = require("../db/model/businessProfileDB");
 const router = express.Router();
 const sendBusinessProfileCSV = require("./sendBusinessProfileCSV");
+const dotenv = require("dotenv");
+const axios = require("axios");
+dotenv.config();
+
 /* ---------------------------------------------------
  ✅ SendGrid setup
 --------------------------------------------------- */
@@ -25,6 +29,26 @@ async function sendEmail(to, subject, html) {
     console.log("Headers:", response.headers);
   } catch (err) {
     console.error("❌ SendGrid email error (non-blocking):", err);
+  }
+}
+
+const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID;
+const EMAILJS_TEMPLATE_ID = process.env.EMAILJS_TEMPLATE_ID;
+const EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY; // optional
+const EMAILJS_PRIVATE_KEY = process.env.EMAILJS_PRIVATE_KEY; // required
+
+async function sendEmailJS(templateParams) {
+  try {
+    await axios.post("https://api.emailjs.com/api/v1.0/email/send", {
+      service_id: EMAILJS_SERVICE_ID,
+      template_id: EMAILJS_TEMPLATE_ID,
+      user_id: EMAILJS_PUBLIC_KEY, // optional
+      accessToken: EMAILJS_PRIVATE_KEY, // required
+      template_params: templateParams,
+    });
+    console.log(`✅ Email sent`);
+  } catch (err) {
+    console.error("❌ EmailJS error:", err.response?.data || err.message);
   }
 }
 
@@ -83,20 +107,15 @@ router.post("/register", async (req, res) => {
       user,
     });
 
-    const htmlContent = `
-  <p>Hello <b>${firstName} ${lastName}</b>,</p>
-  <p>We are pleased to inform you that you may now proceed with your <b>New Business Application.</b></p>
-  <p>Please click the link below to continue with your application process:</p>
-  <a href="${process.env.VITE_API_BASE}/newApplicationPage/${user.id}"
-     style="display:inline-block; padding:10px 16px; background-color:#144C22; color:white; 
-            text-decoration:none; border-radius:4px; font-weight:bold;">
-    View Application
-  </a>
-  <p>Should you have any questions or require further assistance, please do not hesitate to contact us.</p>
-  <br/><br/>
-  <p>Kind regards,<br/><b>Business Portal Team</b></p>
-`;
-    sendEmail(email, "Business Application", htmlContent);
+    // EmailJS template parameters
+    const templateParams = {
+      to_name: `${firstName} ${lastName}`,
+      to_email: email,
+      application_link: `${process.env.VITE_API_BASE}/newApplicationPage/${user.id}`,
+    };
+
+    // Send email asynchronously
+    sendEmailJS(templateParams);
   } catch (error) {
     console.error("❌ Register error:", error);
     res.status(500).json({ error: "Server error during registration." });
