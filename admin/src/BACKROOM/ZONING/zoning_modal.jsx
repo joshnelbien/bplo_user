@@ -687,15 +687,16 @@ function ZoningApplicantModal({
           {!showCert && (
             <>
               {/* ✅ Show Approve ONLY if status is Declined */}
-              {applicant.ZONING === "Declined" && (
-                <Button
-                  onClick={handleApproveClick}
-                  variant="contained"
-                  color="success"
-                >
-                  Approve
-                </Button>
-              )}
+              {applicant.ZONING === "Declined" ||
+                ("Pending" && (
+                  <Button
+                    onClick={handleApproveClick}
+                    variant="contained"
+                    color="success"
+                  >
+                    Approve
+                  </Button>
+                ))}
 
               {/* HOLD button (optional condition if you want) */}
               {applicant.ZONING !== "Approved" && (

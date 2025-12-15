@@ -172,7 +172,80 @@ router.post(
 
 router.get("/files", async (req, res) => {
   try {
-    const files = await File.findAll();
+    const { id, field } = req.query;
+
+    // ===============================
+    // 1️⃣ DOWNLOAD / VIEW FILE
+    // ===============================
+    if (id && field) {
+      const allowedFields = [
+        "tIGEfiles",
+        "proofOfReg",
+        "RecentBusinessPermit",
+        "proofOfRightToUseLoc",
+        "locationPlan",
+        "brgyClearance",
+        "marketClearance",
+        "occupancyPermit",
+        "cedula",
+        "photoOfBusinessEstInt",
+        "photoOfBusinessEstExt",
+        "cswmoCert",
+        "choCert",
+        "cenroCert",
+        "zoningCert",
+        "businesstaxComputation",
+        "businessPermit",
+      ];
+
+      if (!allowedFields.includes(field)) {
+        return res.status(400).json({ message: "Invalid file field" });
+      }
+
+      const record = await File.findByPk(id, {
+        attributes: [field, `${field}_filename`, `${field}_mimetype`],
+      });
+
+      if (!record || !record[field]) {
+        return res.sendStatus(404);
+      }
+
+      res.setHeader(
+        "Content-Type",
+        record[`${field}_mimetype`] || "application/octet-stream"
+      );
+      res.setHeader(
+        "Content-Disposition",
+        `inline; filename="${record[`${field}_filename`] || field}"`
+      );
+
+      return res.send(record[field]);
+    }
+
+    const files = await File.findAll({
+      attributes: {
+        exclude: [
+          "tIGEfiles",
+          "proofOfReg",
+          "RecentBusinessPermit",
+          "proofOfRightToUseLoc",
+          "locationPlan",
+          "brgyClearance",
+          "marketClearance",
+          "occupancyPermit",
+          "cedula",
+          "photoOfBusinessEstInt",
+          "photoOfBusinessEstExt",
+          "cswmoCert",
+          "choCert",
+          "cenroCert",
+          "zoningCert",
+          "businesstaxComputation",
+          "businessPermit",
+        ],
+      },
+    });
+
     res.json(files);
   } catch (err) {
     console.error(err);
