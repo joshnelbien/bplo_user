@@ -561,55 +561,56 @@ function ZoningApplicantModal({
                 </>
               )}
 
-              {applicant.ZONING === "Pending" && (
-                <>
-                  {applicant.application === "Renew" && (
-                    <>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={
-                              renewZoningFee === "0" || renewZoningFee === 0
-                            }
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                handleChange("renewZoningFee", "0");
-                              } else {
-                                handleChange("renewZoningFee", "");
+              {applicant.ZONING === "Pending" ||
+                ("Declined" && (
+                  <>
+                    {applicant.application === "Renew" && (
+                      <>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={
+                                renewZoningFee === "0" || renewZoningFee === 0
                               }
-                            }}
-                          />
-                        }
-                        label="Exempt Zoning Fee"
-                        sx={{ mt: 2 }}
-                      />
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  handleChange("renewZoningFee", "0");
+                                } else {
+                                  handleChange("renewZoningFee", "");
+                                }
+                              }}
+                            />
+                          }
+                          label="Exempt Zoning Fee"
+                          sx={{ mt: 2 }}
+                        />
 
-                      <TextField
-                        label="Zoning Fee"
-                        type="text" // <- change this
-                        value={formatCurrency(renewZoningFee)}
-                        onChange={(e) => {
-                          const rawValue = e.target.value.replace(/,/g, ""); // remove commas
-                          handleChange("renewZoningFee", rawValue);
-                        }}
-                        fullWidth
-                        size="small"
-                        required
-                        error={feeError}
-                        helperText={
-                          feeError &&
-                          "Solid Waste Fee is required for approval."
-                        }
-                        disabled={
-                          renewZoningFee === "0" || renewZoningFee === 0
-                        }
-                      />
-                    </>
-                  )}
-                </>
-              )}
+                        <TextField
+                          label="Zoning Fee"
+                          type="text" // <- change this
+                          value={formatCurrency(renewZoningFee)}
+                          onChange={(e) => {
+                            const rawValue = e.target.value.replace(/,/g, ""); // remove commas
+                            handleChange("renewZoningFee", rawValue);
+                          }}
+                          fullWidth
+                          size="small"
+                          required
+                          error={feeError}
+                          helperText={
+                            feeError &&
+                            "Solid Waste Fee is required for approval."
+                          }
+                          disabled={
+                            renewZoningFee === "0" || renewZoningFee === 0
+                          }
+                        />
+                      </>
+                    )}
+                  </>
+                ))}
 
-              {applicant.ZONING === "Pending" ? (
+              {applicant.ZONING === "Pending" || "Declined" ? (
                 // ✅ Show upload fields
                 <Stack spacing={3}>
                   {files.map((file) => (
@@ -681,35 +682,36 @@ function ZoningApplicantModal({
           >
             Close
           </Button>
-          {/* Only show Approve/Decline if not yet approved and not viewing cert */}
-          {!showCert && applicant.ZONING !== "Approved" && (
+
+          {/* Buttons only if not viewing certificate */}
+          {!showCert && (
             <>
-              {applicant.ZONING !== "Approved" && (
-                <>
-                  <Button
-                    onClick={handleApproveClick}
-                    variant="contained"
-                    color="success"
-                  >
-                    Approve
-                  </Button>
-                </>
+              {/* ✅ Show Approve ONLY if status is Declined */}
+              {applicant.ZONING === "Declined" && (
+                <Button
+                  onClick={handleApproveClick}
+                  variant="contained"
+                  color="success"
+                >
+                  Approve
+                </Button>
               )}
-              <Button
-                onClick={handleDeclineClick}
-                variant="contained"
-                color="error"
-                sx={{
-                  color: "white",
-                  width: "100px",
-                }}
-              >
-                HOLD
-              </Button>
+
+              {/* HOLD button (optional condition if you want) */}
+              {applicant.ZONING !== "Approved" && (
+                <Button
+                  onClick={handleDeclineClick}
+                  variant="contained"
+                  color="error"
+                  sx={{ color: "white", width: "100px" }}
+                >
+                  HOLD
+                </Button>
+              )}
             </>
           )}
 
-          {/* ✅ Only allow Generate Certificate if pending */}
+          {/* Generate / Back button */}
           {!showCert && applicant.ZONING !== "Approved" ? (
             <Button
               variant="contained"
