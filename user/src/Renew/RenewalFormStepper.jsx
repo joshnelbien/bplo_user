@@ -6,6 +6,7 @@ import {
   StepLabel,
   Stepper,
   Typography,
+  CircularProgress,
 } from "@mui/material";
 import { useState } from "react";
 import Step1BusinessInfo from "./components/Step1";
@@ -20,7 +21,6 @@ export default function RenewalFormStepper() {
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_BASE;
 
-  // ✅ Grab record data passed from Renewal.jsx
   const record = location.state?.record;
   if (!record) {
     return (
@@ -30,11 +30,7 @@ export default function RenewalFormStepper() {
     );
   }
 
-  // ✅ Initialize form data from matched record
-  const [formData, setFormData] = useState({
-    ...record,
-  });
-
+  const [formData, setFormData] = useState({ ...record });
   const [errors, setErrors] = useState({});
   const [activeStep, setActiveStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
@@ -43,12 +39,40 @@ export default function RenewalFormStepper() {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  // ✅ Handle Finish / Submit
+  const validateStep1 = () => {
+    const newErrors = {};
+    if (!formData.bin) newErrors.bin = "BIN is required";
+    if (!formData.business_name)
+      newErrors.business_name = "Business Name is required";
+    if (!formData.business_type)
+      newErrors.business_type = "Business Type is required";
+    if (!formData.tin_no) newErrors.tin_no = "TIN is required";
+    if (!formData.dscRegNo) newErrors.dscRegNo = "Registration No. is required";
+    return newErrors;
+  };
+
+  const validateStep2 = () => {
+    const newErrors = {};
+    if (!formData.incharge_first_name)
+      newErrors.incharge_first_name = "First Name is required";
+    if (!formData.incharge_middle_name)
+      newErrors.incharge_middle_name = "Middle Name is required";
+    if (!formData.incharge_last_name)
+      newErrors.incharge_last_name = "Last Name is required";
+    if (!formData.incharge_sex) newErrors.incharge_sex = "Gender is required";
+    if (!formData.email_address) newErrors.email_address = "Email is required";
+    if (!formData.cellphone_no)
+      newErrors.cellphone_no = "Mobile No. is required";
+    return newErrors;
+  };
+
   const handleSubmit = async () => {
     try {
       setSubmitting(true);
 
-      // 📝 Prepare clean payload (map fields to backend)
+      // Ensure at least 2 seconds
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       const payload = {
         bin: formData.bin,
         firstName: formData.incharge_first_name,
@@ -80,12 +104,18 @@ export default function RenewalFormStepper() {
     }
   };
 
-  // ✅ Handle Step navigation
   const handleNext = () => {
-    if (activeStep === steps.length - 1) {
-      handleSubmit(); // 🚀 Call submit on Finish
+    let stepErrors = {};
+    if (activeStep === 0) stepErrors = validateStep1();
+    else if (activeStep === 1) stepErrors = validateStep2();
+
+    setErrors(stepErrors);
+
+    if (Object.keys(stepErrors).length === 0) {
+      if (activeStep === steps.length - 1) handleSubmit();
+      else setActiveStep((prev) => prev + 1);
     } else {
-      setActiveStep((prev) => prev + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -94,7 +124,33 @@ export default function RenewalFormStepper() {
   };
 
   return (
-    <Box sx={{ width: "100%", maxWidth: 800, mx: "auto", p: 4 }}>
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: 800,
+        mx: "auto",
+        p: 4,
+        position: "relative",
+      }}
+    >
+      {/* Grayscale overlay */}
+      {submitting && (
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            backgroundColor: "rgba(255,255,255,0.7)",
+            backdropFilter: "grayscale(100%)",
+            zIndex: 1000,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <CircularProgress size={80} />
+        </Box>
+      )}
+
       <Stepper activeStep={activeStep} alternativeLabel>
         {steps.map((label) => (
           <Step key={label}>

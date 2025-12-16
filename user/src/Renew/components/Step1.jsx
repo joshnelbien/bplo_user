@@ -1,16 +1,18 @@
 import { MenuItem, Stack, TextField, Typography } from "@mui/material";
+import { useMemo } from "react";
 
 export default function Step1BusinessInfo({ formData, handleChange, errors }) {
   const regLabelMap = {
-    "Sole Proprietorship": "DTI Registration No.",
-    Corporation: "SEC Registration No.",
-    "One Person Corporation": "SEC Registration No.",
-    Partnership: "SEC Registration No.",
-    Cooperative: "CDA Registration No.",
+    "SOLE PROPRIETORSHIP": "DTI Registration No.",
+    CORPORATION: "SEC Registration No.",
+    "ONE PERSON CORPORATION": "SEC Registration No.",
+    PARTNERSHIP: "SEC Registration No.",
+    COOPERATIVE: "CDA Registration No.",
   };
 
-  const regLabel = regLabelMap[formData.BusinessType] || "Registration No.";
-
+  const regLabel = useMemo(() => {
+    return regLabelMap[formData.business_type] || "Registration No.";
+  }, [formData.business_type]);
   // ✅ Convert text to uppercase before saving
   const handleUppercaseChange = (e) => {
     const value = (e.target.value || "").toUpperCase();
@@ -109,7 +111,7 @@ export default function Step1BusinessInfo({ formData, handleChange, errors }) {
         />
 
         <TextField
-          label={regLabel}
+          label={regLabelMap[formData.business_type] || "Registration No."}
           name="dscRegNo"
           value={formData.dscRegNo || ""}
           onChange={handleUppercaseChange}
@@ -122,16 +124,13 @@ export default function Step1BusinessInfo({ formData, handleChange, errors }) {
         {/* Trade Name */}
 
         <TextField
-          label="Trade Name"
+          label="Trade Name (optional)"
           name="trade_name"
           value={formData.trade_name || ""}
           onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
-          // Add error props
-          error={!!errors.trade_name}
-          helperText={errors.trade_name}
         />
       </Stack>
     </div>

@@ -89,14 +89,14 @@ export default function Step2PersonalInfo({
 
         {/* Ext. Name */}
         <TextField
-          label="Ext. Name"
+          label="Ext. Name (optional)"
           name="incharge_extension_name"
           value={formData.incharge_extension_name || ""}
           onChange={handleUppercaseChange}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
-          error={!!errors.incharge_extension_name}
+          error={!!errors.incharge_extension_name} // only shows red if you set an error
           helperText={errors.incharge_extension_name}
         />
 
@@ -169,14 +169,14 @@ export default function Step2PersonalInfo({
 
         {/* Telephone No. */}
         <TextField
-          label="Telephone No."
+          label="Telephone No. (optional)"
           name="telephone_no"
           value={formData.telephone_no || ""}
           onChange={handleTelNumberInput}
           fullWidth
           variant="outlined"
           sx={{ minWidth: 300 }}
-          error={!!errors.telephone_no}
+          error={!!errors.telephone_no} // only shows red if you set an error
           helperText={errors.telephone_no}
         />
 
