@@ -32,13 +32,15 @@ router.get("/businessProfiles", async (req, res) => {
 
     const offset = (page - 1) * limit;
 
-    // Accent-insensitive, partial match, relevance order
+    // Exact match ignoring accents
     const whereClause = search
-      ? Sequelize.literal(
-          `unaccent("business_name") ILIKE unaccent('%${search.replace(
-            /'/g,
-            "''"
-          )}%')`
+      ? Sequelize.where(
+          Sequelize.fn("unaccent", Sequelize.col("business_name")),
+          {
+            [Sequelize.Op.iLike]: search
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, ""),
+          }
         )
       : {};
 
@@ -55,19 +57,7 @@ router.get("/businessProfiles", async (req, res) => {
       where: whereClause,
       limit: parseInt(limit),
       offset: parseInt(offset),
-      order: Sequelize.literal(`
-        CASE
-          WHEN unaccent("business_name") ILIKE unaccent('${search.replace(
-            /'/g,
-            "''"
-          )}') THEN 1
-          WHEN unaccent("business_name") ILIKE unaccent('${search.replace(
-            /'/g,
-            "''"
-          )}%') THEN 2
-          ELSE 3
-        END, "business_name" ASC
-      `),
+      order: [["business_name", "ASC"]],
     });
 
     return res.json({ rows, total });
