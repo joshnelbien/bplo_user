@@ -1,11 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Businesses_2025 = require("../db/model/businesses2025");
-const { Op } = require("sequelize");
+const { Op, Sequelize } = require("sequelize");
 const axios = require("axios");
 
 const GOOGLE_SECRET = process.env.RECAPTCHA_SECRET_KEY;
-
 let captchaPassedSessions = new Set();
 
 router.get("/businessProfiles", async (req, res) => {
@@ -28,13 +27,20 @@ router.get("/businessProfiles", async (req, res) => {
           .status(400)
           .json({ message: "Captcha verification failed." });
 
-      captchaPassedSessions.add(sessionId); // mark session as verified
+      captchaPassedSessions.add(sessionId);
     }
 
     const offset = (page - 1) * limit;
 
-    // Exact match (case-insensitive)
-    const whereClause = search ? { business_name: { [Op.iLike]: search } } : {};
+    // Accent-insensitive, partial match, relevance order
+    const whereClause = search
+      ? Sequelize.literal(
+          `unaccent("business_name") ILIKE unaccent('%${search.replace(
+            /'/g,
+            "''"
+          )}%')`
+        )
+      : {};
 
     const total = await Businesses_2025.count({ where: whereClause });
     const rows = await Businesses_2025.findAll({
@@ -49,12 +55,24 @@ router.get("/businessProfiles", async (req, res) => {
       where: whereClause,
       limit: parseInt(limit),
       offset: parseInt(offset),
-      order: [["business_name", "ASC"]],
+      order: Sequelize.literal(`
+        CASE
+          WHEN unaccent("business_name") ILIKE unaccent('${search.replace(
+            /'/g,
+            "''"
+          )}') THEN 1
+          WHEN unaccent("business_name") ILIKE unaccent('${search.replace(
+            /'/g,
+            "''"
+          )}%') THEN 2
+          ELSE 3
+        END, "business_name" ASC
+      `),
     });
 
     return res.json({ rows, total });
   } catch (err) {
-    console.error("Captcha Search Error:", err);
+    console.error("Business search error:", err);
     return res.status(500).json({ message: "Server error" });
   }
 });
