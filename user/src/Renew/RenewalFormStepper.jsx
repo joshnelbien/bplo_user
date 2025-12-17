@@ -12,10 +12,16 @@ import { useState } from "react";
 import Step1BusinessInfo from "./components/Step1";
 import Step2PersonalInfo from "./components/Step2";
 import axios from "axios";
+import SuccessModals from "../modals/successModals";
 
 const steps = ["Business Information", "Personal Information"];
 
 export default function RenewalFormStepper() {
+  // 🔹 MODAL STATE
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -70,7 +76,7 @@ export default function RenewalFormStepper() {
     try {
       setSubmitting(true);
 
-      // Ensure at least 2 seconds
+      // simulate delay
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const payload = {
@@ -94,11 +100,15 @@ export default function RenewalFormStepper() {
 
       await axios.post(`${API}/userAccounts/register-renew`, payload);
 
-      alert("✅ Renewal registration successful!");
-      navigate("/"); // redirect after successful submission
+      // ✅ SHOW SUCCESS MODAL
+      setModalMessage("Renewal registration successful!");
+      setSuccessOpen(true);
     } catch (error) {
       console.error("❌ Renewal submission failed:", error);
-      alert("Failed to submit renewal. Please try again.");
+
+      // ❌ SHOW ERROR MODAL
+      setModalMessage("Failed to submit renewal. Please try again.");
+      setErrorOpen(true);
     } finally {
       setSubmitting(false);
     }
@@ -123,77 +133,102 @@ export default function RenewalFormStepper() {
     setActiveStep((prev) => prev - 1);
   };
 
+  const handleSuccessClose = () => {
+    setSuccessOpen(false);
+    navigate("/");
+  };
+
+  const handleErrorClose = () => {
+    setErrorOpen(false);
+  };
+
   return (
-    <Box
-      sx={{
-        width: "100%",
-        maxWidth: 800,
-        mx: "auto",
-        p: 4,
-        position: "relative",
-      }}
-    >
-      {/* Grayscale overlay */}
-      {submitting && (
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            backgroundColor: "rgba(255,255,255,0.7)",
-            backdropFilter: "grayscale(100%)",
-            zIndex: 1000,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <CircularProgress size={80} />
+    <>
+      {/* ✅ SUCCESS MODAL */}
+      <SuccessModals
+        open={successOpen}
+        onClose={handleSuccessClose}
+        message={modalMessage}
+      />
+
+      {/* ❌ ERROR MODAL (temporary reuse) */}
+      <SuccessModals
+        open={errorOpen}
+        onClose={handleErrorClose}
+        message={modalMessage}
+      />
+
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: 800,
+          mx: "auto",
+          p: 4,
+          position: "relative",
+        }}
+      >
+        {/* SUBMIT OVERLAY */}
+        {submitting && (
+          <Box
+            sx={{
+              position: "absolute",
+              inset: 0,
+              backgroundColor: "rgba(255,255,255,0.7)",
+              backdropFilter: "grayscale(100%)",
+              zIndex: 1000,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <CircularProgress size={80} />
+          </Box>
+        )}
+
+        <Stepper activeStep={activeStep} alternativeLabel>
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+
+        <Box mt={4}>
+          {activeStep === 0 && (
+            <Step1BusinessInfo
+              formData={formData}
+              handleChange={handleChange}
+              errors={errors}
+            />
+          )}
+          {activeStep === 1 && (
+            <Step2PersonalInfo
+              formData={formData}
+              handleChange={handleChange}
+              errors={errors}
+              setErrors={setErrors}
+            />
+          )}
         </Box>
-      )}
 
-      <Stepper activeStep={activeStep} alternativeLabel>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-
-      <Box mt={4}>
-        {activeStep === 0 && (
-          <Step1BusinessInfo
-            formData={formData}
-            handleChange={handleChange}
-            errors={errors}
-          />
-        )}
-        {activeStep === 1 && (
-          <Step2PersonalInfo
-            formData={formData}
-            handleChange={handleChange}
-            errors={errors}
-            setErrors={setErrors}
-          />
-        )}
+        <Box display="flex" justifyContent="space-between" mt={4}>
+          <Button
+            disabled={activeStep === 0 || submitting}
+            onClick={handleBack}
+            variant="outlined"
+          >
+            Back
+          </Button>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleNext}
+            disabled={submitting}
+          >
+            {activeStep === steps.length - 1 ? "Finish" : "Next"}
+          </Button>
+        </Box>
       </Box>
-
-      <Box display="flex" justifyContent="space-between" mt={4}>
-        <Button
-          disabled={activeStep === 0 || submitting}
-          onClick={handleBack}
-          variant="outlined"
-        >
-          Back
-        </Button>
-        <Button
-          variant="contained"
-          color="success"
-          onClick={handleNext}
-          disabled={submitting}
-        >
-          {activeStep === steps.length - 1 ? "Finish" : "Next"}
-        </Button>
-      </Box>
-    </Box>
+    </>
   );
 }
