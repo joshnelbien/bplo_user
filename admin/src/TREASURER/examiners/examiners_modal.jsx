@@ -201,13 +201,18 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
   const handleConfirmApprove = () => {
     setConfirmDialogOpen(false);
     setLoading(true);
+
+    // Optimistically update applicant status
+    applicant.Examiners = "Approved"; // <-- add this
     setSuccessDialogOpen(true);
 
     if (onApprove) {
       onApprove(applicant.id);
     }
+
     setTimeout(() => {
       setSuccessDialogOpen(false);
+      setLoading(false);
       onClose();
     }, 2000);
   };
