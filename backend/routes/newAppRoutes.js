@@ -253,6 +253,61 @@ router.get("/files", async (req, res) => {
   }
 });
 
+router.get("/applications/:id/file/:field", async (req, res) => {
+  try {
+    const { id, field } = req.params;
+
+    const fileFields = [
+      "proofOfReg",
+      "RecentBusinessPermit",
+      "tIGEfiles",
+      "locationPlan",
+      "brgyClearance",
+      "marketClearance",
+      "occupancyPermit",
+      "cedula",
+      "photoOfBusinessEstInt",
+      "photoOfBusinessEstExt",
+      "cswmoCert",
+      "choCert",
+      "cenroCert",
+      "zoningCert",
+      "businesstaxComputation",
+      "businessPermit",
+      "proofOfRightToUseLoc", // <-- add this
+    ];
+
+    if (!fileFields.includes(field)) {
+      return res.status(400).json({ message: "Invalid file field" });
+    }
+
+    const record = await File.findOne({
+      where: { id },
+      attributes: [
+        field,
+        `${field}_filename`,
+        `${field}_mimetype`,
+        `${field}_size`,
+      ],
+    });
+
+    if (!record || !record[field]) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    res.setHeader("Content-Type", record[`${field}_mimetype`]);
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="${record[`${field}_filename`]}"`
+    );
+
+    res.send(record[field]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 router.get("/application-counts", async (req, res) => {
   try {
     // Total applications

@@ -439,14 +439,14 @@ function New_records() {
         applicant={selectedApplicant}
         isOpen={isModalOpen}
         onApprove={handleApprove}
-        baseUrl={`${API}/newApplication/files`}
+        baseUrl={`${API}/newApplication`}
         onClose={closeModal}
       />
       <UpdateModal
         applicant={updateApplicant}
         isOpen={isUpdateModalOpen}
         onClose={closeUpdateModal}
-        baseUrl={`${API}/newApplication/files`}
+        baseUrl={`${API}/newApplication`}
       />
       <ConfirmationModal
         isOpen={isConfirmModalOpen}

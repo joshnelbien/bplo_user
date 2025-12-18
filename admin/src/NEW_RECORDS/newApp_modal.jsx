@@ -105,71 +105,69 @@ const EditableField = ({ label, value, onChange }) => (
 );
 
 // ✅ Component to display files as links
-const FileField = ({ label, fileKey, fileData, baseUrl }) => (
-  <Grid item xs={12} sm={6}>
-    <TextField
-      label={label}
-      value={
-        fileData[fileKey] ? fileData[`${fileKey}_filename`] : "No file uploaded"
-      }
-      fullWidth
-      variant="outlined"
-      size="small"
-      InputProps={{
-        sx: {
-          color: "black",
-          "& .MuiInputBase-input.Mui-disabled": {
-            WebkitTextFillColor: "black",
+const FileField = ({ label, fileKey, fileData, baseUrl }) => {
+  const fileVal = fileData[fileKey];
+  const fileNameFromBackend = fileData[`${fileKey}_filename`];
+  const fileNameFromPath =
+    typeof fileVal === "string" && fileVal ? fileVal.split("/").pop() : "";
+  const fileName =
+    fileNameFromBackend || fileNameFromPath || "No file uploaded";
+
+  const fileExists = !!fileVal || !!fileNameFromBackend;
+
+  const fileUrl = fileExists
+    ? `${baseUrl}/applications/${fileData.id}/file/${fileKey}`
+    : null;
+  const downloadUrl = fileExists ? `${fileUrl}?download=true` : null;
+
+  const handleClick = (url) => {
+    if (!url) {
+      alert("❌ No file uploaded yet");
+      return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <Grid item xs={12} sm={6}>
+      <TextField
+        label={label}
+        value={fileName}
+        fullWidth
+        variant="outlined"
+        size="small"
+        disabled
+        InputProps={{
+          sx: {
+            color: "black",
+            "& .MuiInputBase-input.Mui-disabled": {
+              WebkitTextFillColor: "black",
+            },
+            "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
+            "&.Mui-disabled .MuiOutlinedInput-notchedOutline": {
+              borderColor: "black",
+            },
           },
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "black",
-          },
-          "&.Mui-disabled .MuiOutlinedInput-notchedOutline": {
-            borderColor: "black",
-          },
-        },
-      }}
-      InputLabelProps={{
-        sx: {
-          color: "black",
-          "&.Mui-disabled": { color: "black" },
-        },
-      }}
-    />
-    {fileData[fileKey] && (
-      <Typography
-        variant="body2"
-        sx={{ mt: 0.5, display: "flex", gap: 1, alignItems: "center" }}
-      >
-        <Tooltip title="View File">
-          <IconButton
-            size="small"
-            component="a"
-            href={`${baseUrl}/${fileData.id}/${fileKey}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Typography component="span">view</Typography>
+        }}
+        InputLabelProps={{
+          sx: { color: "black", "&.Mui-disabled": { color: "black" } },
+        }}
+      />
+      <Stack direction="row" spacing={1} mt={1}>
+        <Tooltip title={fileExists ? "View File" : "No file available"}>
+          <IconButton size="small" onClick={() => handleClick(fileUrl)}>
             <VisibilityIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-
-        <Tooltip title="Download File">
-          <IconButton
-            size="small"
-            component="a"
-            href={`${baseUrl}/${fileData.id}/${fileKey}/download`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Typography component="span">download</Typography>
+        <Tooltip title={fileExists ? "Download File" : "No file available"}>
+          <IconButton size="small" onClick={() => handleClick(downloadUrl)}>
             <DownloadIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-      </Typography>
-    )}
-  </Grid>
-);
+      </Stack>
+    </Grid>
+  );
+};
 
 const formatForDatabase = (arr) => {
   return arr.map((val) => `"${val || ""}"`).join(",");
