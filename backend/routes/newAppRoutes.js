@@ -256,6 +256,7 @@ router.get("/files", async (req, res) => {
 router.get("/applications/:id/file/:field", async (req, res) => {
   try {
     const { id, field } = req.params;
+    const download = req.query.download === "true";
 
     const fileFields = [
       "proofOfReg",
@@ -274,7 +275,7 @@ router.get("/applications/:id/file/:field", async (req, res) => {
       "zoningCert",
       "businesstaxComputation",
       "businessPermit",
-      "proofOfRightToUseLoc", // <-- add this
+      "proofOfRightToUseLoc",
     ];
 
     if (!fileFields.includes(field)) {
@@ -298,7 +299,9 @@ router.get("/applications/:id/file/:field", async (req, res) => {
     res.setHeader("Content-Type", record[`${field}_mimetype`]);
     res.setHeader(
       "Content-Disposition",
-      `inline; filename="${record[`${field}_filename`]}"`
+      download
+        ? `attachment; filename="${record[`${field}_filename`]}"`
+        : `inline; filename="${record[`${field}_filename`]}"`
     );
 
     res.send(record[field]);
