@@ -90,7 +90,7 @@ const FileField = ({ label, fileKey, fileData }) => {
   const fileExists = !!fileVal || !!fileNameFromBackend;
 
   const fileUrl = fileExists
-    ? `${API}/newApplication/applications/${fileData.id}/file/${fileKey}`
+    ? `${API}/backroom/applications/${fileData.id}/file/${fileKey}`
     : null;
   const downloadUrl = fileExists ? `${fileUrl}?download=true` : null;
 
@@ -544,69 +544,69 @@ function ZoningApplicantModal({
               </Section>
 
               {/* Zoning Attachments */}
-              {applicant.application === "New" && (
+              {applicant.application === "New" ||
+                (applicant.ZONING !== "Approved" && (
+                  <>
+                    <Typography variant="subtitle1" sx={{ mb: 3, pt: 2 }}>
+                      ZONING FEE:{" "}
+                      <b>
+                        {zoningFee === "Exempted"
+                          ? zoningFee
+                          : `₱${formatCurrency(zoningFee)}`}
+                      </b>
+                    </Typography>
+                  </>
+                ))}
+
+              {applicant.ZONING !== "Approved" && (
                 <>
-                  <Typography variant="subtitle1" sx={{ mb: 3, pt: 2 }}>
-                    ZONING FEE:{" "}
-                    <b>
-                      {zoningFee === "Exempted"
-                        ? zoningFee
-                        : `₱${formatCurrency(zoningFee)}`}
-                    </b>
-                  </Typography>
+                  {applicant.application === "Renew" && (
+                    <>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={
+                              renewZoningFee === "0" || renewZoningFee === 0
+                            }
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                handleChange("renewZoningFee", "0");
+                              } else {
+                                handleChange("renewZoningFee", "");
+                              }
+                            }}
+                          />
+                        }
+                        label="Exempt Zoning Fee"
+                        sx={{ mt: 2 }}
+                      />
+
+                      <TextField
+                        label="Zoning Fee"
+                        type="text" // <- change this
+                        value={formatCurrency(renewZoningFee)}
+                        onChange={(e) => {
+                          const rawValue = e.target.value.replace(/,/g, ""); // remove commas
+                          handleChange("renewZoningFee", rawValue);
+                        }}
+                        fullWidth
+                        size="small"
+                        required
+                        error={feeError}
+                        helperText={
+                          feeError && "Zoning Fee is required for approval."
+                        }
+                        disabled={
+                          renewZoningFee === "0" || renewZoningFee === 0
+                        }
+                      />
+                    </>
+                  )}
                 </>
               )}
 
               {applicant.ZONING === "Pending" ||
-                ("Declined" && (
-                  <>
-                    {applicant.application === "Renew" && (
-                      <>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={
-                                renewZoningFee === "0" || renewZoningFee === 0
-                              }
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  handleChange("renewZoningFee", "0");
-                                } else {
-                                  handleChange("renewZoningFee", "");
-                                }
-                              }}
-                            />
-                          }
-                          label="Exempt Zoning Fee"
-                          sx={{ mt: 2 }}
-                        />
-
-                        <TextField
-                          label="Zoning Fee"
-                          type="text" // <- change this
-                          value={formatCurrency(renewZoningFee)}
-                          onChange={(e) => {
-                            const rawValue = e.target.value.replace(/,/g, ""); // remove commas
-                            handleChange("renewZoningFee", rawValue);
-                          }}
-                          fullWidth
-                          size="small"
-                          required
-                          error={feeError}
-                          helperText={
-                            feeError &&
-                            "Solid Waste Fee is required for approval."
-                          }
-                          disabled={
-                            renewZoningFee === "0" || renewZoningFee === 0
-                          }
-                        />
-                      </>
-                    )}
-                  </>
-                ))}
-
-              {applicant.ZONING === "Pending" || "Declined" ? (
+              applicant.ZONING === "Declined" ? (
                 // ✅ Show upload fields
                 <Stack spacing={3}>
                   {files.map((file) => (
@@ -647,7 +647,7 @@ function ZoningApplicantModal({
                   ))}
                 </Stack>
               ) : applicant.ZONING === "Approved" ? (
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={6} mt={3}>
                   <FileField
                     fileKey="zoningCert"
                     label="Zoning Certificate"
@@ -679,22 +679,18 @@ function ZoningApplicantModal({
             Close
           </Button>
 
+          {applicant.ZONING !== "Approved" && (
+            <Button
+              onClick={handleApproveClick}
+              variant="contained"
+              color="success"
+            >
+              Approve
+            </Button>
+          )}
           {/* Buttons only if not viewing certificate */}
           {!showCert && (
             <>
-              {/* ✅ Show Approve ONLY if status is Declined */}
-              {applicant.ZONING === "Declined" ||
-                ("Pending" && (
-                  <Button
-                    onClick={handleApproveClick}
-                    variant="contained"
-                    color="success"
-                  >
-                    Approve
-                  </Button>
-                ))}
-
-              {/* HOLD button (optional condition if you want) */}
               {applicant.ZONING !== "Approved" && (
                 <Button
                   onClick={handleDeclineClick}

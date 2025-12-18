@@ -105,7 +105,7 @@ const FileField = ({ label, fileKey, fileData }) => {
   const fileExists = !!fileVal || !!fileNameFromBackend;
 
   const fileUrl = fileExists
-    ? `${API}/newApplication/applications/${fileData.id}/file/${fileKey}`
+    ? `${API}/backroom/applications/${fileData.id}/file/${fileKey}`
     : null;
   const downloadUrl = fileExists ? `${fileUrl}?download=true` : null;
 
