@@ -544,19 +544,17 @@ function ZoningApplicantModal({
               </Section>
 
               {/* Zoning Attachments */}
-              {applicant.application === "New" ||
-                (applicant.ZONING !== "Approved" && (
-                  <>
-                    <Typography variant="subtitle1" sx={{ mb: 3, pt: 2 }}>
-                      ZONING FEE:{" "}
-                      <b>
-                        {zoningFee === "Exempted"
-                          ? zoningFee
-                          : `₱${formatCurrency(zoningFee)}`}
-                      </b>
-                    </Typography>
-                  </>
-                ))}
+              {(applicant.application === "New" ||
+                applicant.ZONING !== "Approved") && (
+                <Typography variant="subtitle1" sx={{ mb: 3, pt: 2 }}>
+                  ZONING FEE:{" "}
+                  <b>
+                    {zoningFee === "Exempted"
+                      ? zoningFee
+                      : `₱${formatCurrency(zoningFee)}`}
+                  </b>
+                </Typography>
+              )}
 
               {applicant.ZONING !== "Approved" && (
                 <>
