@@ -7,7 +7,7 @@ import axios from "axios";
 const spcLogo = "/spclogo.png";
 const fallbackSignature = "/samplesig.png"; // default signature
 
-const API = import.meta.env.VITE_API_BASE; // your API base
+const API = import.meta.env.VITE_API_BASE;
 
 const CenroCertExport = ({ applicant }) => {
   const certificateRef = useRef();
@@ -103,35 +103,41 @@ const CenroCertExport = ({ applicant }) => {
     },
   ];
 
+  // Current date formatted
+  const today = new Date();
+  const day = today.getDate();
+  const monthName = today.toLocaleString("default", { month: "long" });
+  const year = today.getFullYear();
+
   return (
     <>
       <div
         ref={certificateRef}
         style={{
-          fontFamily: "'Times New Roman', Times, serif",
-          fontSize: "10pt",
+          fontFamily: "Arial, Helvetica, sans-serif",  // Changed to Arial globally
+          fontSize: "11pt",                           // Slightly larger for better readability in Arial
           backgroundColor: "white",
           color: "black",
-          lineHeight: "1.2",
+          lineHeight: "1.4",
           boxSizing: "border-box",
           width: "612px",
           margin: "0 auto",
-          padding: "30px 40px",
+          padding: "40px 50px",
         }}
       >
         {/* HEADER */}
-        <div style={{ textAlign: "center", marginBottom: "5px" }}>
+        <div style={{ textAlign: "center", marginBottom: "10px" }}>
           <img
             src={spcLogo}
             alt="SPC Logo"
-            style={{ width: "60px", height: "auto" }}
+            style={{ width: "70px", height: "auto" }}
           />
         </div>
-        <div style={{ textAlign: "center", marginBottom: "10px" }}>
+        <div style={{ textAlign: "center", marginBottom: "15px" }}>
           <h2
             style={{
-              margin: "0 0 2px 0",
-              fontSize: "12pt",
+              margin: "0 0 4px 0",
+              fontSize: "14pt",
               fontWeight: "bold",
             }}
           >
@@ -139,37 +145,37 @@ const CenroCertExport = ({ applicant }) => {
           </h2>
           <h3
             style={{
-              margin: "0 0 2px 0",
-              fontSize: "11pt",
+              margin: "0 0 4px 0",
+              fontSize: "13pt",
               fontWeight: "bold",
             }}
           >
             CITY ENVIRONMENT AND NATURAL RESOURCES OFFICE
           </h3>
-          <p style={{ margin: "0 0 8px 0", fontSize: "9pt" }}>
+          <p style={{ margin: "0 0 10px 0", fontSize: "10pt" }}>
             4/F New 8th Storey Building, Capitol Complex, San Pablo City
             <br />
             Tel. No. (049) 562-2822
           </p>
           <h1
             style={{
-              margin: "10px 0 15px 0",
-              fontSize: "14pt",
+              margin: "15px 0 20px 0",
+              fontSize: "18pt",
               fontWeight: "bold",
               textTransform: "uppercase",
-              borderBottom: "2px solid black",
+              borderBottom: "3px solid black",
               display: "inline-block",
-              paddingBottom: "4px",
-              letterSpacing: "2px",
+              paddingBottom: "6px",
+              letterSpacing: "3px",
             }}
           >
-            C E R T I F I C A T I O N
+            CERTIFICATION
           </h1>
         </div>
 
         {/* BODY */}
-        <div style={{ textAlign: "justify", marginBottom: "10px" }}>
-          <p style={{ marginBottom: "8px", fontSize: "10pt" }}>
+        <div style={{ textAlign: "justify", marginBottom: "15px" }}>
+          <p style={{ marginBottom: "12px", fontSize: "11pt" }}>
             This is to certify that the establishment{" "}
             <strong>
               <u>{applicant.businessName || "_______________________"}</u>
@@ -177,8 +183,8 @@ const CenroCertExport = ({ applicant }) => {
             owned by{" "}
             <strong>
               <u>
-                {applicant.lastName} {applicant.firstName}{" "}
-                {applicant.middleName}
+                {applicant.lastName}, {applicant.firstName}{" "}
+                {applicant.middleName || ""}
               </u>
             </strong>{" "}
             situated at{" "}
@@ -193,23 +199,23 @@ const CenroCertExport = ({ applicant }) => {
           <p
             style={{
               fontWeight: "bold",
-              margin: "10px 0 6px 0",
-              fontSize: "10pt",
+              margin: "15px 0 10px 0",
+              fontSize: "12pt",
             }}
           >
             THAT SAID ESTABLISHMENT SHALL:
           </p>
 
-          {/* CHECKBOX LIST */}
-          <div style={{ marginBottom: "12px" }}>
+          {/* CHECKBOX LIST - Enhanced visual */}
+          <div style={{ marginBottom: "15px" }}>
             {checklistItems.map((item) => (
               <div
                 key={item.key}
                 style={{
                   display: "flex",
-                  alignItems: "center",
-                  marginBottom: "6px",
-                  gap: "6px",
+                  alignItems: "flex-start",
+                  marginBottom: "10px",
+                  gap: "10px",
                 }}
               >
                 <input
@@ -217,14 +223,15 @@ const CenroCertExport = ({ applicant }) => {
                   checked={checkboxes[item.key]}
                   onChange={() => handleCheckboxChange(item.key)}
                   style={{
-                    width: "14px",
-                    height: "14px",
-                    margin: 0,
+                    width: "18px",
+                    height: "18px",
+                    margin: "2px 0 0 0",
                     cursor: "pointer",
+                    flexShrink: 0,
                   }}
                   data-key={item.key}
                 />
-                <span style={{ fontSize: "10pt", lineHeight: "1.2" }}>
+                <span style={{ fontSize: "11pt", lineHeight: "1.5" }}>
                   <strong>{item.key}.</strong> {item.text}
                 </span>
               </div>
@@ -234,96 +241,96 @@ const CenroCertExport = ({ applicant }) => {
           {/* NUMBERED LIST */}
           <ol
             style={{
-              margin: "8px 0 12px 0",
-              paddingLeft: "18px",
-              fontSize: "9.5pt",
+              margin: "12px 0 15px 20px",
+              paddingLeft: "5px",
+              fontSize: "11pt",
+              lineHeight: "1.5",
             }}
           >
-            <li style={{ marginBottom: "4px" }}>
+            <li style={{ marginBottom: "8px" }}>
               That the business establishment shall not violate the provisions
               of the San Pablo City Land Use and Zoning Ordinance.
             </li>
-            <li style={{ marginBottom: "4px" }}>
+            <li style={{ marginBottom: "8px" }}>
               That any authorized City Environment and Natural Resources
               Personnel can conduct an on-the-spot inspection...
             </li>
-            <li style={{ marginBottom: "4px" }}>
-              That all necessary permits/certifications (ECC’s CNC’s, Discharge
+            <li style={{ marginBottom: "8px" }}>
+              That all necessary permits/certifications (ECC’s, CNC’s, Discharge
               Permits, NWRB, CWR) from other government agencies...
             </li>
-            <li style={{ marginBottom: "4px" }}>
+            <li style={{ marginBottom: "8px" }}>
               That this certification shall be exhibited together with the
               Mayor’s Business Permit.
             </li>
           </ol>
 
-          <p style={{ margin: "8px 0 12px 0", fontSize: "10pt" }}>
-            This certification is valid up to <strong>December 31, 2025</strong>
-            ...
+          <p style={{ margin: "12px 0 15px 0", fontSize: "11pt" }}>
+            This certification is valid up to{" "}
+            <strong>December 31, {year}</strong> unless sooner revoked for cause.
           </p>
 
-          <p style={{ margin: "8px 0", fontSize: "10pt" }}>
-            Given this <u>{new Date().getDate()}</u> day of{" "}
-            <u>{new Date().toLocaleString("default", { month: "long" })}</u>,{" "}
-            {new Date().getFullYear()}, in the City of San Pablo.
+          <p style={{ margin: "12px 0", fontSize: "11pt" }}>
+            Given this <u>{day}</u> day of <u>{monthName}</u>, {year}, in the City of San Pablo.
           </p>
         </div>
 
-        {/* SIGNATURE */}
+        {/* SIGNATURE SECTION */}
         <div
           style={{
-            marginTop: "10px",
+            marginTop: "30px",
             display: "flex",
-            justifyContent: "flex-end",
+            justifyContent: "space-between",
             gap: "40px",
           }}
         >
           <div style={{ width: "45%", textAlign: "center" }}>
             <p
               style={{
-                marginBottom: "4px",
+                marginBottom: "8px",
                 fontWeight: "bold",
-                fontSize: "10pt",
+                fontSize: "12pt",
               }}
             >
               CONFORME:
             </p>
+            <div style={{ height: "60px", marginBottom: "8px" }} />
             <p
               style={{
                 borderTop: "1px solid black",
-                paddingTop: "4px",
-                marginBottom: "4px",
+                paddingTop: "8px",
+                margin: "0 0 4px 0",
               }}
             >
-              ________________________________
+              ________________________________________
             </p>
-            <p style={{ fontSize: "9pt", marginBottom: "6px" }}>
+            <p style={{ fontSize: "10pt", margin: "4px 0" }}>
               Proprietor/Authorized Representative
               <br />
               (Signature over Printed Name)
             </p>
-            <p style={{ fontSize: "9pt" }}>
+            <p style={{ fontSize: "10pt", marginTop: "10px" }}>
               <strong>CONTACT NO.</strong> ___________________________
             </p>
           </div>
 
           <div style={{ width: "45%", textAlign: "center" }}>
-            <p style={{ marginBottom: "2px", fontSize: "9pt" }}>
-              <strong>APPROVED BY:</strong>
+            <p style={{ marginBottom: "4px", fontSize: "11pt", fontWeight: "bold" }}>
+              APPROVED BY:
             </p>
-            <div style={{ marginBottom: "2px" }}>
+            <div style={{ margin: "10px 0" }}>
               {signatory && (
                 <img
                   src={signatory}
                   alt="e-Signature"
-                  style={{ width: "140px", height: "auto" }}
+                  style={{ width: "160px", height: "auto" }}
                 />
               )}
             </div>
-            <p style={{ margin: "0", fontWeight: "bold", fontSize: "11pt" }}>
+            <p style={{ margin: "8px 0 0 0", fontWeight: "bold", fontSize: "12pt" }}>
               DENNIS A. RAMOS, MPA
             </p>
-            <p style={{ margin: "0", fontSize: "9pt" }}>
+            <p style={{ margin: "4px 0 0 0", fontSize: "11pt" }}>
               City Environment and Natural Resources Officer
             </p>
           </div>
@@ -331,12 +338,12 @@ const CenroCertExport = ({ applicant }) => {
       </div>
 
       {/* DOWNLOAD BUTTON */}
-      <div style={{ textAlign: "center", marginTop: "20px" }}>
+      <div style={{ textAlign: "center", marginTop: "30px" }}>
         <Button
           variant="contained"
           color="success"
           onClick={handleGeneratePDF}
-          sx={{ width: "250px", padding: "10px" }}
+          sx={{ width: "280px", padding: "12px", fontSize: "16px" }}
         >
           Download Certification
         </Button>

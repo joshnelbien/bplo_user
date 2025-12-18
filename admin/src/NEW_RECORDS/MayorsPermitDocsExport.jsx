@@ -1,6 +1,6 @@
 import { Button } from "@mui/material";
 import { saveAs } from "file-saver";
-import React, { useState } from "react";
+import React from "react";
 import axios from "axios";
 import {
   Document,
@@ -14,7 +14,7 @@ import {
 
 const API = import.meta.env.VITE_API_BASE;
 
-// 🟢 Shrunk, tighter layout for one-page fit
+// 🟢 Updated: Larger font for collection items
 const styles = StyleSheet.create({
   page: { padding: 15, fontFamily: "Helvetica" },
   pageWatermark: {
@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     left: "5%",
     width: "90%",
     height: "60%",
-    opacity: 0.1, // 👈 very light
+    opacity: 0.1,
     zIndex: -1,
   },
   frame: {
@@ -95,12 +95,17 @@ const styles = StyleSheet.create({
     border: "0.5pt solid black",
     backgroundColor: "#F5F5F5",
   },
-  collectionCell: { padding: 3, border: "0.5pt solid black", fontSize: 5 },
+  collectionCell: { 
+    padding: 4, 
+    border: "0.5pt solid black", 
+    fontSize: 8,  // ← Increased from 5 to 8 (much more readable)
+    minHeight: 14, // Slightly taller rows for clarity
+  },
   totalCell: {
-    padding: 3,
+    padding: 4,
     border: "0.5pt solid black",
-    minHeight: 12,
-    fontSize: 7,
+    minHeight: 14,
+    fontSize: 9,   // ← Slightly larger for TOTAL
     fontWeight: "bold",
   },
   wordsRow: { flexDirection: "row", border: "0.5pt solid black" },
@@ -119,11 +124,11 @@ const styles = StyleSheet.create({
   },
   bottomText: {
     position: "absolute",
-    bottom: 35, // stays above footer bar
+    bottom: 35,
     left: 20,
-    right: 20, // 👈 add right padding
+    right: 20,
     fontSize: 10,
-    textAlign: "center", // 👈 centers the lines
+    textAlign: "center",
     lineHeight: 1.4,
   },
 });
@@ -146,42 +151,15 @@ async function loadImageAsBase64(path) {
 function numberToWords(num) {
   if (num === 0) return "ZERO PESOS AND ZERO CENTAVOS";
   const ones = [
-    "",
-    "ONE",
-    "TWO",
-    "THREE",
-    "FOUR",
-    "FIVE",
-    "SIX",
-    "SEVEN",
-    "EIGHT",
-    "NINE",
-    "TEN",
-    "ELEVEN",
-    "TWELVE",
-    "THIRTEEN",
-    "FOURTEEN",
-    "FIFTEEN",
-    "SIXTEEN",
-    "SEVENTEEN",
-    "EIGHTEEN",
-    "NINETEEN",
+    "", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE",
+    "TEN", "ELEVEN", "TWELVE", "THIRTEEN", "FOURTEEN", "FIFTEEN", "SIXTEEN",
+    "SEVENTEEN", "EIGHTEEN", "NINETEEN",
   ];
-  const tens = [
-    "",
-    "",
-    "TWENTY",
-    "THIRTY",
-    "FORTY",
-    "FIFTY",
-    "SIXTY",
-    "SEVENTY",
-    "EIGHTY",
-    "NINETY",
-  ];
+  const tens = ["", "", "TWENTY", "THIRTY", "FORTY", "FIFTY", "SIXTY", "SEVENTY", "EIGHTY", "NINETY"];
   const scales = ["", "THOUSAND", "MILLION"];
   const pesos = Math.floor(num);
   const centavos = Math.round((num - pesos) * 100);
+
   function convertGroup(n) {
     let str = "";
     if (n >= 100) {
@@ -195,6 +173,7 @@ function numberToWords(num) {
     if (n > 0) str += ones[n] + " ";
     return str.trim();
   }
+
   function convertNumber(n) {
     if (n === 0) return "";
     let str = "";
@@ -207,6 +186,7 @@ function numberToWords(num) {
     }
     return str.trim();
   }
+
   let words = convertNumber(pesos) + " PESOS";
   if (centavos > 0) words += " AND " + convertNumber(centavos) + " CENTAVOS";
   else words += " AND ZERO CENTAVOS";
@@ -218,25 +198,18 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
 
   const handleDone = async (id) => {
     try {
-      if (!selectedFiles || selectedFiles.length === 0) {
+      if (!selectedFiles || !selectedFiles.businessPermit) {
         alert("No file selected!");
         return;
       }
 
       const fileToUpload = selectedFiles.businessPermit;
-      console.log("Uploading file:", fileToUpload);
-
       const formData = new FormData();
-
       formData.append("businessPermit", fileToUpload);
 
-      const res = await axios.put(
-        `${API}/newApplication/appDone/${id}`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      await axios.put(`${API}/newApplication/appDone/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       alert("Permit marked as released and file uploaded!");
     } catch (error) {
@@ -253,9 +226,8 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
       (i) => i.amount && Number(i.amount) > 0
     );
 
-    const MAX_ROWS = 17;
+    const MAX_ROWS = 13;
     const filledRows = [...validCollections];
-
     while (filledRows.length < MAX_ROWS) {
       filledRows.push({ label: "", amount: "" });
     }
@@ -265,12 +237,8 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
     const eSig = await loadImageAsBase64("/samplesig.png");
     const oSig = await loadImageAsBase64("/samplesig.png");
 
-    const fullName = `${applicant.firstName || ""} ${
-      applicant.middleName || ""
-    } ${applicant.lastName || ""}`;
-    const businessAddress = `${applicant.barangay || ""}, ${
-      applicant.cityOrMunicipality || ""
-    }`;
+    const fullName = `${applicant.firstName || ""} ${applicant.middleName || ""} ${applicant.lastName || ""}`.trim();
+    const businessAddress = `${applicant.barangay || ""}, ${applicant.cityOrMunicipality || ""}`;
     const amountInWords = total > 0 ? numberToWords(total) : "";
 
     const PdfDocument = () => (
@@ -278,18 +246,14 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
         <Page size="A4" style={styles.page}>
           <Image src={spcLogoSrc} style={styles.pageWatermark} />
           <View style={styles.frame}>
+            {/* Header */}
             <View style={styles.row}>
               <View style={styles.col25}>
-                <Image
-                  src={bagongPilipinasSrc}
-                  style={{ width: 65, height: 65 }}
-                />
+                <Image src={bagongPilipinasSrc} style={{ width: 65, height: 65 }} />
               </View>
               <View style={[styles.col50, { alignItems: "center" }]}>
                 <Image src={spcLogoSrc} style={{ width: 65, height: 65 }} />
-                <Text
-                  style={{ fontSize: 16, fontWeight: "bold", paddingTop: 5 }}
-                >
+                <Text style={{ fontSize: 16, fontWeight: "bold", paddingTop: 5 }}>
                   OFFICE OF THE MAYOR
                 </Text>
                 <Text style={{ fontSize: 10 }}>
@@ -298,7 +262,6 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
               </View>
               <View style={[styles.col25, { alignItems: "flex-end" }]}>
                 <Text style={{ fontSize: 26, fontWeight: "bold" }}>
-                  {" "}
                   {new Date().getFullYear()}
                 </Text>
                 <Text style={{ fontSize: 26, fontWeight: "bold" }}>
@@ -307,6 +270,7 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
                 <Text style={{ fontSize: 8 }}>PERMIT NUMBER</Text>
               </View>
             </View>
+
             <View style={styles.banner}>
               <Text style={[styles.bannerText, { fontSize: 26 }]}>
                 MAYOR'S PERMIT
@@ -314,7 +278,7 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
             </View>
 
             <Text style={styles.introText}>
-              Pursuant to City Ordinance No. 2012-40, s. of 2012,also known as
+              Pursuant to City Ordinance No. 2012-40, s. of 2012, also known as
               the "2012 Revenue Code of the City of San Pablo", as amended.
               {"\n"}
               BUSINESS LICENSE and MAYOR'S PERMIT is hereby granted to:
@@ -326,22 +290,17 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
             <Text style={{ fontWeight: "bold", fontSize: 8 }}>
               REFERENCE NO: {applicant?.referenceNo || ""}
             </Text>
-
             <Text style={{ fontWeight: "bold", fontSize: 8 }}>
               APPLICATION TYPE: {applicant?.application || ""}
             </Text>
 
+            {/* Info Table */}
             <View style={{ marginVertical: 6 }}>
               <View style={styles.row}>
                 <Text style={[styles.infoTableHeader, { width: "30%" }]}>
                   DESCRIPTION
                 </Text>
-                <Text
-                  style={[
-                    styles.infoTableHeader,
-                    { width: "70%", textAlign: "center" },
-                  ]}
-                >
+                <Text style={[styles.infoTableHeader, { width: "70%", textAlign: "center" }]}>
                   DETAILS
                 </Text>
               </View>
@@ -349,60 +308,35 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
                 ["NAME OF OWNER:", fullName],
                 ["ADDRESS:", applicant?.addressLine1 || "_________"],
                 ["BUSINESS NAME:", applicant?.businessName || "_________"],
-                [
-                  "LINE OF BUSINESS:",
-                  applicant?.lineOfBusiness?.replace(/"/g, "") || "_________",
-                ],
-                [
-                  "KIND OF ORGANIZATION:",
-                  applicant?.BusinessType || "_________",
-                ],
+                ["LINE OF BUSINESS:", applicant?.lineOfBusiness?.replace(/"/g, "") || "_________"],
+                ["KIND OF ORGANIZATION:", applicant?.BusinessType || "_________"],
                 ["BUSINESS ADDRESS:", businessAddress],
               ].map(([label, value]) => (
                 <View style={styles.infoTableRow} key={label}>
-                  <Text style={[styles.infoTableCell, { width: "30%" }]}>
-                    {label}
-                  </Text>
-                  <Text style={[styles.infoTableCell, { width: "70%" }]}>
-                    {value}
-                  </Text>
+                  <Text style={[styles.infoTableCell, { width: "30%" }]}>{label}</Text>
+                  <Text style={[styles.infoTableCell, { width: "70%" }]}>{value}</Text>
                 </View>
               ))}
             </View>
 
+            {/* Collections + Signatures */}
             <View style={[styles.row, { marginTop: 8 }]}>
-              {/* Left 50% Table */}
               <View style={{ width: "70%" }}>
                 <View style={styles.row}>
                   <Text style={[styles.collectionHeader, { width: "40%" }]}>
                     NATURE OF COLLECTION
                   </Text>
-                  <Text
-                    style={[
-                      styles.collectionHeader,
-                      { width: "70%", textAlign: "center" },
-                    ]}
-                  >
+                  <Text style={[styles.collectionHeader, { width: "70%", textAlign: "center" }]}>
                     AMOUNT
                   </Text>
                 </View>
 
                 {filledRows.map((item, idx) => (
                   <View style={styles.row} key={idx}>
-                    <Text
-                      style={[
-                        styles.collectionCell,
-                        { width: "40%", height: "12px" },
-                      ]}
-                    >
+                    <Text style={[styles.collectionCell, { width: "40%" }]}>
                       {item.label}
                     </Text>
-                    <Text
-                      style={[
-                        styles.collectionCell,
-                        { width: "70%", textAlign: "left" },
-                      ]}
-                    >
+                    <Text style={[styles.collectionCell, { width: "70%", textAlign: "left" }]}>
                       {item.amount ? formatPeso(Number(item.amount)) : ""}
                     </Text>
                   </View>
@@ -411,67 +345,29 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
                 {total > 0 && (
                   <>
                     <View style={styles.row}>
-                      <Text style={[styles.totalCell, { width: "40%" }]}>
-                        TOTAL
-                      </Text>
-                      <Text
-                        style={[
-                          styles.totalCell,
-                          { width: "70%", textAlign: "left" },
-                        ]}
-                      >
+                      <Text style={[styles.totalCell, { width: "40%" }]}>TOTAL</Text>
+                      <Text style={[styles.totalCell, { width: "70%", textAlign: "left" }]}>
                         {formatPeso(total)}
                       </Text>
                     </View>
-
                     <View style={styles.wordsRow}>
-                      <Text style={styles.wordsLabelSmall}>
-                        AMOUNT IN WORDS:
-                      </Text>
-                      <Text style={styles.wordsValueSmall}>
-                        {amountInWords}
-                      </Text>
+                      <Text style={styles.wordsLabelSmall}>AMOUNT IN WORDS:</Text>
+                      <Text style={styles.wordsValueSmall}>{amountInWords}</Text>
                     </View>
                   </>
                 )}
               </View>
 
-              {/* Right side stacked signatures */}
+              {/* Signatures */}
               <View style={{ width: "50%", paddingLeft: 10 }}>
-                <View
-                  style={{
-                    alignItems: "center",
-                    marginBottom: 10,
-                    marginTop: 20,
-                  }}
-                >
-                  <Image
-                    src={oSig}
-                    style={{
-                      width: 40,
-                      height: 40,
-                      marginBottom: -10,
-                      marginTop: 65,
-                    }}
-                  />
-                  <Text style={{ fontWeight: "bold", fontSize: 10 }}>
-                    ORIA M. BAÑAGALE
-                  </Text>
-                  <Text style={{ fontSize: 8 }}>
-                    LICENSING OFFICER IV, CHIEF, BPLO
-                  </Text>
+                <View style={{ alignItems: "center", marginBottom: 10, marginTop: 20 }}>
+                  <Image src={oSig} style={{ width: 40, height: 40, marginBottom: -10, marginTop: 65 }} />
+                  <Text style={{ fontWeight: "bold", fontSize: 10 }}>ORIA M. BAÑAGALE</Text>
+                  <Text style={{ fontSize: 8 }}>LICENSING OFFICER IV, CHIEF, BPLO</Text>
                 </View>
 
                 <View style={{ alignItems: "center" }}>
-                  <Image
-                    src={eSig}
-                    style={{
-                      width: 40,
-                      height: 40,
-                      marginBottom: -10,
-                      marginTop: 30,
-                    }}
-                  />
+                  <Image src={eSig} style={{ width: 40, height: 40, marginBottom: -10, marginTop: 30 }} />
                   <Text style={{ fontWeight: "bold", fontSize: 10 }}>
                     HON. ARCADIO B. GAPANGADA JR., MNSA
                   </Text>
@@ -480,6 +376,7 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
               </View>
             </View>
 
+            {/* Bottom Text */}
             <Text style={styles.bottomText}>
               This Permit shall take effect upon approval until December 31,
               2025 unless sooner revoked for cause and shall be renewed on or
@@ -488,9 +385,7 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
                 January 20, {new Date().getFullYear() + 1}
               </Text>
               .{"\n"}
-              <Text style={{ fontWeight: "bold", fontSize: 10 }}>
-                IMPORTANT:
-              </Text>{" "}
+              <Text style={{ fontWeight: "bold", fontSize: 10 }}>IMPORTANT:</Text>{" "}
               Violation of any provision of ordinance No.: 2012 - 40 s. 2012,
               otherwise known as the "2012 Revenue Code of the City of San
               Pablo", as amended, shall cause revocation of this permit and
@@ -508,13 +403,7 @@ function MayorsPermit({ applicant, collections, total, selectedFiles }) {
             </Text>
 
             <View style={styles.footerGreenBar}>
-              <Text
-                style={[
-                  styles.whiteText,
-                  styles.center,
-                  { fontWeight: "bold", fontSize: 10 },
-                ]}
-              >
+              <Text style={[styles.whiteText, styles.center, { fontWeight: "bold", fontSize: 10 }]}>
                 ANY ALTERATION AND/OR ERASURE WILL INVALIDATE THIS PERMIT.
                 {"\n"}
                 "CONTINUITY AND GOOD GOVERNANCE FOR STRONGER UNITY AND PROGRESS"

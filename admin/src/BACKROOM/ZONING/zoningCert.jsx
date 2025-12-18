@@ -11,7 +11,6 @@ import {
 import jsPDF from "jspdf";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { a } from "framer-motion/client";
 
 // Convert month number to Filipino month name
 function getFilipinoMonth(monthIndex) {
@@ -49,7 +48,6 @@ const getTextFieldWidth = (value) => {
 };
 
 function ZoningCert({ applicant, renewZoningFee }) {
-  console.log;
   const today = new Date();
   const day = today.getDate();
   const month = getFilipinoMonth(today.getMonth());
@@ -125,6 +123,9 @@ function ZoningCert({ applicant, renewZoningFee }) {
     const marginX = 20;
     let y = 20;
 
+    // Set default font to Arial for entire PDF
+    doc.setFont("helvetica"); // jsPDF uses "helvetica" as Arial equivalent
+
     // 1. WATERMARK
     const watermarkPath = "/ZoningWatermark.png";
     const wmWidth = 160;
@@ -146,7 +147,7 @@ function ZoningCert({ applicant, renewZoningFee }) {
     );
 
     const centerX = pageWidth / 2;
-    doc.setFont("Times", "bold");
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text("CITY MAYOR'S OFFICE", centerX, y + 8, { align: "center" });
     y += 8;
@@ -163,7 +164,7 @@ function ZoningCert({ applicant, renewZoningFee }) {
 
     // 3. BODY
     y += 25;
-    doc.setFont("Times", "normal");
+    doc.setFont("helvetica", "normal");
     doc.setFontSize(12);
     const paragraph1 = `ITO AY PAGPAPATUNAY na ang isang lugar na lupang matatagpuan sa barangay ${form.barangay}, San Pablo City, nakatala sa pangalan ni ${form.firstName} ${form.lastName} ay nakakasakop sa SONANG nakatalaga sa/o para gamiting RES/COMM/IND/AGRI/INS, dahil dito ang pagtatayo ng ${form.businessType} ay maaaring pahintulutan at pasubaling babawiin o patitigilin sa sandaling mapatunayan naglalagay ng panganib sa PANGMADLANG KALUSUGAN AT KALIGTASAN.`;
     doc.text(paragraph1, marginX, y, { maxWidth: 170, align: "justify" });
@@ -173,7 +174,7 @@ function ZoningCert({ applicant, renewZoningFee }) {
     doc.text(dateText, marginX, y, { maxWidth: 170, align: "justify" });
 
     y += 20;
-    doc.setFont("Times", "bold");
+    doc.setFont("helvetica", "bold");
     doc.text(`CAPITAL: P ${form.totalCapital}`, marginX, y);
     y += 8;
     const feeText = zoningFee === "Exempted" ? "Exempted" : `P ${zoningFee}`;
@@ -181,7 +182,7 @@ function ZoningCert({ applicant, renewZoningFee }) {
 
     // 4. Dynamic Checkboxes in PDF
     y += 15;
-    doc.setFont("Times", "normal");
+    doc.setFont("helvetica", "normal");
     doc.text("Type:", marginX, y);
     const checkboxX = marginX + 20;
     const checkboxY = y - 3;
@@ -208,7 +209,7 @@ function ZoningCert({ applicant, renewZoningFee }) {
 
     // 5. SIGNATURE
     y += 35;
-    doc.setFont("Times", "normal");
+    doc.setFont("helvetica", "normal");
     doc.text("For:", 150, y, { align: "center" });
 
     y += 25;
@@ -221,10 +222,10 @@ function ZoningCert({ applicant, renewZoningFee }) {
     }
 
     y += 25;
-    doc.setFont("Times", "bold");
+    doc.setFont("helvetica", "bold");
     doc.text("HON. ARCADIO B. GAPANGADA, MNSA", 150, y, { align: "center" });
     y += 7;
-    doc.setFont("Times", "normal");
+    doc.setFont("helvetica", "normal");
     doc.text("City Mayor", 150, y, { align: "center" });
 
     doc.save(`ZoningCert_${form.lastName}.pdf`);
@@ -244,6 +245,7 @@ function ZoningCert({ applicant, renewZoningFee }) {
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
           backgroundSize: "70%",
+          fontFamily: "Arial, Helvetica, sans-serif", // Global Arial for preview
         }}
       >
         {/* HEADER */}
@@ -258,12 +260,17 @@ function ZoningCert({ applicant, renewZoningFee }) {
           </Grid>
 
           <Grid item xs={6} sx={{ textAlign: "center" }}>
-            <Typography variant="h5" fontWeight="bold">
+            <Typography variant="h5" fontWeight="bold" sx={{ fontFamily: "Arial" }}>
               CITY MAYOR'S OFFICE
             </Typography>
-            <Typography variant="h6">San Pablo City PAG PAPATUNAY</Typography>
-            <Typography variant="h5" fontWeight="bold">
+            <Typography variant="h6" sx={{ fontFamily: "Arial" }}>
+              San Pablo City
+            </Typography>
+            <Typography variant="h5" fontWeight="bold" sx={{ fontFamily: "Arial" }}>
               ZONING AND LAND USE DIVISION
+            </Typography>
+            <Typography variant="h5" fontWeight="bold" sx={{ fontFamily: "Arial", mt: 1 }}>
+              PAGPAPATUNAY
             </Typography>
           </Grid>
 
@@ -278,7 +285,17 @@ function ZoningCert({ applicant, renewZoningFee }) {
         </Grid>
 
         {/* BODY */}
-        <Typography paragraph sx={{ textAlign: "justify", mt: 5, mb: 2 }}>
+        <Typography
+          paragraph
+          sx={{
+            textAlign: "justify",
+            mt: 5,
+            mb: 2,
+            fontFamily: "Arial",
+            fontSize: "14pt",
+            lineHeight: 1.6,
+          }}
+        >
           ITO AY PAGPAPATUNAY na ang isang lugar na lupang matatagpuan sa
           barangay{" "}
           <TextField
@@ -286,6 +303,7 @@ function ZoningCert({ applicant, renewZoningFee }) {
             value={form.barangay}
             onChange={handleChange}
             variant="standard"
+            InputProps={{ style: { fontFamily: "Arial" } }}
             sx={{ width: getTextFieldWidth(form.barangay) }}
           />{" "}
           , San Pablo City, nakatala sa pangalan ni
@@ -294,6 +312,7 @@ function ZoningCert({ applicant, renewZoningFee }) {
             value={form.firstName}
             onChange={handleChange}
             variant="standard"
+            InputProps={{ style: { fontFamily: "Arial" } }}
             sx={{ width: getTextFieldWidth(form.firstName) }}
           />
           <TextField
@@ -301,6 +320,7 @@ function ZoningCert({ applicant, renewZoningFee }) {
             value={form.lastName}
             onChange={handleChange}
             variant="standard"
+            InputProps={{ style: { fontFamily: "Arial" } }}
             sx={{ width: getTextFieldWidth(form.lastName) }}
           />{" "}
           ay nakakasakop sa SONANG nakatalaga sa/o para gamiting{" "}
@@ -313,6 +333,7 @@ function ZoningCert({ applicant, renewZoningFee }) {
             value={form.businessType}
             onChange={handleChange}
             variant="standard"
+            InputProps={{ style: { fontFamily: "Arial" } }}
             sx={{ width: getTextFieldWidth(form.businessType) }}
           />{" "}
           ay maaaring pahintulutan at pasubaling babawiin o patitigilin sa
@@ -320,23 +341,27 @@ function ZoningCert({ applicant, renewZoningFee }) {
           AT KALIGTASAN.
         </Typography>
 
-        <Typography paragraph sx={{ textAlign: "justify" }}>
+        <Typography
+          paragraph
+          sx={{ textAlign: "justify", fontFamily: "Arial", fontSize: "14pt", lineHeight: 1.6 }}
+        >
           Ipinagkaloob ngayon ika-{day} ng {month}, {year} kaugnay ng kanyang
           kahilingan para sa MAYOR'S PERMIT.
         </Typography>
 
-        <Typography variant="subtitle1" sx={{ mt: 2 }}>
+        <Typography variant="subtitle1" sx={{ mt: 2, fontFamily: "Arial", fontWeight: "bold" }}>
           CAPITAL: P
           <TextField
             name="totalCapital"
             value={form.totalCapital}
             onChange={handleChange}
             variant="standard"
+            InputProps={{ style: { fontFamily: "Arial" } }}
             sx={{ width: getTextFieldWidth(form.totalCapital) }}
           />
         </Typography>
 
-        <Typography variant="subtitle1" sx={{ mb: 1 }}>
+        <Typography variant="subtitle1" sx={{ mb: 1, fontFamily: "Arial" }}>
           ZONING FEE:{" "}
           <b>{zoningFee === "Exempted" ? zoningFee : `P${zoningFee}`}</b>
         </Typography>
@@ -345,17 +370,17 @@ function ZoningCert({ applicant, renewZoningFee }) {
         <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
           <FormControlLabel
             control={<Checkbox checked={applicant.application === "New"} />}
-            label="New"
+            label={<span style={{ fontFamily: "Arial" }}>New</span>}
           />
           <FormControlLabel
             control={<Checkbox checked={applicant.application === "Renew"} />}
-            label="Renew"
+            label={<span style={{ fontFamily: "Arial" }}>Renew</span>}
           />
         </Box>
 
         {/* SIGNATURE */}
         <Box mt={5} textAlign="right" sx={{ mr: 10 }}>
-          <Typography variant="body1" sx={{ mb: 3 }}>
+          <Typography variant="body1" sx={{ mb: 3, fontFamily: "Arial" }}>
             For:
           </Typography>
           {signatureToUse && (
@@ -365,10 +390,12 @@ function ZoningCert({ applicant, renewZoningFee }) {
               sx={{ width: 120, height: 50, mb: -1 }}
             />
           )}
-          <Typography variant="body1" fontWeight="bold">
+          <Typography variant="body1" fontWeight="bold" sx={{ fontFamily: "Arial" }}>
             HON. ARCADIO B. GAPANGADA, MNSA
           </Typography>
-          <Typography variant="body2">City Mayor</Typography>
+          <Typography variant="body2" sx={{ fontFamily: "Arial" }}>
+            City Mayor
+          </Typography>
         </Box>
 
         {/* EXPORT BUTTON */}

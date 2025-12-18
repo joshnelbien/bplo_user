@@ -341,6 +341,10 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
       const res = await axios.post(
         `${API}/businessTax/businessTax/approve/${applicant.id}`
       );
+   
+
+
+
 
       if (res.status === 201) {
         alert("✅ Applicant successfully passed to Business Tax!");
