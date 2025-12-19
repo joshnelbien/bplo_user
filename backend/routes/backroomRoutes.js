@@ -703,7 +703,7 @@ router.get("/backrooms", async (req, res) => {
         return res.status(400).json({ message: "Invalid file field" });
       }
 
-      const record = await File.findByPk(id, {
+      const record = await Backroom.findByPk(id, {
         attributes: [field, `${field}_filename`, `${field}_mimetype`],
       });
 
@@ -723,7 +723,7 @@ router.get("/backrooms", async (req, res) => {
       return res.send(record[field]);
     }
 
-    const files = await File.findAll({
+    const files = await Backroom.findAll({
       attributes: {
         exclude: [
           "tIGEfiles",
@@ -783,7 +783,7 @@ router.get("/applications/:id/file/:field", async (req, res) => {
       return res.status(400).json({ message: "Invalid file field" });
     }
 
-    const record = await File.findOne({
+    const record = await Backroom.findOne({
       where: { id },
       attributes: [
         field,

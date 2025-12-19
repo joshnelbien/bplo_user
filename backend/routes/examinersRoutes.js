@@ -242,7 +242,7 @@ router.get("/examiners", async (req, res) => {
         return res.status(400).json({ message: "Invalid file field" });
       }
 
-      const record = await File.findByPk(id, {
+      const record = await Examiners.findByPk(id, {
         attributes: [field, `${field}_filename`, `${field}_mimetype`],
       });
 
@@ -262,7 +262,7 @@ router.get("/examiners", async (req, res) => {
       return res.send(record[field]);
     }
 
-    const files = await File.findAll({
+    const files = await Examiners.findAll({
       attributes: {
         exclude: [
           "tIGEfiles",
@@ -322,7 +322,7 @@ router.get("/applications/:id/file/:field", async (req, res) => {
       return res.status(400).json({ message: "Invalid file field" });
     }
 
-    const record = await File.findOne({
+    const record = await Examiners.findOne({
       where: { id },
       attributes: [
         field,
