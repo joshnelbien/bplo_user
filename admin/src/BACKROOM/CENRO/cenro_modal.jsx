@@ -146,6 +146,7 @@ function CenroApplicantModal({
   onApprove,
   handleFileChange,
   onDecline,
+  fetchApplicants,
 }) {
   if (!isOpen || !applicant) return null;
 
@@ -218,26 +219,7 @@ function CenroApplicantModal({
     }
   };
 
-  const handleApproveClick = () => {
-    let hasError = false;
-    const newErrors = { cenroFee: false, cenroCert: false };
 
-    if (cenroField.cenroFee.trim() === "") {
-      newErrors.cenroFee = true;
-      hasError = true;
-    }
-
-    if (!selectedFiles.cenroCert) {
-      newErrors.cenroCert = true;
-      hasError = true;
-    }
-
-    setValidationErrors(newErrors);
-
-    if (!hasError) {
-      setConfirmOpen(true);
-    }
-  };
 
   const handleDeclineClick = () => {
     setDeclineReason("");
@@ -698,66 +680,7 @@ function CenroApplicantModal({
         </DialogActions>
       </Dialog>
 
-      {/* Confirmation Dialog for Approve */}
-      {/* <Dialog
-        open={confirmOpen}
-        onClose={handleConfirmClose}
-        aria-labelledby="confirm-dialog-title"
-        sx={{ "& .MuiDialog-paper": { borderRadius: "10px", width: "400px" } }}
-      >
-        <DialogTitle
-          id="confirm-dialog-title"
-          align="center"
-          sx={{
-            py: 3,
-            px: 4,
-            fontWeight: "bold",
-            fontSize: "1.25rem",
-            color: "#333",
-          }}
-        >
-          Are you sure you want to approve this applicant?
-        </DialogTitle>
-        <DialogContent sx={{ p: 0, m: 0 }}></DialogContent>
-        <DialogActions
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            gap: 2,
-            pb: 2,
-          }}
-        >
-          <Button
-            onClick={handleConfirmApprove}
-            variant="contained"
-            color="success"
-            sx={{
-              fontWeight: "bold",
-              textTransform: "uppercase",
-              minWidth: "100px",
-              bgcolor: "#1a7322",
-              "&:hover": { bgcolor: "#155a1b" },
-            }}
-          >
-            Yes
-          </Button>
-          <Button
-            onClick={handleConfirmClose}
-            variant="outlined"
-            color="primary"
-            sx={{
-              fontWeight: "bold",
-              textTransform: "uppercase",
-              minWidth: "100px",
-              color: "#1a7322",
-              borderColor: "#1a7322",
-              "&:hover": { borderColor: "#1a7322", bgcolor: "#e8f5e9" },
-            }}
-          >
-            No
-          </Button>
-        </DialogActions>
-      </Dialog> */}
+      
 
       {/* Decline Dialog with Reason Buttons and input */}
       <Dialog
