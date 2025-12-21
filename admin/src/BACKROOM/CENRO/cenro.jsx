@@ -192,8 +192,7 @@ function Cenro() {
 
   // 2. Confirm & send to backend
   const handleConfirmAction = async () => {
-    setIsConfirmModalOpen(false);
-    setLoading(true);
+
     const { id, cenroFee, selectedFiles } = confirmationData;
 
     try {
@@ -213,6 +212,7 @@ function Cenro() {
             : applicant
         )
       );
+      setIsConfirmModalOpen(false);
       setIsSuccessModalOpen(true);
       closeModal();
     } catch (error) {
@@ -308,8 +308,8 @@ function Cenro() {
                 {status === "pending"
                   ? "Pending"
                   : status === "approved"
-                  ? "Approved"
-                  : "Declined"}
+                    ? "Approved"
+                    : "Declined"}
               </Button>
             ))}
           </ButtonGroup>
@@ -383,8 +383,8 @@ function Cenro() {
                             applicant.CENRO === "Approved"
                               ? "success.main"
                               : applicant.CENRO === "Declined"
-                              ? "error.main"
-                              : "text.primary",
+                                ? "error.main"
+                                : "text.primary",
                         }}
                       >
                         {applicant.CENRO || "Pending"}

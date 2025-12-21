@@ -212,8 +212,7 @@ function Zoning() {
   };
 
   const handleConfirmAction = async () => {
-    setIsConfirmModalOpen(false);
-    setLoading(true);
+    
     const id = confirmationData;
 
     try {
@@ -256,7 +255,7 @@ function Zoning() {
             : applicant
         )
       );
-
+      setIsConfirmModalOpen(false);
       setIsSuccessModalOpen(true);
       closeModal();
     } catch (error) {
