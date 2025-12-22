@@ -146,7 +146,6 @@ function CenroApplicantModal({
   onApprove,
   handleFileChange,
   onDecline,
-  fetchApplicants,
 }) {
   if (!isOpen || !applicant) return null;
 
@@ -219,27 +218,6 @@ function CenroApplicantModal({
     }
   };
 
-    const handleApproveClick = () => {
-    let hasError = false;
-    const newErrors = { cenroFee: false, cenroCert: false };
-
-    if (cenroField.cenroFee.trim() === "") {
-      newErrors.cenroFee = true;
-      hasError = true;
-    }
-
-    if (!selectedFiles.cenroCert) {
-      newErrors.cenroCert = true;
-      hasError = true;
-    }
-
-    setValidationErrors(newErrors);
-
-    if (!hasError) {
-      setConfirmOpen(true);
-    }
-  };
-  
   const handleDeclineClick = () => {
     setDeclineReason("");
     setSelectedReasons([]);
