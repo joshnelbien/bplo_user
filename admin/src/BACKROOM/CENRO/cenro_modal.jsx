@@ -146,7 +146,6 @@ function CenroApplicantModal({
   onApprove,
   handleFileChange,
   onDecline,
-  fetchApplicants,
 }) {
   if (!isOpen || !applicant) return null;
 
@@ -218,8 +217,6 @@ function CenroApplicantModal({
       setValidationErrors((prev) => ({ ...prev, cenroCert: false }));
     }
   };
-
-
 
   const handleDeclineClick = () => {
     setDeclineReason("");
@@ -679,8 +676,6 @@ function CenroApplicantModal({
           )}
         </DialogActions>
       </Dialog>
-
-      
 
       {/* Decline Dialog with Reason Buttons and input */}
       <Dialog

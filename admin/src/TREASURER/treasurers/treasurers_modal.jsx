@@ -14,6 +14,7 @@ import {
   Typography,
   IconButton,
   Tooltip,
+  Stack,
   Fade,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -72,73 +73,69 @@ const Field = ({
 );
 
 // Component to display files as links
-const FileField = ({ label, fileKey, fileData, sx = {} }) => (
-  <Grid item xs={12} sm={6} sx={sx}>
-    <TextField
-      label={label}
-      value={
-        fileData[fileKey] ? fileData[`${fileKey}_filename`] : "No file uploaded"
-      }
-      fullWidth
-      variant="outlined"
-      size="small"
-      disabled
-      InputProps={{
-        sx: {
-          color: "black",
-          "& .MuiInputBase-input.Mui-disabled": {
-            WebkitTextFillColor: "black",
-          },
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "black",
-          },
-          "&.Mui-disabled .MuiOutlinedInput-notchedOutline": {
-            borderColor: "black",
-          },
-        },
-      }}
-      InputLabelProps={{
-        sx: {
-          color: "black",
-          "&.Mui-disabled": { color: "black" },
-        },
-      }}
-    />
+const FileField = ({ label, fileKey, fileData }) => {
+  const fileVal = fileData[fileKey];
+  const fileNameFromBackend = fileData[`${fileKey}_filename`];
+  const fileNameFromPath =
+    typeof fileVal === "string" && fileVal ? fileVal.split("/").pop() : "";
+  const fileName =
+    fileNameFromBackend || fileNameFromPath || "No file uploaded";
 
-    {fileData[fileKey] && (
-      <Typography
-        component="span"
-        sx={{ mt: 0.5, display: "flex", gap: 1, alignItems: "center" }}
-      >
-        <Tooltip title="View File">
-          <IconButton
-            size="small"
-            component="a"
-            href={`${API}/newApplication/files/${fileData.id}/${fileKey}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Typography component="span">View</Typography>
+  const fileExists = !!fileVal || !!fileNameFromBackend;
+
+  const fileUrl = fileExists
+    ? `${API}/treasurer/treasurer/${fileData.id}/file/${fileKey}`
+    : null;
+  const downloadUrl = fileExists ? `${fileUrl}?download=true` : null;
+
+  const handleClick = (url) => {
+    if (!url) {
+      alert("❌ No file uploaded yet");
+      return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <Grid item xs={12} sm={6}>
+      <TextField
+        label={label}
+        value={fileName}
+        fullWidth
+        variant="outlined"
+        size="small"
+        disabled
+        InputProps={{
+          sx: {
+            color: "black",
+            "& .MuiInputBase-input.Mui-disabled": {
+              WebkitTextFillColor: "black",
+            },
+            "& .MuiOutlinedInput-notchedOutline": { borderColor: "black" },
+            "&.Mui-disabled .MuiOutlinedInput-notchedOutline": {
+              borderColor: "black",
+            },
+          },
+        }}
+        InputLabelProps={{
+          sx: { color: "black", "&.Mui-disabled": { color: "black" } },
+        }}
+      />
+      <Stack direction="row" spacing={1} mt={1}>
+        <Tooltip title={fileExists ? "View File" : "No file available"}>
+          <IconButton size="small" onClick={() => handleClick(fileUrl)}>
             <VisibilityIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-
-        <Tooltip title="Download File">
-          <IconButton
-            size="small"
-            component="a"
-            href={`${API}/newApplication/files/${fileData.id}/${fileKey}/download`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Typography component="span">Download</Typography>
+        <Tooltip title={fileExists ? "Download File" : "No file available"}>
+          <IconButton size="small" onClick={() => handleClick(downloadUrl)}>
             <DownloadIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-      </Typography>
-    )}
-  </Grid>
-);
+      </Stack>
+    </Grid>
+  );
+};
 
 function TreasurersApplicantModal({
   applicant,

@@ -8,12 +8,14 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
   port: DB_PORT || 5432,
   dialect: "postgres",
   logging: false,
+
   pool: {
-    max: 10,
+    max: 2, // ✅ VERY IMPORTANT
     min: 0,
-    acquire: 30000,
+    acquire: 60000, // give DB time to wake up
     idle: 10000,
   },
+
   dialectOptions: {
     ssl:
       DB_SSL === "true" ? { require: true, rejectUnauthorized: false } : false,

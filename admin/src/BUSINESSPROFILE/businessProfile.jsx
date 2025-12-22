@@ -43,7 +43,9 @@ function BusinessProfile() {
   useEffect(() => {
     const fetchApplicants = async () => {
       try {
-        const res = await axios.get(`${API}/businessProfile/businessProfiles`);
+        const res = await axios.get(
+          `${API}/businessProfile/businessProfile-list`
+        );
         const sortedData = res.data.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
