@@ -211,7 +211,7 @@ function Cenro() {
             : applicant
         )
       );
-      setIsConfirmModalOpen(false);
+      
       setIsSuccessModalOpen(true);
       closeModal();
     } catch (error) {
