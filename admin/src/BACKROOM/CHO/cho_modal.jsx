@@ -266,6 +266,7 @@ function ChoApplicantModal({
   onApprove,
   handleFileChange,
   onDecline,
+  fetchApplicants,
 }) {
   if (!isOpen || !applicant) return null;
 
@@ -311,10 +312,11 @@ function ChoApplicantModal({
   };
 
   const handleApproveConfirm = () => {
-    setApproveConfirmOpen(false);
+    
     onApprove(applicant.id, choFee, selectedFiles);
     setLoading(true);
     setSuccessStatusOpen(true);
+    fetchApplicants();
   };
 
   const handleDeclineClick = () => {
@@ -940,6 +942,7 @@ function ChoApplicantModal({
         open={successStatusOpen}
         onClose={() => {
           setSuccessStatusOpen(false);
+          setApproveConfirmOpen(false);
           onClose();
         }}
         icon={<CheckCircleIcon sx={{ fontSize: "5rem", color: "#4caf50" }} />}

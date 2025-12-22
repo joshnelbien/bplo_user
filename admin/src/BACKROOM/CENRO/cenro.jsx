@@ -149,21 +149,21 @@ function Cenro() {
     setSelectedFiles((prev) => ({ ...prev, [name]: file }));
   };
 
+  const fetchApplicants = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${API}/backroom/backrooms`);
+      const sortedData = res.data.sort(
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+      );
+      setApplicants(sortedData);
+    } catch (error) {
+      console.error("Error fetching applicants:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchApplicants = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get(`${API}/backroom/backrooms`);
-        const sortedData = res.data.sort(
-          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-        );
-        setApplicants(sortedData);
-      } catch (error) {
-        console.error("Error fetching applicants:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchApplicants();
   }, [API]);
 
@@ -192,8 +192,6 @@ function Cenro() {
 
   // 2. Confirm & send to backend
   const handleConfirmAction = async () => {
-    setIsConfirmModalOpen(false);
-    setLoading(true);
     const { id, cenroFee, selectedFiles } = confirmationData;
 
     try {
@@ -213,6 +211,7 @@ function Cenro() {
             : applicant
         )
       );
+      setIsConfirmModalOpen(false);
       setIsSuccessModalOpen(true);
       closeModal();
     } catch (error) {
@@ -419,6 +418,7 @@ function Cenro() {
         handleFileChange={handleFileChange}
         selectedFiles={selectedFiles}
         onDecline={handleDecline}
+        fetchApplicants={fetchApplicants}
       />
 
       {/* Confirmation Modal */}

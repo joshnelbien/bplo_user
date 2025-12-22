@@ -243,7 +243,7 @@ function CmswoApplicantModal({
 
   // Confirm approve
   const handleConfirmApprove = () => {
-    setConfirmApproveOpen(false);
+
     onApprove(applicant.id, csmwoFee, selectedFiles);
     setLoading(true);
     setSuccessOpen(true);
@@ -262,6 +262,7 @@ function CmswoApplicantModal({
 
   // Close success dialogs
   const handleSuccessClose = () => {
+    setConfirmApproveOpen(false);
     setSuccessOpen(false);
     onClose();
   };

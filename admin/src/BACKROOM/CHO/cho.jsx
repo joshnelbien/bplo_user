@@ -46,23 +46,26 @@ function Cho() {
     }));
   };
 
+  // move this OUTSIDE useEffect
+  const fetchApplicants = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${API}/backroom/backrooms`);
+      const sortedData = res.data.sort(
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+      );
+      setApplicants(sortedData);
+    } catch (error) {
+      console.error("Error fetching applicants:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchApplicants = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get(`${API}/backroom/backrooms`);
-        const sortedData = res.data.sort(
-          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-        );
-        setApplicants(sortedData);
-      } catch (error) {
-        console.error("Error fetching applicants:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchApplicants();
   }, [API]);
+
 
   // Filter Logic
   const filteredApplicants = applicants.filter((a) => {
@@ -246,8 +249,8 @@ function Cho() {
                             applicant.CHO === "Approved"
                               ? "success.main"
                               : applicant.CHO === "Declined"
-                              ? "error.main"
-                              : "text.primary",
+                                ? "error.main"
+                                : "text.primary",
                         }}
                       >
                         {applicant.CHO || "Pending"}
@@ -281,6 +284,7 @@ function Cho() {
         onApprove={handleApprove}
         onDecline={handleDecline}
         handleFileChange={handleFileChange}
+        refreshApplicants={fetchApplicants}
         selectedFiles={selectedFiles}
         baseUrl={`${API}/newApplication/files`}
       />

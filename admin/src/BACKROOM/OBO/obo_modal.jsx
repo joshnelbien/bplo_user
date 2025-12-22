@@ -146,6 +146,7 @@ function OboApplicantModal({
   onClose,
   onApprove,
   onDecline,
+  fetchApplicants,
 }) {
   if (!isOpen || !applicant) return null;
 
@@ -278,6 +279,7 @@ function OboApplicantModal({
 
   const handleSuccessClose = () => {
     setSuccessOpen(false);
+    fetchApplicants();
     onClose();
   };
 
