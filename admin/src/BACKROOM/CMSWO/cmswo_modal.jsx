@@ -179,7 +179,7 @@ function CmswoApplicantModal({
   const [selectedFiles, setSelectedFiles] = useState({});
   const [selectedReasons, setSelectedReasons] = useState([]);
   const [generatingPDF, setGeneratingPDF] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   // Ref to access hidden certificate
   const certRef = useRef();
@@ -241,13 +241,22 @@ function CmswoApplicantModal({
     setConfirmDeclineOpen(true);
   };
 
-  // Confirm approve
-  const handleConfirmApprove = () => {
-
-    onApprove(applicant.id, csmwoFee, selectedFiles);
-    setLoading(true);
-    setSuccessOpen(true);
+  const handleConfirmApprove = async () => {
+    setConfirmLoading(true); // start loading
+    // simulate 2-second processing
+    setTimeout(async () => {
+      try {
+        await onApprove(applicant.id, csmwoFee, selectedFiles); // call your approve function
+        setSuccessOpen(true); // show success dialog
+      } catch (error) {
+        console.error(error);
+        alert("Approval failed. See console for details.");
+      } finally {
+        setConfirmLoading(false); // stop loading
+      }
+    }, 2000);
   };
+  // Confirm approve
 
   // Confirm decline
   const handleDeclineConfirm = () => {
@@ -744,7 +753,7 @@ function CmswoApplicantModal({
               "&:hover": { bgcolor: "#155a1b" },
             }}
           >
-            {loading ? "Processing..." : "Approve"}
+            {confirmLoading ? "Processing..." : "Approve"}
           </Button>
           <Button
             onClick={handleConfirmClose}

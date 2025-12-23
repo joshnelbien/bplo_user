@@ -176,6 +176,7 @@ function OboApplicantModal({
   const [selectedReason, setSelectedReason] = useState("");
   const [declineSuccessOpen, setDeclineSuccessOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   const handleToggleReason = (reason) => {
     setSelectedReason(selectedReason === reason ? "" : reason);
@@ -269,12 +270,26 @@ function OboApplicantModal({
     }
   };
 
-  const handleConfirmClose = () => setConfirmOpen(false);
-
-  const handleConfirmApprove = () => {
+  const handleConfirmClose = () => {
     setConfirmOpen(false);
-    onApprove(applicant.id, oboFields);
-    setSuccessOpen(true);
+    setLoading(false);
+  };
+
+  const handleConfirmApprove = async () => {
+    setConfirmLoading(true); // start loading
+    // simulate 2-second processing
+    setTimeout(async () => {
+      try {
+        await onApprove(applicant.id, oboFields); // call your approve function
+        setSuccessOpen(true); // show success dialog
+      } catch (error) {
+        console.error(error);
+        alert("Approval failed. See console for details.");
+      } finally {
+        setConfirmLoading(false); // stop loading
+        setConfirmOpen(false); // close confirmation dialog
+      }
+    }, 2000);
   };
 
   const handleSuccessClose = () => {
@@ -757,8 +772,9 @@ function OboApplicantModal({
               bgcolor: "#1a7322",
               "&:hover": { bgcolor: "#155a1b" },
             }}
+            disabled={confirmLoading} // disable while processing
           >
-            Yes
+            {confirmLoading ? "Processing..." : "Yes"}
           </Button>
           <Button
             onClick={handleConfirmClose}

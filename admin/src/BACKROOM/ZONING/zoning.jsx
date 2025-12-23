@@ -140,6 +140,7 @@ function Zoning() {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [confirmationData, setConfirmationData] = useState(null);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [approving, setApproving] = useState(false);
 
   const recordsPerPage = 20;
   const API = import.meta.env.VITE_API_BASE;
@@ -212,8 +213,8 @@ function Zoning() {
   };
 
   const handleConfirmAction = async () => {
-    
     const id = confirmationData;
+    setApproving(true); // ✅ START loading
 
     try {
       const formData = new FormData();
@@ -225,17 +226,14 @@ function Zoning() {
       if (applicant) {
         const calculateZoningFee = (totalCapital) => {
           if (totalCapital <= 5000) return "Exempted";
-          if (totalCapital >= 5001 && totalCapital <= 10000) return 100;
-          if (totalCapital >= 10001 && totalCapital <= 50000) return 200;
-          if (totalCapital >= 50001 && totalCapital <= 100000) return 300;
+          if (totalCapital <= 10000) return 100;
+          if (totalCapital <= 50000) return 200;
+          if (totalCapital <= 100000) return 300;
           return ((totalCapital - 100000) * 0.001 + 500).toFixed(2);
         };
 
         const zoningFee = calculateZoningFee(Number(applicant.totalCapital));
-        const finalZoningFee =
-          applicant.renewZoningFee !== "" && applicant.renewZoningFee !== null
-            ? applicant.renewZoningFee
-            : zoningFee;
+        const finalZoningFee = applicant.renewZoningFee ?? zoningFee;
 
         formData.append("zoningFee", finalZoningFee);
       }
@@ -245,21 +243,20 @@ function Zoning() {
       });
 
       setApplicants((prev) =>
-        prev.map((applicant) =>
-          applicant.id === id
-            ? {
-                ...applicant,
-                ZONING: "Approved",
-                zoningFee: formData.get("zoningFee"),
-              }
-            : applicant
+        prev.map((a) =>
+          a.id === id
+            ? { ...a, ZONING: "Approved", zoningFee: formData.get("zoningFee") }
+            : a
         )
       );
+
       setIsConfirmModalOpen(false);
       setIsSuccessModalOpen(true);
       closeModal();
     } catch (error) {
       console.error("Error approving:", error);
+    } finally {
+      setApproving(false); // ✅ STOP loading
     }
   };
 
@@ -453,7 +450,7 @@ function Zoning() {
         onClose={() => setIsConfirmModalOpen(false)}
         onConfirm={handleConfirmAction}
         message="Are you sure you want to approve this applicant?"
-        loading={loading}
+        loading={approving} // ✅ FIXED
       />
 
       {/* Success Modal */}

@@ -78,8 +78,6 @@ function BusinessTax() {
   const handleApprove = async (id, selectedFiles) => {
     try {
       const formData = new FormData();
-
-      // 1. Add uploaded file if there is one
       if (selectedFiles?.businessTaxComputation) {
         formData.append(
           "businessTaxComputation",
@@ -160,8 +158,6 @@ function BusinessTax() {
       });
       sessionStorage.removeItem("businessTaxTotal");
       sessionStorage.removeItem("otherChargesTotal");
-
-      closeModal();
     } catch (error) {
       console.error("Error approving applicant:", error);
     }
