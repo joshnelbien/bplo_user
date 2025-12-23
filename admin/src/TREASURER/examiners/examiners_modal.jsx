@@ -195,23 +195,28 @@ function ExaminersApplicantModal({ applicant, isOpen, onClose, onApprove }) {
     setConfirmDialogOpen(true);
   };
 
-  const handleConfirmApprove = () => {
+  const handleConfirmApprove = async () => {
     setConfirmDialogOpen(false);
     setLoading(true);
 
-    // Optimistically update applicant status
-    applicant.Examiners = "Approved"; // <-- add this
-    setSuccessDialogOpen(true);
+    try {
+      // Simulate API call here (replace with actual API if needed)
+      if (onApprove) {
+        await onApprove(applicant.id);
+      }
 
-    if (onApprove) {
-      onApprove(applicant.id);
-    }
+      // Ensure minimum 2 seconds processing
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    setTimeout(() => {
-      setSuccessDialogOpen(false);
+      // Optimistically update applicant status
+      applicant.Examiners = "Approved";
+
+      setSuccessDialogOpen(true);
+    } catch (e) {
+      console.error("Error approving applicant:", e);
+    } finally {
       setLoading(false);
-      onClose();
-    }, 2000);
+    }
   };
 
   return (

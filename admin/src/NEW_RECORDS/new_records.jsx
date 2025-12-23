@@ -191,22 +191,30 @@ function New_records() {
   /* ---- APPROVE ---- */
   const handleApprove = (applicant, businessDetails) => {
     setConfirmationData({ ...applicant, businessDetails });
-    // setIsModalOpen(false);
     setIsConfirmModalOpen(true);
   };
 
   const handleConfirmAction = async () => {
     if (!confirmationData) return;
+
+    setLoading(true); // show loading state in modal
+
     try {
       await axios.post(`${API}/examiners/bplo/approve/${confirmationData.id}`, {
         businessDetails: confirmationData.businessDetails,
       });
+
+      // Ensure minimum 2 seconds processing
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       setIsConfirmModalOpen(false);
       setIsModalOpen(false);
       setIsSuccessModalOpen(true);
       fetchApplicants();
     } catch (e) {
       console.error("Error approving:", e);
+    } finally {
+      setLoading(false); // stop loading spinner
     }
   };
 

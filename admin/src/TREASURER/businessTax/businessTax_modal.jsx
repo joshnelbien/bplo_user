@@ -155,6 +155,7 @@ function BusinessTaxApplicantModal({
   const [successOpen, setSuccessOpen] = useState(false); // State for success pop-up
   const [selectedFiles, setSelectedFiles] = useState({});
   const [computeOpen, setComputeOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const files = [
     { label: "Business Tax Computation", name: "businessTaxComputation" },
@@ -182,18 +183,25 @@ function BusinessTaxApplicantModal({
   };
 
   // Handle approval confirmation
-  const handleConfirmApprove = () => {
-    setConfirmOpen(false);
-    onApprove(applicant.id, selectedFiles, collections);
-    setSuccessOpen(true); // Show success pop-up
+  const handleConfirmApprove = async () => {
+    setLoading(true);
+    try {
+      // 1. Perform the approval
+      await onApprove(applicant.id, selectedFiles, collections);
+      setConfirmOpen(false);
+      setSuccessOpen(true); // <-- This always triggers if `await` doesn't throw
+    } catch (error) {
+      console.error(error);
+      alert("❌ Approval failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Handle closing success pop-up
   const handleSuccessClose = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
+    if (reason === "clickaway") return;
     setSuccessOpen(false);
+    onClose(); // <--- Trigger the parent's close function ONLY after "OK" is clicked
   };
 
   const Section = ({ title, children }) => (
@@ -735,8 +743,9 @@ function BusinessTaxApplicantModal({
               bgcolor: "#1a7322",
               "&:hover": { bgcolor: "#155a1b" },
             }}
+            disabled={loading} // Disable while loading
           >
-            Yes
+            {loading ? "Approving..." : "Yes"}
           </Button>
           <Button
             onClick={handleConfirmClose}
@@ -750,19 +759,14 @@ function BusinessTaxApplicantModal({
               borderColor: "#1a7322",
               "&:hover": { borderColor: "#1a7322", bgcolor: "#e8f5e9" },
             }}
+            disabled={loading} // Prevent closing while loading
           >
             No
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Success Pop-up */}
-      <Dialog
-        open={successOpen}
-        onClose={handleSuccessClose}
-        TransitionComponent={Fade}
-        maxWidth="xs"
-      >
+      <Dialog open={successOpen} onClose={handleSuccessClose} maxWidth="xs">
         <Paper
           elevation={6}
           sx={{
