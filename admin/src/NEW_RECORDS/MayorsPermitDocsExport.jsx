@@ -523,7 +523,7 @@ function MayorsPermit({
                   styles.center,
                   { fontWeight: "bold", fontSize: 10 },
                 ]}
-              >
+              > 
                 ANY ALTERATION AND/OR ERASURE WILL INVALIDATE THIS PERMIT.
                 {"\n"}
                 "BAGONG SAN PABLO"
