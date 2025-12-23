@@ -136,9 +136,9 @@ function ZoningCert({ applicant, renewZoningFee }) {
 
     // 2. HEADER
     const logoSize = 28;
-    doc.addImage("/spclogo.png", "PNG", marginX, y, logoSize, logoSize);
+    doc.addImage("/bagongpilipinas.png", "PNG", marginX, y, logoSize, logoSize);
     doc.addImage(
-      "/zoninglogo.png",
+      "/spclogo.png",
       "PNG",
       pageWidth - marginX - logoSize,
       y,
@@ -253,8 +253,8 @@ function ZoningCert({ applicant, renewZoningFee }) {
           <Grid item xs={3} sx={{ textAlign: "left" }}>
             <Box
               component="img"
-              src="/spclogo.png"
-              alt="SPC Logo"
+              src="/bagongpilipinas.png"
+              alt="bagong pilipinas Logo"
               sx={{ width: 70, height: 70 }}
             />
           </Grid>
@@ -277,8 +277,8 @@ function ZoningCert({ applicant, renewZoningFee }) {
           <Grid item xs={3} sx={{ textAlign: "right" }}>
             <Box
               component="img"
-              src="/zoninglogo.png"
-              alt="Zoning Logo"
+              src="/spclogo.png"
+              alt="spc Logo"
               sx={{ width: 70, height: 70 }}
             />
           </Grid>
