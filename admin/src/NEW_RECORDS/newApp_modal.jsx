@@ -14,6 +14,7 @@ import {
   TextField,
   Typography,
   Tooltip,
+  CircularProgress,
   IconButton,
   Stack,
   Stepper,
@@ -25,6 +26,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
 import { useState, useEffect } from "react";
 import MayorsPermit from "./MayorsPermitDocsExport"; // ✅ Import the export component
+import { LoadingButton } from "@mui/lab";
 
 // ✅ Custom Colored Step Icon
 function ColorStepIcon(props) {
@@ -179,6 +181,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
   const [businessDetails, setBusinessDetails] = useState([]);
   const [fsicData, setFsicData] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState({});
+  const [passing, setPassing] = useState(false);
 
   const handleFileChange = (name, file) => {
     setSelectedFiles((prev) => ({
@@ -337,14 +340,11 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
   const otherChargesTotal = 0;
 
   const handlePassToBusinessTax = async () => {
+    setPassing(true);
     try {
       const res = await axios.post(
         `${API}/businessTax/businessTax/approve/${applicant.id}`
       );
-   
-
-
-
 
       if (res.status === 201) {
         alert("✅ Applicant successfully passed to Business Tax!");
@@ -355,6 +355,8 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
     } catch (error) {
       console.error("❌ Error passing to Business Tax:", error);
       alert("Failed to pass applicant to Business Tax");
+    } finally {
+      setPassing(false);
     }
   };
 
@@ -955,6 +957,7 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
               applicant={applicant}
               collections={collections}
               total={total}
+              onClose={onClose}
               otherChargesTotal={otherChargesTotal}
               selectedFiles={selectedFiles}
             />
@@ -980,14 +983,15 @@ function ApplicantModal({ applicant, isOpen, onClose, onApprove, baseUrl }) {
           </>
         ) : (
           // ✅ Show Pass to Business Tax
-          <Button
+          <LoadingButton
             onClick={handlePassToBusinessTax}
+            loading={passing}
             variant="contained"
             color="success"
             disabled={!allApproved}
           >
             Pass to Business Tax
-          </Button>
+          </LoadingButton>
         )}
       </DialogActions>
     </Dialog>

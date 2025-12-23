@@ -10,9 +10,9 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
   logging: false,
 
   pool: {
-    max: 2, // ✅ VERY IMPORTANT
+    max: 2,
     min: 0,
-    acquire: 60000, // give DB time to wake up
+    acquire: 60000,
     idle: 10000,
   },
 
