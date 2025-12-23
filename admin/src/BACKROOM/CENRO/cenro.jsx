@@ -83,10 +83,16 @@ const ConfirmationModal = ({
 };
 
 // Success Modal (Responsive)
-const SuccessModal = ({ isOpen, onClose, message }) => {
+const SuccessModal = ({ isOpen, onClose, message, onCloseModal }) => {
   const isMobile = useMediaQuery("(max-width:600px)");
+
+  const handleClose = () => {
+    if (onClose) onClose(); // close success modal
+    if (onCloseModal) onCloseModal(); // additional action, e.g., close applicant modal
+  };
+
   return (
-    <Modal open={isOpen} onClose={onClose}>
+    <Modal open={isOpen} onClose={handleClose}>
       <Box
         sx={{
           position: "absolute",
@@ -115,7 +121,7 @@ const SuccessModal = ({ isOpen, onClose, message }) => {
         <Button
           variant="contained"
           color="success"
-          onClick={onClose}
+          onClick={handleClose}
           size={isMobile ? "small" : "medium"}
         >
           OK
@@ -136,6 +142,7 @@ function Cenro() {
   const [filter, setFilter] = useState("pending");
   const [selectedFiles, setSelectedFiles] = useState({});
   const [loading, setLoading] = useState(false);
+  const [approving, setApproving] = useState(false);
 
   // Confirmation & Success
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -193,7 +200,7 @@ function Cenro() {
   // 2. Confirm & send to backend
   const handleConfirmAction = async () => {
     const { id, cenroFee, selectedFiles } = confirmationData;
-
+    setApproving(true);
     try {
       const formData = new FormData();
       formData.append("cenroFee", cenroFee);
@@ -213,9 +220,10 @@ function Cenro() {
       );
       setIsConfirmModalOpen(false);
       setIsSuccessModalOpen(true);
-      closeModal();
     } catch (error) {
       console.error("Error approving:", error);
+    } finally {
+      setApproving(false);
     }
   };
 
@@ -426,13 +434,14 @@ function Cenro() {
         isOpen={isConfirmModalOpen}
         onClose={() => setIsConfirmModalOpen(false)}
         onConfirm={handleConfirmAction}
-        loading={loading}
+        loading={approving}
         message="Are you sure you want to approve this applicant?"
       />
 
       {/* Success Modal */}
       <SuccessModal
         isOpen={isSuccessModalOpen}
+        onCloseModal={closeModal}
         onClose={() => setIsSuccessModalOpen(false)}
         message="CENRO Application Approved!"
       />

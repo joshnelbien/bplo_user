@@ -286,6 +286,7 @@ function ChoApplicantModal({
   const [generatingPDF, setGeneratingPDF] = useState(false);
   const certRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [approving, setApproving] = useState(false);
 
   useEffect(() => {
     if (applicant) setChoFee(applicant.choFee || "");
@@ -311,12 +312,21 @@ function ChoApplicantModal({
     }
   };
 
-  const handleApproveConfirm = () => {
-    
-    onApprove(applicant.id, choFee, selectedFiles);
-    setLoading(true);
-    setSuccessStatusOpen(true);
-    fetchApplicants();
+  const handleApproveConfirm = async () => {
+    setApproving(true);
+
+    try {
+      // Wait for approval to finish
+      await onApprove(applicant.id, choFee, selectedFiles);
+      // Close confirm dialog and show success
+      setApproveConfirmOpen(false);
+      setSuccessStatusOpen(true);
+    } catch (error) {
+      console.error("Approval failed:", error);
+      alert("Approval failed. See console for details.");
+    } finally {
+      setApproving(false);
+    }
   };
 
   const handleDeclineClick = () => {
@@ -832,7 +842,7 @@ function ChoApplicantModal({
         open={approveConfirmOpen}
         title="Are you sure you want to approve this applicant?"
         onConfirm={handleApproveConfirm}
-        loading={loading}
+        loading={approving} // pass approving state here
         onCancel={() => setApproveConfirmOpen(false)}
         confirmColor="success"
       />
