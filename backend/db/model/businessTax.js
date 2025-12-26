@@ -220,6 +220,7 @@ const BusinessTax = sequelize.define(
     billiards: { type: DataTypes.STRING }, //OC
     boardAndLogging: { type: DataTypes.STRING }, //OC
     fsicFee: { type: DataTypes.STRING }, //FSIC
+    plate_no: { type: DataTypes.STRING },
   },
 
   {

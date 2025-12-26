@@ -243,6 +243,7 @@ const File = sequelize.define(
     billiards: { type: DataTypes.STRING },
     boardAndLogging: { type: DataTypes.STRING },
     fsicFee: { type: DataTypes.STRING },
+    plate_no: { type: DataTypes.STRING },
   },
   {
     tableName: "NewApplications",

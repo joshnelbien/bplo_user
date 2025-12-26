@@ -8,6 +8,7 @@ const TreasurersOffice = require("../db/model/treasurersOfficeDB");
 const BusinessProfile = require("../db/model/businessProfileDB");
 const File = require("../db/model/files");
 const ClientPayments = require("../db/model/paymentsDB");
+const { Op, Sequelize } = require("sequelize");
 
 router.post("/businessTax/approve/:id", async (req, res) => {
   try {
@@ -164,32 +165,50 @@ router.put("/treasurer-payments/:id", async (req, res) => {
       checkDate,
     } = req.body;
 
-    console.log("Received payment update:", req.body);
-
     const applicant = await TreasurersOffice.findByPk(id);
     const fileApplicant = await File.findByPk(id);
-    // const businessProfile = await BusinessProfile.findByPk(id);
 
-    // if (!applicant || !fileApplicant || !businessProfile) {
-    //   return res.status(404).json({ error: "Applicant or Profile not found" });
-    // }
+    if (!applicant || !fileApplicant) {
+      return res.status(404).json({ error: "Record not found" });
+    }
 
+    // ============================
+    // AUTO-INCREMENT PLATE NUMBER
+    // ============================
+    let nextPlate = applicant.plate_no;
+
+    if (!nextPlate) {
+      const lastRecord = await TreasurersOffice.findOne({
+        where: {
+          plate_no: { [Op.ne]: null },
+          id: { [Op.ne]: id },
+        },
+        order: [[Sequelize.literal(`CAST("plate_no" AS INTEGER)`), "DESC"]],
+        attributes: ["plate_no"],
+      });
+
+      const lastPlate = lastRecord?.plate_no || "0";
+      nextPlate = String(parseInt(lastPlate, 10) + 1).padStart(5, "0");
+    }
+
+    // ============================
+    // PAYMENT LOGIC
+    // ============================
     const isRenew = applicant.application?.toLowerCase() === "renew";
     const isNew = applicant.application?.toLowerCase() === "new";
 
-    const parseArray = (field) => {
-      if (!field) return [];
-      return field
-        .replace(/["']/g, "")
-        .split(",")
-        .map((v) => v.trim());
-    };
+    const parseArray = (v) =>
+      v
+        ? v
+            .replace(/["']/g, "")
+            .split(",")
+            .map((x) => x.trim())
+        : [];
 
-    const toQuotedCSV = (arr) => arr.map((v) => `"${v}"`).join(",");
+    const toCSV = (arr) => arr.map((v) => `"${v}"`).join(",");
 
     let updatedFields = {};
 
-    // === NEW APPLICATION ===
     if (
       isNew ||
       (isRenew && applicant.Modeofpayment?.toLowerCase() === "annual")
@@ -204,10 +223,7 @@ router.put("/treasurer-payments/:id", async (req, res) => {
         amount_due: `"${applicant.businessTaxTotal}"`,
         due_date: `""`,
       };
-    }
-
-    // === RENEWAL ===
-    else if (isRenew) {
+    } else {
       let oldPaid = parseArray(applicant.amount_paid);
       let oldMode = parseArray(applicant.payment_mode);
       let oldPaymentDate = parseArray(applicant.payment_date);
@@ -217,69 +233,66 @@ router.put("/treasurer-payments/:id", async (req, res) => {
       let oldDueDates = parseArray(applicant.due_date);
       let oldAmountDue = parseArray(applicant.amount_due);
 
-      const paymentMode = applicant.Modeofpayment?.toLowerCase();
-      const totalAmount = parseFloat(applicant.businessTaxTotal || "0");
+      const total = parseFloat(applicant.businessTaxTotal || 0);
+      const mode = applicant.Modeofpayment?.toLowerCase();
 
-      let perSlot = 0;
-      let slots = 0;
-      let dueDates = [];
+      let slots = 1;
+      let perSlot = total;
+      let dueDates = [""];
 
-      if (paymentMode === "quarterly") {
+      if (mode === "quarterly") {
         slots = 4;
-        perSlot = totalAmount / 4;
-        dueDates = ["January 20", "April 20", "July 20", "October 20"];
-      } else if (paymentMode === "semi-annual") {
+        perSlot = total / 4;
+        dueDates = ["Jan 20", "Apr 20", "Jul 20", "Oct 20"];
+      } else if (mode === "semi-annual") {
         slots = 2;
-        perSlot = totalAmount / 2;
-        dueDates = ["January 20", "June 20"];
-      } else if (paymentMode === "annual") {
-        slots = 1;
-        perSlot = totalAmount;
-        dueDates = [""];
+        perSlot = total / 2;
+        dueDates = ["Jan 20", "Jun 20"];
       }
 
-      const ensureLength = (arr, len) => {
-        while (arr.length < len) arr.push("");
-        return arr.slice(0, len);
+      const normalize = (arr) => {
+        while (arr.length < slots) arr.push("");
+        return arr.slice(0, slots);
       };
 
-      oldPaid = ensureLength(oldPaid, slots);
-      oldMode = ensureLength(oldMode, slots);
-      oldPaymentDate = ensureLength(oldPaymentDate, slots);
-      oldDrawee = ensureLength(oldDrawee, slots);
-      oldCheckNum = ensureLength(oldCheckNum, slots);
-      oldCheckDate = ensureLength(oldCheckDate, slots);
-      oldDueDates = ensureLength(oldDueDates, slots);
-      oldAmountDue = ensureLength(oldAmountDue, slots);
+      oldPaid = normalize(oldPaid);
+      oldMode = normalize(oldMode);
+      oldPaymentDate = normalize(oldPaymentDate);
+      oldDrawee = normalize(oldDrawee);
+      oldCheckNum = normalize(oldCheckNum);
+      oldCheckDate = normalize(oldCheckDate);
+      oldDueDates = normalize(oldDueDates);
+      oldAmountDue = normalize(oldAmountDue);
 
       for (let i = 0; i < slots; i++) {
-        if (oldDueDates[i] === "") oldDueDates[i] = dueDates[i];
-        if (oldAmountDue[i] === "") oldAmountDue[i] = perSlot.toFixed(2);
+        if (!oldDueDates[i]) oldDueDates[i] = dueDates[i];
+        if (!oldAmountDue[i]) oldAmountDue[i] = perSlot.toFixed(2);
       }
 
-      const i = Number(index) ?? 0;
-      oldPaid[i] = amount_paid || "";
-      oldMode[i] = payment_mode || "";
-      oldPaymentDate[i] = paymentDate || "";
-      oldDrawee[i] = draweeBank || "";
-      oldCheckNum[i] = checkNumber || "";
-      oldCheckDate[i] = checkDate || "";
+      const i = Number(index || 0);
+
+      oldPaid[i] = amount_paid;
+      oldMode[i] = payment_mode;
+      oldPaymentDate[i] = paymentDate;
+      oldDrawee[i] = draweeBank;
+      oldCheckNum[i] = checkNumber;
+      oldCheckDate[i] = checkDate;
 
       updatedFields = {
-        amount_paid: toQuotedCSV(oldPaid),
-        payment_mode: toQuotedCSV(oldMode),
-        payment_date: toQuotedCSV(oldPaymentDate),
-        drawee_bank: toQuotedCSV(oldDrawee),
-        check_number: toQuotedCSV(oldCheckNum),
-        check_date: toQuotedCSV(oldCheckDate),
-        amount_due: toQuotedCSV(oldAmountDue),
-        due_date: toQuotedCSV(oldDueDates),
+        amount_paid: toCSV(oldPaid),
+        payment_mode: toCSV(oldMode),
+        payment_date: toCSV(oldPaymentDate),
+        drawee_bank: toCSV(oldDrawee),
+        check_number: toCSV(oldCheckNum),
+        check_date: toCSV(oldCheckDate),
+        amount_due: toCSV(oldAmountDue),
+        due_date: toCSV(oldDueDates),
       };
     }
 
-    // SHARED UPDATE FOR ALL TABLES
     const sharedUpdate = {
       ...updatedFields,
+      plate_no: nextPlate,
       TREASURER: "Approved",
       passtoTreasurer: "Done",
       permitRelease: "Yes",
@@ -287,11 +300,13 @@ router.put("/treasurer-payments/:id", async (req, res) => {
 
     await applicant.update(sharedUpdate);
     await fileApplicant.update(sharedUpdate);
-    // await businessProfile.update(sharedUpdate);
 
-    res.json({ success: true, updated: sharedUpdate });
-  } catch (error) {
-    console.error("Payment update error:", error);
+    res.json({
+      success: true,
+      plate_no: nextPlate,
+    });
+  } catch (err) {
+    console.error("Payment update error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

@@ -315,7 +315,7 @@ function MayorsPermit({
                   {new Date().getFullYear()}
                 </Text>
                 <Text style={{ fontSize: 26, fontWeight: "bold" }}>
-                  {applicant?.PermitNumber || "00000"}
+                  {applicant?.plate_no || "00000"}
                 </Text>
                 <Text style={{ fontSize: 8 }}>PERMIT NUMBER</Text>
               </View>
@@ -465,9 +465,7 @@ function MayorsPermit({
                   <Text style={{ fontWeight: "bold", fontSize: 10 }}>
                     JOHN ANDRE A. BELEN, MPA
                   </Text>
-                  <Text style={{ fontSize: 8 }}>
-                    LICENSING OFFICER III
-                  </Text>
+                  <Text style={{ fontSize: 8 }}>LICENSING OFFICER III</Text>
                 </View>
 
                 <View style={{ alignItems: "center" }}>
@@ -523,7 +521,7 @@ function MayorsPermit({
                   styles.center,
                   { fontWeight: "bold", fontSize: 10 },
                 ]}
-              > 
+              >
                 ANY ALTERATION AND/OR ERASURE WILL INVALIDATE THIS PERMIT.
                 {"\n"}
                 "BAGONG SAN PABLO"
