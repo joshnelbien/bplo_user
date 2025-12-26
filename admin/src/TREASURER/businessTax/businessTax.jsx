@@ -179,24 +179,16 @@ function BusinessTax() {
 
   return (
     <>
-      {/* 1. TOP BAR (Fixed Header) - NEWLY ADDED */}
       <TopBar />
-
-      {/* 2. SIDE BAR (Original Position Maintained) */}
       <Side_bar />
-
-      {/* 3. MAIN CONTENT (Padded to clear fixed TopBar and offset by Side_bar) */}
       <Box
         id="main_content"
         sx={{
           p: 3,
           minHeight: "100vh",
-          // 🛑 CHANGED: Background set to plain white
           background: "white",
-          // Offset from sidebar (250px)
           marginLeft: { xs: 0, sm: `${SIDE_BAR_WIDTH}px` },
           width: { xs: "100%", sm: `calc(100% - ${SIDE_BAR_WIDTH}px)` },
-          // Padded to clear fixed TopBar (80px + margin)
           pt: `${TOP_BAR_HEIGHT + 24}px`,
         }}
       >
@@ -206,15 +198,11 @@ function BusinessTax() {
           sx={{
             color: "darkgreen",
             fontWeight: "bold",
-            // Only show on mobile since the TopBar handles the title on desktop
             display: { xs: "block", sm: "none" },
           }}
         >
-          {/* Title for Mobile View */}
           BUSINESS TAX OFFICE
         </Typography>
-
-        {/* ✅ Button Group Filter */}
         <Box mb={2}>
           <ButtonGroup variant="contained">
             <Button
@@ -249,8 +237,6 @@ function BusinessTax() {
             </Button>
           </ButtonGroup>
         </Box>
-
-        {/* ✅ Table */}
         <TableContainer
           component={Paper}
           sx={{ borderRadius: 2, boxShadow: 3 }}
@@ -312,20 +298,16 @@ function BusinessTax() {
             </TableBody>
           </Table>
         </TableContainer>
-
-        {/* ✅ Pagination */}
         <Box display="flex" justifyContent="center" mt={3}>
           <Pagination
             count={totalPages}
             page={currentPage}
             onChange={handlePageChange}
-            color="success" // Changed color to 'success' to match the green theme
+            color="success"
             shape="rounded"
           />
         </Box>
       </Box>
-
-      {/* ✅ Modal Component */}
       <BusinessTaxApplicantModal
         applicant={selectedApplicant}
         isOpen={isModalOpen}

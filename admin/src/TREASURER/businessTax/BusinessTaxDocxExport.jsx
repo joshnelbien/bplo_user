@@ -82,8 +82,6 @@ function BusinessTaxPdfExport({ applicant, collections, totalExcludingOBO }) {
         (pesos > 0 ? " and " : "") + numberToWords(centavos) + " centavos";
     return words || "zero";
   }
-
-  // Convert local image to base64 (fallback sig)
   const loadImageAsBase64 = async (imagePath) => {
     try {
       const response = await fetch(imagePath);
@@ -94,7 +92,7 @@ function BusinessTaxPdfExport({ applicant, collections, totalExcludingOBO }) {
         reader.readAsDataURL(blob);
       });
     } catch {
-      return null;
+      return null;0
     }
   };
 
