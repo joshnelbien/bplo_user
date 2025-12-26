@@ -32,7 +32,7 @@ const CmswoCertExport = ({ applicant }) => {
         }
 
         if (res.data?.name) {
-          setCmswoSignatoryName(res.data.name); // Adjust if API returns first/last separately
+          setCmswoSignatoryName(res.data.name);
         }
       } catch (err) {
         console.error("Error loading CMSWO admin signature:", err);
@@ -60,8 +60,8 @@ const CmswoCertExport = ({ applicant }) => {
 
   // Helper to pick the day with ordinal suffix
   const dayWithSuffix = (day) => {
-    const s = ["th", "st", "nd", "rd"],
-      v = day % 100;
+    const s = ["th", "st", "nd", "rd"];
+    const v = day % 100;
     return day + (s[(v - 20) % 10] || s[v] || s[0]);
   };
 
@@ -91,33 +91,54 @@ const CmswoCertExport = ({ applicant }) => {
           pageBreakAfter: "always",
         }}
       >
-        {/* Left logo */}
+        {/* Header with logos on both sides */}
         <Box
-          component="img"
-          src="/spclogo.png"
-          alt="left logo"
           sx={{
-            position: "absolute",
-            top: "15mm",
-            left: "20mm",
-            width: "28mm",
-            height: "auto",
-            opacity: 0.85,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            px: "20mm",
+            pt: "15mm",
+            position: "relative",
             zIndex: 1,
           }}
-        />
+        >
+          {/* Left: Bagong Pilipinas logo */}
+          <Box
+            component="img"
+            src="/bagongpilipinas.png"
+            alt="Bagong Pilipinas"
+            sx={{
+              width: "20mm",
+              height: "20mm",
+              opacity: 0.85,
+            }}
+          />
 
-        {/* Header */}
-        <Box textAlign="center" pt={8}>
-          <Typography variant="h6" fontWeight="bold">
-            Republic of the Philippines
-          </Typography>
-          <Typography variant="h5" fontWeight="bold">
-            City Solid Waste Management Office
-          </Typography>
-          <Typography variant="h6" fontWeight="bold">
-            San Pablo City
-          </Typography>
+          {/* Center text */}
+          <Box textAlign="center" sx={{ flex: 1 }}>
+            <Typography variant="h6" fontWeight="bold">
+              Republic of the Philippines
+            </Typography>
+            <Typography variant="h5" fontWeight="bold">
+              City Solid Waste Management Office
+            </Typography>
+            <Typography variant="h6" fontWeight="bold">
+              San Pablo City
+            </Typography>
+          </Box>
+
+          {/* Right: SPC logo */}
+          <Box
+            component="img"
+            src="/spclogo.png"
+            alt="San Pablo City Logo"
+            sx={{
+              width: "20mm",
+              height: "20mm",
+              opacity: 0.85,
+            }}
+          />
         </Box>
 
         {/* Title */}

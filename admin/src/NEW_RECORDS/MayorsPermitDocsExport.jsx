@@ -463,10 +463,10 @@ function MayorsPermit({
                     }}
                   />
                   <Text style={{ fontWeight: "bold", fontSize: 10 }}>
-                    ORIA M. BAÑAGALE
+                    JOHN ANDRE A. BELEN, MPA
                   </Text>
                   <Text style={{ fontSize: 8 }}>
-                    LICENSING OFFICER IV, CHIEF, BPLO
+                    LICENSING OFFICER III
                   </Text>
                 </View>
 
@@ -523,10 +523,10 @@ function MayorsPermit({
                   styles.center,
                   { fontWeight: "bold", fontSize: 10 },
                 ]}
-              >
+              > 
                 ANY ALTERATION AND/OR ERASURE WILL INVALIDATE THIS PERMIT.
                 {"\n"}
-                "CONTINUITY AND GOOD GOVERNANCE FOR STRONGER UNITY AND PROGRESS"
+                "BAGONG SAN PABLO"
               </Text>
             </View>
           </View>

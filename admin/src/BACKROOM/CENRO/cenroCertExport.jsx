@@ -5,7 +5,8 @@ import html2canvas from "html2canvas";
 import axios from "axios";
 
 const spcLogo = "/spclogo.png";
-const fallbackSignature = "/samplesig.png"; // default signature
+const bagongPilipinasLogo = "/bagongpilipinas.png";
+const fallbackSignature = "/samplesig.png";
 
 const API = import.meta.env.VITE_API_BASE;
 
@@ -95,7 +96,7 @@ const CenroCertExport = ({ applicant }) => {
     },
     {
       key: "D",
-      text: "Duli certified Barangay Clearance (when required)",
+      text: "Duly certified Barangay Clearance (when required)",
     },
     {
       key: "E",
@@ -114,59 +115,80 @@ const CenroCertExport = ({ applicant }) => {
       <div
         ref={certificateRef}
         style={{
-          fontFamily: "Arial, Helvetica, sans-serif",  // Changed to Arial globally
-          fontSize: "11pt",                           // Slightly larger for better readability in Arial
+          fontFamily: "Arial, Helvetica, sans-serif",
+          fontSize: "10pt", // Reduced from 11pt
           backgroundColor: "white",
           color: "black",
-          lineHeight: "1.4",
+          lineHeight: "1.35", // Slightly tighter
           boxSizing: "border-box",
           width: "612px",
           margin: "0 auto",
-          padding: "40px 50px",
+          padding: "35px 45px", // Reduced padding
         }}
       >
-        {/* HEADER */}
-        <div style={{ textAlign: "center", marginBottom: "10px" }}>
+        {/* HEADER with logos */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "12px",
+          }}
+        >
+          {/* Left: Bagong Pilipinas */}
+          <img
+            src={bagongPilipinasLogo}
+            alt="Bagong Pilipinas"
+            style={{ width: "70px", height: "auto" }}
+          />
+
+          {/* Center text */}
+          <div style={{ textAlign: "center", flex: 1 }}>
+            <h2
+              style={{
+                margin: "0 0 4px 0",
+                fontSize: "13pt",
+                fontWeight: "bold",
+              }}
+            >
+              Republic of the Philippines
+            </h2>
+            <h3
+              style={{
+                margin: "0 0 4px 0",
+                fontSize: "12pt",
+                fontWeight: "bold",
+              }}
+            >
+              CITY ENVIRONMENT AND NATURAL RESOURCES OFFICE
+            </h3>
+            <p style={{ margin: "0 0 8px 0", fontSize: "9pt" }}>
+              4/F New 8th Storey Building, Capitol Complex, San Pablo City
+              <br />
+              Tel. No. (049) 562-2822
+            </p>
+          </div>
+
+          {/* Right: SPC Logo */}
           <img
             src={spcLogo}
             alt="SPC Logo"
             style={{ width: "70px", height: "auto" }}
           />
         </div>
-        <div style={{ textAlign: "center", marginBottom: "15px" }}>
-          <h2
-            style={{
-              margin: "0 0 4px 0",
-              fontSize: "14pt",
-              fontWeight: "bold",
-            }}
-          >
-            Republic of the Philippines
-          </h2>
-          <h3
-            style={{
-              margin: "0 0 4px 0",
-              fontSize: "13pt",
-              fontWeight: "bold",
-            }}
-          >
-            CITY ENVIRONMENT AND NATURAL RESOURCES OFFICE
-          </h3>
-          <p style={{ margin: "0 0 10px 0", fontSize: "10pt" }}>
-            4/F New 8th Storey Building, Capitol Complex, San Pablo City
-            <br />
-            Tel. No. (049) 562-2822
-          </p>
+
+        {/* CERTIFICATION TITLE */}
+        <div style={{ textAlign: "center", marginBottom: "18px" }}>
           <h1
             style={{
-              margin: "15px 0 20px 0",
-              fontSize: "18pt",
+              margin: "0 0 10px 0",
+              fontSize: "16pt", // Slightly smaller
               fontWeight: "bold",
               textTransform: "uppercase",
               borderBottom: "3px solid black",
               display: "inline-block",
-              paddingBottom: "6px",
-              letterSpacing: "3px",
+              paddingBottom: "4px",
+              letterSpacing: "1.5px", // Reduced letter spacing
             }}
           >
             CERTIFICATION
@@ -174,8 +196,8 @@ const CenroCertExport = ({ applicant }) => {
         </div>
 
         {/* BODY */}
-        <div style={{ textAlign: "justify", marginBottom: "15px" }}>
-          <p style={{ marginBottom: "12px", fontSize: "11pt" }}>
+        <div style={{ textAlign: "justify", marginBottom: "12px" }}>
+          <p style={{ marginBottom: "10px" }}>
             This is to certify that the establishment{" "}
             <strong>
               <u>{applicant.businessName || "_______________________"}</u>
@@ -199,23 +221,22 @@ const CenroCertExport = ({ applicant }) => {
           <p
             style={{
               fontWeight: "bold",
-              margin: "15px 0 10px 0",
-              fontSize: "12pt",
+              margin: "12px 0 8px 0",
             }}
           >
             THAT SAID ESTABLISHMENT SHALL:
           </p>
 
-          {/* CHECKBOX LIST - Enhanced visual */}
-          <div style={{ marginBottom: "15px" }}>
+          {/* CHECKBOX LIST */}
+          <div style={{ marginBottom: "12px" }}>
             {checklistItems.map((item) => (
               <div
                 key={item.key}
                 style={{
                   display: "flex",
                   alignItems: "flex-start",
-                  marginBottom: "10px",
-                  gap: "10px",
+                  marginBottom: "8px",
+                  gap: "8px",
                 }}
               >
                 <input
@@ -223,15 +244,15 @@ const CenroCertExport = ({ applicant }) => {
                   checked={checkboxes[item.key]}
                   onChange={() => handleCheckboxChange(item.key)}
                   style={{
-                    width: "18px",
-                    height: "18px",
+                    width: "16px",
+                    height: "16px",
                     margin: "2px 0 0 0",
                     cursor: "pointer",
                     flexShrink: 0,
                   }}
                   data-key={item.key}
                 />
-                <span style={{ fontSize: "11pt", lineHeight: "1.5" }}>
+                <span style={{ lineHeight: "1.4" }}>
                   <strong>{item.key}.</strong> {item.text}
                 </span>
               </div>
@@ -241,36 +262,35 @@ const CenroCertExport = ({ applicant }) => {
           {/* NUMBERED LIST */}
           <ol
             style={{
-              margin: "12px 0 15px 20px",
+              margin: "10px 0 12px 20px",
               paddingLeft: "5px",
-              fontSize: "11pt",
-              lineHeight: "1.5",
+              lineHeight: "1.4",
             }}
           >
-            <li style={{ marginBottom: "8px" }}>
+            <li style={{ marginBottom: "6px" }}>
               That the business establishment shall not violate the provisions
               of the San Pablo City Land Use and Zoning Ordinance.
             </li>
-            <li style={{ marginBottom: "8px" }}>
+            <li style={{ marginBottom: "6px" }}>
               That any authorized City Environment and Natural Resources
               Personnel can conduct an on-the-spot inspection...
             </li>
-            <li style={{ marginBottom: "8px" }}>
+            <li style={{ marginBottom: "6px" }}>
               That all necessary permits/certifications (ECC’s, CNC’s, Discharge
               Permits, NWRB, CWR) from other government agencies...
             </li>
-            <li style={{ marginBottom: "8px" }}>
+            <li style={{ marginBottom: "6px" }}>
               That this certification shall be exhibited together with the
               Mayor’s Business Permit.
             </li>
           </ol>
 
-          <p style={{ margin: "12px 0 15px 0", fontSize: "11pt" }}>
+          <p style={{ margin: "10px 0 8px 0" }}>
             This certification is valid up to{" "}
             <strong>December 31, {year}</strong> unless sooner revoked for cause.
           </p>
 
-          <p style={{ margin: "12px 0", fontSize: "11pt" }}>
+          <p style={{ margin: "10px 0" }}>
             Given this <u>{day}</u> day of <u>{monthName}</u>, {year}, in the City of San Pablo.
           </p>
         </div>
@@ -278,59 +298,58 @@ const CenroCertExport = ({ applicant }) => {
         {/* SIGNATURE SECTION */}
         <div
           style={{
-            marginTop: "30px",
+            marginTop: "25px",
             display: "flex",
             justifyContent: "space-between",
-            gap: "40px",
+            gap: "30px",
           }}
         >
-          <div style={{ width: "45%", textAlign: "center" }}>
+          <div style={{ width: "48%", textAlign: "center" }}>
             <p
               style={{
-                marginBottom: "8px",
+                marginBottom: "6px",
                 fontWeight: "bold",
-                fontSize: "12pt",
               }}
             >
               CONFORME:
             </p>
-            <div style={{ height: "60px", marginBottom: "8px" }} />
+            <div style={{ height: "50px", marginBottom: "6px" }} />
             <p
               style={{
                 borderTop: "1px solid black",
-                paddingTop: "8px",
+                paddingTop: "6px",
                 margin: "0 0 4px 0",
               }}
             >
               ________________________________________
             </p>
-            <p style={{ fontSize: "10pt", margin: "4px 0" }}>
+            <p style={{ fontSize: "9pt", margin: "4px 0" }}>
               Proprietor/Authorized Representative
               <br />
               (Signature over Printed Name)
             </p>
-            <p style={{ fontSize: "10pt", marginTop: "10px" }}>
+            <p style={{ fontSize: "9pt", marginTop: "8px" }}>
               <strong>CONTACT NO.</strong> ___________________________
             </p>
           </div>
 
-          <div style={{ width: "45%", textAlign: "center" }}>
-            <p style={{ marginBottom: "4px", fontSize: "11pt", fontWeight: "bold" }}>
+          <div style={{ width: "48%", textAlign: "center" }}>
+            <p style={{ marginBottom: "4px", fontWeight: "bold" }}>
               APPROVED BY:
             </p>
-            <div style={{ margin: "10px 0" }}>
+            <div style={{ margin: "8px 0" }}>
               {signatory && (
                 <img
                   src={signatory}
                   alt="e-Signature"
-                  style={{ width: "160px", height: "auto" }}
+                  style={{ width: "140px", height: "auto" }}
                 />
               )}
             </div>
-            <p style={{ margin: "8px 0 0 0", fontWeight: "bold", fontSize: "12pt" }}>
+            <p style={{ margin: "6px 0 0 0", fontWeight: "bold" }}>
               DENNIS A. RAMOS, MPA
             </p>
-            <p style={{ margin: "4px 0 0 0", fontSize: "11pt" }}>
+            <p style={{ margin: "3px 0 0 0", fontSize: "9pt" }}>
               City Environment and Natural Resources Officer
             </p>
           </div>

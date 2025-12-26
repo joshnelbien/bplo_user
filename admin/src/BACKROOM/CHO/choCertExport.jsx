@@ -113,15 +113,22 @@ const ChoCertExport = ({ applicant }) => {
             style={{
               display: "flex",
               alignItems: "center",
+              justifyContent: "space-between",
               marginBottom: "15px",
-              marginRight: "170px",
             }}
           >
+            {/* Left side: Bagong Pilipinas logo */}
             <img
-              src="/spclogo.png"
-              alt="San Pablo City Logo"
-              style={{ width: "75px", height: "auto", marginLeft: "120px" }}
+              src="/bagongpilipinas.png"
+              alt="Bagong Pilipinas"
+              style={{ 
+                width: "75px", 
+                height: "auto",
+                marginLeft: "0" 
+              }}
             />
+            
+            {/* Center text */}
             <div style={{ textAlign: "center", flex: 1 }}>
               <p style={{ margin: 0, fontWeight: "bold", fontSize: "13pt" }}>
                 Republic of the Philippines
@@ -139,6 +146,17 @@ const ChoCertExport = ({ applicant }) => {
                 San Pablo City
               </p>
             </div>
+            
+            {/* Right side: SPC logo */}
+            <img
+              src="/spclogo.png"
+              alt="San Pablo City Logo"
+              style={{ 
+                width: "75px", 
+                height: "auto", 
+                marginRight: "0" 
+              }}
+            />
           </div>
 
           {/* Title */}
@@ -217,7 +235,6 @@ const ChoCertExport = ({ applicant }) => {
                 (Business Name)
               </p>
 
-              {applicant.officeType}
               <p
                 style={{
                   margin: "0 0 8px",
@@ -226,7 +243,9 @@ const ChoCertExport = ({ applicant }) => {
                   paddingBottom: "3px",
                   width: "380px",
                 }}
-              ></p>
+              >
+                {applicant.officeType}
+              </p>
               <p
                 style={{
                   margin: "0 0 20px",

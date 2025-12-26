@@ -16,7 +16,7 @@ function BusinessTaxPdfExport({ applicant, collections, totalExcludingOBO }) {
       ? value.toLocaleString(undefined, { minimumFractionDigits: 2 })
       : "";
 
-  // ✅ Convert numbers to words (your original logic)
+  // Convert numbers to words (unchanged)
   function numberToWords(num) {
     if (num === 0) return "zero";
     const belowTwenty = [
@@ -92,11 +92,11 @@ function BusinessTaxPdfExport({ applicant, collections, totalExcludingOBO }) {
         reader.readAsDataURL(blob);
       });
     } catch {
-      return null;0
+      return null;
+      0;
     }
   };
 
-  // ✅ Load logged-in user's signature from DB
   useEffect(() => {
     const loadAdmin = async () => {
       try {
@@ -124,15 +124,12 @@ function BusinessTaxPdfExport({ applicant, collections, totalExcludingOBO }) {
     loadFallbackSig();
   }, [API]);
 
-  // ✅ Export to PDF
   const exportPdf = async () => {
     const validCollections = collections.filter(
       (item) => item.amount && Number(item.amount) > 0
     );
 
     const spcLogoImageData = await loadImageAsBase64("/spclogo.png");
-
-    // ✅ Use uploaded signature if exists, else fallback
     const signatureToUse = userSignatory || defaultSignature;
 
     const fullName = `${applicant.firstName || ""} ${
@@ -147,16 +144,17 @@ function BusinessTaxPdfExport({ applicant, collections, totalExcludingOBO }) {
 
     // ---- HEADER ----
     pdf.setFont("helvetica");
-    pdf.setFontSize(8);
-
     let yPos = 25;
+
     if (spcLogoImageData) {
       const logoWidth = 60;
       const xLogo = (pdf.internal.pageSize.getWidth() - logoWidth) / 2;
       pdf.addImage(spcLogoImageData, "PNG", xLogo, yPos, logoWidth, logoWidth);
     }
     yPos += 75;
-    pdf.setFontSize(9);
+
+    // Increased header font sizes
+    pdf.setFontSize(12); // was 9
     pdf.setFont("helvetica", "bold");
     pdf.text(
       "Republic of the Philippines",
@@ -164,28 +162,31 @@ function BusinessTaxPdfExport({ applicant, collections, totalExcludingOBO }) {
       yPos,
       { align: "center" }
     );
-    yPos += 12;
+    yPos += 16; // increased spacing
+
+    pdf.setFontSize(11); // was 9
     pdf.setFont("helvetica", "normal");
     pdf.text("City of San Pablo", pdf.internal.pageSize.getWidth() / 2, yPos, {
       align: "center",
     });
-    yPos += 20;
+    yPos += 28; // increased spacing
 
+    // Title
     autoTable(pdf, {
       startY: yPos,
       theme: "plain",
       styles: {
         fillColor: [0, 0, 0],
         textColor: [255, 255, 255],
-        fontSize: 9,
+        fontSize: 14, // was 9 → much larger title
         fontStyle: "bold",
-        cellPadding: 4,
+        cellPadding: 6, // slightly increased padding
       },
       body: [["BUSINESS TAX ORDER OF PAYMENT"]],
       margin: { left: 50, right: 50 },
       tableWidth: 495,
     });
-    yPos = pdf.lastAutoTable.finalY + 10;
+    yPos = pdf.lastAutoTable.finalY + 16; // increased spacing
 
     // ---- INFO TABLE ----
     const isRenew = applicant?.application?.toLowerCase() === "renew";
@@ -206,11 +207,11 @@ function BusinessTaxPdfExport({ applicant, collections, totalExcludingOBO }) {
       startY: yPos,
       body: infoBody,
       theme: "grid",
-      styles: { fontSize: 7, cellPadding: 3 },
+      styles: { fontSize: 10, cellPadding: 5 }, // was 7 → now 10
       margin: { left: 50, right: 50 },
       tableWidth: 495,
     });
-    yPos = pdf.lastAutoTable.finalY + 10;
+    yPos = pdf.lastAutoTable.finalY + 16; // increased spacing
 
     // ---- COLLECTIONS TABLE ----
     const collectionBody = validCollections.map((item) => [
@@ -241,42 +242,45 @@ function BusinessTaxPdfExport({ applicant, collections, totalExcludingOBO }) {
       body: collectionBody,
       theme: "grid",
       styles: {
-        fontSize: 7,
-        cellPadding: 3,
-        fillColor: null, // remove background for body cells
+        fontSize: 10, // was 7 → now 10
+        cellPadding: 5, // was 3 → now 5
+        fillColor: null,
       },
       headStyles: {
         fillColor: [0, 0, 0],
-        textColor: [255, 255, 255], // black text
+        textColor: [255, 255, 255],
+        fontSize: 11, // was 9 → now 11
         fontStyle: "bold",
         halign: "center",
       },
-      alternateRowStyles: { fillColor: null }, // remove row stripes
+      alternateRowStyles: { fillColor: null },
       margin: { left: 50, right: 50 },
       tableWidth: 495,
     });
-    yPos = pdf.lastAutoTable.finalY + 20;
+    yPos = pdf.lastAutoTable.finalY + 28; // increased spacing
 
     // ---- SIGNATURES ----
-    const sigWidth = 120,
-      sigHeight = 40;
+    const sigWidth = 140, // slightly larger signature area
+      sigHeight = 50;
     const leftX = 70,
       rightX = 360;
 
     // Clerk Signature (You)
     if (signatureToUse)
       pdf.addImage(signatureToUse, "PNG", leftX, yPos, sigWidth, sigHeight);
-    pdf.text("COMPUTED BY", leftX + sigWidth / 2, yPos + sigHeight + 20, {
+    pdf.setFontSize(10); // was implicit ~9
+    pdf.text("COMPUTED BY", leftX + sigWidth / 2, yPos + sigHeight + 24, {
       align: "center",
     });
 
-    // Treasurer Fixed
+    // Treasurer
     if (defaultSignature)
       pdf.addImage(defaultSignature, "PNG", rightX, yPos, sigWidth, sigHeight);
+    pdf.setFontSize(10);
     pdf.text(
       "ACTING CITY TREASURER",
       rightX + sigWidth / 2,
-      yPos + sigHeight + 20,
+      yPos + sigHeight + 24,
       { align: "center" }
     );
 
