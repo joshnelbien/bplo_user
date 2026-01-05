@@ -211,8 +211,7 @@ export default function DataPrivacyPolicy() {
   }, []);
 
   const handleProceed = () => {
-    window.location.href =
-      "https://play.google.com/store/apps/details?id=egov.app&hl=en";
+    window.location.href = "https://e.gov.ph/";
   };
 
   return (
