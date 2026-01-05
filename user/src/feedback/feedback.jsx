@@ -352,7 +352,7 @@ export default function ClientFeedbackForm() {
               variant="caption"
               sx={{ display: "block", fontSize: "0.6rem" }}
             >
-              San Pablo Mega Complex, Brgy. San Jose, San Pablo City 4000
+              San Pablo City Hall{" "}
             </Typography>
             <Typography
               variant="caption"

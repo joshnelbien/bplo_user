@@ -314,8 +314,6 @@ router.put("/treasurer-payments/:id", async (req, res) => {
 router.post("/business/approve/:id", async (req, res) => {
   try {
     const { id } = req.params;
-
-    // 1. Get applicant from Files table
     const applicant = await BusinessTax.findByPk(id);
     if (!applicant) {
       return res.status(404).json({ error: "Applicant not found" });
@@ -325,8 +323,6 @@ router.post("/business/approve/:id", async (req, res) => {
     if (!applicantStatus) {
       return res.status(404).json({ error: "Applicant not found" });
     }
-
-    // 2. Convert to plain object
     const applicantData = applicant.toJSON();
 
     applicantData.BusinessTax = "pending";
@@ -354,9 +350,6 @@ router.get("/treasurer", async (req, res) => {
   try {
     const { id, field } = req.query;
 
-    // ===============================
-    // 1️⃣ DOWNLOAD / VIEW FILE
-    // ===============================
     if (id && field) {
       const allowedFields = [
         "tIGEfiles",
