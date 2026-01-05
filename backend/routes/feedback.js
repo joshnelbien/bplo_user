@@ -72,7 +72,6 @@ router.post("/send-feedback", async (req, res) => {
 
     const templateParams = {
       to_email: "feedback@sanpablocity.gov.ph",
-
       client_name: clientName || "N/A",
       email: emailAddress || "N/A",
       contact_no: contactNo || "N/A",
