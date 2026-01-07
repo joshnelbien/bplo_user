@@ -5,6 +5,7 @@ import {
   Typography,
   Divider,
   Paper,
+  CircularProgress,
   TextField,
   Button,
 } from "@mui/material";
@@ -222,6 +223,7 @@ export default function ClientFeedbackForm() {
   const [transactionTime, setTransactionTime] = useState("");
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_BASE;
+  const [loading, setLoading] = useState(false);
 
   // Auto fill date and time
   useEffect(() => {
@@ -266,6 +268,9 @@ export default function ClientFeedbackForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    if (loading) return; // prevent double submit
+    setLoading(true);
+
     const formData = {
       clientName: document.getElementById("clientName").value,
       emailAddress: document.getElementById("emailAddress").value,
@@ -303,6 +308,8 @@ export default function ClientFeedbackForm() {
     } catch (err) {
       console.error(err);
       alert("Server error. Please try again later.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -520,10 +527,18 @@ export default function ClientFeedbackForm() {
           variant="contained"
           color="primary"
           type="submit"
+          disabled={loading}
           onClick={handleSubmit}
-          sx={{ bgcolor: "#144C22" }}
+          sx={{ bgcolor: "#144C22", minWidth: "160px" }}
         >
-          Submit Feedback
+          {loading ? (
+            <>
+              <CircularProgress size={18} sx={{ color: "white", mr: 1 }} />
+              Submitting...
+            </>
+          ) : (
+            "Submit Feedback"
+          )}
         </Button>
       </Box>
     </Box>
