@@ -5,6 +5,7 @@ import {
   Typography,
   Divider,
   Paper,
+  CircularProgress,
   TextField,
   Button,
 } from "@mui/material";
@@ -222,6 +223,7 @@ export default function ClientFeedbackForm() {
   const [transactionTime, setTransactionTime] = useState("");
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_BASE;
+  const [loading, setLoading] = useState(false);
 
   // Auto fill date and time
   useEffect(() => {
@@ -266,6 +268,9 @@ export default function ClientFeedbackForm() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    if (loading) return; // prevent double submit
+    setLoading(true);
+
     const formData = {
       clientName: document.getElementById("clientName").value,
       emailAddress: document.getElementById("emailAddress").value,
@@ -303,6 +308,8 @@ export default function ClientFeedbackForm() {
     } catch (err) {
       console.error(err);
       alert("Server error. Please try again later.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -335,40 +342,47 @@ export default function ClientFeedbackForm() {
             alt="San Pablo City Logo"
             sx={{ height: "55px", width: "auto" }}
           />
-        <Box
-  sx={{ textAlign: "center", lineHeight: 1.1, flexGrow: 1, mx: 1 }}
->
-  <Typography variant="caption" sx={{ fontSize: "0.6rem" }}>
-    Republic of the Philippines
-  </Typography>
-  <Typography
-    variant="subtitle2"
-    fontWeight="bold"
-    sx={{ fontSize: "0.7rem" }}
-  >
-    City Government of San Pablo
-  </Typography>
-  <Typography
-    variant="caption"
-    sx={{ display: "block", fontSize: "0.6rem" }}
-  >
-    San Pablo City Hall{" "}
-  </Typography>
-  <Typography
-    variant="caption"
-    sx={{ display: "block", mb: 0.2, fontSize: "0.6rem" }}
-  >
-    Tel No. (049) 503-3487 | Email add: feedback.sanpablocity.gov.ph
-  </Typography>
-  <Divider sx={{ borderBottomWidth: 1, bgcolor: "black", mb: 0.2 }} />
-  <Typography
-    variant="subtitle2"
-    fontWeight="bold"
-    sx={{ fontSize: "0.7rem" }}
-  >
-    FEEDBACK FORM
-  </Typography>
-</Box>
+          <Box
+            sx={{ textAlign: "center", lineHeight: 1.1, flexGrow: 1, mx: 1 }}
+          >
+            <Typography variant="caption" sx={{ fontSize: "0.6rem" }}>
+              Republic of the Philippines
+            </Typography>
+            <Typography
+              variant="subtitle2"
+              fontWeight="bold"
+              sx={{ fontSize: "0.7rem" }}
+            >
+              City Government of San Pablo
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{ display: "block", fontSize: "0.6rem" }}
+            >
+              San Pablo City Hall{" "}
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{ display: "block", mb: 0.2, fontSize: "0.6rem" }}
+            >
+              Tel No. 503-5873 | Email add: feedback@sanpablocity.gov.ph
+            </Typography>
+            <Divider sx={{ borderBottomWidth: 1, bgcolor: "black", mb: 0.2 }} />
+            <Typography
+              variant="subtitle2"
+              fontWeight="bold"
+              sx={{ fontSize: "0.7rem", lineHeight: 1.2 }}
+            >
+              Help us Improve our Service
+            </Typography>
+            <Typography
+              variant="subtitle2"
+              fontWeight="bold"
+              sx={{ fontSize: "0.7rem" }}
+            >
+              FEEDBACK FORM
+            </Typography>
+          </Box>
           <Box
             component="img"
             src="/bagongp.png"
@@ -520,10 +534,18 @@ export default function ClientFeedbackForm() {
           variant="contained"
           color="primary"
           type="submit"
+          disabled={loading}
           onClick={handleSubmit}
-          sx={{ bgcolor: "#144C22" }}
+          sx={{ bgcolor: "#144C22", minWidth: "160px" }}
         >
-          Submit Feedback
+          {loading ? (
+            <>
+              <CircularProgress size={18} sx={{ color: "white", mr: 1 }} />
+              Submitting...
+            </>
+          ) : (
+            "Submit Feedback"
+          )}
         </Button>
       </Box>
     </Box>

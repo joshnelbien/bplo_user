@@ -365,22 +365,15 @@ export default function ClientFeedbackForm() {
               variant="caption"
               sx={{ display: "block", mb: 0.2, fontSize: "0.6rem" }}
             >
-              Tel No. 503-5873 | Email add: feedback@sanpablocity.gov.ph
+              Tel No. (049) 503-3487 | Email add: bplospc@gmail.com
             </Typography>
             <Divider sx={{ borderBottomWidth: 1, bgcolor: "black", mb: 0.2 }} />
             <Typography
               variant="subtitle2"
               fontWeight="bold"
-              sx={{ fontSize: "0.7rem", lineHeight: 1.2 }}
-            >
-              Help us Improve our Service
-            </Typography>
-            <Typography
-              variant="subtitle2"
-              fontWeight="bold"
               sx={{ fontSize: "0.7rem" }}
             >
-              FEEDBACK FORM
+              BUSINESS PERMITS AND LICENSING OFFICE
             </Typography>
           </Box>
           <Box
