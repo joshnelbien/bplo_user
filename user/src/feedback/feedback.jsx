@@ -375,13 +375,6 @@ export default function ClientFeedbackForm() {
             >
               Help us Improve our Service
             </Typography>
-            <Typography
-              variant="subtitle2"
-              fontWeight="bold"
-              sx={{ fontSize: "0.7rem" }}
-            >
-              FEEDBACK FORM
-            </Typography>
           </Box>
           <Box
             component="img"
