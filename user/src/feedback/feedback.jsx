@@ -368,12 +368,13 @@ export default function ClientFeedbackForm() {
               Tel No. 503-5873 | Email add: feedback@sanpablocity.gov.ph
             </Typography>
             <Divider sx={{ borderBottomWidth: 1, bgcolor: "black", mb: 0.2 }} />
+          
             <Typography
               variant="subtitle2"
               fontWeight="bold"
-              sx={{ fontSize: "0.7rem", lineHeight: 1.2 }}
+              sx={{ fontSize: "0.7rem" }}
             >
-              Help us Improve our Service
+              HELP US IMPROVE OUR SERVICE
             </Typography>
           </Box>
           <Box
