@@ -251,16 +251,17 @@ export default function DataPrivacyPolicy() {
         >
           {/* Title */}
           <Typography variant="h5" fontWeight="bold" sx={{ color: "#09360D" }}>
-            Access Notice:
+            Access Notice
           </Typography>
 
           {/*Sub Title */}
           <Typography variant="h6" fontWeight="bold" sx={{ color: "#09360D" }}>
             Access is available only upon official request
+            
           </Typography>
 
           {/* Message */}
-          <Typography variant="body1">
+          <Typography variant="body2" sx={{ color: "#555" }}>
             BPLMS serves as the digitalized backup system of the City Government of San Pablo for the Business Processing and Licensing Office.
 
           </Typography>
