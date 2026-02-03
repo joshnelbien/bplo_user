@@ -12,6 +12,7 @@ import RenewalFormStepper from "./Renew/RenewalFormStepper";
 import RenewApplicationPage from "./RenewApplicationPage/renewApplication";
 import ClientFeedbackForm from "./feedback/feedback";
 import UniversalFeedbackForm from "./UniversalFeedback/FeedbackForm";
+import SwitchServer from "./20260202swtchsrvr/switchServer";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           path="/newApplicationRegister"
           element={<NewApplicationRegisterPage />}
         />
+        <Route path="/switchServer" element={<SwitchServer />} />
       </Routes>
     </BrowserRouter>
   );

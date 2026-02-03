@@ -251,17 +251,17 @@ export default function DataPrivacyPolicy() {
         >
           {/* Title */}
           <Typography variant="h5" fontWeight="bold" sx={{ color: "#09360D" }}>
-            Service Temporarily Unavailable
+            Access Notice: Access is available only upon official request
           </Typography>
 
           {/* Message */}
           <Typography variant="body1">
-            This website is currently not available.
+            BPLMS serves as the backup system of the City Government of San Pablo for e-Governance services.
+
           </Typography>
 
           <Typography variant="body2" sx={{ color: "#555" }}>
-            To continue your transaction, please proceed to the official eGov
-            portal of the City Government of San Pablo.
+            To start your business registration or renewal, please proceed to the official eGov portal of the City Government of San Pablo.
           </Typography>
 
           {/* Button */}
@@ -276,7 +276,7 @@ export default function DataPrivacyPolicy() {
                 "&:hover": { backgroundColor: "#07270a" },
               }}
             >
-              Proceed to eGov
+              Click here
             </Button>
           </Box>
 
