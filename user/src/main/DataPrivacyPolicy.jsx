@@ -251,18 +251,22 @@ export default function DataPrivacyPolicy() {
         >
           {/* Title */}
           <Typography variant="h5" fontWeight="bold" sx={{ color: "#09360D" }}>
-            Access Notice: Access is available only upon official request
+            Access Notice:
+          </Typography>
+
+          {/*Sub Title */}
+          <Typography variant="h6" fontWeight="bold" sx={{ color: "#09360D" }}>
+            Access is available only upon official request
           </Typography>
 
           {/* Message */}
           <Typography variant="body1">
-            BPLMS serves as the backup system of the City Government of San Pablo for e-Governance services.
+            BPLMS serves as the digitalized backup system of the City Government of San Pablo for the Business Processing and Licensing Office.
 
           </Typography>
 
           <Typography variant="body2" sx={{ color: "#555" }}>
-            To start your business registration or renewal, please proceed to the official eGov portal of the City Government of San Pablo.
-          </Typography>
+To start your business registration or renewal, please proceed to the official eGov portal of the City Government of San Pablo.          </Typography>
 
           {/* Button */}
           <Box sx={{ mt: 2 }}>
