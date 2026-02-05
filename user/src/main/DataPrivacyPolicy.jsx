@@ -170,58 +170,16 @@
 //   );
 // }
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Box, Button, Typography, Slide, Paper } from "@mui/material";
 
 export default function DataPrivacyPolicy() {
-  const [open, setOpen] = useState(true);
-  const [isGray, setIsGray] = useState(true);
-  const [blockClicks, setBlockClicks] = useState(true);
-
-  // 🔹 Always block the site
-  useEffect(() => {
-    setOpen(true);
-    setIsGray(true);
-    setBlockClicks(true);
-  }, []);
-
-  // 🔹 Overlay effect (grayscale + disable clicks)
-  useEffect(() => {
-    let overlay = document.getElementById("grayOverlay");
-
-    if (!overlay) {
-      overlay = document.createElement("div");
-      overlay.id = "grayOverlay";
-      overlay.style.position = "fixed";
-      overlay.style.top = "0";
-      overlay.style.left = "0";
-      overlay.style.width = "100%";
-      overlay.style.height = "100%";
-      overlay.style.zIndex = "9998";
-      document.body.appendChild(overlay);
-    }
-
-    overlay.style.background = "rgba(0, 0, 0, 0.45)";
-    overlay.style.backdropFilter = "grayscale(1) blur(3px)";
-    overlay.style.pointerEvents = "all";
-
-    return () => {
-      if (overlay) overlay.remove();
-    };
-  }, []);
-
   const handleProceed = () => {
     window.location.href = "https://e.gov.ph/";
   };
 
   return (
-    <Slide
-      direction="up"
-      in={open}
-      mountOnEnter
-      unmountOnExit={false}
-      timeout={{ enter: 600 }}
-    >
+    <Slide direction="up" in={true} mountOnEnter timeout={{ enter: 600 }}>
       <Paper
         elevation={10}
         sx={{
@@ -249,27 +207,22 @@ export default function DataPrivacyPolicy() {
             mx: "auto",
           }}
         >
-          {/* Title */}
           <Typography variant="h5" fontWeight="bold" sx={{ color: "#09360D" }}>
             Access Notice
           </Typography>
 
-          {/*Sub Title */}
           <Typography variant="h6" fontWeight="bold" sx={{ color: "#09360D" }}>
             Access is available only upon official request
-            
           </Typography>
 
-          {/* Message */}
           <Typography variant="body2" sx={{ color: "#555" }}>
             BPLMS serves as the digitalized backup system of the City Government of San Pablo for the Business Processing and Licensing Office.
-
           </Typography>
 
           <Typography variant="body2" sx={{ color: "#555" }}>
-To start your business registration or renewal, please proceed to the official eGov portal of the City Government of San Pablo.          </Typography>
+            To start your business registration or renewal, please proceed to the official eGov portal of the City Government of San Pablo.
+          </Typography>
 
-          {/* Button */}
           <Box sx={{ mt: 2 }}>
             <Button
               variant="contained"
