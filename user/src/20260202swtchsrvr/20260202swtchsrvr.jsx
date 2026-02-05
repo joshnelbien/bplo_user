@@ -14,6 +14,7 @@ import {
 
 export default function SwitchServer() {
   const [enabled, setEnabled] = useState(() => {
+    if (typeof window === 'undefined') return true;   // during SSR/hydration
     const v = localStorage.getItem("privacyOverlayEnabled");
     return v === null ? true : v === "true";
   });
