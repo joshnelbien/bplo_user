@@ -20,13 +20,13 @@ import {
   DialogContent,
   DialogActions,
   Snackbar,
-  CircularProgress,
 } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { styled } from "@mui/material/styles";
 import CloseIcon from "@mui/icons-material/Close";
 import MuiAlert from "@mui/material/Alert";
 import axios from "axios";
+import { CircularProgress } from "@mui/material";
 import BusinessAssessmentDialog from "./BusinessAssessmentDialog";
 import DataPrivacyPolicy from "./DataPrivacyPolicy";
 import SearchBusinesses from "./SearchBusinesses";
@@ -54,7 +54,7 @@ const SearchInput = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-// Centralized Requirements Data
+// 🔹 Centralized Requirements Data
 const requirements = {
   new: {
     title: "REQUIREMENTS FOR NEW BUSINESS REGISTRATION",
@@ -101,13 +101,6 @@ function App() {
     severity: "info",
   });
   const [searchBusiness, setSearchBusinesses] = useState(false);
-
-  // Control privacy overlay + grayscale effect
-  const [privacyEnabled, setPrivacyEnabled] = useState(() => {
-    const saved = localStorage.getItem("privacyOverlayEnabled");
-    return saved === null ? true : saved === "true";
-  });
-
   const handleSnackbarClose = () => setSnackbar({ ...snackbar, open: false });
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
@@ -123,6 +116,7 @@ function App() {
     setSearchBusinesses(true);
   };
 
+  // Track button behavior
   const handleTrackClick = async () => {
     if (!searchValue.trim()) {
       setSnackbar({
@@ -203,14 +197,7 @@ function App() {
   useEffect(() => setAnimate(true), []);
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        position: "relative",
-      }}
-    >
+    <Box className="relative">
       {/* Navbar */}
       <AppBar
         position="sticky"
@@ -234,277 +221,289 @@ function App() {
         </Toolbar>
       </AppBar>
 
-      {/* Main content area – gets grayed out when blocked */}
-      <Box
+      {/* Main Content */}
+      <Grid
+        container
+        direction="column"
+        alignItems="center"
         sx={{
-          flex: 1,
-          filter: privacyEnabled
-            ? "grayscale(100%) brightness(0.82) contrast(0.9)"
-            : "none",
-          transition: "filter 0.5s ease",
-          pointerEvents: privacyEnabled ? "none" : "auto",
-          userSelect: privacyEnabled ? "none" : "auto",
+          minHeight: "85vh",
+          px: { xs: 2, md: 6 },
+          textAlign: "center",
+          background: "#fff",
+          pt: 8,
         }}
       >
-        <Grid
-          container
-          direction="column"
-          alignItems="center"
-          sx={{
-            minHeight: "85vh",
-            px: { xs: 2, md: 6 },
-            textAlign: "center",
-            background: "#fff",
-            pt: 8,
-          }}
-        >
-          {/* Logo */}
-          <Slide in={animate} direction="down" timeout={800}>
-            <Grow in={animate} timeout={1200}>
-              <Box
-                component="img"
-                src="spclogo.png"
-                alt="San Pablo City Logo"
-                sx={{ width: { xs: 120, sm: 150 }, mb: 5 }}
-              />
-            </Grow>
-          </Slide>
-
-          {/* Title */}
-          <Slide in={animate} direction="down" timeout={1000}>
-            <Fade in={animate} timeout={1500}>
-              <Typography
-                variant="h2"
-                sx={{
-                  fontWeight: 900,
-                  color: "#09360D",
-                  fontSize: { xs: "1.8rem", sm: "3rem" },
-                  mb: 3,
-                }}
-              >
-                BUSINESS PERMIT AND LICENSING
-              </Typography>
-            </Fade>
-          </Slide>
-
-          {/* Buttons */}
-          <Stack direction="row" spacing={2} sx={{ mb: 3, flexWrap: "wrap" }}>
-            <Fade in={animate} timeout={1800}>
-              <Button
-                variant="contained"
-                sx={{
-                  px: 3,
-                  py: 1,
-                  fontWeight: "bold",
-                  backgroundColor: "#09360D",
-                  "&:hover": { backgroundColor: "#07270a" },
-                }}
-                onClick={() => navigate("/newApplicationRegister")}
-              >
-                New Application
-              </Button>
-            </Fade>
-            <Fade in={animate} timeout={2000}>
-              <Button
-                variant="outlined"
-                sx={{
-                  px: 3,
-                  py: 1,
-                  fontWeight: "bold",
-                  borderColor: "#09360D",
-                  color: "#09360D",
-                  "&:hover": { borderColor: "#07270a", color: "#07270a" },
-                }}
-                onClick={() => navigate("/renew")}
-              >
-                Renewal
-              </Button>
-            </Fade>
-          </Stack>
-
-          {/* Search and action buttons */}
-          <Grow in={animate} timeout={2200}>
+        {/* Logo */}
+        <Slide in={animate} direction="down" timeout={800}>
+          <Grow in={animate} timeout={1200}>
             <Box
+              component="img"
+              src="spclogo.png"
+              alt="San Pablo City Logo"
+              sx={{ width: { xs: 120, sm: 150 }, mb: 5 }}
+            />
+          </Grow>
+        </Slide>
+
+        {/* Title */}
+        <Slide in={animate} direction="down" timeout={1000}>
+          <Fade in={animate} timeout={1500}>
+            <Typography
+              variant="h2"
               sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                maxWidth: 350,
+                fontWeight: 900,
+                color: "#09360D",
+                fontSize: { xs: "1.8rem", sm: "3rem" },
+                mb: 3,
               }}
             >
-              <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
-                <SearchBar>
-                  <SearchInput
-                    placeholder="Enter BIN , Business Name or Tin No."
-                    value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value.slice(0, 50))}
-                    inputProps={{ maxLength: 50 }}
-                  />
-                  <Box
-                    sx={{
-                      borderLeft: "1px solid #09360D",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    <IconButton onClick={handleClick}>
-                      <ArrowDropDownIcon />
-                    </IconButton>
-                  </Box>
-                  <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-                    <MenuItem onClick={() => handleSelect("new")}>
-                      New Application Requirements
-                    </MenuItem>
-                    <MenuItem onClick={() => handleSelect("renewal")}>
-                      Renewal Requirements
-                    </MenuItem>
-                  </Menu>
-                </SearchBar>
-              </Box>
+              BUSINESS PERMIT AND LICENSING
+            </Typography>
+          </Fade>
+        </Slide>
 
-              {/* Track button */}
-              <Button
-                variant="contained"
-                sx={{
-                  width: "300px",
-                  py: 1,
-                  fontWeight: "bold",
-                  backgroundColor: "#09360D",
-                  "&:hover": { backgroundColor: "#07270a" },
-                  m: 1,
-                }}
-                onClick={handleTrackClick}
-                disabled={isTracking}
-              >
-                {isTracking ? (
-                  <>
-                    <CircularProgress size={20} sx={{ color: "white", mr: 1 }} />
-                    Tracking...
-                  </>
-                ) : (
-                  "Track"
-                )}
-              </Button>
+        {/* Buttons */}
+        <Stack direction="row" spacing={2} sx={{ mb: 3, flexWrap: "wrap" }}>
+          <Fade in={animate} timeout={1800}>
+            <Button
+              variant="contained"
+              sx={{
+                px: 3,
+                py: 1,
+                fontWeight: "bold",
+                backgroundColor: "#09360D",
+                "&:hover": { backgroundColor: "#07270a" },
+              }}
+              onClick={() => navigate("/newApplicationRegister")}
+            >
+              New Application
+            </Button>
+          </Fade>
+          <Fade in={animate} timeout={2000}>
+            <Button
+              variant="outlined"
+              sx={{
+                px: 3,
+                py: 1,
+                fontWeight: "bold",
+                borderColor: "#09360D",
+                color: "#09360D",
+                "&:hover": { borderColor: "#07270a", color: "#07270a" },
+              }}
+              onClick={() => navigate("/renew")}
+            >
+              Renewal
+            </Button>
+          </Fade>
+        </Stack>
 
-              <Button
-                variant="outlined"
-                sx={{
-                  width: "300px",
-                  fontWeight: "bold",
-                  borderColor: "#09360D",
-                  color: "#09360D",
-                  "&:hover": { borderColor: "#07270a", color: "#07270a" },
-                  mt: 5,
-                }}
-                onClick={handleSearchBusinesses}
-              >
-                Business Profiles
-              </Button>
-
-              <Button
-                variant="outlined"
-                sx={{
-                  width: "300px",
-                  py: 1,
-                  fontWeight: "bold",
-                  borderColor: "#09360D",
-                  color: "#09360D",
-                  "&:hover": { borderColor: "#07270a", color: "#07270a" },
-                  m: 1,
-                }}
-                onClick={() => setIsAssessmentOpen(true)}
-              >
-                Business Assessment
-              </Button>
-
-              <Button
-                variant="outlined"
-                sx={{
-                  width: "300px",
-                  py: 1,
-                  fontWeight: "bold",
-                  borderColor: "#09360D",
-                  color: "#09360D",
-                  "&:hover": { borderColor: "#07270a", color: "#07270a" },
-                  mt: 0,
-                }}
-                onClick={() => navigate("/feedback")}
-              >
-                Feedback
-              </Button>
-
-              {/* Results display */}
-              {results.length > 0 && (
+        {/* Search and Buttons */}
+        <Grow in={animate} timeout={2200}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              maxWidth: 350,
+            }}
+          >
+            <Box
+              sx={{ width: "100%", display: "flex", justifyContent: "center" }}
+            >
+              <SearchBar>
+                <SearchInput
+                  placeholder="Enter BIN , Business Name or Tin No."
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value.slice(0, 50))}
+                  inputProps={{ maxLength: 50 }}
+                />
                 <Box
                   sx={{
-                    mt: 4,
-                    px: { xs: 2, md: 6 },
-                    py: 3,
-                    borderTop: "2px solid #09360D",
-                    width: "100%",
-                    backgroundColor: "#fafafa",
-                    m: 1,
+                    borderLeft: "1px solid #09360D",
+                    display: "flex",
+                    alignItems: "center",
                   }}
                 >
-                  <Typography
-                    variant="h5"
-                    sx={{ fontWeight: "bold", mb: 2, color: "#09360D" }}
-                  >
-                    Application Status
-                  </Typography>
-
-                  {results.map((status, index) => (
-                    <Box
-                      key={index}
-                      sx={{
-                        mb: 2,
-                        p: 2,
-                        border: "1px solid #ccc",
-                        borderRadius: 2,
-                        textAlign: "left",
-                        backgroundColor: "white",
-                      }}
-                    >
-                      <Typography><strong>Tracking ID:</strong> {status.userId}</Typography>
-                      <Typography><strong>BPLO:</strong> {status.BPLO}</Typography>
-                      <Typography><strong>Examiners:</strong> {status.Examiners}</Typography>
-                      {status.Examiners === "Declined" && (
-                        <Typography color="error">
-                          <strong>Reason:</strong> {status.Examinersdecline}
-                        </Typography>
-                      )}
-                      <Typography><strong>CSMWO:</strong> {status.CSMWO}</Typography>
-                      <Typography><strong>CHO:</strong> {status.CHO}</Typography>
-                      <Typography><strong>ZONING:</strong> {status.ZONING}</Typography>
-                      <Typography><strong>CENRO:</strong> {status.CENRO}</Typography>
-                      <Typography><strong>OBO:</strong> {status.OBO}</Typography>
-                      <Typography><strong>Business Tax:</strong> {status.BUSINESSTAX}</Typography>
-                    </Box>
-                  ))}
+                  <IconButton onClick={handleClick}>
+                    <ArrowDropDownIcon />
+                  </IconButton>
                 </Box>
-              )}
+                <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                  <MenuItem onClick={() => handleSelect("new")}>
+                    New Application Requirements
+                  </MenuItem>
+                  <MenuItem onClick={() => handleSelect("renewal")}>
+                    Renewal Requirements
+                  </MenuItem>
+                </Menu>
+              </SearchBar>
             </Box>
-          </Grow>
-        </Grid>
 
-        {/* Footer */}
-        <Box
-          component="footer"
-          sx={{
-            mt: "auto",
-            py: 3,
-            borderTop: "2px solid #09360D",
-            textAlign: "center",
-            backgroundColor: "#f9f9f9",
-          }}
-        >
-          <Typography variant="body2" sx={{ color: "#746a6aff" }}>
-            © {new Date().getFullYear()} Business Permit and Licensing Office | v6.0.0
-          </Typography>
-        </Box>
+            {/* Track */}
+            <Button
+              variant="contained"
+              sx={{
+                width: "300px",
+                py: 1,
+                fontWeight: "bold",
+                backgroundColor: "#09360D",
+                "&:hover": { backgroundColor: "#07270a" },
+                m: 1,
+              }}
+              onClick={handleTrackClick}
+              disabled={isTracking}
+            >
+              {isTracking ? (
+                <>
+                  <CircularProgress size={20} sx={{ color: "white", mr: 1 }} />
+                  Tracking...
+                </>
+              ) : (
+                "Track"
+              )}
+            </Button>
+
+            <Button
+              variant="outlined"
+              sx={{
+                width: "300px",
+
+                fontWeight: "bold",
+                borderColor: "#09360D",
+                color: "#09360D",
+                "&:hover": { borderColor: "#07270a", color: "#07270a" },
+
+                mt: 5,
+              }}
+              onClick={handleSearchBusinesses}
+            >
+              Business Profiles
+            </Button>
+
+            {/* Business Assessment */}
+            <Button
+              variant="outlined"
+              sx={{
+                width: "300px",
+                py: 1,
+                fontWeight: "bold",
+                borderColor: "#09360D",
+                color: "#09360D",
+                "&:hover": { borderColor: "#07270a", color: "#07270a" },
+                m: 1,
+              }}
+              onClick={() => setIsAssessmentOpen(true)}
+            >
+              Business Assessment
+            </Button>
+
+            {/* Feedback */}
+            <Button
+              variant="outlined"
+              sx={{
+                width: "300px",
+                py: 1,
+                fontWeight: "bold",
+                borderColor: "#09360D",
+                color: "#09360D",
+                "&:hover": { borderColor: "#07270a", color: "#07270a" },
+                mt: 0,
+              }}
+              onClick={() => navigate("/feedback")}
+            >
+              Feedback
+            </Button>
+
+            {/* Results */}
+            {results.length > 0 && (
+              <Box
+                sx={{
+                  mt: 4,
+                  px: { xs: 2, md: 6 },
+                  py: 3,
+                  borderTop: "2px solid #09360D",
+                  width: "100%",
+                  backgroundColor: "#fafafa",
+                  m: 1,
+                }}
+              >
+                <Typography
+                  variant="h5"
+                  sx={{ fontWeight: "bold", mb: 2, color: "#09360D" }}
+                >
+                  Application Status
+                </Typography>
+
+                {results.map((status, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      mb: 2,
+                      p: 2,
+                      border: "1px solid #ccc",
+                      borderRadius: 2,
+                      textAlign: "left",
+                      backgroundColor: "white",
+                    }}
+                  >
+                    <Typography>
+                      <strong>Tracking ID:</strong> {status.userId}
+                    </Typography>
+                    <Typography>
+                      <strong>BPLO:</strong> {status.BPLO}
+                    </Typography>
+                    <Typography>
+                      <strong>Examiners:</strong> {status.Examiners}
+                    </Typography>
+                    {status.Examiners === "Declined" && (
+                      <Typography color="error">
+                        <strong>Reason:</strong> {status.Examinersdecline}
+                      </Typography>
+                    )}
+                    <Typography>
+                      <strong>CSMWO:</strong> {status.CSMWO}
+                    </Typography>
+                    <Typography>
+                      <strong>CHO:</strong> {status.CHO}
+                    </Typography>
+                    <Typography>
+                      <strong>ZONING:</strong> {status.ZONING}
+                    </Typography>
+                    <Typography>
+                      <strong>CENRO:</strong> {status.CENRO}
+                    </Typography>
+                    <Typography>
+                      <strong>OBO:</strong> {status.OBO}
+                    </Typography>
+                    <Typography>
+                      <strong>Business Tax:</strong> {status.BUSINESSTAX}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+        </Grow>
+      </Grid>
+      {/* Footer */}
+      <Box
+        component="footer"
+        sx={{
+          mt: "auto",
+          py: 3,
+          borderTop: "2px solid #09360D",
+          textAlign: "center",
+          backgroundColor: "#f9f9f9",
+        }}
+      >
+        <Typography variant="body2" sx={{ color: "#746a6aff" }}>
+          © {new Date().getFullYear()} Business Permit and Licensing Office |
+          v6.0.0
+        </Typography>
       </Box>
 
-      {/* Dialogs / Modals / Snackbar – remain interactive */}
+      {/* Requirements Modal */}
       <Dialog
         open={!!modalData}
         onClose={() => setModalData(null)}
@@ -532,6 +531,7 @@ function App() {
         </DialogActions>
       </Dialog>
 
+      {/* ✅ Business Assessment Dialog */}
       <BusinessAssessmentDialog
         open={isAssessmentOpen}
         onClose={() => setIsAssessmentOpen(false)}
@@ -542,6 +542,7 @@ function App() {
         onClose={() => setSearchBusinesses(false)}
       />
 
+      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
@@ -556,9 +557,7 @@ function App() {
           {snackbar.message}
         </MuiAlert>
       </Snackbar>
-
-      {/* Privacy overlay – only when enabled */}
-      {privacyEnabled && <DataPrivacyPolicy />}
+      <DataPrivacyPolicy />
     </Box>
   );
 }
