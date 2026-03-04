@@ -1,10 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Typography, Slide, Paper } from "@mui/material";
+import {
+  Box,
+  Button,
+  Typography,
+  Slide,
+  Paper,
+  Modal,
+  Fade,
+  Backdrop,
+} from "@mui/material";
 
 export default function DataPrivacyPolicy() {
   const [open, setOpen] = useState(false);
   const [isGray, setIsGray] = useState(false);
   const [blockClicks, setBlockClicks] = useState(false);
+  const [showRedirectModal, setShowRedirectModal] = useState(false);
 
   // 🔹 Check storage on page load
   useEffect(() => {
@@ -28,21 +38,27 @@ export default function DataPrivacyPolicy() {
     }
   }, []);
 
-  // 🔹 Accept handler
+  // 🔹 Accept handler → show modal instead of just closing banner
   const handleAccept = () => {
     sessionStorage.setItem("privacyAccepted", "true");
     localStorage.removeItem("privacyRejected");
     setIsGray(false);
     setBlockClicks(false);
     setOpen(false);
+    setShowRedirectModal(true); // ← show the new modal
   };
 
-  // 🔹 Reject handler
+  // 🔹 Reject handler (unchanged)
   const handleReject = () => {
     localStorage.setItem("privacyRejected", "true");
     setIsGray(true);
     setBlockClicks(true);
     setOpen(false);
+  };
+
+  // 🔹 Close the redirect/info modal
+  const handleCloseRedirectModal = () => {
+    setShowRedirectModal(false);
   };
 
   // 🔹 Overlay effect (grayscale + disable clicks)
@@ -73,100 +89,157 @@ export default function DataPrivacyPolicy() {
   }, [isGray, blockClicks]);
 
   return (
-    <Slide
-      direction="up"
-      in={open}
-      mountOnEnter
-      unmountOnExit
-      timeout={{ enter: 1000, exit: 300 }}
-    >
-      <Paper
-        elevation={6}
-        sx={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: "#fff",
-          borderTop: "1px solid #ddd",
-          p: 3,
-          zIndex: 9999,
-          display: "flex",
-          justifyContent: "center",
-        }}
+    <>
+      {/* Privacy Banner */}
+      <Slide
+        direction="up"
+        in={open}
+        mountOnEnter
+        unmountOnExit
+        timeout={{ enter: 1000, exit: 300 }}
       >
-        <Box
+        <Paper
+          elevation={6}
           sx={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: "#fff",
+            borderTop: "1px solid #ddd",
+            p: 3,
+            zIndex: 9999,
             display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            alignItems: { xs: "stretch", md: "center" },
-            justifyContent: "space-between",
-            gap: 2,
-            width: "100%",
-            maxWidth: "1200px",
-            mx: "auto",
-            mt: { xs: 2, md: 0 },
+            justifyContent: "center",
           }}
         >
-          {/* Text */}
-          <Box sx={{ flex: 1, textAlign: { xs: "center", md: "left" } }}>
-            <Typography variant="h6" fontWeight="bold">
-              Data Privacy Policy
-            </Typography>
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              The City Government of San Pablo values your privacy and is
-              dedicated to protecting your personal data in compliance with the
-              Data Privacy Act (DPA) of 2012 (Republic Act No. 10173).{" "}
-              <a
-                href="https://sanpablocity.gov.ph/privacy-policy"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "#09360D", textDecoration: "underline" }}
-              >
-                Read More
-              </a>
-            </Typography>
-          </Box>
-
-          {/* Buttons */}
           <Box
             sx={{
               display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
+              flexDirection: { xs: "column", md: "row" },
+              alignItems: { xs: "stretch", md: "center" },
+              justifyContent: "space-between",
               gap: 2,
+              width: "100%",
+              maxWidth: "1200px",
+              mx: "auto",
               mt: { xs: 2, md: 0 },
-              alignItems: "center",
-              minWidth: { md: "200px" },
-              justifyContent: { md: "flex-end" },
             }}
           >
-            <Button
-              variant="outlined"
-              onClick={handleReject}
+            {/* Text */}
+            <Box sx={{ flex: 1, textAlign: { xs: "center", md: "left" } }}>
+              <Typography variant="h6" fontWeight="bold">
+                Data Privacy Policy
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 1 }}>
+                The City Government of San Pablo values your privacy and is
+                dedicated to protecting your personal data in compliance with the
+                Data Privacy Act (DPA) of 2012 (Republic Act No. 10173).{" "}
+                <a
+                  href="https://sanpablocity.gov.ph/privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "#09360D", textDecoration: "underline" }}
+                >
+                  Read More
+                </a>
+              </Typography>
+            </Box>
+
+            {/* Buttons */}
+            <Box
               sx={{
-                borderColor: "#09360D",
-                color: "#09360D",
-                "&:hover": { backgroundColor: "#f5f5f5" },
-                width: { xs: "100%", sm: "auto" },
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                gap: 2,
+                mt: { xs: 2, md: 0 },
+                alignItems: "center",
+                minWidth: { md: "200px" },
+                justifyContent: { md: "flex-end" },
               }}
             >
-              Reject All
-            </Button>
+              <Button
+                variant="outlined"
+                onClick={handleReject}
+                sx={{
+                  borderColor: "#09360D",
+                  color: "#09360D",
+                  "&:hover": { backgroundColor: "#f5f5f5" },
+                  width: { xs: "100%", sm: "auto" },
+                }}
+              >
+                Reject All
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleAccept}
+                sx={{
+                  backgroundColor: "#09360D",
+                  "&:hover": { backgroundColor: "#07270a" },
+                  width: { xs: "100%", sm: "auto" },
+                }}
+              >
+                Accept All
+              </Button>
+            </Box>
+          </Box>
+        </Paper>
+      </Slide>
+
+      {/* Redirect / System Notice Modal */}
+      <Modal
+        open={showRedirectModal}
+        onClose={handleCloseRedirectModal}
+        closeAfterTransition
+        slots={{ backdrop: Backdrop }}
+        slotProps={{
+          backdrop: {
+            timeout: 500,
+          },
+        }}
+      >
+        <Fade in={showRedirectModal}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: { xs: "90%", sm: 480 },
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: 4,
+              borderRadius: 2,
+              outline: "none",
+              textAlign: "center",
+            }}
+          >
+            <Typography variant="h6" component="h2" fontWeight="bold" gutterBottom>
+              Important Notice
+            </Typography>
+
+            <Typography variant="body1" sx={{ mb: 3, mt: 2 }}>
+              This system is no longer used for BPLMS transactions.<br /><br />
+              We are now using the <strong>eGov system</strong>.<br />
+              To start your business registration or renewal, please proceed to
+              the official eGov portal of the City Government of San Pablo.
+            </Typography>
+
             <Button
               variant="contained"
-              onClick={handleAccept}
+              onClick={handleCloseRedirectModal}
               sx={{
                 backgroundColor: "#09360D",
                 "&:hover": { backgroundColor: "#07270a" },
-                width: { xs: "100%", sm: "auto" },
+                px: 5,
               }}
             >
-              Accept All
+              OK
             </Button>
           </Box>
-        </Box>
-      </Paper>
-    </Slide>
+        </Fade>
+      </Modal>
+    </>
   );
 }
 // import React, { useEffect, useState } from "react";
